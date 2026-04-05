@@ -9,7 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-heading);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,72 +49,74 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
+  /* Ultra Clean Light Mode (Sebagai Pendamping) */
+  --background: #FAFAFA;
+  --foreground: #09090B;
+  --card: #FFFFFF;
+  --card-foreground: #09090B;
+  --popover: #FFFFFF;
+  --popover-foreground: #09090B;
+  --primary: #D4AF37; /* Pure Gold */
+  --primary-foreground: #ffffff;
+  --secondary: #E4E4E7;
+  --secondary-foreground: #09090B;
+  --muted: #F4F4F5;
+  --muted-foreground: #71717A;
+  --accent: #F4F4F5;
+  --accent-foreground: #09090B;
+  --destructive: #EF4444;
+  --border: #E4E4E7;
+  --input: #E4E4E7;
+  --ring: #D4AF37;
+  --chart-1: #D4AF37;
+  --chart-2: #27272A;
+  --chart-3: #52525B;
+  --chart-4: #A1A1AA;
+  --chart-5: #E4E4E7;
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --sidebar: #FAFAFA;
+  --sidebar-foreground: #09090B;
+  --sidebar-primary: #D4AF37;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #F4F4F5;
+  --sidebar-accent-foreground: #09090B;
+  --sidebar-border: #E4E4E7;
+  --sidebar-ring: #D4AF37;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  /* Onyx Black & Pure Gold (Vibe Utama) */
+  --background: #09090B; /* Deep Onyx */
+  --foreground: #FAFAFA; /* Soft White */
+  --card: #111113; /* Lifted Onyx for Cards */
+  --card-foreground: #FAFAFA;
+  --popover: #111113;
+  --popover-foreground: #FAFAFA;
+  --primary: #D4AF37; /* Pure Gold Accent */
+  --primary-foreground: #09090B; /* Black text on gold */
+  --secondary: #E4E4E7; /* Readable light text color (not a surface!) */
+  --secondary-foreground: #09090B;
+  --muted: #1F1F22; /* Surface: Charcoal */
+  --muted-foreground: #A1A1AA;
+  --accent: #1F1F22; /* Surface: Charcoal */
+  --accent-foreground: #FAFAFA;
+  --destructive: #7f1d1d;
+  --border: #27272A; /* Subtle Charcoal Border */
+  --input: #27272A;
+  --ring: #D4AF37;
+  --chart-1: #D4AF37;
+  --chart-2: #E4E4E7;
+  --chart-3: #A1A1AA;
+  --chart-4: #52525B;
+  --chart-5: #27272A;
+  --sidebar: #09090B;
+  --sidebar-foreground: #FAFAFA;
+  --sidebar-primary: #D4AF37;
+  --sidebar-primary-foreground: #09090B;
+  --sidebar-accent: #1F1F22;
+  --sidebar-accent-foreground: #FAFAFA;
+  --sidebar-border: #27272A;
+  --sidebar-ring: #D4AF37;
 }
 
 @layer base {
@@ -127,4 +129,259 @@
   html {
     @apply font-sans;
   }
+}
+@layer utilities {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-xl border border-border shadow-xl;
+    /* Dark mode: Lifted Onyx surface */
+    &:is(.dark *) {
+      background-color: rgba(17, 17, 19, 0.85);
+      border-color: #27272A;
+    }
+  }
+  .modern-gradient {
+    @apply bg-gradient-to-br from-primary/10 via-background to-secondary/5;
+  }
+  .text-gradient {
+    /* Light Mode: dark to gold to dark */
+    @apply bg-clip-text text-transparent font-black;
+    background-image: linear-gradient(to right, #09090B, #D4AF37, #09090B);
+    /* Dark Mode: white to gold to white */
+    &:is(.dark *) {
+      background-image: linear-gradient(to right, #FAFAFA, #D4AF37, #FAFAFA);
+    }
+  }
+  .mask-fade {
+    mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+  }
+  @keyframes bounce-subtle {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+  .animate-bounce-subtle {
+    animation: bounce-subtle 3s ease-in-out infinite;
+  }
+
+}
+
+/* Chrome/Edge Autofill Hack untuk mempertahankan warna transparan/gelap dan font putih */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+    transition: background-color 5000s ease-in-out 0s;
+    -webkit-text-fill-color: #fff !important;
+}
+
+/* --- FULLCALENDAR PREMIUM OVERRIDES (Onyx & Pure Gold) --- */
+.fc {
+  font-family: var(--font-sans) !important;
+  --fc-border-color: #E4E4E7;
+  --fc-daygrid-event-dot-width: 8px;
+  --fc-button-bg-color: #D4AF37;
+  --fc-button-border-color: transparent;
+  --fc-button-hover-bg-color: #c09b2e;
+  --fc-button-hover-border-color: transparent;
+  --fc-button-active-bg-color: #a8861f;
+  --fc-button-active-border-color: transparent;
+  --fc-event-border-color: transparent;
+  --fc-list-event-hover-bg-color: transparent;
+  --fc-today-bg-color: rgba(212, 175, 55, 0.08);
+}
+
+/* Dark Mode: Full Onyx Palette Override */
+.dark .fc {
+  --fc-page-bg-color: #09090B;
+  --fc-neutral-bg-color: #111113;
+  --fc-today-bg-color: rgba(212, 175, 55, 0.08);
+  --fc-border-color: #27272A;
+  --fc-list-event-dot-width: 8px;
+  color: #FAFAFA;
+}
+
+/* Dark Mode: Column Headers & Day Numbers */
+.dark .fc-col-header-cell,
+.dark .fc-daygrid-day-number,
+.dark .fc-toolbar-title,
+.dark .fc .fc-button {
+  color: #FAFAFA;
+}
+
+/* Dark Mode: Highlight warna hari ini yang lebih terlihat */
+.dark .fc .fc-daygrid-day.fc-day-today {
+  background-color: rgba(212, 175, 55, 0.08) !important;
+}
+
+.dark .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
+  color: #D4AF37 !important;
+  font-weight: 900 !important;
+}
+
+/* Enforce Google Calendar Spreadsheet Grid Borders */
+.fc-theme-standard td, .fc-theme-standard th {
+  border: 1px solid var(--fc-border-color) !important;
+}
+
+.fc .fc-toolbar.fc-header-toolbar {
+  margin-bottom: 1rem !important;
+  align-items: center;
+}
+
+.fc .fc-toolbar-title {
+  font-family: var(--font-heading);
+  font-size: 1.5rem !important;
+  font-weight: 900 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.fc-event {
+  border-radius: 6px !important;
+  padding: 4px 8px !important;
+  font-weight: 700 !important;
+  font-size: 0.7rem !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0.05em;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  border: none !important;
+  cursor: pointer;
+  transition: transform 0.2s;
+  white-space: normal !important;
+  word-break: break-all !important;
+  overflow: hidden !important;
+  display: block !important;
+}
+
+.fc-event:hover {
+  transform: scale(1.02);
+}
+
+.fc .fc-button {
+  text-transform: uppercase !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.1em !important;
+  padding: 0.5rem 1.25rem !important;
+  border: none !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border-radius: 0.5rem; /* Standard */
+}
+
+/* Physical Elevasi dan Glow Effect ketika Button Di-Hover */
+.fc .fc-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4) !important;
+  filter: brightness(1.05);
+}
+
+/* Fix FullCalendar Button Group Radiuses so they blend smoothly */
+.fc-button-group > .fc-button:not(:first-child):not(:last-child) {
+  border-radius: 0 !important;
+  margin-left: 1px !important;
+}
+
+.fc-button-group > .fc-button:first-child {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+}
+
+.fc-button-group > .fc-button:last-child {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  margin-left: 1px !important;
+}
+
+.fc .fc-button-primary:not(:disabled):active, 
+.fc .fc-button-primary:not(:disabled).fc-button-active {
+  box-shadow: inset 0 3px 5px rgba(0,0,0,0.2) !important;
+}
+
+/* Transisi Murni Fade (Menghilang Halus) saat tombol reset disembunyikan */
+.fc .fc-today-button {
+  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out !important;
+  opacity: 1;
+  visibility: visible;
+  margin-left: 0.5rem !important;
+}
+
+.fc .fc-today-button:disabled {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+.fc-daygrid-day-number {
+  font-weight: 700 !important;
+  padding: 12px 12px !important;
+  opacity: 0.7;
+}
+
+.fc-col-header-cell-cushion {
+  font-weight: 800 !important;
+  text-transform: uppercase;
+  font-size: 0.75rem !important;
+  padding: 12px 0 !important;
+  letter-spacing: 0.1em;
+  opacity: 0.8;
+}
+
+/* ── Kunci tinggi baris kalender agar tidak melar saat event ditambah ── */
+
+/* Minimum tinggi per hari: konsisten di semua baris */
+.fc-daygrid-day-frame {
+  min-height: 90px !important;
+}
+
+/* Event overflow "+X more" — styling agar sesuai tema Onyx & Gold */
+.fc-daygrid-more-link {
+  font-size: 0.65rem !important;
+  font-weight: 800 !important;
+  padding: 1px 6px !important;
+  border-radius: 999px !important;
+  background-color: var(--fc-button-bg-color) !important;
+  color: #09090B !important;
+  margin-top: 2px !important;
+  display: inline-block;
+  letter-spacing: 0.03em;
+  transition: opacity 0.2s ease;
+}
+
+.fc-daygrid-more-link:hover {
+  opacity: 0.85;
+}
+
+/* Popover saat "+X more" diklik — styling dark-aware */
+.fc-popover {
+  border-radius: 1rem !important;
+  border: 1px solid var(--border, #27272A) !important;
+  background: var(--card, #111113) !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
+  overflow: hidden;
+}
+
+.fc-popover-header {
+  background: var(--muted, #1F1F22) !important;
+  color: var(--foreground, #FAFAFA) !important;
+  font-size: 0.75rem !important;
+  font-weight: 800 !important;
+  padding: 10px 14px !important;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fc-popover-body {
+  padding: 8px !important;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ── Animasi stagger untuk UpcomingEventCard ────────────────────────────── */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-card-in {
+  animation: card-in 0.3s ease-out;
 }

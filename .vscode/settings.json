@@ -1,0 +1,13 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "tailwindcss.includeLanguages": {
+    "css": "css"
+  },
+  "deno.enable": true,
+  "deno.lint": true,
+  "deno.unstable": true,
+  "deno.enablePaths": [
+    "./supabase/functions"
+  ],
+  "deno.importMap": "./supabase/functions/import_map.json"
+}

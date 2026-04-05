@@ -1,0 +1,167 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model account {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              user    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
+
+  @@unique([provider, providerAccountId], map: "Account_provider_providerAccountId_key")
+  @@index([userId], map: "Account_userId_fkey")
+}
+
+model attendance {
+  id        String            @id
+  date      DateTime
+  status    attendance_status
+  note      String?           @db.Text
+  playerId  String
+  createdAt DateTime          @default(now())
+  player    player            @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Attendance_playerId_fkey")
+
+  @@unique([playerId, date], map: "Attendance_playerId_date_key")
+}
+
+model auditlog {
+  id          String   @id
+  action      String
+  targetTable String
+  recordId    String?
+  timestamp   DateTime @default(now())
+  userId      String?
+  user        user?    @relation(fields: [userId], references: [id], map: "AuditLog_userId_fkey")
+
+  @@index([userId], map: "AuditLog_userId_fkey")
+}
+
+model certificate {
+  id         String   @id
+  title      String
+  fileUrl    String
+  uploadedAt DateTime @default(now())
+  playerId   String?
+  groupId    String?
+  group      group?   @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "Certificate_groupId_fkey")
+  player     player?  @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Certificate_playerId_fkey")
+
+  @@index([groupId], map: "Certificate_groupId_fkey")
+  @@index([playerId], map: "Certificate_playerId_fkey")
+}
+
+model event {
+  id          String   @id
+  title       String
+  description String?  @db.Text
+  date        DateTime
+  type        String   @default("LATIHAN")
+  groupId     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  group       group?   @relation(fields: [groupId], references: [id], map: "Event_groupId_fkey")
+
+  @@index([groupId], map: "Event_groupId_fkey")
+}
+
+model group {
+  id          String        @id
+  name        String        @unique(map: "Group_name_key")
+  description String?       @db.Text
+  createdAt   DateTime      @default(now())
+  certificate certificate[]
+  event       event[]
+  player      player[]
+}
+
+model player {
+  id           String        @id
+  name         String
+  dateOfBirth  DateTime
+  schoolOrigin String?
+  photoUrl     String?
+  isDeleted    Boolean       @default(false)
+  groupId      String?
+  parentId     String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime
+  attendance   attendance[]
+  certificate  certificate[]
+  group        group?        @relation(fields: [groupId], references: [id], map: "Player_groupId_fkey")
+  user         user          @relation(fields: [parentId], references: [id], onDelete: Cascade, map: "Player_parentId_fkey")
+  statistic    statistic[]
+
+  @@index([groupId], map: "Player_groupId_idx")
+  @@index([parentId], map: "Player_parentId_idx")
+}
+
+model session {
+  id           String   @id
+  sessionToken String   @unique(map: "Session_sessionToken_key")
+  userId       String
+  expires      DateTime
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
+
+  @@index([userId], map: "Session_userId_fkey")
+}
+
+model statistic {
+  id          String   @id
+  date        DateTime
+  metricsJson String   @db.LongText
+  status      String   @default("Draft")
+  playerId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime
+  player      player   @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
+
+  @@unique([playerId, date], map: "Statistic_playerId_date_key")
+}
+
+model user {
+  id            String     @id
+  name          String?
+  email         String?    @unique(map: "User_email_key")
+  emailVerified DateTime?
+  image         String?
+  username      String?    @unique(map: "User_username_key")
+  password      String?
+  role          user_role  @default(PARENT)
+  account       account[]
+  auditlog      auditlog[]
+  player        player[]
+  session       session[]
+}
+
+model verificationtoken {
+  identifier String
+  token      String   @unique(map: "VerificationToken_token_key")
+  expires    DateTime
+
+  @@unique([identifier, token], map: "VerificationToken_identifier_token_key")
+}
+
+enum attendance_status {
+  HADIR
+  IZIN
+  SAKIT
+  ALPA
+}
+
+enum user_role {
+  ADMIN
+  PARENT
+}
