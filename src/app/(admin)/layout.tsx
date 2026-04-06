@@ -1,9 +1,19 @@
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar"
 import { AdminSidebar } from "@/components/features/AdminSidebar"
 import { AuthGuard } from "@/components/providers/auth-guard"
+import { getServerSession } from "next-auth/next"
+import { authOptions } from "@/lib/auth"
+import { redirect } from "next/navigation"
 
 // The layout that strictly bounds all internal admin pages (/dashboard/*)
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = await getServerSession(authOptions);
+
+  // Server-side redirect to prevent Flash of Unauthenticated Content (FOUC)
+  if (!session || session.user.role !== "ADMIN") {
+    redirect("/");
+  }
+
   return (
     <AuthGuard>
       <SidebarProvider>

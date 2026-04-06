@@ -2,21 +2,20 @@
 
 import dynamic from "next/dynamic";
 import { Card } from "@/components/ui/card";
-import { useSchedule, type ScheduleEvent } from "@/hooks/use-schedule";
+import { useSchedule } from "@/hooks/use-schedule";
 import { 
   CalendarDays, 
   ChevronRight, 
   Clock, 
   Loader2, 
-  Cone, 
-  Swords, 
-  Trophy, 
-  AlertCircle, 
   CheckSquare,
-  type LucideIcon
+  MapPin
 } from "lucide-react";
 import { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
+import { getEventConfig, EVENT_TYPES } from "@/lib/config/events";
+import { getJakartaToday, getCountdownLabel } from "@/lib/date-utils";
+import { type ScheduleEvent, type UserSession } from "@/types/dashboard";
 
 // Dynamic import for Heavy Calendar component
 const CalendarView = dynamic(
@@ -32,83 +31,53 @@ const CalendarView = dynamic(
   }
 );
 
-// ─── Konfigurasi Kategori Terpusat ─────────────────────────────────────────
-
-type CategoryKey = "latihan" | "sparing" | "turnamen" | "event" | "default";
-
-const CATEGORY_CONFIG: Record<CategoryKey, { color: string; icon: LucideIcon; label: string }> = {
-  latihan:  { color: "#D4AF37", icon: Cone,         label: "Latihan"            },
-  sparing:  { color: "#F97316", icon: Swords,       label: "Sparing"            },
-  turnamen: { color: "#E11D48", icon: Trophy,        label: "Turnamen/Kejuaraan" },
-  event:    { color: "#3B82F6", icon: AlertCircle,   label: "Event"              },
-  default:  { color: "#8B5CF6", icon: CalendarDays,  label: "Agenda"             },
-};
-
-function getCategoryKey(type: string): CategoryKey {
-  const t = type.toLowerCase();
-  if (t.includes("latihan")) return "latihan";
-  if (t.includes("sparing")) return "sparing";
-  // "pertandingan" = nilai yang dikirim form untuk Kejuaraan/Match Day
-  if (t.includes("turnamen") || t.includes("kejuaraan") || t.includes("tournament") || t.includes("pertandingan")) return "turnamen";
-  // "evaluasi" = Ujian Evaluasi, "khusus" = Acara Ekstra, "event" = fallback
-  if (t.includes("evaluasi") || t.includes("event") || t.includes("khusus")) return "event";
-  return "default";
-}
-
 // Formatter dibuat di luar komponen — tidak re-instantiate setiap render
 const DATE_FORMATTER = new Intl.DateTimeFormat("id-ID", {
   weekday: "short",
   day: "numeric",
   month: "long",
+  year: "numeric",
 });
 
-// ─── Komponen Kartu Upcoming Event ──────────────────────────────────────────
-
 function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) {
-  const key = getCategoryKey(ev.type);
-  const cfg = CATEGORY_CONFIG[key];
+  const cfg = getEventConfig(ev.type);
   const Icon = cfg.icon;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  const countdownLabel = getCountdownLabel(ev.date);
   const evDate = new Date(ev.date);
-  evDate.setHours(0, 0, 0, 0);
-  const diffDays = Math.round((evDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  const countdownLabel =
-    diffDays === 0 ? "Hari Ini" :
-    diffDays === 1 ? "Besok" :
-    `${diffDays} hari lagi`;
 
   return (
     <div
-      className="group flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-default animate-card-in"
+      className="group flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-default animate-card-in relative"
       style={{ animationDelay: `${delay}ms`, animationFillMode: "both" } as React.CSSProperties}
     >
       <div className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-300"
         style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px ${cfg.color}55` }}>
         <Icon className="size-5" />
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-bold text-foreground text-sm truncate">
+      
+      <div className="flex-1 min-w-0 pr-2">
+        <p className="font-bold text-foreground text-sm break-words leading-snug">
           {ev.title}{ev.group ? ` · ${ev.group.name}` : ""}
         </p>
-        <div className="flex items-center gap-1.5 mt-0.5">
+        <div className="flex items-center gap-1.5 mt-1.5">
           <CalendarDays className="size-3 text-muted-foreground flex-shrink-0" />
-          <span className="text-xs text-muted-foreground">{DATE_FORMATTER.format(evDate)}</span>
+          <span className="text-xs text-muted-foreground font-medium">{DATE_FORMATTER.format(evDate)}</span>
         </div>
+        {ev.location && (
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <MapPin className="size-3 text-muted-foreground flex-shrink-0 mt-0.5 self-start" />
+            <span className="text-xs text-muted-foreground break-words">{ev.location}</span>
+          </div>
+        )}
       </div>
-      <div className="flex flex-col items-end gap-1 flex-shrink-0">
-        <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full"
-          style={{ backgroundColor: `${cfg.color}20`, color: cfg.color }}>
-          {cfg.label}
-        </span>
-        <span className="flex items-center gap-1 text-[10px] text-muted-foreground font-medium tracking-wide">
-          <Clock className="size-2.5" />
-          {countdownLabel}
-        </span>
-      </div>
+
       <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-300 flex-shrink-0" />
+
+      {/* Badge dipindahkan ke absolute agar tidak memblokir space baris kedua dan ketiga */}
+      <span className="absolute top-4 right-12 flex items-center gap-1 text-[9px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md">
+        <Clock className="size-2.5" />
+        {countdownLabel}
+      </span>
     </div>
   );
 }
@@ -127,44 +96,51 @@ export default function AdminDashboardPage() {
   }, []);
 
   const mappedEvents = useMemo(() => scheduleData?.map((ev) => {
-    const cfg = CATEGORY_CONFIG[getCategoryKey(ev.type)];
+    const cfg = getEventConfig(ev.type);
     return {
       id: ev.id,
-      title: ev.group ? `${ev.title} (${ev.group.name})` : ev.title,
+      title: cfg.label,
       start: ev.date,
       allDay: true,
-      backgroundColor: cfg.color,
+      backgroundColor: "transparent",
       borderColor: "transparent",
+      extendedProps: { type: ev.type, originalTitle: ev.title }
     };
   }) || [], [scheduleData]);
 
   const upcomingEvents = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getJakartaToday();
     return (scheduleData || [])
       .filter((ev) => new Date(ev.date) >= today)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 5);
   }, [scheduleData]);
 
-  const legends = useMemo(() => 
-    (Object.entries(CATEGORY_CONFIG) as [CategoryKey, typeof CATEGORY_CONFIG[CategoryKey]][])
-    .filter(([k]) => k !== "default")
-    .map(([, cfg]) => cfg), []);
+  // Clean helper for user display name
+  const getUserDisplayName = () => {
+    const role = (session as unknown as UserSession)?.user?.role;
+    const username = (session as unknown as UserSession)?.user?.username;
+    return role === "ADMIN" ? "SUPERADMIN" : (username || "ADMIN");
+  };
+
+  const legends = useMemo(() => Object.values(EVENT_TYPES), []);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-6">
       {/* Legend Bar + Live Date */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center px-1 gap-3">
         <div className="flex flex-wrap gap-2 items-center">
-          {legends.map((leg, idx) => (
-            <div key={idx} className="flex items-center gap-1.5 bg-muted/60 px-2.5 py-1 rounded-full border border-border shadow-sm">
-              <div className="p-1 rounded-full text-white shadow-sm" style={{ backgroundColor: leg.color }}>
-                <leg.icon className="size-2.5" />
+          {legends.map((leg) => {
+            const Icon = leg.icon;
+            return (
+              <div key={leg.id} className="flex items-center gap-1.5 bg-muted/60 px-2.5 py-1 rounded-full border border-border shadow-sm">
+                <div className="p-1 rounded-full text-white shadow-sm" style={{ backgroundColor: leg.color }}>
+                  <Icon className="size-2.5" />
+                </div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{leg.label}</span>
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{leg.label}</span>
-            </div>
-          ))}
+            );
+          })}
         </div>
         {liveDate && (
           <div className="flex items-center bg-muted/60 px-3 py-1.5 rounded-full border border-border/50 shadow-sm">
@@ -181,7 +157,7 @@ export default function AdminDashboardPage() {
           <div className="glass-card p-6 rounded-[2.5rem] border-border/40 shadow-sm relative overflow-hidden group h-full">
             <div className="flex items-center gap-2 mb-6">
               <CheckSquare className="size-4 text-primary" />
-              <h2 className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Statistik Kehadiran & Jadwal</h2>
+              <h2 className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Kalender Kegiatan ADORA</h2>
             </div>
             
             <div className="w-full">
@@ -199,10 +175,10 @@ export default function AdminDashboardPage() {
           {/* Welcome Greeting */}
           <div className="mb-10">
             <h3 className="text-muted-foreground text-[10px] uppercase font-medium tracking-[0.2em] leading-none mb-1">
-              Halo, selamat datang kembali
+              Selamat Datang,
             </h3>
             <p className="font-heading text-3xl tracking-wider text-foreground uppercase truncate">
-              {(session?.user as { username?: string })?.username || "Admin"} 👋
+              {getUserDisplayName()} 👋
             </p>
           </div>
 
@@ -212,7 +188,7 @@ export default function AdminDashboardPage() {
           <div className="flex items-center justify-between px-1 mb-2">
               <div className="flex items-center gap-2">
                 <CalendarDays className="size-4 text-primary" />
-                <h2 className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Upcoming Events</h2>
+                <h2 className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Agenda Mendatang</h2>
               </div>
               {upcomingEvents.length > 0 && (
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/20">

@@ -1,6 +1,7 @@
 "use client";
 
-import { useDeletePlayer, type Player } from "@/hooks/use-players";
+import { useDeletePlayer } from "@/hooks/use-players";
+import { type Player } from "@/types/dashboard";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {

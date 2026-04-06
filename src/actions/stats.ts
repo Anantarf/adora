@@ -4,13 +4,16 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
-
+import crypto from "crypto";
+import { AttendanceStatus } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
 
 // 1. Submit Attendance
 export async function submitAttendanceAction(data: {
   date: string;
-  playerStatuses: { playerId: string; status: "HADIR" | "IZIN" | "SAKIT" | "ALPA" }[];
+  playerStatuses: { playerId: string; status: AttendanceStatus }[];
   note?: string;
 }) {
   await requireAdmin();
@@ -28,6 +31,7 @@ export async function submitAttendanceAction(data: {
         },
         update: { status: ps.status, note: data.note },
         create: {
+          id: crypto.randomUUID(),
           playerId: ps.playerId,
           date: dateObj,
           status: ps.status,
@@ -46,7 +50,7 @@ export async function submitAttendanceAction(data: {
 export async function submitStatisticAction(data: {
   playerId: string;
   date: string;
-  metrics: any;
+  metrics: Record<string, number | string>;
   status: "Draft" | "Published";
 }) {
   await requireAdmin();
@@ -65,10 +69,12 @@ export async function submitStatisticAction(data: {
         status: data.status,
       },
       create: {
+        id: crypto.randomUUID(),
         playerId: data.playerId,
         date: targetDate,
         metricsJson: JSON.stringify(data.metrics),
         status: data.status,
+        updatedAt: new Date(),
       },
     });
 
@@ -80,19 +86,15 @@ export async function submitStatisticAction(data: {
   return stat;
 }
 
-
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-
 // 3. Get Player Stats
 export async function getPlayerStatsAction(playerId: string) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
   
-  const userRole = (session.user as any).role;
-  const userId = (session.user as any).id;
+  const userRole = session.user.role;
+  const userId = session.user.id;
 
-  // Jika parent, pastikan dia hanya bisa menarik data anaknya sendiri (Mencegah IDOR / Horizontal Escalation)
+  // Jika parent, pastikan dia hanya bisa menarik data anaknya sendiri
   if (userRole === "PARENT") {
     const parentOwnsChild = await prisma.player.findFirst({
       where: { id: playerId, parentId: userId }
@@ -102,8 +104,14 @@ export async function getPlayerStatsAction(playerId: string) {
     }
   }
 
-  return await prisma.statistic.findMany({
+  const stats = await prisma.statistic.findMany({
     where: { playerId },
     orderBy: { date: "desc" },
   });
+
+  // Type-safe transform: Parse metricsJson
+  return stats.map(s => ({
+    ...s,
+    metricsJson: JSON.parse(s.metricsJson as string)
+  }));
 }

@@ -69,6 +69,7 @@ model event {
   description String?  @db.Text
   date        DateTime
   type        String   @default("LATIHAN")
+  location    String?
   groupId     String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime

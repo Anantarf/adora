@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
+import crypto from "crypto";
 
 // 1. Ambil semua pemain (Read)
 export async function getPlayersAction(groupId?: string) {
@@ -35,11 +36,13 @@ export async function addPlayerAction(data: {
   const player = await prisma.$transaction(async (tx) => {
     const p = await tx.player.create({
       data: {
+        id: crypto.randomUUID(),
         name: data.name,
         dateOfBirth: toJakartaDate(data.dateOfBirth),
         schoolOrigin: data.schoolOrigin,
         groupId: data.groupId,
         parentId: data.parentId,
+        updatedAt: new Date(),
       },
     });
 
@@ -62,11 +65,13 @@ export async function addBatchPlayersAction(playersData: Array<{
   await requireAdmin();
   
   const formattedData = playersData.map((data) => ({
+    id: crypto.randomUUID(),
     name: data.name,
     dateOfBirth: toJakartaDate(data.dateOfBirth),
     schoolOrigin: data.schoolOrigin || null,
     groupId: data.groupId,
     parentId: data.parentId,
+    updatedAt: new Date(),
   }));
 
   const result = await prisma.$transaction(async (tx) => {

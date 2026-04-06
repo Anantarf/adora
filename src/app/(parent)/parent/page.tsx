@@ -83,7 +83,7 @@ export default function ParentDashboard() {
   if (familyLoading) {
     return (
       <div className="flex w-full items-center justify-center p-20 gap-3 text-muted-foreground font-semibold">
-        <Loader2 className="animate-spin size-6" /> Otentikasi Profil Keluarga...
+        <Loader2 className="animate-spin size-6" /> Memverifikasi Profil Keluarga...
       </div>
     );
   }
@@ -93,7 +93,7 @@ export default function ParentDashboard() {
       <Card className="border-border/50 bg-card p-10 text-center max-w-lg mx-auto mt-20">
         <div className="flex justify-center mb-4 text-muted-foreground opacity-50"><User className="size-12" /></div>
         <CardTitle className="mb-2 text-secondary">Akses Terkunci</CardTitle>
-        <CardDescription>Halo, Akun ada belum tertambat dengan nama atlet manapun di *Database* Pelatih. Silakan hubungi Administrator untuk dihubungkan dengan putra/putri Anda.</CardDescription>
+        <CardDescription>Halo, Akun Anda belum terhubung dengan profil siswa mana pun di database akademi. Silakan hubungi Administrator untuk menghubungkan akun ini dengan putra/putri Anda.</CardDescription>
       </Card>
     );  
   }
@@ -130,7 +130,7 @@ export default function ParentDashboard() {
       {/* 2. Loading State */}
       {statsLoading ? (
          <div className="flex w-full items-center justify-center p-20 gap-3 text-primary font-semibold">
-           <Loader2 className="animate-spin size-6" /> Mengunduh Basis Data Performa {activeChild.name}...
+           <Loader2 className="animate-spin size-6" /> Memuat Data Rapor & Statistik {activeChild.name}...
          </div>
       ) : (
         <>
@@ -149,8 +149,8 @@ export default function ParentDashboard() {
                 <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Komposisi Skill Terakhir</CardTitle>
-                      <CardDescription className="text-xs">Dimensi teknik motorik menurut pelatih.</CardDescription>
+                      <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Komposisi Kemampuan (Skillset)</CardTitle>
+                      <CardDescription className="text-xs">Fokus evaluasi teknik dasar bulan ini.</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
@@ -171,7 +171,7 @@ export default function ParentDashboard() {
                 <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
                   <div className="flex justify-between items-center">
                     <div>
-                      <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Tren Progresi Historis</CardTitle>
+                      <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Grafik Perkembangan Fisik</CardTitle>
                       <CardDescription className="text-xs">Peningkatan Stamina vs Rata-Rata Umum (Per Bulan).</CardDescription>
                     </div>
                   </div>
@@ -198,8 +198,8 @@ export default function ParentDashboard() {
                 <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
                   <div className="flex justify-between items-center">
                      <div>
-                       <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Laporan Analisis Pelatih</CardTitle>
-                       <CardDescription className="text-xs">Catatan tekstual untuk bulan evaluasi terakhir.</CardDescription>
+                       <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Catatan Khusus Pelatih</CardTitle>
+                       <CardDescription className="text-xs">Evaluasi tekstual untuk bulan laporan terakhir.</CardDescription>
                      </div>
                      <Button 
                         size="sm" 
@@ -207,7 +207,7 @@ export default function ParentDashboard() {
                         onClick={handleDownloadPDF}
                       >
                        <FileText className="mr-2 size-3" />
-                       Rekap PDF Rapor
+                       Unduh Rapor PDF
                      </Button>
                   </div>
                 </CardHeader>

@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 // Initialize Prisma 7 MariaDB adapter
 const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
@@ -16,6 +17,7 @@ async function main() {
       password: hashedPassword,
     },
     create: {
+      id: crypto.randomUUID(),
       username: "superadmin",
       password: hashedPassword,
       name: "Super Administrator",

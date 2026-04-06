@@ -2,8 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAttendancesAction } from "@/actions/dashboard";
 import { submitAttendanceAction } from "@/actions/stats";
-
-export type AttendanceStatus = "HADIR" | "IZIN" | "SAKIT" | "ALPA";
+import { type AttendanceStatus } from "@/types/dashboard";
 
 export type AttendanceInput = {
   playerId: string;

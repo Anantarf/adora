@@ -3,23 +3,35 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
+import crypto from "crypto";
 
 export async function getGroupsAction() {
   await requireAdmin();
-  return await prisma.group.findMany({
-    orderBy: { name: "asc" },
-  });
+  try {
+    return await prisma.group.findMany({
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    console.error("Error fetching groups:", error);
+    throw new Error("Gagal mengambil daftar grup");
+  }
 }
 
 export async function addGroupAction(data: { name: string; description?: string }) {
   await requireAdmin();
-  const group = await prisma.group.create({
-    data: {
-      name: data.name,
-      description: data.description,
-    },
-  });
+  try {
+    const group = await prisma.group.create({
+      data: {
+        id: crypto.randomUUID(),
+        name: data.name,
+        description: data.description || null,
+      },
+    });
 
-  revalidatePath("/dashboard/groups");
-  return group;
+    revalidatePath("/dashboard/groups");
+    return { success: true, data: group };
+  } catch (error) {
+    console.error("Error adding group:", error);
+    throw new Error("Gagal menambahkan grup baru");
+  }
 }

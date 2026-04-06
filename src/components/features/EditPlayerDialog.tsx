@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useUpdatePlayer, type Player } from "@/hooks/use-players";
+import { useUpdatePlayer } from "@/hooks/use-players";
+import { type Player } from "@/types/dashboard";
 import { useGroups } from "@/hooks/use-groups";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -131,7 +132,7 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
                 <SelectValue placeholder="Pilih Grup" />
               </SelectTrigger>
               <SelectContent>
-                {groups?.map((group: any) => (
+                {groups?.map((group: { id: string; name: string }) => (
                   <SelectItem key={group.id} value={group.id}>
                     {group.name}
                   </SelectItem>

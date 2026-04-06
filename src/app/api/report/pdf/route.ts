@@ -48,16 +48,16 @@ export async function GET(req: NextRequest) {
       where: { id: playerId },
       include: {
         group: { select: { name: true } },
-        statistics: {
+        statistic: {
           where: { status: "Published" },
           orderBy: { date: "desc" },
           take: 6, // Last 6 evaluation periods
         },
-        attendances: {
+        attendance: {
           orderBy: { date: "desc" },
           take: 30, // Last 30 attendance records
         },
-        certificates: {
+        certificate: {
           orderBy: { uploadedAt: "desc" },
         },
       },
@@ -68,7 +68,7 @@ export async function GET(req: NextRequest) {
     }
 
     // 5. Calculate embedded metrics
-    const latestStat = player.statistics[0];
+    const latestStat = player.statistic[0];
     let latestMetrics: Record<string, number> = {};
     let coachNotes = "";
 
@@ -92,8 +92,8 @@ export async function GET(req: NextRequest) {
       ? (Object.values(latestMetrics).reduce((a, b) => a + b, 0) / Object.values(latestMetrics).length).toFixed(1)
       : "N/A";
 
-    const totalAttendance = player.attendances.length;
-    const hadirCount = player.attendances.filter((a: { status: string }) => a.status === "HADIR").length;
+    const totalAttendance = player.attendance.length;
+    const hadirCount = player.attendance.filter((a: { status: string }) => a.status === "HADIR").length;
     const attendanceRate = totalAttendance > 0
       ? ((hadirCount / totalAttendance) * 100).toFixed(0)
       : "N/A";
@@ -369,11 +369,11 @@ export async function GET(req: NextRequest) {
       <div class="label">tingkat kehadiran</div>
     </div>
     <div class="summary-card">
-      <div class="value">${player.statistics.length}</div>
+      <div class="value">${player.statistic.length}</div>
       <div class="label">total evaluasi</div>
     </div>
     <div class="summary-card">
-      <div class="value">${player.certificates.length}</div>
+      <div class="value">${player.certificate.length}</div>
       <div class="label">sertifikat</div>
     </div>
   </div>
@@ -395,10 +395,10 @@ export async function GET(req: NextRequest) {
   <div class="notes-box">"${coachNotes}"</div>` : ""}
 
   <!-- Certificates -->
-  ${player.certificates.length > 0 ? `
+  ${player.certificate.length > 0 ? `
   <div class="section-title">Riwayat Sertifikat Prestasi</div>
   <div class="cert-list">
-    ${player.certificates.map((c: { title: string; uploadedAt: Date }) => `
+    ${player.certificate.map((c: { title: string; uploadedAt: Date }) => `
     <div class="cert-item">
       <span class="cert-badge">🏆 Prestasi</span>
       ${c.title}

@@ -120,6 +120,9 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -160,6 +163,25 @@
   }
   .animate-bounce-subtle {
     animation: bounce-subtle 3s ease-in-out infinite;
+  }
+
+  @keyframes float-orb-1 {
+    0%, 100% { transform: translate(0px, 0px) scale(1) translateZ(0); }
+    33% { transform: translate(60px, -40px) scale(1.1) translateZ(0); }
+    66% { transform: translate(-30px, 50px) scale(0.95) translateZ(0); }
+  }
+  @keyframes float-orb-2 {
+    0%, 100% { transform: translate(0px, 0px) scale(1) translateZ(0); }
+    33% { transform: translate(-60px, 50px) scale(0.9) translateZ(0); }
+    66% { transform: translate(40px, -40px) scale(1.1) translateZ(0); }
+  }
+  .animate-float-1 {
+    animation: float-orb-1 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform;
+  }
+  .animate-float-2 {
+    animation: float-orb-2 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform;
   }
 
 }

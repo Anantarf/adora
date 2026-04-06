@@ -2,7 +2,8 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
-import { toJakartaDate } from "@/lib/date-utils";
+import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
+import { AttendanceStatus } from "@/types/dashboard";
 
 /**
  * ADORA Basketball - Optimized Dashboard Aggregator
@@ -33,8 +34,8 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       }),
     ]);
 
-    // Optimized Attendance Rate Calculation using groupBy for better performance
-    const thirtyDaysAgo = toJakartaDate();
+    // Optimized Attendance Rate Calculation
+    const thirtyDaysAgo = getJakartaToday();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const attendanceStats = await prisma.attendance.groupBy({
@@ -59,18 +60,16 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       : 0;
 
     // Optimized Dynamic Trend Calculation
-    // We only take the last 12 months/cycles of stats to keep it light
     const stats = await prisma.statistic.findMany({
        where: { 
          status: "Published",
          player: { isDeleted: false }
        },
-       orderBy: { date: "desc" }, // Fetch latest first
-       take: 200, // Reduced from 300 to 200 for lightness
+       orderBy: { date: "desc" },
+       take: 200,
        select: { date: true, metricsJson: true }
     });
 
-    // Reversed because we took 'desc' but want trend 'asc'
     stats.reverse();
 
     const trendMap = new Map<string, { sum: number; count: number }>();
@@ -120,7 +119,6 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
   }
 }
 
-
 export async function getAttendancesAction(date: string, groupId?: string) {
   try {
      await requireAdmin();
@@ -128,17 +126,20 @@ export async function getAttendancesAction(date: string, groupId?: string) {
      
      const where: any = { 
        date: targetDate,
-       player: { isDeleted: false } // Only show active players
+       player: { isDeleted: false }
      };
      
      if (groupId && groupId !== "all") {
-       where.player.groupId = groupId;
+       where.player = {
+         ...where.player,
+         groupId: groupId
+       };
      }
 
      return await prisma.attendance.findMany({
        where,
        select: { playerId: true, status: true, note: true }
-     });
+     }) as { playerId: string; status: AttendanceStatus; note: string | null }[];
   } catch (error) {
      console.error("[GET_ATTENDANCES_ERROR]:", error);
      return [];

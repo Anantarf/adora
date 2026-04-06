@@ -9,6 +9,7 @@ import { useGroups } from "@/hooks/use-groups";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import { BatchPlayerUpload } from "@/components/features/BatchPlayerUpload";
+import { type UserSession } from "@/types/dashboard";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,15 +53,15 @@ export function AddPlayerDialog() {
 
   const onSubmit = async (data: PlayerForm) => {
     try {
-      const userId = (session?.user as any)?.id;
+      const userId = session?.user?.id;
       if (!userId) {
-        throw new Error("Sesi tidak valid. Silakan login kembali.");
+        throw new Error("Sesi tidak aktif. Silakan login kembali.");
       }
 
       // Kirim data ke MySQL via Server Action
       await addPlayer({
         ...data,
-        parentId: (session?.user as any)?.id ?? "", 
+        parentId: userId, 
       });
       
       reset();
@@ -106,26 +107,26 @@ export function AddPlayerDialog() {
             </div>
 
             <div className="space-y-2">
-               <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Tanggal Lahir (YYYY-MM-DD)</label>
-              <Input type="date" {...register("dateOfBirth")} className="h-11" />
+               <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Tanggal Lahir</label>
+              <Input type="date" {...register("dateOfBirth")} className="h-11 rounded-xl bg-background/40" />
               {errors.dateOfBirth && <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>}
             </div>
 
             <div className="space-y-2">
-               <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Asal Sekolah</label>
-              <Input {...register("schoolOrigin")} placeholder="Contoh: SMA Gonzaga" className="h-11" />
+               <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Asal Sekolah</label>
+              <Input {...register("schoolOrigin")} placeholder="Contoh: SMA Gonzaga" className="h-11 rounded-xl bg-background/40" />
               {errors.schoolOrigin && <p className="text-destructive text-xs">{errors.schoolOrigin.message}</p>}
             </div>
 
             <div className="space-y-2">
-               <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Grup Latihan</label>
+               <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Grup Latihan (KU)</label>
               <Select onValueChange={(val: string | null) => { if (val) setValue("groupId", val); }} disabled={isGroupsLoading}>
-                <SelectTrigger className="h-11">
-                  <SelectValue placeholder={isGroupsLoading ? "Memuat..." : "Pilih Grup"} />
+                <SelectTrigger className="h-11 rounded-xl bg-background/40">
+                  <SelectValue placeholder={isGroupsLoading ? "Memuat..." : "Pilih Kelompok Umur"} />
                 </SelectTrigger>
-                <SelectContent>
-                  {groups?.map((group: any) => (
-                    <SelectItem key={group.id} value={group.id}>
+                <SelectContent className="rounded-xl">
+                  {groups?.map((group: { id: string; name: string }) => (
+                    <SelectItem key={group.id} value={group.id} className="font-medium text-sm">
                       {group.name}
                     </SelectItem>
                   ))}
@@ -134,13 +135,13 @@ export function AddPlayerDialog() {
               {errors.groupId && <p className="text-destructive text-xs">{errors.groupId.message}</p>}
             </div>
 
-            <div className="pt-4 flex flex-col gap-2 w-full justify-end">
-              <Button type="submit" disabled={isPending} className="w-full bg-primary hover:bg-primary/90 h-11 text-primary-foreground font-bold tracking-widest uppercase">
+            <div className="pt-6 flex flex-col gap-3">
+              <Button type="submit" disabled={isPending} className="w-full bg-primary hover:bg-primary/90 h-12 text-black font-bold tracking-[0.2em] uppercase rounded-xl shadow-lg transition-all hover:scale-[1.02] active:scale-95">
                 {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
-                Simpan Data Manual
+                Konfirmasi Simpan Data
               </Button>
-              <Button type="button" variant="ghost" className="w-full text-xs font-bold tracking-widest uppercase text-muted-foreground" onClick={() => setIsBatchMode(true)}>
-                Gunakan Mode Batch (CSV)
+              <Button type="button" variant="ghost" className="w-full text-[10px] font-black tracking-[0.3em] uppercase text-muted-foreground/40 hover:text-primary transition-colors" onClick={() => setIsBatchMode(true)}>
+                Unggah Banyak Atlet via Excel / CSV (Batch)
               </Button>
             </div>
           </form>

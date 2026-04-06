@@ -19,8 +19,9 @@ import { Providers } from "@/components/providers/query-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Adora Basketball Club | Management Dashboard",
-  description: "Dashboard eksklusif Adora Basketball Club",
+  title: "ADORA Basketball Club | Akademi Basket Profesional Indonesia",
+  description:
+    "ADORA Basketball Club — Membentuk generasi atlet basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-10, KU-15, KU-18.",
 };
 
 export default function RootLayout({
@@ -29,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${plusJakartaSans.variable} ${bebasNeue.variable} dark`} suppressHydrationWarning>
+    <html lang="id" className={`${plusJakartaSans.variable} ${bebasNeue.variable} dark scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`antialiased min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground`}>
         <Providers>
           {children}

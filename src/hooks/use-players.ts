@@ -1,16 +1,7 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPlayersAction, addPlayerAction, updatePlayerAction, deletePlayerAction } from "@/actions/players";
-
-export type Player = {
-  id: string;
-  name: string;
-  dateOfBirth: Date;
-  schoolOrigin: string | null;
-  groupId: string | null;
-  isDeleted: boolean;
-  group: { id: string; name: string } | null;
-};
+import { type Player } from "@/types/dashboard";
 
 // 1. Hook (GET): Tarik data pemain via Server Action
 export const usePlayers = (groupId?: string) => {

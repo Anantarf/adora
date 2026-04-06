@@ -9,7 +9,7 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   pages: {
-    signIn: "/", // Root page is our login page
+    signIn: "/login",
   },
   providers: [
     CredentialsProvider({
@@ -53,17 +53,17 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as any).role;
-        token.id = (user as any).id;
-        token.username = (user as any).username;
+        token.role = user.role;
+        token.id = user.id;
+        token.username = user.username;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        (session.user as any).role = token.role;
-        (session.user as any).id = token.id;
-        (session.user as any).username = token.username;
+        session.user.role = token.role;
+        session.user.id = token.id;
+        session.user.username = token.username;
       }
       return session;
     },

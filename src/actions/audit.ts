@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import crypto from "crypto";
 
 // ─── Types ───────────────────────────────────────────
 export type AuditLogRecord = {
@@ -25,7 +26,7 @@ export async function getAuditLogsAction(options?: {
 
   const take = options?.take || 50;
 
-  const logs = await prisma.auditLog.findMany({
+  const logs = await prisma.auditlog.findMany({
     take: take + 1, // Take one extra to check for next page
     ...(options?.cursor ? { cursor: { id: options.cursor }, skip: 1 } : {}),
     include: {
@@ -53,8 +54,9 @@ export async function createAuditLog(
   const session = await getServerSession(authOptions);
   const userId = (session?.user as { id?: string })?.id || null;
 
-  return await tx.auditLog.create({
+    return await tx.auditlog.create({
     data: {
+      id: crypto.randomUUID(),
       action,
       targetTable,
       recordId: recordId || null,

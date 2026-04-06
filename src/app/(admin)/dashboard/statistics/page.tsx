@@ -5,6 +5,8 @@ import { Loader2, CalendarDays, LayoutList as SelectIcon } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
+import { getJakartaToday } from "@/lib/date-utils";
+import { type Player } from "@/types/dashboard";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +27,7 @@ import {
 
 export default function StatisticsPage() {
   const [activeGroup, setActiveGroup] = useState<string>("all");
-  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState<string>(getJakartaToday().toISOString().split("T")[0]);
 
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
@@ -100,7 +102,7 @@ export default function StatisticsPage() {
                 </TableCell>
               </TableRow>
             )}
-            {players?.map((player, idx) => (
+            {players?.map((player: Player, idx: number) => (
               <TableRow key={player.id} className="group hover:bg-muted/40 transition-colors">
                 <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
                 <TableCell className="font-semibold text-secondary">{player.name}</TableCell>

@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAddStatistic } from "@/hooks/use-statistics";
-import { Player } from "@/hooks/use-players";
+import { type Player } from "@/types/dashboard";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";

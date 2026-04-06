@@ -12,19 +12,18 @@ import {
   SidebarMenuItem,
   SidebarFooter
 } from "@/components/ui/sidebar";
-import { CopySlash, LayoutDashboard, Users, CheckSquare, FileBadge, LineChart, ShieldAlert, Layers, CalendarDays, LogOut } from "lucide-react";
+import { Cone, LayoutDashboard, Users, CheckSquare, FileBadge, LineChart, ShieldAlert, Layers, CalendarDays, LogOut } from "lucide-react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
 
 const navItems = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Schedule", url: "/schedule", icon: CalendarDays },
-  { title: "Groups", url: "/groups", icon: Layers },
-  { title: "Players", url: "/players", icon: Users },
-  { title: "Attendances", url: "/attendances", icon: CheckSquare },
-  { title: "Statistics", url: "/statistics", icon: LineChart },
-  { title: "Certificates", url: "/certificates", icon: FileBadge },
-  { title: "Audit & Security", url: "/audit", icon: ShieldAlert },
+  { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Jadwal Klub", url: "/schedule", icon: CalendarDays },
+  { title: "Roster & Grup", url: "/players", icon: Layers },
+  { title: "Input Absensi", url: "/attendances", icon: CheckSquare },
+  { title: "Input Penilaian", url: "/statistics", icon: LineChart },
+  { title: "Sertifikat Digital", url: "/certificates", icon: FileBadge },
+  { title: "Audit Log (Keamanan)", url: "/audit", icon: ShieldAlert },
 ];
 
 export function AdminSidebar() {
@@ -34,8 +33,8 @@ export function AdminSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default">
-              <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm group-data-[collapsible=icon]:size-8">
-                 <CopySlash className="size-5 group-data-[collapsible=icon]:size-4" />
+               <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm group-data-[collapsible=icon]:size-8">
+                 <Cone className="size-5 group-data-[collapsible=icon]:size-4" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none overflow-hidden group-data-[collapsible=icon]:hidden">
                 <span className="font-heading text-xl tracking-wider text-foreground">ADORA</span>

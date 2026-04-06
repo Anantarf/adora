@@ -26,7 +26,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
     }
 
     // 3. Cek peran (Role-based check) (Server Middleware sudah menghandle ini, tapi kita tambahkan lapis kedua di client)
-    const userRole = (session?.user as any)?.role;
+    const userRole = session?.user?.role;
     
     if (pathname.startsWith("/dashboard") && userRole !== "ADMIN") {
       router.replace("/");

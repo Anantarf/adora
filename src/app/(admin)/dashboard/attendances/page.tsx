@@ -4,8 +4,10 @@ import { useState, useEffect, useMemo } from "react";
 import { Loader2, CheckSquare, CalendarDays, LayoutList as SelectIcon } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
-import { useAddAttendances, useAttendances, AttendanceInput } from "@/hooks/use-attendances";
+import { useAddAttendances, useAttendances } from "@/hooks/use-attendances";
 import { toast } from "sonner";
+import { getJakartaToday } from "@/lib/date-utils";
+import { AttendanceStatus, Player } from "@/types/dashboard";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,43 +27,38 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-type StatusVal = "HADIR" | "IZIN" | "SAKIT" | "ALPA";
-
 export default function AttendancesPage() {
   const [activeGroup, setActiveGroup] = useState<string>("all");
-  const [date, setDate] = useState<string>(new Date().toISOString().split("T")[0]);
-  const [batchStatus, setBatchStatus] = useState<Record<string, StatusVal>>({});
+  // Jakarta Midnight Date Sync
+  const [date, setDate] = useState<string>(getJakartaToday().toISOString().split("T")[0]);
+  const [batchStatus, setBatchStatus] = useState<Record<string, AttendanceStatus>>({});
 
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
   const { mutateAsync: sendBatch, isPending } = useAddAttendances();
   const { data: existingAttendances } = useAttendances(date);
 
-  // Sync state dengan data dari database saat tanggal atau grup berubah
+  // Sync state data from DB when date or data changes
   useEffect(() => {
-    // Selalu reset status saat filter berubah agar tidak ada data tertinggal dari tanggal/grup sebelumnya
-    const preloaded: Record<string, StatusVal> = {};
-    
-    if (existingAttendances && existingAttendances.length > 0) {
-      existingAttendances.forEach((att: any) => {
-        preloaded[att.playerId] = att.status as StatusVal;
+    if (existingAttendances) {
+      const preloaded: Record<string, AttendanceStatus> = {};
+      existingAttendances.forEach((att) => {
+        preloaded[att.playerId] = att.status as AttendanceStatus;
       });
+      setBatchStatus(preloaded);
+    } else {
+      setBatchStatus({});
     }
-    
-    setBatchStatus(preloaded);
-  }, [existingAttendances, date, activeGroup]);
+  }, [existingAttendances]);
 
-  const handleStatusChange = (playerId: string, status: StatusVal) => {
-    setBatchStatus(prev => ({
-      ...prev,
-      [playerId]: status
-    }));
+  const handleStatusChange = (playerId: string, status: AttendanceStatus) => {
+    setBatchStatus(prev => ({ ...prev, [playerId]: status }));
   };
 
   const handleMarkAllPresent = () => {
     if (!players) return;
-    const allPresent: Record<string, StatusVal> = { ...batchStatus };
-    players.forEach((p: any) => {
+    const allPresent: Record<string, AttendanceStatus> = { ...batchStatus };
+    players.forEach((p) => {
       allPresent[p.id] = "HADIR";
     });
     setBatchStatus(allPresent);
@@ -78,7 +75,7 @@ export default function AttendancesPage() {
       return;
     }
 
-    const playerStatuses = players.map((p: any) => ({
+    const playerStatuses = players.map((p) => ({
       playerId: p.id,
       status: batchStatus[p.id] || "HADIR", 
     }));
@@ -92,10 +89,10 @@ export default function AttendancesPage() {
     }
   };
 
-  const stats = useMemo(() => {
+  const statsCount = useMemo(() => {
     if (!players) return { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
     const counts = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
-    players.forEach((p: any) => {
+    players.forEach((p) => {
       const s = batchStatus[p.id] || "HADIR";
       counts[s]++;
     });
@@ -111,7 +108,7 @@ export default function AttendancesPage() {
           <p className="text-muted-foreground text-sm font-medium tracking-wide">Buku absen kelompok (Batching Input) untuk mempermudah pelatih di lapangan.</p>
         </div>
         <div className="flex items-center gap-2">
-            {Object.entries(stats).map(([label, count]) => (
+            {Object.entries(statsCount).map(([label, count]) => (
                 <div key={label} className="flex flex-col items-center px-4 py-1.5 bg-card border border-border/40 rounded-xl">
                     <span className="text-[10px] font-black tracking-widest text-muted-foreground">{label}</span>
                     <span className="text-lg font-bold text-secondary">{count}</span>
@@ -148,7 +145,7 @@ export default function AttendancesPage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
+              className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30 font-bold"
             />
           </div>
         </div>
@@ -176,7 +173,6 @@ export default function AttendancesPage() {
         </div>
       </div>
 
-      {/* Data Table Matrix */}
       <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm mt-2">
         <Table>
           <TableHeader className="bg-muted/30">
@@ -197,14 +193,14 @@ export default function AttendancesPage() {
                 </TableCell>
               </TableRow>
             )}
-            {players?.length === 0 && !playersLoading && (
+            {!playersLoading && players?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground font-semibold">
                   Grup kosong. Mohon pilih grup kelas yang lain.
                 </TableCell>
               </TableRow>
             )}
-            {players?.map((player: any, idx: number) => (
+            {players?.map((player: Player, idx: number) => (
               <TableRow key={player.id} className="group hover:bg-muted/40 transition-colors">
                 <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
                 <TableCell className="font-semibold text-secondary">{player.name}</TableCell>
@@ -216,16 +212,16 @@ export default function AttendancesPage() {
                 <TableCell>
                   <Select 
                     value={batchStatus[player.id] || "HADIR"} 
-                    onValueChange={(val: string | null) => handleStatusChange(player.id, (val as StatusVal) || "HADIR")}
+                    onValueChange={(val: string | null) => handleStatusChange(player.id, (val as AttendanceStatus) || "HADIR")}
                   >
-                    <SelectTrigger className="w-full h-9 font-bold hover:border-primary/50 text-[10px] tracking-widest uppercase">
+                    <SelectTrigger className="w-full h-9 font-black hover:border-primary/50 text-[10px] tracking-widest uppercase">
                       <SelectValue placeholder="STATUS" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="HADIR"><span className="text-green-600 font-bold tracking-widest">HADIR</span></SelectItem>
-                      <SelectItem value="IZIN"><span className="text-amber-500 font-bold tracking-widest">IZIN</span></SelectItem>
-                      <SelectItem value="SAKIT"><span className="text-orange-500 font-bold tracking-widest">SAKIT</span></SelectItem>
-                      <SelectItem value="ALPA"><span className="text-destructive font-bold tracking-widest">ALPA</span></SelectItem>
+                      <SelectItem value="HADIR"><span className="text-green-600 font-black tracking-widest">HADIR</span></SelectItem>
+                      <SelectItem value="IZIN"><span className="text-amber-500 font-black tracking-widest">IZIN</span></SelectItem>
+                      <SelectItem value="SAKIT"><span className="text-orange-500 font-black tracking-widest">SAKIT</span></SelectItem>
+                      <SelectItem value="ALPA"><span className="text-destructive font-black tracking-widest">ALPA</span></SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>
@@ -234,7 +230,6 @@ export default function AttendancesPage() {
           </TableBody>
         </Table>
       </div>
-
     </div>
   );
 }

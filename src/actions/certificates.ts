@@ -6,6 +6,8 @@ import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 
+import crypto from "crypto";
+
 // ─── Types ───────────────────────────────────────────
 export type CertificateRecord = {
   id: string;
@@ -42,6 +44,7 @@ export async function addCertificateAction(data: {
 
   const cert = await prisma.certificate.create({
     data: {
+      id: crypto.randomUUID(),
       title: data.title,
       fileUrl: data.fileUrl,
       playerId: data.playerId || null,
@@ -73,8 +76,8 @@ export async function getPlayerCertificatesAction(playerId: string) {
   const session = await getServerSession(authOptions);
   if (!session) throw new Error("Unauthorized");
 
-  const userRole = (session.user as { role?: string })?.role;
-  const userId = (session.user as { id?: string })?.id;
+  const userRole = session.user.role;
+  const userId = session.user.id;
 
   const player = await prisma.player.findUnique({
     where: { id: playerId },
@@ -102,10 +105,11 @@ export async function getPlayerCertificatesAction(playerId: string) {
 async function logAuditAction(action: string, targetTable: string, recordId?: string) {
   try {
     const session = await getServerSession(authOptions);
-    const userId = (session?.user as { id?: string })?.id || null;
+    const userId = session?.user?.id ?? null;
 
-    await prisma.auditLog.create({
+    await prisma.auditlog.create({
       data: {
+        id: crypto.randomUUID(),
         action,
         targetTable,
         recordId: recordId || null,

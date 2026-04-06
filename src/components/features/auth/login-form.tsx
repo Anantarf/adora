@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,8 @@ import {
   ArrowRight, 
   Loader2,
   ShieldCheck,
-  AlertCircle
+  AlertCircle,
+  Cone
 } from "lucide-react";
 
 const loginSchema = z.object({
@@ -26,6 +28,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -44,8 +47,7 @@ export function LoginForm() {
     
     try {
       const result = await signIn("credentials", {
-        redirect: true,
-        callbackUrl: "/api/auth/callback/credentials", // Temporary, logic handles in middleware or server component redirect generally
+        redirect: false,
         username: data.username,
         password: data.password,
       });
@@ -57,9 +59,13 @@ export function LoginForm() {
         });
       } else {
         toast.success("Login Berhasil", {
-          description: "Selamat datang kembali!",
+          description: "Mengarahkan ke portal...",
           icon: <ShieldCheck className="size-4" />
         });
+        // Fetch fresh session to read role, then navigate to the correct portal
+        const session = await getSession();
+        const role = (session?.user as { role?: string })?.role;
+        router.push(role === "ADMIN" ? "/dashboard" : "/parent");
       }
     } catch (err) {
       toast.error("Sistem Bermasalah", {
@@ -80,13 +86,13 @@ export function LoginForm() {
           {/* Logo & Header */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center size-16 bg-gradient-to-tr from-primary to-primary/60 rounded-2xl mb-4 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]">
-              <Trophy className="size-10 text-white animate-bounce-subtle" />
+              <Cone className="size-10 text-white animate-bounce-subtle" />
             </div>
             <h1 className="text-4xl font-heading text-white tracking-[0.2em] uppercase mb-2">
               Adora <span className="text-primary">Cloud</span>
             </h1>
             <p className="text-white/50 font-medium text-[10px] uppercase tracking-widest">
-              Sistem Manajemen Klub Bola Basket Eksklusif
+              Portal Akses Pengurus & Orang Tua Siswa
             </p>
           </div>
 
@@ -96,7 +102,7 @@ export function LoginForm() {
               {/* Username Input */}
               <div className="space-y-2">
                 <label className="text-[10px] font-medium text-white/40 uppercase tracking-[0.2em] ml-1">
-                  Identitas Pengguna
+                  ID PENGGUNA / USERNAME
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -107,7 +113,7 @@ export function LoginForm() {
                     type="text"
                     disabled={loading}
                     className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50"
-                    placeholder="Contoh: admin"
+                    placeholder="Masukkan Username Anda"
                   />
                 </div>
                 {errors.username && (
@@ -118,7 +124,7 @@ export function LoginForm() {
               {/* Password Input */}
               <div className="space-y-2">
                 <label className="text-[10px] font-medium text-white/40 uppercase tracking-[0.2em] ml-1">
-                  Kunci Sandi
+                  Kata Sandi
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -148,17 +154,17 @@ export function LoginForm() {
               {loading ? (
                 <Loader2 className="size-5 animate-spin" />
               ) : (
-                <>
-                  Masuk Ke Dashboard
+                <div className="flex items-center justify-center gap-2">
+                  <span>Masuk</span>
                   <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
-                </>
+                </div>
               )}
             </motion.button>
 
             {/* Footer Links */}
             <div className="text-center pt-2">
               <p className="text-white/30 text-xs font-medium">
-                Masalah akses? Hubungi admin sistem.
+                Kendala akses? Hubungi IT Support Adora.
               </p>
             </div>
           </form>
