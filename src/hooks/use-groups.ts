@@ -6,6 +6,9 @@ export type Group = {
   id: string;
   name: string;
   description: string | null;
+  _count?: {
+    player: number;
+  };
 };
 
 // Hook (GET): Tarik data Grup Latihan via Server Action

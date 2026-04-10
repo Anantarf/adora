@@ -5,11 +5,7 @@ import { type ScheduleEvent } from "@/types/dashboard";
 export function useSchedule() {
   return useQuery<ScheduleEvent[]>({
     queryKey: ["schedule-events"],
-    queryFn: async () => {
-      const data = await getEventsAction();
-      // @ts-ignore
-      return (data as unknown as ScheduleEvent[]) || [];
-    },
+    queryFn: () => getEventsAction(),
     staleTime: 1000 * 60 * 5, // 5 menit
   });
 }

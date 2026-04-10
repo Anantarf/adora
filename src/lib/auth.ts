@@ -1,4 +1,3 @@
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcrypt";
 import type { NextAuthOptions } from "next-auth";
@@ -7,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60, // 1 hari, session otomatis kadaluwarsa
   },
   pages: {
     signIn: "/login",

@@ -2,10 +2,10 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Edit2, Trash2, ArrowLeft, Users, UserPlus, FolderPlus, MoreVertical } from "lucide-react";
+import { Loader2, Search, Edit2, Trash2, ArrowLeft, Users, FolderPlus } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
-import { useGroups } from "@/hooks/use-groups";
+import { useGroups, type Group } from "@/hooks/use-groups";
 import { useState, useMemo } from "react";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { EditPlayerDialog } from "@/components/features/EditPlayerDialog";
@@ -24,14 +24,14 @@ export default function PlayersPage() {
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
   const selectedGroup = useMemo(() => 
-    groups?.find((g: any) => g.id === selectedGroupId), 
+    groups?.find((g: Group) => g.id === selectedGroupId), 
     [groups, selectedGroupId]
   );
 
   // Filter Groups (Home View)
   const filteredGroups = useMemo(() => {
     if (!groups) return [];
-    return groups.filter((g: any) => 
+    return groups.filter((g: Group) => 
       g.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [groups, searchQuery]);
@@ -148,7 +148,7 @@ export default function PlayersPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
-              {filteredGroups.map((group: any) => (
+              {filteredGroups.map((group: Group) => (
                 <div 
                   key={group.id}
                   onClick={() => { setSelectedGroupId(group.id); setSearchQuery(""); }}
@@ -251,8 +251,6 @@ export default function PlayersPage() {
          <p className="text-[9px] font-black uppercase tracking-[0.5em] text-muted-foreground/50">Sistem Performa ADORA Basketball © {new Date().getFullYear()}</p>
          <div className="flex items-center gap-4 text-xs font-bold text-primary/50">
            <span>{groups?.length || 0} Kelompok Terdaftar</span>
-           <span className="size-1 rounded-full bg-border" />
-           <span>Live Management Engine v2.0</span>
          </div>
       </footer>
     </motion.div>

@@ -27,7 +27,7 @@ const statSchema = z.object({
   passing: z.coerce.number().min(0).max(100),
   stamina: z.coerce.number().min(0).max(100),
   attitude: z.coerce.number().min(0).max(100),
-  notes: z.string().optional(),
+  notes: z.string(),
 });
 
 type StatForm = z.infer<typeof statSchema>;
@@ -58,7 +58,7 @@ export function AddStatDialog({ player, date }: { player: Player; date: string }
           passing: data.passing,
           stamina: data.stamina,
           attitude: data.attitude,
-          notes: data.notes || ""
+          notes: data.notes
         }
       });
       reset();

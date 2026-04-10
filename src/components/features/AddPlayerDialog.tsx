@@ -6,10 +6,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAddPlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
+import { useParents } from "@/hooks/use-family";
 import { toast } from "sonner";
-import { useSession } from "next-auth/react";
 import { BatchPlayerUpload } from "@/components/features/BatchPlayerUpload";
-import { type UserSession } from "@/types/dashboard";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -36,15 +35,16 @@ const playerSchema = z.object({
   dateOfBirth: z.string().nonempty("TTL wajib diisi"),
   schoolOrigin: z.string().min(3, "Asal Sekolah minimal 3 karakter"),
   groupId: z.string().nonempty("Grup wajib dipilih"),
+  parentId: z.string().nonempty("Orang tua / wali wajib dipilih"),
 });
 
 type PlayerForm = z.infer<typeof playerSchema>;
 
 export function AddPlayerDialog() {
-  const { data: session } = useSession();
   const [open, setOpen] = useState(false);
   const [isBatchMode, setIsBatchMode] = useState(false);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const { data: parents, isLoading: isParentsLoading } = useParents();
   const { mutateAsync: addPlayer, isPending } = useAddPlayer();
 
   const { register, handleSubmit, setValue, formState: { errors }, reset } = useForm<PlayerForm>({
@@ -53,20 +53,10 @@ export function AddPlayerDialog() {
 
   const onSubmit = async (data: PlayerForm) => {
     try {
-      const userId = session?.user?.id;
-      if (!userId) {
-        throw new Error("Sesi tidak aktif. Silakan login kembali.");
-      }
-
-      // Kirim data ke MySQL via Server Action
-      await addPlayer({
-        ...data,
-        parentId: userId, 
-      });
-      
+      await addPlayer(data);
       reset();
       setOpen(false);
-      toast.success("Atlet baru berhasil didaftarkan ke MySQL!");
+      toast.success("Atlet baru berhasil didaftarkan!");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
       toast.error("Gagal menambahkan pemain: " + msg);
@@ -87,7 +77,7 @@ export function AddPlayerDialog() {
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase text-foreground tracking-widest">Registrasi Atlet Baru</DialogTitle>
           <DialogDescription className="text-sm font-medium tracking-wide">
-            Masukkan data atlet ke dalam database MySQL Adora.
+            Masukkan data atlet ke dalam database Adora.
           </DialogDescription>
         </DialogHeader>
 
@@ -120,7 +110,7 @@ export function AddPlayerDialog() {
 
             <div className="space-y-2">
                <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Grup Latihan (KU)</label>
-              <Select onValueChange={(val: string | null) => { if (val) setValue("groupId", val); }} disabled={isGroupsLoading}>
+              <Select onValueChange={(val) => { if (val) setValue("groupId", val as string); }} disabled={isGroupsLoading}>
                 <SelectTrigger className="h-11 rounded-xl bg-background/40">
                   <SelectValue placeholder={isGroupsLoading ? "Memuat..." : "Pilih Kelompok Umur"} />
                 </SelectTrigger>
@@ -133,6 +123,23 @@ export function AddPlayerDialog() {
                 </SelectContent>
               </Select>
               {errors.groupId && <p className="text-destructive text-xs">{errors.groupId.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+               <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Orang Tua / Wali</label>
+              <Select onValueChange={(val) => { if (val) setValue("parentId", val as string); }} disabled={isParentsLoading}>
+                <SelectTrigger className="h-11 rounded-xl bg-background/40">
+                  <SelectValue placeholder={isParentsLoading ? "Memuat..." : "Pilih Akun Orang Tua"} />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  {parents?.map((parent) => (
+                    <SelectItem key={parent.id} value={parent.id} className="font-medium text-sm">
+                      {parent.name || parent.username || parent.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {errors.parentId && <p className="text-destructive text-xs">{errors.parentId.message}</p>}
             </div>
 
             <div className="pt-6 flex flex-col gap-3">

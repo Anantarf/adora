@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { format, isSameDay } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
+import { useState, useMemo } from "react";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CalendarDays, MapPin, Clock, AlignLeft } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getEventConfig } from "@/lib/config/events";
 import { type ScheduleEvent } from "@/types/dashboard";
 
+/**
+ * ADORA Basketball - Public Schedule Component
+ * Displayed on the landing page for all potential members.
+ */
+
 type PublicEvent = {
   id: string;
   title: string;
   description: string | null;
-  date: Date;
+  date: string; // Keep as string to avoid TZ shifting in new Date()
   type: string;
   location: string | null;
 };
@@ -21,14 +24,19 @@ type PublicEvent = {
 export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[] }) {
   const [selectedEvent, setSelectedEvent] = useState<PublicEvent | null>(null);
 
-  // Convert dates string to Date objects
-  const events: PublicEvent[] = initialEvents.map(ev => ({
-    ...ev,
-    date: new Date(ev.date)
-  }));
-  
-  // Logic filter dipindah ke server (getPublicEventsAction), di sini hanya menampilkan apa yang ada.
-  const upcomingEvents = events;
+  // Use Intl to format for Jakarta (WIB) specifically, ignoring client timezone for the display text
+  const formatJakarta = useMemo(() => (iso: string, options: Intl.DateTimeFormatOptions) => {
+    try {
+      return new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        ...options
+      }).format(new Date(iso));
+    } catch {
+      return "—";
+    }
+  }, []);
+
+  const upcomingEvents = initialEvents as unknown as PublicEvent[];
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -51,7 +59,6 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                 onClick={() => setSelectedEvent(ev)}
                 className="group relative bg-[#111113] border border-primary/20 rounded-2xl p-6 text-left overflow-hidden transition-all hover:border-primary/50 hover:bg-primary/[0.02]"
               >
-                {/* Visual patterns */}
                 <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(212,175,55,0.1) 0px, rgba(212,175,55,0.1) 1px, transparent 1px, transparent 20px)" }} />
                 
                 <div className="relative z-10">
@@ -72,7 +79,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
 
                   <div className="flex flex-col gap-1">
                     <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">
-                       {format(ev.date, "d MMMM yyyy", { locale: idLocale })} • {format(ev.date, "HH:mm")} WIB
+                       {formatJakarta(ev.date, { day: 'numeric', month: 'long', year: 'numeric' })} • {formatJakarta(ev.date, { hour: '2-digit', minute: '2-digit', hour12: false })} WIB
                     </span>
                     {ev.location && (
                       <span className="text-[8px] font-medium text-white/20 uppercase tracking-widest truncate">
@@ -82,7 +89,6 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                   </div>
                 </div>
 
-                {/* Accent corner */}
                 <div className="absolute top-0 right-0 w-8 h-8 bg-primary/5 group-hover:bg-primary/20 transition-colors" style={{ clipPath: "polygon(100% 0, 0 0, 100% 100%)" }} />
               </motion.button>
             ))}
@@ -94,7 +100,6 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
         <DialogContent className="bg-[#0f0f11] border-primary/20 text-white sm:max-w-[400px] p-0 overflow-hidden">
           <div className="relative h-32 bg-primary flex items-center justify-center overflow-hidden">
-             {/* Abstract basketball pattern / lines */}
              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 10px)" }} />
              <div className="relative z-10 font-heading text-5xl md:text-6xl tracking-[0.2em] text-black/20 uppercase select-none">
                 {selectedEvent ? getEventConfig(selectedEvent.type).accent : ''}
@@ -121,7 +126,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Hari & Tanggal</div>
                     <div className="text-sm font-semibold text-white/80">
-                      {selectedEvent ? format(selectedEvent.date, "EEEE, dd MMMM yyyy", { locale: idLocale }) : ""}
+                      {selectedEvent ? formatJakarta(selectedEvent.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : ""}
                     </div>
                   </div>
                </div>
@@ -133,7 +138,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                   <div>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Waktu</div>
                     <div className="text-sm font-semibold text-white/80">
-                      {selectedEvent ? format(selectedEvent.date, "HH:mm", { locale: idLocale }) : ""} WIB
+                      {selectedEvent ? formatJakarta(selectedEvent.date, { hour: '2-digit', minute: '2-digit', hour12: false }) : ""} WIB
                     </div>
                   </div>
                </div>

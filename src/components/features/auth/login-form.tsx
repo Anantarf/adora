@@ -16,7 +16,9 @@ import {
   Loader2,
   ShieldCheck,
   AlertCircle,
-  Cone
+  Cone,
+  Eye,
+  EyeOff
 } from "lucide-react";
 
 const loginSchema = z.object({
@@ -28,6 +30,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const {
@@ -102,7 +105,7 @@ export function LoginForm() {
               {/* Username Input */}
               <div className="space-y-2">
                 <label className="text-[10px] font-medium text-white/40 uppercase tracking-[0.2em] ml-1">
-                  ID PENGGUNA / USERNAME
+                  USERNAME
                 </label>
                 <div className="relative group">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -112,7 +115,7 @@ export function LoginForm() {
                     {...register("username")}
                     type="text"
                     disabled={loading}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                     placeholder="Masukkan Username Anda"
                   />
                 </div>
@@ -132,11 +135,22 @@ export function LoginForm() {
                   </div>
                   <input
                     {...register("password")}
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     disabled={loading}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                     placeholder="••••••••"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white focus:outline-none transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="size-5" />
+                    ) : (
+                      <Eye className="size-5" />
+                    )}
+                  </button>
                 </div>
                 {errors.password && (
                   <p className="text-xs text-red-400 mt-1 ml-1">{errors.password.message}</p>
@@ -164,7 +178,7 @@ export function LoginForm() {
             {/* Footer Links */}
             <div className="text-center pt-2">
               <p className="text-white/30 text-xs font-medium">
-                Kendala akses? Hubungi IT Support Adora.
+                Kendala akses? Hubungi Admin Adora.
               </p>
             </div>
           </form>

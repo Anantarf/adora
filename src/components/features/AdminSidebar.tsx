@@ -23,6 +23,7 @@ const navItems = [
   { title: "Input Absensi", url: "/attendances", icon: CheckSquare },
   { title: "Input Penilaian", url: "/statistics", icon: LineChart },
   { title: "Sertifikat Digital", url: "/certificates", icon: FileBadge },
+  { title: "Manajemen Akun", url: "/users", icon: Users },
   { title: "Audit Log (Keamanan)", url: "/audit", icon: ShieldAlert },
 ];
 
@@ -38,7 +39,6 @@ export function AdminSidebar() {
               </div>
               <div className="flex flex-col gap-0.5 leading-none overflow-hidden group-data-[collapsible=icon]:hidden">
                 <span className="font-heading text-xl tracking-wider text-foreground">ADORA</span>
-                <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Master Admin</span>
               </div>
             </SidebarMenuButton>
           </SidebarMenuItem>

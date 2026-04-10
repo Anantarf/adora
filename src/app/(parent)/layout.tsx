@@ -1,17 +1,15 @@
 "use client";
 
-import { Cone, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Cone, LogOut, UserCircle } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { AuthGuard } from "@/components/providers/auth-guard";
+import Link from "next/link";
 
 /**
  * Layout Khusus Portal Orang Tua (Parent Portal)
  * Terintegrasi dengan MySQL Login (NextAuth) dan Proyeksi Bebas Supabase.
  */
 export default function ParentLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
-
   const handleSignOut = async () => {
     await signOut({ callbackUrl: "/" });
   };
@@ -33,6 +31,14 @@ export default function ParentLayout({ children }: { children: React.ReactNode }
           </div>
 
           <div className="flex items-center gap-6">
+             <Link 
+               href="/parent/profile"
+               className="group flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-muted-foreground hover:text-primary transition-all hover:bg-primary/5 px-4 py-2.5 rounded-xl uppercase border border-transparent hover:border-primary/20"
+             >
+               <span className="hidden sm:inline">Profil</span>
+               <div className="size-4 group-hover:scale-110 transition-transform"><UserCircle className="size-4" /></div>
+             </Link>
+
              <button 
                onClick={handleSignOut}
                className="group flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-muted-foreground hover:text-primary transition-all hover:bg-primary/5 px-4 py-2.5 rounded-xl uppercase border border-transparent hover:border-primary/20"

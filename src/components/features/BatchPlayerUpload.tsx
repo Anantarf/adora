@@ -1,34 +1,70 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Papa from "papaparse";
-import * as XLSX from "xlsx";
 import { useAddBatchPlayers } from "@/hooks/use-players";
-import { Button } from "@/components/ui/button";
+import { useParents } from "@/hooks/use-family";
 import { toast } from "sonner";
-import { Loader2, UploadCloud, FileSpreadsheet, FileType2 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { FileUp, Loader2, Info, FileSpreadsheet, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
-  const { data: session } = useSession();
   const { mutateAsync: addBatchPlayers } = useAddBatchPlayers();
+  const { data: parents, isLoading: isParentsLoading } = useParents();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [defaultParentId, setDefaultParentId] = useState<string>("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const processPayload = async (rows: any[]) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "text/csv") {
+      setSelectedFile(file);
+    } else if (file) {
+      toast.error("Hanya file .CSV yang diizinkan.");
+    }
+  };
+
+  const startUpload = () => {
+    if (!selectedFile) return toast.error("Pilih file CSV terlebih dahulu.");
+    if (!defaultParentId) return toast.error("Pilih akun Orang Tua / Wali sebagai default.");
+
+    setIsProcessing(true);
+    setProgress(10);
+
+    Papa.parse(selectedFile, {
+      header: true,
+      skipEmptyLines: true,
+      complete: async (results) => {
+        setProgress(30);
+        await processPayload(results.data as Record<string, string>[]);
+      },
+      error: (error) => {
+        toast.error("Gagal membaca file: " + error.message);
+        setIsProcessing(false);
+      },
+    });
+  };
+
+  const processPayload = async (rows: Record<string, string>[]) => {
     if (rows.length === 0) {
       setIsProcessing(false);
       return toast.error("File data kosong atau tidak terbaca.");
     }
 
-    setProgress(50);
-    
+    setProgress(60);
+
+    // Transform rows to match backend schema
     const payload = rows.map((row, i) => ({
       name: row.name || row.Name || row.NAMA || `Athlete ${i}`,
       dateOfBirth: row.dateOfBirth || row.DOB || row.BIRTHDATE || "2010-01-01",
       schoolOrigin: row.schoolOrigin || row.SCHOOL || row.SEKOLAH || "Private Enrollment",
-      groupId: row.groupId || row.GROUP_ID || row.GRUP || "", 
-      parentId: (session?.user as any)?.id ?? "",
+      groupId: row.groupId || row.GROUP_ID || row.GRUP || "",
+      parentId: row.parentId || row.PARENT_ID || defaultParentId,
     }));
 
     try {
@@ -36,88 +72,94 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
       setProgress(100);
       toast.success(`Berhasil! ${response?.count || payload.length} atlet telah diserap ke MySQL Adora.`);
       onDone();
-    } catch (error) {
-      toast.error("Gagal melakukan Bulk Insert. Cek format kolom Anda.");
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Cek format kolom Anda.";
+      toast.error("Gagal melakukan Bulk Insert: " + msg);
     } finally {
       setIsProcessing(false);
       setProgress(0);
     }
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const extension = file.name.split(".").pop()?.toLowerCase();
-    setIsProcessing(true);
-
-    if (extension === "csv") {
-      // Logic Parsing CSV (Existing)
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => processPayload(results.data),
-        error: () => {
-          toast.error("Gagal membaca file CSV");
-          setIsProcessing(false);
-        }
-      });
-    } else if (extension === "xlsx" || extension === "xls") {
-      // Logic Parsing Excel (New Feature)
-      const reader = new FileReader();
-      reader.onload = (evt) => {
-        try {
-          const bstr = evt.target?.result;
-          const wb = XLSX.read(bstr, { type: "binary" });
-          const wsname = wb.SheetNames[0]; // Ambil Sheet Pertama
-          const ws = wb.Sheets[wsname];
-          const data = XLSX.utils.sheet_to_json(ws);
-          processPayload(data);
-        } catch (err) {
-          toast.error("Format Excel tidak valid.");
-          setIsProcessing(false);
-        }
-      };
-      reader.readAsBinaryString(file);
-    } else {
-      toast.error("Hanya file .xlsx atau .csv yang didukung.");
-      setIsProcessing(false);
-    }
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center border-2 border-dashed border-primary/20 rounded-[2rem] p-10 bg-primary/[0.02] hover:bg-primary/[0.05] transition-all duration-500">
-      <div className="size-20 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mb-6 shadow-inner ring-1 ring-primary/20">
-        {isProcessing ? <Loader2 className="animate-spin size-10" /> : <FileSpreadsheet className="size-10" />}
-      </div>
-      
-      <div className="text-center space-y-2 mb-8">
-        <h3 className="text-foreground font-heading uppercase tracking-[0.3em] text-sm">
-          {isProcessing ? `Menyerap Data... ${progress}%` : "Drop Excel / CSV Batch"}
-        </h3>
-        <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold opacity-60">
-          Gunakan Header: name, dateOfBirth, schoolOrigin, groupId
-        </p>
-      </div>
-      
-      <div className="relative group/input">
-        <Button variant="outline" className="w-full relative z-10 pointer-events-none gap-3 h-14 px-8 rounded-2xl bg-background/50 border-primary/20 hover:border-primary group-hover/input:border-primary transition-all font-bold uppercase tracking-widest text-xs">
-           <FileType2 className="size-5 text-primary" /> Pilih File Spreadsheet
-        </Button>
-        <input 
-          type="file" 
-          accept=".xlsx,.xls,.csv"
-          disabled={isProcessing}
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
-          onChange={handleFileUpload}
-        />
+    <div className="space-y-6">
+      <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20 flex gap-3 items-start">
+        <Info className="size-5 text-primary shrink-0 mt-0.5" />
+        <div className="space-y-1">
+          <p className="text-[11px] font-bold uppercase tracking-wider text-primary">Panduan Format File</p>
+          <p className="text-[10px] text-muted-foreground leading-relaxed">
+            Pastikan file .csv memiliki header: <code className="text-primary font-bold">name, dateOfBirth, schoolOrigin, groupId</code>. Format tanggal: YYYY-MM-DD. Kolom parentId opsional.
+          </p>
+        </div>
       </div>
 
-      <div className="mt-8 p-4 rounded-xl bg-secondary/50 border border-white/5 flex gap-3 items-start">
-         <div className="size-2 rounded-full bg-primary mt-1.5 animate-pulse" />
-         <p className="text-[9px] text-white/40 leading-relaxed uppercase font-black tracking-widest text-left">
-           Sistem akan mendeteksi otomatis data pada Sheet pertama dan melakukan pembersihan entitas sebelum disimpan ke MySQL.
-         </p>
+      <div className="space-y-2">
+        <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Default Orang Tua / Wali</label>
+        <Select value={defaultParentId} onValueChange={(val) => setDefaultParentId(val || "")} disabled={isParentsLoading || isProcessing}>
+          <SelectTrigger className="h-11 rounded-xl bg-background/40">
+            <SelectValue placeholder={isParentsLoading ? "Memuat..." : "Pilih Akun Penanggung Jawab"} />
+          </SelectTrigger>
+          <SelectContent className="rounded-xl">
+            {parents?.map((parent) => (
+              <SelectItem key={parent.id} value={parent.id} className="font-medium text-sm">
+                {parent.name || parent.username || parent.id}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-4">
+        {!selectedFile ? (
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="border-2 border-dashed border-border/40 rounded-[2rem] p-12 
+            flex flex-col items-center justify-center gap-4 cursor-pointer
+            transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 group"
+          >
+            <input type="file" ref={fileInputRef} className="hidden" accept=".csv" onChange={handleFileChange} />
+            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+              <FileUp className="size-8" />
+            </div>
+            <div className="text-center">
+              <h4 className="font-heading text-sm uppercase tracking-widest text-foreground">Pilih File CSV</h4>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase opacity-60">Baris data tidak terbatas</p>
+            </div>
+          </div>
+        ) : (
+          <div className="glass-card p-6 rounded-2xl flex items-center justify-between animate-in zoom-in-95 duration-200">
+            <div className="flex items-center gap-4">
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                <FileSpreadsheet className="size-6" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold truncate max-w-[200px]">{selectedFile.name}</h4>
+                <p className="text-[10px] text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="icon" onClick={() => setSelectedFile(null)} disabled={isProcessing} className="hover:text-destructive">
+              <X className="size-4" />
+            </Button>
+          </div>
+        )}
+
+        {isProcessing && (
+          <div className="space-y-3">
+            <Progress value={progress} className="h-1.5" />
+            <div className="flex items-center justify-center gap-2 text-primary">
+              <Loader2 className="size-4 animate-spin" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Sinkronisasi {progress}%</span>
+            </div>
+          </div>
+        )}
+
+        <Button
+          className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-[0.3em] text-xs shadow-xl shadow-primary/20 rounded-2xl"
+          onClick={startUpload}
+          disabled={!selectedFile || isProcessing}
+        >
+          {isProcessing ? "Mohon Tunggu..." : "Mulai Unggah & Sinkron"}
+        </Button>
       </div>
     </div>
   );

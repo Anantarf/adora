@@ -6,7 +6,7 @@ import { usePlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 import { useAddAttendances, useAttendances } from "@/hooks/use-attendances";
 import { toast } from "sonner";
-import { getJakartaToday } from "@/lib/date-utils";
+import { getJakartaToday, toYYYYMMDD } from "@/lib/date-utils";
 import { AttendanceStatus, Player } from "@/types/dashboard";
 
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ import {
 export default function AttendancesPage() {
   const [activeGroup, setActiveGroup] = useState<string>("all");
   // Jakarta Midnight Date Sync
-  const [date, setDate] = useState<string>(getJakartaToday().toISOString().split("T")[0]);
+  const [date, setDate] = useState<string>(toYYYYMMDD(getJakartaToday()));
   const [batchStatus, setBatchStatus] = useState<Record<string, AttendanceStatus>>({});
 
   const { data: groups } = useGroups();
@@ -38,17 +38,12 @@ export default function AttendancesPage() {
   const { mutateAsync: sendBatch, isPending } = useAddAttendances();
   const { data: existingAttendances } = useAttendances(date);
 
-  // Sync state data from DB when date or data changes
+  // Sync DB data into editable local state when date/query changes
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
-    if (existingAttendances) {
-      const preloaded: Record<string, AttendanceStatus> = {};
-      existingAttendances.forEach((att) => {
-        preloaded[att.playerId] = att.status as AttendanceStatus;
-      });
-      setBatchStatus(preloaded);
-    } else {
-      setBatchStatus({});
-    }
+    setBatchStatus(
+      Object.fromEntries(existingAttendances?.map(a => [a.playerId, a.status]) ?? [])
+    );
   }, [existingAttendances]);
 
   const handleStatusChange = (playerId: string, status: AttendanceStatus) => {

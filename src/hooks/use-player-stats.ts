@@ -2,12 +2,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { getPlayerStatsAction } from "@/actions/stats";
 
+export type MetricsJson = {
+  shooting: number;
+  dribbling: number;
+  passing: number;
+  stamina: number;
+  attitude: number;
+  notes?: string;
+};
+
 export type PlayerStatRecord = {
   id: string;
   date: Date;
   status: string;
-  metricsJson: any; // Prisma stores Json as field
-  evaluatorId: string;
+  metricsJson: MetricsJson;
+  playerId: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // Hook (GET): Tarik data evaluasi rapor pemain via Server Action MySQL

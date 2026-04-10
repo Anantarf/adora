@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { FileBadge, Loader2, Trash2, ExternalLink, Users, User } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";

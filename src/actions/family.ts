@@ -26,3 +26,12 @@ export async function getFamilyPlayersAction() {
     orderBy: { createdAt: "asc" },
   });
 }
+export async function getParentsAction() {
+  const { requireAdmin } = await import("@/lib/server-auth");
+  await requireAdmin();
+  return await prisma.user.findMany({
+    where: { role: "PARENT" },
+    select: { id: true, name: true, username: true },
+    orderBy: { name: "asc" }
+  });
+}

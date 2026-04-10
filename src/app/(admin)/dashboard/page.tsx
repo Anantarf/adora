@@ -1,7 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Card } from "@/components/ui/card";
 import { useSchedule } from "@/hooks/use-schedule";
 import { 
   CalendarDays, 
@@ -11,11 +10,11 @@ import {
   CheckSquare,
   MapPin
 } from "lucide-react";
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { getEventConfig, EVENT_TYPES } from "@/lib/config/events";
 import { getJakartaToday, getCountdownLabel } from "@/lib/date-utils";
-import { type ScheduleEvent, type UserSession } from "@/types/dashboard";
+import { type ScheduleEvent } from "@/types/dashboard";
 
 // Dynamic import for Heavy Calendar component
 const CalendarView = dynamic(
@@ -87,13 +86,9 @@ function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
   const { data: scheduleData } = useSchedule();
-  const [liveDate, setLiveDate] = useState("");
-
-  useEffect(() => {
-    setLiveDate(new Intl.DateTimeFormat("id-ID", {
-      weekday: "long", day: "numeric", month: "long", year: "numeric",
-    }).format(new Date()));
-  }, []);
+  const [liveDate] = useState(() => new Intl.DateTimeFormat("id-ID", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  }).format(new Date()));
 
   const mappedEvents = useMemo(() => scheduleData?.map((ev) => {
     const cfg = getEventConfig(ev.type);
@@ -118,8 +113,8 @@ export default function AdminDashboardPage() {
 
   // Clean helper for user display name
   const getUserDisplayName = () => {
-    const role = (session as unknown as UserSession)?.user?.role;
-    const username = (session as unknown as UserSession)?.user?.username;
+    const role = session?.user?.role;
+    const username = session?.user?.username;
     return role === "ADMIN" ? "SUPERADMIN" : (username || "ADMIN");
   };
 

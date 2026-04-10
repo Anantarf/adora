@@ -1,4 +1,4 @@
-import { Cone, Swords, Trophy, AlertCircle, CalendarDays, LucideIcon, CheckSquare } from "lucide-react";
+import { Cone, Swords, Trophy, CalendarDays, LucideIcon, CheckSquare } from "lucide-react";
 
 export type EventTypeKey = "LATIHAN" | "PERTANDINGAN" | "SPARING" | "EVALUASI" | "KHUSUS";
 

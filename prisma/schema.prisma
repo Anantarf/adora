@@ -47,6 +47,7 @@ model auditlog {
   user        user?    @relation(fields: [userId], references: [id], map: "AuditLog_userId_fkey")
 
   @@index([userId], map: "AuditLog_userId_fkey")
+  @@index([timestamp])
 }
 
 model certificate {
@@ -76,6 +77,7 @@ model event {
   group       group?   @relation(fields: [groupId], references: [id], map: "Event_groupId_fkey")
 
   @@index([groupId], map: "Event_groupId_fkey")
+  @@index([date])
 }
 
 model group {
@@ -130,6 +132,7 @@ model statistic {
   player      player   @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
 
   @@unique([playerId, date], map: "Statistic_playerId_date_key")
+  @@index([status])
 }
 
 model user {

@@ -1,36 +1,43 @@
 /**
  * ADORA Basketball - Global Date Service (WIB Focus)
  * Ensures consistent time handling between Node.js server and Browser.
+ * All dates stored as midnight Jakarta (00:00:00+07:00) for cross-server consistency.
  */
-
-// WIB is UTC+7
-const WIB_OFFSET = 7;
 
 /**
  * Returns a normalized Date object set to 00:00:00 Jakarta time (WIB).
+ * Uses explicit +07:00 offset to guarantee consistency across server timezones.
  */
 export function getJakartaToday(): Date {
-  const now = new Date();
-  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const wib = new Date(utc + (3600000 * WIB_OFFSET));
-  wib.setHours(0, 0, 0, 0);
-  return wib;
+  const todayWIB = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
+  return new Date(`${todayWIB}T00:00:00+07:00`);
 }
 
 /**
- * Robust conversion to Jakarta Date at Midnight.
+ * Robust conversion to Jakarta Date at Midnight (00:00:00+07:00).
+ * Uses sv-SE locale to get YYYY-MM-DD in Jakarta timezone, then
+ * constructs an explicit offset string to avoid local-TZ ambiguity.
  */
 export function toJakartaDate(date?: string | Date | number): Date {
   if (!date) return getJakartaToday();
   const d = new Date(date);
-  
-  // Use toLocaleString for safe TZ conversion then reset time
-  const jakartaStr = d.toLocaleString("en-US", { timeZone: "Asia/Jakarta" });
-  const jakartaDate = new Date(jakartaStr);
-  jakartaDate.setHours(0, 0, 0, 0);
-  
-  return jakartaDate;
+
+  if (isNaN(d.getTime())) {
+    throw new Error("Format tanggal tidak valid.");
+  }
+
+  const jakartaDateStr = d.toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
+  return new Date(`${jakartaDateStr}T00:00:00+07:00`);
 }
+/**
+ * Convert Date to YYYY-MM-DD string adjusted for Jakarta Timezeone,
+ * preventing UTC boundary shifting.
+ */
+export function toYYYYMMDD(date: Date | string): string {
+  const d = new Date(date);
+  return d.toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
+}
+
 
 /**
  * Generates human-friendly relative dates (Today, Tomorrow, X days left).
@@ -68,4 +75,13 @@ export function getAge(dateOfBirth: Date | string): number {
     age--;
   }
   return age;
+}
+
+/**
+ * Combine a Date object and a time string (HH:mm) into a ISO string.
+ * Resulting string is in Jakarta offset (+07:00).
+ */
+export function combineDateAndTime(date: Date, time: string): string {
+  const yyyymmdd = date.toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
+  return `${yyyymmdd}T${time}:00+07:00`;
 }

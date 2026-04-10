@@ -4,10 +4,11 @@ import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
+import { EventInput } from "@fullcalendar/core";
 import { getEventConfig } from "@/lib/config/events";
 
 interface CalendarViewProps {
-  events: any[];
+  events: EventInput[];
 }
 
 export function CalendarView({ events }: CalendarViewProps) {
