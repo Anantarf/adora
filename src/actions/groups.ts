@@ -6,6 +6,12 @@ import { requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import crypto from "crypto";
 
+// ─── Helper: Build group update data ────────────────────────────────────────
+const buildGroupUpdateData = (data: { name?: string; description?: string | undefined }) =>
+  Object.fromEntries(
+    Object.entries(data).filter(([_, v]) => v !== undefined)
+  );
+
 export async function getGroupsAction() {
   await requireAdmin();
   try {
@@ -55,10 +61,7 @@ export async function updateGroupAction(id: string, data: { name?: string; descr
     const updated = await prisma.$transaction(async (tx) => {
       const g = await tx.group.update({
         where: { id },
-        data: {
-          ...(data.name ? { name: data.name } : {}),
-          ...(data.description !== undefined ? { description: data.description } : {}),
-        },
+        data: buildGroupUpdateData(data),
       });
 
       await createAuditLog(tx, "UPDATE", "group", g.id);

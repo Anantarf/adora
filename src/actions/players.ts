@@ -7,6 +7,18 @@ import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import crypto from "crypto";
 
+// ─── Helper: Build update object only with provided fields ────────────────
+const buildPlayerUpdateData = (data: {
+  name?: string;
+  dateOfBirth?: string;
+  schoolOrigin?: string | undefined;
+  groupId?: string;
+}) => Object.fromEntries(
+  Object.entries(data)
+    .filter(([_, v]) => v !== undefined)
+    .map(([k, v]) => [k, k === "dateOfBirth" ? toJakartaDate(v as string) : v])
+);
+
 // 1. Ambil semua pemain (Read)
 export async function getPlayersAction(groupId?: string) {
   await requireAdmin();
@@ -100,12 +112,7 @@ export async function updatePlayerAction(id: string, data: {
   const updated = await prisma.$transaction(async (tx) => {
     const res = await tx.player.update({
       where: { id },
-      data: {
-        ...(data.name ? { name: data.name } : {}),
-        ...(data.dateOfBirth ? { dateOfBirth: toJakartaDate(data.dateOfBirth) } : {}),
-        ...(data.schoolOrigin !== undefined ? { schoolOrigin: data.schoolOrigin } : {}),
-        ...(data.groupId ? { groupId: data.groupId } : {}),
-      },
+      data: buildPlayerUpdateData(data),
     });
 
     await createAuditLog(tx, "UPDATE", "player", res.id);

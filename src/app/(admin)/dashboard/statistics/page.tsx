@@ -36,18 +36,20 @@ export default function StatisticsPage() {
   const playersByGroup = useMemo(() => {
     if (!players || !groups) return [];
 
-    const grouped = players.reduce((acc, player) => {
-      const groupId = player.groupId || "ungrouped";
-      if (!acc[groupId]) acc[groupId] = [];
-      acc[groupId].push(player);
-      return acc;
-    }, {} as Record<string, Player[]>);
+    // Group players by groupId
+    const grouped = players.reduce(
+      (acc, player) => {
+        const groupId = player.groupId || null;
+        return { ...acc, [groupId || "null"]: [...(acc[groupId || "null"] || []), player] };
+      },
+      {} as Record<string, Player[]>
+    );
 
-    return groups.map(group => ({
-      group,
-      players: grouped[group.id] || []
-    })).filter(g => g.players.length > 0 || activeGroup === "all");
-  }, [players, groups, activeGroup]);
+    // Map groups to players, filtering empty groups
+    return groups
+      .map(group => ({ group, players: grouped[group.id] || [] }))
+      .filter(g => g.players.length > 0);
+  }, [players, groups]);
 
   return (
     <div className="flex flex-col gap-6 w-full">

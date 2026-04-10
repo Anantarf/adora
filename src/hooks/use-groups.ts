@@ -25,9 +25,7 @@ export const useAddGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (newGroup: { name: string; description?: string }) => {
-      return await addGroupAction(newGroup);
-    },
+    mutationFn: addGroupAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
@@ -39,9 +37,8 @@ export const useUpdateGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: { name?: string; description?: string } }) => {
-      return await updateGroupAction(id, data);
-    },
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; description?: string } }) =>
+      updateGroupAction(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
@@ -53,9 +50,7 @@ export const useDeleteGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      return await deleteGroupAction(id);
-    },
+    mutationFn: deleteGroupAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },

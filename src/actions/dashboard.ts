@@ -10,6 +10,16 @@ import { AttendanceStatus } from "@/types/dashboard";
  * Updated to Senior Standards: Dynamic Metrics & Soft-Delete Safe.
  */
 
+// ─── Constants ──────────────────────────────────────────────────────────────
+const ATTENDANCE_LOOKBACK_DAYS = 30;
+const TREND_STATS_SAMPLE_SIZE = 200;
+const ATTENDANCE_STATUSES = ["HADIR", "IZIN", "SAKIT", "ALPA"] as const;
+
+// Initialize default attendance counts
+const DEFAULT_ATTENDANCE_COUNTS = Object.fromEntries(
+  ATTENDANCE_STATUSES.map(status => [status, 0])
+);
+
 export type DashboardMetrics = {
   playerCount: number;
   groupCount: number;
@@ -36,66 +46,74 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
 
     // Optimized Attendance Rate Calculation
     // Calculate 30 days ago in Jakarta time, preserving timezone offset
-    const thirtyDaysAgoMs = getJakartaToday().getTime() - 30 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgoMs = getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
     const thirtyDaysAgo = toJakartaDate(new Date(thirtyDaysAgoMs).toISOString().split('T')[0]);
 
     const attendanceStats = await prisma.attendance.groupBy({
       by: ['status'],
-      where: { 
+      where: {
         date: { gte: thirtyDaysAgo },
-        player: { isDeleted: false } 
+        player: { isDeleted: false }
       },
       _count: true
     });
 
-    let totalAttendances = 0;
-    let hadirCount = 0;
+    const attendanceCounts = attendanceStats.reduce(
+      (acc, stat) => ({ ...acc, [stat.status]: stat._count }),
+      { ...DEFAULT_ATTENDANCE_COUNTS }
+    );
 
-    attendanceStats.forEach(stat => {
-      totalAttendances += stat._count;
-      if (stat.status === "HADIR") hadirCount = stat._count;
-    });
+    const totalAttendances = Object.values(attendanceCounts).reduce((sum, count) => sum + count, 0);
+    const hadirCount = attendanceCounts["HADIR"] || 0;
 
-    const attendanceRate = totalAttendances > 0 
-      ? Math.round((hadirCount / totalAttendances) * 100) 
+    const attendanceRate = totalAttendances > 0
+      ? Math.round((hadirCount / totalAttendances) * 100)
       : 0;
 
     // Optimized Dynamic Trend Calculation
     const stats = await prisma.statistic.findMany({
-       where: { 
-         status: "Published",
-         player: { isDeleted: false }
-       },
-       orderBy: { date: "desc" },
-       take: 200,
-       select: { date: true, metricsJson: true }
+      where: {
+        status: "Published",
+        player: { isDeleted: false }
+      },
+      orderBy: { date: "desc" },
+      take: TREND_STATS_SAMPLE_SIZE,
+      select: { date: true, metricsJson: true }
     });
 
-    stats.reverse();
+    // Format month label with explicit locale
+    const formatMonth = (date: Date): string => {
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      return monthNames[date.getMonth()];
+    };
 
-    const trendMap = new Map<string, { sum: number; count: number }>();
-    
-    stats.forEach(s => {
-       const month = s.date.toLocaleDateString("id-ID", { month: "short" });
-       try {
-         const metrics = JSON.parse(s.metricsJson as string);
-         const values = Object.values(metrics).filter(v => typeof v === "number") as number[];
-         
-         if (values.length > 0) {
-            const avg = values.reduce((a, b) => a + b, 0) / values.length;
-            if (!trendMap.has(month)) trendMap.set(month, { sum: 0, count: 0 });
-            const entry = trendMap.get(month)!;
-            entry.sum += avg;
-            entry.count += 1;
-         }
-       } catch (e) {
-         // Silently fail on malformed JSON
-       }
-    });
+    // Parse metrics safely and extract numeric values
+    const parseMetrics = (metricsJson: string): number[] => {
+      try {
+        const metrics = JSON.parse(metricsJson);
+        return Object.values(metrics).filter((v): v is number => typeof v === "number");
+      } catch {
+        return [];
+      }
+    };
+
+    // Build trend map using reduce
+    const trendMap = stats.reverse().reduce((acc, s) => {
+      const month = formatMonth(s.date);
+      const values = parseMetrics(s.metricsJson as string);
+
+      if (values.length > 0) {
+        const avg = values.reduce((a, b) => a + b, 0) / values.length;
+        const existing = acc.get(month) || { sum: 0, count: 0 };
+        acc.set(month, { sum: existing.sum + avg, count: existing.count + 1 });
+      }
+
+      return acc;
+    }, new Map<string, { sum: number; count: number }>());
 
     const performanceTrend = Array.from(trendMap.entries()).map(([name, data]) => ({
-       name,
-       val: data.count > 0 ? Math.round(data.sum / data.count) : 0
+      name,
+      val: data.count > 0 ? Math.round(data.sum / data.count) : 0
     }));
 
     return {
@@ -103,10 +121,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       groupCount,
       publishedStatsCount,
       attendanceRate,
-      performanceTrend: performanceTrend.length > 0 ? performanceTrend : [
-          { name: "Siklus 1", val: 0 },
-          { name: "Siklus 2", val: 0 }
-      ],
+      performanceTrend,
     };
   } catch (error) {
     console.error("[DASHBOARD_METRICS_ERROR]:", error);

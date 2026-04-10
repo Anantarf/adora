@@ -2,6 +2,14 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Loader2, CheckSquare, CalendarDays, LayoutList as SelectIcon } from "lucide-react";
+
+// ─── Constants ──────────────────────────────────────────────────────────────
+const ATTENDANCE_STATUSES = {
+  HADIR: "HADIR",
+  IZIN: "IZIN",
+  SAKIT: "SAKIT",
+  ALPA: "ALPA",
+} as const;
 import { usePlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 import { useAddAttendances, useAttendances } from "@/hooks/use-attendances";
@@ -52,13 +60,9 @@ export default function AttendancesPage() {
 
   const handleMarkAll = (status: AttendanceStatus) => {
     if (!players) return;
-    const updated: Record<string, AttendanceStatus> = { ...batchStatus };
-    players.forEach((p) => {
-      updated[p.id] = status;
-    });
+    const updated = Object.fromEntries(players.map(p => [p.id, status]));
     setBatchStatus(updated);
-    const label = status === "HADIR" ? "HADIR" : status === "IZIN" ? "IZIN" : status === "SAKIT" ? "SAKIT" : "ALPA";
-    toast.info(`Semua ditandai sebagai ${label}.`);
+    toast.info(`Semua ditandai sebagai ${status}.`);
   };
 
   const handleBatchSubmit = async () => {
@@ -94,13 +98,14 @@ export default function AttendancesPage() {
   };
 
   const statsCount = useMemo(() => {
-    if (!players) return { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
-    const counts = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
-    players.forEach((p) => {
-      const s = batchStatus[p.id] || "HADIR";
-      counts[s]++;
-    });
-    return counts;
+    if (!players) return Object.fromEntries(Object.keys(ATTENDANCE_STATUSES).map(s => [s, 0]));
+    return players.reduce(
+      (acc, p) => {
+        const status = (batchStatus[p.id] || "HADIR") as AttendanceStatus;
+        return { ...acc, [status]: (acc[status] || 0) + 1 };
+      },
+      Object.fromEntries(Object.keys(ATTENDANCE_STATUSES).map(s => [s, 0]))
+    );
   }, [players, batchStatus]);
 
   return (
