@@ -35,8 +35,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
     ]);
 
     // Optimized Attendance Rate Calculation
-    const thirtyDaysAgo = getJakartaToday();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const thirtyDaysAgo = new Date(getJakartaToday().getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const attendanceStats = await prisma.attendance.groupBy({
       by: ['status'],
@@ -124,17 +123,13 @@ export async function getAttendancesAction(date: string, groupId?: string) {
      await requireAdmin();
      const targetDate = toJakartaDate(date);
      
-     const where: any = { 
+     const where = {
        date: targetDate,
-       player: { isDeleted: false }
+       player: {
+         isDeleted: false,
+         ...(groupId && groupId !== "all" ? { groupId } : {}),
+       },
      };
-     
-     if (groupId && groupId !== "all") {
-       where.player = {
-         ...where.player,
-         groupId: groupId
-       };
-     }
 
      return await prisma.attendance.findMany({
        where,

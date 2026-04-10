@@ -97,7 +97,7 @@ export async function getPlayerStatsAction(playerId: string) {
   // Jika parent, pastikan dia hanya bisa menarik data anaknya sendiri
   if (userRole === "PARENT") {
     const parentOwnsChild = await prisma.player.findFirst({
-      where: { id: playerId, parentId: userId }
+      where: { id: playerId, parentId: userId, isDeleted: false }
     });
     if (!parentOwnsChild) {
       throw new Error("Akses Terlarang: Anda tidak diizinkan melihat evaluasi anak dari keluarga lain.");
@@ -105,13 +105,16 @@ export async function getPlayerStatsAction(playerId: string) {
   }
 
   const stats = await prisma.statistic.findMany({
-    where: { playerId },
+    where: { playerId, player: { isDeleted: false } },
     orderBy: { date: "desc" },
   });
 
-  // Type-safe transform: Parse metricsJson
-  return stats.map(s => ({
-    ...s,
-    metricsJson: JSON.parse(s.metricsJson as string)
-  }));
+  // Type-safe transform: Parse metricsJson with fallback
+  return stats.map(s => {
+    try {
+      return { ...s, metricsJson: JSON.parse(s.metricsJson as string) };
+    } catch {
+      return { ...s, metricsJson: {} };
+    }
+  });
 }

@@ -12,7 +12,11 @@ export async function getGroupsAction() {
     return await prisma.group.findMany({
       orderBy: { name: "asc" },
       include: {
-        _count: { select: { player: true } }
+        _count: {
+          select: {
+            player: { where: { isDeleted: false } }
+          }
+        }
       }
     });
   } catch (error) {
