@@ -98,13 +98,13 @@ model player {
   photoUrl     String?
   isDeleted    Boolean       @default(false)
   groupId      String?
-  parentId     String
+  parentId     String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime
   attendance   attendance[]
   certificate  certificate[]
   group        group?        @relation(fields: [groupId], references: [id], map: "Player_groupId_fkey")
-  user         user          @relation(fields: [parentId], references: [id], onDelete: Cascade, map: "Player_parentId_fkey")
+  user         user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
   statistic    statistic[]
 
   @@index([groupId], map: "Player_groupId_idx")

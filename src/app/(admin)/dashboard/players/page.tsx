@@ -11,12 +11,16 @@ import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { EditPlayerDialog } from "@/components/features/EditPlayerDialog";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
 import { AddGroupDialog } from "@/components/features/AddGroupDialog";
+import { EditGroupDialog } from "@/components/features/EditGroupDialog";
+import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function PlayersPage() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
+  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState<Group | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
 
@@ -54,18 +58,32 @@ export default function PlayersPage() {
       className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-20"
     >
       {/* Modals Manager */}
+      {editingGroup && (
+        <EditGroupDialog
+          group={editingGroup}
+          open={!!editingGroup}
+          onOpenChange={(open) => !open && setEditingGroup(null)}
+        />
+      )}
+      {deletingGroup && (
+        <DeleteGroupConfirm
+          group={deletingGroup}
+          open={!!deletingGroup}
+          onOpenChange={(open) => !open && setDeletingGroup(null)}
+        />
+      )}
       {editingPlayer && (
-        <EditPlayerDialog 
-            player={editingPlayer} 
-            open={!!editingPlayer} 
-            onOpenChange={(open) => !open && setEditingPlayer(null)} 
+        <EditPlayerDialog
+            player={editingPlayer}
+            open={!!editingPlayer}
+            onOpenChange={(open) => !open && setEditingPlayer(null)}
         />
       )}
       {deletingPlayer && (
-        <DeletePlayerConfirm 
-            player={deletingPlayer} 
-            open={!!deletingPlayer} 
-            onOpenChange={(open) => !open && setDeletingPlayer(null)} 
+        <DeletePlayerConfirm
+            player={deletingPlayer}
+            open={!!deletingPlayer}
+            onOpenChange={(open) => !open && setDeletingPlayer(null)}
         />
       )}
 
@@ -149,13 +167,39 @@ export default function PlayersPage() {
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {filteredGroups.map((group: Group) => (
-                <div 
+                <div
                   key={group.id}
                   onClick={() => { setSelectedGroupId(group.id); setSearchQuery(""); }}
                   className="group relative bg-[#111113] border border-primary/20 rounded-[2.5rem] p-10 cursor-pointer overflow-hidden transition-all duration-500 hover:border-primary/60 hover:bg-primary/[0.03] hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
                 >
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[5rem] transition-all group-hover:bg-primary/10 group-hover:scale-110 duration-700" />
-                  
+
+                  {/* Action Buttons */}
+                  <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-9 rounded-lg hover:bg-primary/20 hover:text-primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingGroup(group);
+                      }}
+                    >
+                      <Edit2 className="size-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="size-9 rounded-lg hover:bg-destructive/10 hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDeletingGroup(group);
+                      }}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
+
                   <div className="relative z-10 space-y-6">
                     <div className="flex items-center justify-between">
                       <div className="size-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">

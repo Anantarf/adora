@@ -7,7 +7,6 @@ import { z } from "zod";
 import { useUpdatePlayer } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups } from "@/hooks/use-groups";
-import { useParents } from "@/hooks/use-family";
 import { toast } from "sonner";
 import { toYYYYMMDD } from "@/lib/date-utils";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,6 @@ const playerSchema = z.object({
   dateOfBirth: z.string().nonempty("TTL wajib diisi"),
   schoolOrigin: z.string().min(3, "Asal Sekolah minimal 3 karakter"),
   groupId: z.string().nonempty("Grup wajib dipilih"),
-  parentId: z.string().nonempty("Orang tua / wali wajib dipilih"),
 });
 
 type PlayerForm = z.infer<typeof playerSchema>;
@@ -47,7 +45,6 @@ interface EditPlayerDialogProps {
 
 export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialogProps) {
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
-  const { data: parents, isLoading: isParentsLoading } = useParents();
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
   const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<PlayerForm>({
@@ -57,12 +54,10 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
       dateOfBirth: toYYYYMMDD(player.dateOfBirth),
       schoolOrigin: player.schoolOrigin || "",
       groupId: player.groupId || "",
-      parentId: player.parentId || "",
     }
   });
 
   const watchedGroupId = watch("groupId");
-  const watchedParentId = watch("parentId");
 
   // Reset form when player or open state changes
   useEffect(() => {
@@ -72,7 +67,6 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
         dateOfBirth: toYYYYMMDD(player.dateOfBirth),
         schoolOrigin: player.schoolOrigin || "",
         groupId: player.groupId || "",
-        parentId: player.parentId || "",
       });
     }
   }, [player, open, reset]);
@@ -147,29 +141,6 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
               </SelectContent>
             </Select>
             {errors.groupId && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.groupId.message}</p>}
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Orang Tua / Wali</label>
-            <Select 
-              value={watchedParentId} 
-              onValueChange={(val) => {
-                if (val) setValue("parentId", val);
-              }}
-              disabled={isParentsLoading}
-            >
-              <SelectTrigger className="h-11 bg-background/50">
-                <SelectValue placeholder="Pilih Orang Tua" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl">
-                {parents?.map((parent) => (
-                  <SelectItem key={parent.id} value={parent.id} className="font-medium text-sm">
-                    {parent.name || parent.username || parent.id}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {errors.parentId && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.parentId.message}</p>}
           </div>
 
           <div className="pt-6 flex gap-3">

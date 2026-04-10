@@ -30,7 +30,7 @@ export async function addPlayerAction(data: {
   dateOfBirth: string;
   schoolOrigin?: string;
   groupId: string;
-  parentId: string;
+  parentId?: string;
 }) {
   await requireAdmin();
   const player = await prisma.$transaction(async (tx) => {
@@ -39,9 +39,9 @@ export async function addPlayerAction(data: {
         id: crypto.randomUUID(),
         name: data.name,
         dateOfBirth: toJakartaDate(data.dateOfBirth),
-        schoolOrigin: data.schoolOrigin,
+        schoolOrigin: data.schoolOrigin || undefined,
         groupId: data.groupId,
-        parentId: data.parentId,
+        parentId: data.parentId || undefined,
         updatedAt: new Date(),
       },
     });
@@ -60,17 +60,17 @@ export async function addBatchPlayersAction(playersData: Array<{
   dateOfBirth: string;
   schoolOrigin?: string;
   groupId: string;
-  parentId: string;
+  parentId?: string;
 }>) {
   await requireAdmin();
-  
+
   const formattedData = playersData.map((data) => ({
     id: crypto.randomUUID(),
     name: data.name,
     dateOfBirth: toJakartaDate(data.dateOfBirth),
-    schoolOrigin: data.schoolOrigin || null,
+    schoolOrigin: data.schoolOrigin || undefined,
     groupId: data.groupId,
-    parentId: data.parentId,
+    parentId: data.parentId || undefined,
     updatedAt: new Date(),
   }));
 
@@ -94,10 +94,9 @@ export async function updatePlayerAction(id: string, data: {
   dateOfBirth?: string;
   schoolOrigin?: string;
   groupId?: string;
-  parentId?: string;
 }) {
   await requireAdmin();
-  
+
   const updated = await prisma.$transaction(async (tx) => {
     const res = await tx.player.update({
       where: { id },
@@ -106,7 +105,6 @@ export async function updatePlayerAction(id: string, data: {
         ...(data.dateOfBirth ? { dateOfBirth: toJakartaDate(data.dateOfBirth) } : {}),
         ...(data.schoolOrigin !== undefined ? { schoolOrigin: data.schoolOrigin } : {}),
         ...(data.groupId ? { groupId: data.groupId } : {}),
-        ...(data.parentId ? { parentId: data.parentId } : {}),
       },
     });
 
