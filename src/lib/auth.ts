@@ -23,30 +23,35 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Izin akses gagal: Identitas login belum lengkap.");
         }
 
-        const user = await prisma.user.findUnique({
-          where: { username: credentials.username },
-        });
+        try {
+          const user = await prisma.user.findUnique({
+            where: { username: credentials.username },
+          });
 
-        if (!user || !user.password) {
-          throw new Error("Identitas ditolak: Akun tidak ditemukan.");
+          if (!user || !user.password) {
+            throw new Error("Identitas ditolak: Akun tidak ditemukan.");
+          }
+
+          const isPasswordCorrect = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isPasswordCorrect) {
+            throw new Error("Identitas ditolak: Sandi tidak cocok.");
+          }
+
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            username: user.username,
+          };
+        } catch (error) {
+          const msg = error instanceof Error ? error.message : "Terjadi kesalahan saat verifikasi.";
+          throw new Error(msg);
         }
-
-        const isPasswordCorrect = await bcrypt.compare(
-          credentials.password,
-          user.password
-        );
-
-        if (!isPasswordCorrect) {
-          throw new Error("Identitas ditolak: Sandi tidak cocok.");
-        }
-
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          username: user.username, // Include username explicitly
-        };
       },
     }),
   ],
