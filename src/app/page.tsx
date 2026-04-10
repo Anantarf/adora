@@ -28,6 +28,7 @@ const NAV_LINKS = [
   { label: "Program", href: "#program" },
   { label: "Galeri", href: "#galeri" },
   { label: "Jadwal", href: "#jadwal" },
+  { label: "Daftar", href: "#daftar" },
 ];
 
 const STATS = [
@@ -70,6 +71,32 @@ const MISSION_POINTS = [
   "Mendorong nilai sportivitas, disiplin, dan kerja tim.",
   "Menyelenggarakan kompetisi internal dan partisipasi pada turnamen nasional.",
 ];
+
+const REGISTRATION_STEPS = [
+  {
+    step: "1",
+    title: "Hubungi Admin",
+    desc: "Kontak kami via WhatsApp untuk informasi program dan proses pendaftaran.",
+  },
+  {
+    step: "2",
+    title: "Verifikasi Data",
+    desc: "Lengkapi data atlet dan orang tua, termasuk fotocopy identitas.",
+  },
+  {
+    step: "3",
+    title: "Konfirmasi & Mulai",
+    desc: "Setelah konfirmasi, atlet siap mengikuti latihan rutin di Home Court.",
+  },
+];
+
+const CONTACT_INFO = {
+  whatsapp: "08388724552",
+  email: "admin@adora.club",
+  address: "Home Court, Jakarta",
+  instagram: "@adorabbc",
+  tiktok: "adora_bbc",
+};
 
 
 
@@ -294,6 +321,43 @@ export default async function LandingPage() {
         </section>
       </div>
 
+      {/* ── Cara Mendaftar ── */}
+      <section id="daftar" className="container mx-auto px-4 py-24 relative z-10">
+        <FadeIn direction="up">
+          <h2 className="font-heading text-4xl text-primary uppercase tracking-widest mb-12 text-center">
+            Cara Mendaftar
+          </h2>
+        </FadeIn>
+        <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16" delay={0.2}>
+          {REGISTRATION_STEPS.map(({ step, title, desc }) => (
+            <StaggerItem key={step} className="text-center">
+              <div className="inline-flex items-center justify-center size-16 rounded-full bg-primary/20 border-2 border-primary mb-6 mx-auto">
+                <span className="font-heading text-3xl text-primary">{step}</span>
+              </div>
+              <h3 className="font-heading text-xl text-white uppercase tracking-widest mb-3">
+                {title}
+              </h3>
+              <p className="text-white/60 text-sm leading-relaxed">
+                {desc}
+              </p>
+            </StaggerItem>
+          ))}
+        </StaggerContainer>
+
+        {/* CTA Button */}
+        <FadeIn delay={0.6} direction="up" className="text-center">
+          <a
+            href={`https://wa.me/${CONTACT_INFO.whatsapp.replace(/\D/g, "")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-4 rounded-full transition-all text-sm uppercase tracking-widest shadow-lg shadow-green-600/30 hover:shadow-green-600/50 hover:scale-105"
+          >
+            <span>💬</span>
+            Daftar Sekarang via WhatsApp
+          </a>
+        </FadeIn>
+      </section>
+
       {/* ── Footer ── */}
       <footer className="relative z-10 border-t border-white/10 bg-[#0d0d0d]">
         <div className="container mx-auto px-4 py-12">
@@ -327,11 +391,32 @@ export default async function LandingPage() {
             {/* Contact — <address> adalah tag semantik untuk info kontak */}
             <address className="not-italic">
               <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/25 mb-4">Kontak</div>
-              {/* TODO: Ganti dengan kontak resmi */}
               <ul className="space-y-2.5 text-xs text-white/40 font-medium">
-                <li>📧 admin@adora.club</li>
-                <li>📍 Jakarta, Indonesia</li>
-                <li>📱 @adorabbc</li>
+                <li>
+                  <a href={`https://wa.me/${CONTACT_INFO.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    💬 {CONTACT_INFO.whatsapp}
+                  </a>
+                </li>
+                <li>
+                  <a href={`mailto:${CONTACT_INFO.email}`} className="hover:text-primary transition-colors">
+                    📧 {CONTACT_INFO.email}
+                  </a>
+                </li>
+                <li>
+                  <a href="https://share.google/nWbXxpJTuJAEYR3xJ" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    📍 {CONTACT_INFO.address}
+                  </a>
+                </li>
+                <li className="pt-2 border-t border-white/10 mt-2.5">
+                  <a href="https://instagram.com/adorabbc" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    📸 {CONTACT_INFO.instagram}
+                  </a>
+                </li>
+                <li>
+                  <a href="https://tiktok.com/@adora_bbc" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                    🎵 {CONTACT_INFO.tiktok}
+                  </a>
+                </li>
               </ul>
             </address>
           </div>
