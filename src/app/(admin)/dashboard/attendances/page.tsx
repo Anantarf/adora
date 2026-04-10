@@ -71,18 +71,26 @@ export default function AttendancesPage() {
       return;
     }
 
-    const playerStatuses = players.map((p) => ({
-      playerId: p.id,
-      status: batchStatus[p.id] || "HADIR", 
-    }));
+    // Use current state snapshot to avoid stale closure
+    setBatchStatus(currentStatus => {
+      const playerStatuses = players.map((p) => ({
+        playerId: p.id,
+        status: currentStatus[p.id] || "HADIR",
+      }));
 
-    try {
-      await sendBatch({ date, playerStatuses });
-      toast.success("Presensi berhasil disimpan.");
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : "Terjadi kesalahan tak dikenal.";
-      toast.error("Gagal menyimpan: " + msg);
-    }
+      // Fire mutation with guaranteed fresh state
+      (async () => {
+        try {
+          await sendBatch({ date, playerStatuses });
+          toast.success("Presensi berhasil disimpan.");
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "Terjadi kesalahan tak dikenal.";
+          toast.error("Gagal menyimpan: " + msg);
+        }
+      })();
+
+      return currentStatus; // No state change
+    });
   };
 
   const statsCount = useMemo(() => {

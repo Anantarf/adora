@@ -35,7 +35,9 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
     ]);
 
     // Optimized Attendance Rate Calculation
-    const thirtyDaysAgo = new Date(getJakartaToday().getTime() - 30 * 24 * 60 * 60 * 1000);
+    // Calculate 30 days ago in Jakarta time, preserving timezone offset
+    const thirtyDaysAgoMs = getJakartaToday().getTime() - 30 * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = toJakartaDate(new Date(thirtyDaysAgoMs).toISOString().split('T')[0]);
 
     const attendanceStats = await prisma.attendance.groupBy({
       by: ['status'],

@@ -17,9 +17,29 @@ export async function submitAttendanceAction(data: {
   note?: string;
 }) {
   await requireAdmin();
+
+  // Validate input
+  if (!data.playerStatuses || data.playerStatuses.length === 0) {
+    throw new Error("Minimal ada 1 pemain untuk didaftarkan kehadirannya.");
+  }
+
   const dateObj = toJakartaDate(data.date);
-  
+
   await prisma.$transaction(async (tx) => {
+    // Validate all players exist and are not deleted
+    const playerIds = data.playerStatuses.map(ps => ps.playerId);
+    const existingPlayers = await tx.player.findMany({
+      where: { id: { in: playerIds }, isDeleted: false },
+      select: { id: true }
+    });
+
+    const existingPlayerIds = new Set(existingPlayers.map(p => p.id));
+    const invalidPlayers = playerIds.filter(id => !existingPlayerIds.has(id));
+
+    if (invalidPlayers.length > 0) {
+      throw new Error(`Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}`);
+    }
+
     // Bulking operation (Create or Update)
     for (const ps of data.playerStatuses) {
       await tx.attendance.upsert({
