@@ -19,6 +19,7 @@ export default function PlayersPage() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const [addGroupOpen, setAddGroupOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
   const [deletingGroup, setDeletingGroup] = useState<Group | null>(null);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
@@ -58,6 +59,7 @@ export default function PlayersPage() {
       className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-20"
     >
       {/* Modals Manager */}
+      <AddGroupDialog externalOpen={addGroupOpen} onExternalOpenChange={setAddGroupOpen} />
       {editingGroup && (
         <EditGroupDialog
           group={editingGroup}
@@ -232,8 +234,11 @@ export default function PlayersPage() {
                 </div>
               ))}
               
-              {/* Optional Add Quickie */}
-              <div className="border-2 border-dashed border-border/30 rounded-[2.5rem] p-10 flex flex-col items-center justify-center gap-4 text-muted-foreground/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 cursor-pointer group">
+              {/* Add Group Quickie */}
+              <div
+                onClick={() => setAddGroupOpen(true)}
+                className="border-2 border-dashed border-border/30 rounded-[2.5rem] p-10 flex flex-col items-center justify-center gap-4 text-muted-foreground/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 cursor-pointer group"
+              >
                   <FolderPlus className="size-12 group-hover:scale-110 transition-transform" />
                   <span className="text-xs font-black uppercase tracking-widest">Tambah Kelompok Baru</span>
               </div>

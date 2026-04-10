@@ -26,8 +26,15 @@ const groupSchema = z.object({
 
 type GroupForm = z.infer<typeof groupSchema>;
 
-export function AddGroupDialog() {
-  const [open, setOpen] = useState(false);
+interface AddGroupDialogProps {
+  externalOpen?: boolean;
+  onExternalOpenChange?: (open: boolean) => void;
+}
+
+export function AddGroupDialog({ externalOpen, onExternalOpenChange }: AddGroupDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = externalOpen ?? internalOpen;
+  const setOpen = onExternalOpenChange ?? setInternalOpen;
   const { mutateAsync: addGroup, isPending } = useAddGroup();
 
   const { register, handleSubmit, formState: { errors }, reset } = useForm<GroupForm>({

@@ -90,7 +90,7 @@ export function AddStatDialog({ player, date }: { player: Player; date: string }
         } 
       />
 
-      <DialogContent className="sm:max-w-[450px]">
+      <DialogContent className="sm:max-w-[450px] bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase text-foreground tracking-widest">Evaluasi Kinerja: {player.name}</DialogTitle>
           <DialogDescription className="text-sm font-medium tracking-wide">

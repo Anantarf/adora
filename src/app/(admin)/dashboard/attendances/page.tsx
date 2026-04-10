@@ -195,8 +195,8 @@ export default function AttendancesPage() {
         </div>
       </div>
 
-      <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm mt-2">
-        <Table>
+      <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm mt-2 overflow-x-auto">
+        <Table className="min-w-[600px]">
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-border/50">
               <TableHead className="w-[80px] text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
