@@ -15,7 +15,8 @@
       "Bash(echo \"EXIT:$?\")",
       "Bash(npx eslint:*)",
       "Bash(npm run:*)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(grep -n \"getAttendancesAction\\\\|submitAttendanceAction\" src/actions/*.ts)"
     ]
   }
 }

@@ -36,7 +36,7 @@ export default function AttendancesPage() {
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
   const { mutateAsync: sendBatch, isPending } = useAddAttendances();
-  const { data: existingAttendances } = useAttendances(date);
+  const { data: existingAttendances } = useAttendances(date, activeGroup !== "all" ? activeGroup : undefined);
 
   // Sync DB data into editable local state when date/query changes
   // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -50,14 +50,15 @@ export default function AttendancesPage() {
     setBatchStatus(prev => ({ ...prev, [playerId]: status }));
   };
 
-  const handleMarkAllPresent = () => {
+  const handleMarkAll = (status: AttendanceStatus) => {
     if (!players) return;
-    const allPresent: Record<string, AttendanceStatus> = { ...batchStatus };
+    const updated: Record<string, AttendanceStatus> = { ...batchStatus };
     players.forEach((p) => {
-      allPresent[p.id] = "HADIR";
+      updated[p.id] = status;
     });
-    setBatchStatus(allPresent);
-    toast.info("Semua ditandai sebagai HADIR.");
+    setBatchStatus(updated);
+    const label = status === "HADIR" ? "HADIR" : status === "IZIN" ? "IZIN" : status === "SAKIT" ? "SAKIT" : "ALPA";
+    toast.info(`Semua ditandai sebagai ${label}.`);
   };
 
   const handleBatchSubmit = async () => {
@@ -145,21 +146,47 @@ export default function AttendancesPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2 ml-auto w-full md:w-auto">
+        <div className="flex items-center gap-2 ml-auto w-full md:w-auto flex-wrap">
             <Button
                 variant="outline"
                 size="lg"
-                onClick={handleMarkAllPresent}
+                onClick={() => handleMarkAll("HADIR")}
                 disabled={!players || players.length === 0}
-                className="h-11 font-bold uppercase tracking-widest text-xs border-border/50 hover:bg-green-500/10 hover:text-green-600 hover:border-green-500/30 flex-1 md:flex-none"
+                className="h-11 font-bold uppercase tracking-widest text-xs text-green-600 border-green-500/30 hover:bg-green-500/10 hover:text-green-600 hover:border-green-500/50 flex-1 md:flex-none"
             >
-                <CheckSquare className="size-4 mr-2" />
-                Hadir Semua
+                Semua Hadir
             </Button>
-            <Button 
-                size="lg" 
-                onClick={handleBatchSubmit} 
-                disabled={isPending || !players || players.length === 0} 
+            <Button
+                variant="outline"
+                size="lg"
+                onClick={() => handleMarkAll("IZIN")}
+                disabled={!players || players.length === 0}
+                className="h-11 font-bold uppercase tracking-widest text-xs text-amber-500 border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-600 hover:border-amber-500/50 flex-1 md:flex-none"
+            >
+                Semua Izin
+            </Button>
+            <Button
+                variant="outline"
+                size="lg"
+                onClick={() => handleMarkAll("SAKIT")}
+                disabled={!players || players.length === 0}
+                className="h-11 font-bold uppercase tracking-widest text-xs text-orange-500 border-orange-500/30 hover:bg-orange-500/10 hover:text-orange-600 hover:border-orange-500/50 flex-1 md:flex-none"
+            >
+                Semua Sakit
+            </Button>
+            <Button
+                variant="outline"
+                size="lg"
+                onClick={() => handleMarkAll("ALPA")}
+                disabled={!players || players.length === 0}
+                className="h-11 font-bold uppercase tracking-widest text-xs text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/50 flex-1 md:flex-none"
+            >
+                Semua Alpa
+            </Button>
+            <Button
+                size="lg"
+                onClick={handleBatchSubmit}
+                disabled={isPending || !players || players.length === 0}
                 className="h-11 font-bold uppercase tracking-widest text-xs shadow-lg shadow-primary/20 flex-1 md:flex-none"
             >
                 {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <CheckSquare className="size-4 mr-2" />}
