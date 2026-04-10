@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Loader2, CalendarDays, LayoutList as SelectIcon } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
-import { useGroups } from "@/hooks/use-groups";
+import { useGroups, type Group } from "@/hooks/use-groups";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { getJakartaToday, toYYYYMMDD } from "@/lib/date-utils";
 import { type Player } from "@/types/dashboard";
@@ -31,6 +31,23 @@ export default function StatisticsPage() {
 
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
+
+  // Organize players by group
+  const playersByGroup = useMemo(() => {
+    if (!players || !groups) return [];
+
+    const grouped = players.reduce((acc, player) => {
+      const groupId = player.groupId || "ungrouped";
+      if (!acc[groupId]) acc[groupId] = [];
+      acc[groupId].push(player);
+      return acc;
+    }, {} as Record<string, Player[]>);
+
+    return groups.map(group => ({
+      group,
+      players: grouped[group.id] || []
+    })).filter(g => g.players.length > 0 || activeGroup === "all");
+  }, [players, groups, activeGroup]);
 
   return (
     <div className="flex flex-col gap-6 w-full">
@@ -95,27 +112,37 @@ export default function StatisticsPage() {
                 </TableCell>
               </TableRow>
             )}
-            {players?.length === 0 && !playersLoading && (
+            {playersByGroup.length === 0 && !playersLoading && (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground font-semibold">
                   Tabel pemain kosong didalam filter grup ini.
                 </TableCell>
               </TableRow>
             )}
-            {players?.map((player: Player, idx: number) => (
-              <TableRow key={player.id} className="group hover:bg-muted/40 transition-colors">
-                <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
-                <TableCell className="font-semibold text-secondary">{player.name}</TableCell>
-                <TableCell>
-                  <span className="inline-flex items-center rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
-                    {player.group?.name || "-"}
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                   <AddStatDialog player={player} date={date} />
+            {playersByGroup.map(({ group, players: groupPlayers }) => (
+              <TableRow key={group.id} className="bg-muted/20 hover:bg-muted/20">
+                <TableCell colSpan={4} className="font-bold text-primary uppercase tracking-widest text-sm py-3">
+                  {group.name}
                 </TableCell>
               </TableRow>
-            ))}
+            )).concat(
+              playersByGroup.flatMap(({ group, players: groupPlayers }, groupIdx) =>
+                groupPlayers.map((player: Player, playerIdx: number) => (
+                  <TableRow key={player.id} className="group hover:bg-muted/40 transition-colors">
+                    <TableCell className="font-medium text-muted-foreground">{playerIdx + 1}</TableCell>
+                    <TableCell className="font-semibold text-secondary">{player.name}</TableCell>
+                    <TableCell>
+                      <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary border border-primary/20">
+                        {player.group?.name || "-"}
+                      </span>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <AddStatDialog player={player} date={date} />
+                    </TableCell>
+                  </TableRow>
+                ))
+              )
+            )}
           </TableBody>
         </Table>
       </div>

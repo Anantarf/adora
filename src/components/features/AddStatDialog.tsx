@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,6 +20,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { LineChart, Loader2 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const statSchema = z.object({
   shooting: z.coerce.number().min(0).max(100, "Maksimal skor 100"),
@@ -36,10 +37,19 @@ export function AddStatDialog({ player, date }: { player: Player; date: string }
   const [open, setOpen] = useState(false);
   const { mutateAsync: addStat, isPending } = useAddStatistic();
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset, watch: watchForm } = useForm({
     resolver: zodResolver(statSchema),
     defaultValues: { shooting: 70, dribbling: 70, passing: 70, stamina: 70, attitude: 70, notes: "" }
   });
+
+  const metrics = watchForm();
+  const chartData = useMemo(() => [
+    { name: "Shooting", value: metrics.shooting || 0 },
+    { name: "Dribbling", value: metrics.dribbling || 0 },
+    { name: "Passing", value: metrics.passing || 0 },
+    { name: "Stamina", value: metrics.stamina || 0 },
+    { name: "Attitude", value: metrics.attitude || 0 },
+  ], [metrics]);
 
   const onSubmit = async (data: StatForm) => {
     if (!date) {
@@ -116,6 +126,23 @@ export function AddStatDialog({ player, date }: { player: Player; date: string }
           <div className="space-y-2">
             <label htmlFor="notes" className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground cursor-pointer">Catatan Laporan / Saran Pelatih</label>
             <Textarea id="notes" {...register("notes")} placeholder="Fokus pada transisi bertahan minggu depan..." className="h-24 resize-none" />
+          </div>
+
+          {/* Chart Preview */}
+          <div className="pt-4 border-t border-border/50">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Preview Performa</p>
+            <ResponsiveContainer width="100%" height={240}>
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" style={{ fontSize: "10px" }} />
+                <YAxis stroke="rgba(255,255,255,0.4)" domain={[0, 100]} style={{ fontSize: "10px" }} />
+                <Tooltip
+                  contentStyle={{ backgroundColor: "rgba(20,20,20,0.95)", border: "1px solid rgba(212,175,55,0.3)", borderRadius: "8px" }}
+                  formatter={(value) => [`${value}`, "Nilai"]}
+                />
+                <Bar dataKey="value" fill="rgba(212,175,55,0.8)" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
 
           <div className="pt-4 flex w-full justify-end">
