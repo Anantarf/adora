@@ -99,7 +99,7 @@ export default function AdminDashboardPage() {
       allDay: true,
       backgroundColor: "transparent",
       borderColor: "transparent",
-      extendedProps: { type: ev.type, originalTitle: ev.title }
+      extendedProps: { type: ev.type, originalTitle: ev.title, location: ev.location, description: ev.description, date: ev.date }
     };
   }) || [], [scheduleData]);
 
