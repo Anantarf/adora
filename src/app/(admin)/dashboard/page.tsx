@@ -46,19 +46,29 @@ function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) 
 
   return (
     <div
-      className="group flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-default animate-card-in relative"
+      className="group flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-default animate-card-in"
       style={{ animationDelay: `${delay}ms`, animationFillMode: "both" } as React.CSSProperties}
     >
-      <div className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-300"
-        style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px ${cfg.color}55` }}>
+      <div
+        className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-300"
+        style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px ${cfg.color}55` }}
+      >
         <Icon className="size-5" />
       </div>
-      
-      <div className="flex-1 min-w-0 pr-2">
-        <p className="font-bold text-foreground text-sm break-words leading-snug">
-          {ev.title}{ev.group ? ` · ${ev.group.name}` : ""}
-        </p>
-        <div className="flex items-center gap-1.5 mt-1.5">
+
+      <div className="flex-1 min-w-0">
+        {/* Title row + badge: flex-wrap agar badge turun kalau title panjang */}
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
+          <p className="font-bold text-foreground text-sm leading-snug min-w-0">
+            {ev.title}{ev.group ? ` · ${ev.group.name}` : ""}
+          </p>
+          <span className="flex-shrink-0 flex items-center gap-1 text-[9px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md">
+            <Clock className="size-2.5" />
+            {countdownLabel}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
           <CalendarDays className="size-3 text-muted-foreground flex-shrink-0" />
           <span className="text-xs text-muted-foreground font-medium">{DATE_FORMATTER.format(evDate)}</span>
         </div>
@@ -71,12 +81,6 @@ function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) 
       </div>
 
       <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-300 flex-shrink-0" />
-
-      {/* Badge dipindahkan ke absolute agar tidak memblokir space baris kedua dan ketiga */}
-      <span className="absolute top-4 right-12 flex items-center gap-1 text-[9px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md">
-        <Clock className="size-2.5" />
-        {countdownLabel}
-      </span>
     </div>
   );
 }
