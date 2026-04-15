@@ -5,11 +5,6 @@ import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
 import { AttendanceStatus } from "@/types/dashboard";
 
-/**
- * ADORA Basketball - Optimized Dashboard Aggregator
- * Updated to Senior Standards: Dynamic Metrics & Soft-Delete Safe.
- */
-
 // ─── Constants ──────────────────────────────────────────────────────────────
 const ATTENDANCE_LOOKBACK_DAYS = 30;
 const TREND_STATS_SAMPLE_SIZE = 200;
@@ -44,7 +39,6 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       }),
     ]);
 
-    // Optimized Attendance Rate Calculation
     // Calculate 30 days ago in Jakarta time, preserving timezone offset
     const thirtyDaysAgoMs = getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
     const thirtyDaysAgo = toJakartaDate(new Date(thirtyDaysAgoMs).toISOString().split('T')[0]);
@@ -70,7 +64,6 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       ? Math.round((hadirCount / totalAttendances) * 100)
       : 0;
 
-    // Optimized Dynamic Trend Calculation
     const stats = await prisma.statistic.findMany({
       where: {
         status: "Published",
@@ -125,13 +118,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
     };
   } catch (error) {
     console.error("[DASHBOARD_METRICS_ERROR]:", error);
-    return {
-      playerCount: 0,
-      groupCount: 0,
-      publishedStatsCount: 0,
-      attendanceRate: 0,
-      performanceTrend: []
-    };
+    throw new Error("Gagal mengambil metrik dashboard. Silakan coba lagi.");
   }
 }
 

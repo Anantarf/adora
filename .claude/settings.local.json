@@ -16,7 +16,11 @@
       "Bash(npx eslint:*)",
       "Bash(npm run:*)",
       "Bash(npx prisma:*)",
-      "Bash(grep -n \"getAttendancesAction\\\\|submitAttendanceAction\" src/actions/*.ts)"
+      "Bash(grep -n \"getAttendancesAction\\\\|submitAttendanceAction\" src/actions/*.ts)",
+      "Bash(findstr \"3306\\\\|3308\")",
+      "Bash(cmd.exe /c \"netstat -an | findstr 3308\")",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(grep -E \"^-.*\\\\.\\(ts|js\\)$\")"
     ]
   }
 }

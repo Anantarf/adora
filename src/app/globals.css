@@ -50,21 +50,21 @@
 
 :root {
   /* Ultra Clean Light Mode (Sebagai Pendamping) */
-  --background: #FAFAFA;
-  --foreground: #09090B;
+  --background: #F8F8F8; /* Light Gray */
+  --foreground: #1A1A2E; /* Dark Navy */
   --card: #FFFFFF;
-  --card-foreground: #09090B;
+  --card-foreground: #1A1A2E;
   --popover: #FFFFFF;
-  --popover-foreground: #09090B;
+  --popover-foreground: #1A1A2E;
   --primary: #D4AF37; /* Pure Gold */
   --primary-foreground: #ffffff;
-  --secondary: #E4E4E7;
-  --secondary-foreground: #09090B;
-  --muted: #F4F4F5;
+  --secondary: #FFD700; /* Secondary Yellow */
+  --secondary-foreground: #1A1A2E;
+  --muted: #E4E4E7;
   --muted-foreground: #71717A;
-  --accent: #F4F4F5;
-  --accent-foreground: #09090B;
-  --destructive: #EF4444;
+  --accent: #E4E4E7;
+  --accent-foreground: #1A1A2E;
+  --destructive: #E63946; /* Accent Red */
   --border: #E4E4E7;
   --input: #E4E4E7;
   --ring: #D4AF37;
@@ -85,22 +85,22 @@
 }
 
 .dark {
-  /* Onyx Black & Pure Gold (Vibe Utama) */
-  --background: #09090B; /* Deep Onyx */
-  --foreground: #FAFAFA; /* Soft White */
-  --card: #111113; /* Lifted Onyx for Cards */
+  /* Dark Navy & Pure Gold (Vibe Utama) */
+  --background: #09090B; /* Dark Navy */
+  --foreground: #FAFAFA; /* Light Gray */
+  --card: #18181B; /* Lifted Navy for Cards */
   --card-foreground: #FAFAFA;
-  --popover: #111113;
+  --popover: #18181B;
   --popover-foreground: #FAFAFA;
   --primary: #D4AF37; /* Pure Gold Accent */
-  --primary-foreground: #09090B; /* Black text on gold */
-  --secondary: #E4E4E7; /* Readable light text color (not a surface!) */
-  --secondary-foreground: #09090B;
-  --muted: #1F1F22; /* Surface: Charcoal */
+  --primary-foreground: #1A1A2E; /* Dark text on gold */
+  --secondary: #FFD700; /* Secondary Yellow */
+  --secondary-foreground: #1A1A2E;
+  --muted: #2d2d4c; /* Surface: Charcoal/Navy mix */
   --muted-foreground: #A1A1AA;
-  --accent: #1F1F22; /* Surface: Charcoal */
-  --accent-foreground: #FAFAFA;
-  --destructive: #7f1d1d;
+  --accent: #2d2d4c; /* Surface: Charcoal/Navy mix */
+  --accent-foreground: #F8F8F8;
+  --destructive: #E63946; /* Accent Red */
   --border: #27272A; /* Subtle Charcoal Border */
   --input: #27272A;
   --ring: #D4AF37;
@@ -136,9 +136,9 @@
 @layer utilities {
   .glass-card {
     @apply bg-white/70 backdrop-blur-xl border border-border shadow-xl;
-    /* Dark mode: Lifted Onyx surface */
+    /* Dark mode: Lifted Navy surface */
     &:is(.dark *) {
-      background-color: rgba(17, 17, 19, 0.85);
+      background-color: rgba(9, 9, 11, 0.85); /* #09090B */
       border-color: #27272A;
     }
   }
@@ -148,10 +148,10 @@
   .text-gradient {
     /* Light Mode: dark to gold to dark */
     @apply bg-clip-text text-transparent font-black;
-    background-image: linear-gradient(to right, #09090B, #D4AF37, #09090B);
+    background-image: linear-gradient(to right, #1A1A2E, #D4AF37, #1A1A2E);
     /* Dark Mode: white to gold to white */
     &:is(.dark *) {
-      background-image: linear-gradient(to right, #FAFAFA, #D4AF37, #FAFAFA);
+      background-image: linear-gradient(to right, #F8F8F8, #D4AF37, #F8F8F8);
     }
   }
   .mask-fade {

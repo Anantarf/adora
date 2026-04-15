@@ -18,7 +18,7 @@ import { signOut } from "next-auth/react";
 
 const navItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Jadwal Klub", url: "/schedule", icon: CalendarDays },
+  { title: "Input Jadwal Klub", url: "/schedule", icon: CalendarDays },
   { title: "Roster & Grup", url: "/players", icon: Layers },
   { title: "Input Absensi", url: "/attendances", icon: CheckSquare },
   { title: "Input Penilaian", url: "/statistics", icon: LineChart },

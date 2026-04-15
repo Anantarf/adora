@@ -3,12 +3,13 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Calendar } from "@/components/ui/calendar";
-import { useSchedule, useAddEvent, useDeleteEvent } from "@/hooks/use-schedule";
+import { useSchedule, useAddEvent, useUpdateEvent, useDeleteEvent } from "@/hooks/use-schedule";
 import { type ScheduleEvent } from "@/types/dashboard";
+import { useHomebases } from "@/hooks/use-homebases";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CalendarDays, Plus, Loader2, Trash2, MapPinned, AlignLeft } from "lucide-react";
+import { CalendarDays, Plus, Loader2, Trash2, MapPinned, AlignLeft, Pencil } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,18 +28,23 @@ import { combineDateAndTime, toYYYYMMDD, getJakartaToday } from "@/lib/date-util
  */
 
 const eventSchema = z.object({
-  title: z.string().min(3, "Judul minimal 3 karakter"),
-  location: z.string().optional(),
-  type: z.string().min(1, "Tipe agenda wajib dipilih"),
-  time: z.string().min(1, "Waktu wajib diisi"),
+  title:      z.string().min(3, "Judul minimal 3 karakter"),
+  location:   z.string().optional(),
+  type:       z.string().min(1, "Tipe agenda wajib dipilih"),
+  time:       z.string().min(1, "Waktu wajib diisi"),
+  homebaseId: z.string().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
 export default function SchedulePage() {
-  const [date, setDate] = useState<Date | undefined>(getJakartaToday());
-  const [open, setOpen] = useState(false);
+  const [date, setDate]                     = useState<Date | undefined>(getJakartaToday());
+  const [open, setOpen]                     = useState(false);
+  const [editingEvent, setEditingEvent]     = useState<ScheduleEvent | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const { data: homebases = [] }            = useHomebases();
+
+  const isEditMode = editingEvent !== null;
 
   // Time context for default values
   const { currentHH, currentMM } = useMemo(() => {
@@ -58,18 +64,28 @@ export default function SchedulePage() {
     formState: { errors },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
-    defaultValues: {
-      title: "",
-      location: "",
-      type: Object.keys(EVENT_TYPES)[0] || "LATIHAN",
-      time: `${currentHH}:${currentMM}`,
-    },
+    defaultValues: isEditMode
+      ? {
+          title:      editingEvent?.title || "",
+          location:   editingEvent?.location || "",
+          type:       editingEvent?.type || Object.keys(EVENT_TYPES)[0] || "LATIHAN",
+          time:       editingEvent?.date ? format(new Date(editingEvent.date), "HH:mm") : `${currentHH}:${currentMM}`,
+          homebaseId: editingEvent?.homebaseId || undefined,
+        }
+      : {
+          title:      "",
+          location:   "",
+          type:       Object.keys(EVENT_TYPES)[0] || "LATIHAN",
+          time:       `${currentHH}:${currentMM}`,
+          homebaseId: undefined,
+        },
   });
 
   const selectedType = watch("type");
 
   const { data: events, isLoading } = useSchedule();
   const { mutateAsync: addEvent, isPending } = useAddEvent();
+  const { mutateAsync: updateEvent } = useUpdateEvent();
   const { mutateAsync: deleteEvent } = useDeleteEvent();
 
   // ─── Memoized Calculations ──────────────────────────────
@@ -96,18 +112,36 @@ export default function SchedulePage() {
     try {
       const isoWithWib = combineDateAndTime(date, data.time);
 
-      await addEvent({
-        title: data.title,
-        location: data.location,
-        type: data.type,
-        date: isoWithWib,
-      });
+      if (isEditMode && editingEvent) {
+        // EDIT MODE
+        await updateEvent({
+          id: editingEvent.id,
+          data: {
+            title:      data.title,
+            location:   data.location,
+            type:       data.type,
+            date:       isoWithWib,
+            homebaseId: data.homebaseId || undefined,
+          },
+        });
+        toast.success("Jadwal berhasil diperbarui!");
+      } else {
+        // ADD MODE
+        await addEvent({
+          title:      data.title,
+          location:   data.location,
+          type:       data.type,
+          date:       isoWithWib,
+          homebaseId: data.homebaseId || undefined,
+        });
+        toast.success("Jadwal sukses ditambahkan!");
+      }
 
-      toast.success("Jadwal sukses ditambahkan!");
       setOpen(false);
+      setEditingEvent(null);
       reset();
     } catch {
-      toast.error("Gagal menambahkan jadwal");
+      toast.error(isEditMode ? "Gagal mengubah jadwal" : "Gagal menambahkan jadwal");
     }
   };
 
@@ -116,11 +150,20 @@ export default function SchedulePage() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-8 w-full max-w-7xl mx-auto">
         <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-1">
-            <h1 className="text-5xl md:text-6xl font-heading uppercase tracking-widest text-foreground">Jadwal Klub</h1>
+            <h1 className="text-5xl md:text-6xl font-heading uppercase tracking-widest text-foreground">Input Jadwal Klub</h1>
             <p className="text-muted-foreground font-medium max-w-lg border-l-2 border-primary/40 pl-4 py-1 tracking-wide">Kelola seluruh agenda klub — latihan rutin, pertandingan, evaluasi, dan kegiatan khusus.</p>
           </div>
 
-          <Dialog open={open} onOpenChange={setOpen}>
+          <Dialog
+            open={open}
+            onOpenChange={(isOpen) => {
+              setOpen(isOpen);
+              if (!isOpen) {
+                setEditingEvent(null);
+                reset();
+              }
+            }}
+          >
             <DialogTrigger
               render={
                 <Button size="lg" className="uppercase font-bold tracking-widest text-xs h-11 bg-secondary text-secondary-foreground hover:bg-secondary/90">
@@ -130,32 +173,33 @@ export default function SchedulePage() {
             />
             <DialogContent className="sm:max-w-106.25 bg-card border-border/50">
               <DialogHeader>
-                <DialogTitle className="text-xl font-heading uppercase text-secondary">Tambah Agenda Klub</DialogTitle>
+                <DialogTitle className="text-2xl font-heading uppercase text-primary font-bold">
+                  {isEditMode ? "Edit Agenda Klub" : "Tambah Agenda Klub"}
+                </DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Tanggal Pelaksanaan</label>
-                    <div className="h-11 rounded-lg border border-border bg-muted/50 px-3 flex items-center text-sm font-semibold text-secondary opacity-70 truncate">
-                      {date ? format(date, "dd MMM yyyy", { locale: idLocale }) : "Pilih Kalender"}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Waktu</label>
-                    <Input type="time" {...register("time")} className="h-11 font-semibold" />
-                    {errors.time && <p className="text-[10px] text-destructive">{errors.time.message}</p>}
-                  </div>
-                </div>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 pt-4">
+                {/* Nama Kegiatan */}
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Jenis Kegiatan</label>
+                  <label className="text-[11px] uppercase font-bold tracking-widest text-foreground">Nama Kegiatan</label>
+                  <Input
+                    {...register("title")}
+                    placeholder="Contoh: Latihan Pagi KU-15"
+                    className="h-11 font-semibold placeholder:font-medium border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-primary/10 transition-colors"
+                  />
+                  {errors.title && <p className="text-[10px] text-destructive font-medium">{errors.title.message}</p>}
+                </div>
+
+                {/* Jenis Kegiatan */}
+                <div className="space-y-2">
+                  <label className="text-[11px] uppercase font-bold tracking-widest text-foreground">Jenis Kegiatan</label>
                   <Select
                     value={selectedType}
                     onValueChange={(val: string | null) => {
                       if (val) setValue("type", val);
                     }}
                   >
-                    <SelectTrigger className="h-11 font-semibold">
-                      <SelectValue placeholder="Tipe Agenda" />
+                    <SelectTrigger className="h-11 font-semibold border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-primary/10 transition-colors">
+                      <SelectValue placeholder="Pilih tipe agenda" />
                     </SelectTrigger>
                     <SelectContent>
                       {Object.values(EVENT_TYPES).map((config) => (
@@ -165,19 +209,70 @@ export default function SchedulePage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors.type && <p className="text-[10px] text-destructive">{errors.type.message}</p>}
+                  {errors.type && <p className="text-[10px] text-destructive font-medium">{errors.type.message}</p>}
                 </div>
+
+                {/* Tanggal & Waktu - Grid cols-2 responsive */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[11px] uppercase font-bold tracking-widest text-foreground">Tanggal</label>
+                    <Input
+                      type="date"
+                      value={date ? format(date, "yyyy-MM-dd") : ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val) {
+                          const d = new Date(val + "T00:00:00+07:00");
+                          setDate(d);
+                        }
+                      }}
+                      className="h-11 font-semibold border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-primary/10 transition-colors"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[11px] uppercase font-bold tracking-widest text-foreground">Waktu</label>
+                    <Input
+                      type="time"
+                      {...register("time")}
+                      className="h-11 font-semibold border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-primary/10 transition-colors"
+                    />
+                    {errors.time && <p className="text-[10px] text-destructive font-medium">{errors.time.message}</p>}
+                  </div>
+                </div>
+
+                {/* Lokasi */}
                 <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Nama Kegiatan</label>
-                  <Input {...register("title")} placeholder="Contoh: Latihan Pagi KU-15" className="h-11 font-semibold placeholder:font-medium" />
-                  {errors.title && <p className="text-[10px] text-destructive">{errors.title.message}</p>}
+                  <label className="text-[11px] uppercase font-bold tracking-widest text-foreground">Lokasi</label>
+                  <Input
+                    {...register("location")}
+                    placeholder="Contoh: Lapangan GOR Citra"
+                    className="h-11 font-semibold placeholder:font-medium border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-primary/10 transition-colors"
+                  />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Lokasi</label>
-                  <Input {...register("location")} placeholder="Contoh: Lapangan GOR Citra" className="h-11 font-semibold placeholder:font-medium" />
-                </div>
-                <Button type="submit" disabled={isPending} className="w-full h-11 mt-2 text-primary-foreground font-bold tracking-widest uppercase">
-                  {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : "Simpan"}
+
+                {/* Homebase - Optional */}
+                {homebases.length > 0 && (
+                  <div className="space-y-2">
+                    <label className="text-[11px] uppercase font-bold tracking-widest text-foreground">Homebase (Opsional)</label>
+                    <Select
+                      value={watch("homebaseId") ?? ""}
+                      onValueChange={(val: string | null) => setValue("homebaseId", val || undefined)}
+                    >
+                      <SelectTrigger className="h-11 font-semibold border-2 border-primary/30 bg-primary/5 focus:border-primary focus:bg-primary/10 transition-colors">
+                        <SelectValue placeholder="Pilih homebase..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {homebases.map((hb) => (
+                          <SelectItem key={hb.id} value={hb.id}>{hb.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+
+                {/* Submit Button */}
+                <Button type="submit" disabled={isPending} className="w-full h-11 mt-6 text-primary-foreground font-bold tracking-widest uppercase bg-primary hover:bg-primary/90">
+                  {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : isEditMode ? "Perbarui Agenda" : "Simpan Agenda"}
                 </Button>
               </form>
             </DialogContent>
@@ -256,9 +351,23 @@ export default function SchedulePage() {
                         )}
                       </div>
                     </div>
-                    <Button variant="ghost" size="icon" onClick={() => setDeleteTargetId(ev.id)} className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-xl opacity-0 transition-opacity group-hover:opacity-100">
-                      <Trash2 className="size-5" />
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          setEditingEvent(ev);
+                          setDate(new Date(ev.date));
+                          setOpen(true);
+                        }}
+                        className="text-primary/50 hover:text-primary hover:bg-primary/10 rounded-xl opacity-0 transition-opacity group-hover:opacity-100"
+                      >
+                        <Pencil className="size-5" />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => setDeleteTargetId(ev.id)} className="text-destructive/50 hover:text-destructive hover:bg-destructive/10 rounded-xl opacity-0 transition-opacity group-hover:opacity-100">
+                        <Trash2 className="size-5" />
+                      </Button>
+                    </div>
                   </motion.div>
                 ))
               )}

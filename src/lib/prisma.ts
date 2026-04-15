@@ -3,11 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { Prisma } from "@prisma/client";
 
-/**
- * Senior Developer Standard: Explicit Singleton Pattern for Next.js 16.
- * Using Prisma 7 Driver Adapters for maximal performance and "Rust-free" portability.
- */
-
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
@@ -25,14 +20,15 @@ const createPrismaClient = () => {
 
   const parsedUrl = new URL(url || "mysql://localhost:3306/");
 
-  // Initialize with MariaDB adapter for MySQL workloads in Prisma 7
+  // Initialize with MariaDB adapter. Dynamic pool limit to avoid exhaustion during build workers.
+  const poolLimit = process.env.npm_lifecycle_event === "build" ? 10 : 25;
   const adapter = new PrismaMariaDb({
     host: parsedUrl.hostname,
     port: Number(parsedUrl.port) || 3306,
     user: parsedUrl.username,
     password: parsedUrl.password,
     database: parsedUrl.pathname.slice(1) || process.env.DB_NAME,
-    connectionLimit: 5,
+    connectionLimit: poolLimit,
   });
 
   return new PrismaClient({

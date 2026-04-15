@@ -41,7 +41,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
   return (
     <div className="max-w-4xl mx-auto">
       {upcomingEvents.length === 0 ? (
-        <div className="relative max-w-2xl mx-auto bg-[#111113] border border-primary/20 rounded-2xl h-64 overflow-hidden">
+        <div className="relative max-w-2xl mx-auto bg-card border border-primary/20 rounded-2xl h-64 overflow-hidden">
           <div className="absolute inset-0" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(212,175,55,0.07) 0px, rgba(212,175,55,0.07) 1px, transparent 1px, transparent 28px)" }} />
           <div className="relative z-10 h-full flex flex-col items-center justify-center gap-3 text-center px-6">
             <span className="font-heading text-5xl tracking-widest text-primary/10 uppercase">Jadwal</span>
@@ -57,7 +57,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                 key={ev.id}
                 layoutId={`event-${ev.id}`}
                 onClick={() => setSelectedEvent(ev)}
-                className="group relative bg-[#111113] border border-primary/20 rounded-2xl p-6 text-left overflow-hidden transition-all hover:border-primary/50 hover:bg-primary/[0.02]"
+                className="group relative bg-card border border-primary/20 rounded-2xl p-6 text-left overflow-hidden transition-all hover:border-primary/50 hover:bg-primary/[0.02]"
               >
                 <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(212,175,55,0.1) 0px, rgba(212,175,55,0.1) 1px, transparent 1px, transparent 20px)" }} />
                 
@@ -98,7 +98,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
 
       {/* Modal Detail */}
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
-        <DialogContent className="bg-[#0f0f11] border-primary/20 text-white sm:max-w-[400px] p-0 overflow-hidden">
+        <DialogContent className="bg-background border-primary/20 text-white sm:max-w-[400px] p-0 overflow-hidden">
           <div className="relative h-32 bg-primary flex items-center justify-center overflow-hidden">
              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 10px)" }} />
              <div className="relative z-10 font-heading text-5xl md:text-6xl tracking-[0.2em] text-black/20 uppercase select-none">

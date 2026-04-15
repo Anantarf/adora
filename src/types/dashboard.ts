@@ -13,6 +13,7 @@ export interface ScheduleEvent {
   type: string; // e.g., 'Latihan', 'Sparing'
   location: string | null;
   groupId: string | null;
+  homebaseId: string | null;
   group?: {
     name: string;
   } | null;

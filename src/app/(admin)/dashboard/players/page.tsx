@@ -125,24 +125,24 @@ export default function PlayersPage() {
       </section>
 
       {/* Persistent Control Bar */}
-      <div className="glass-card p-6 rounded-3xl flex flex-col md:flex-row gap-4 items-center justify-between">
-        <div className="relative w-full md:max-w-md group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-5 text-muted-foreground group-focus-within:text-primary transition-all duration-300" />
-          <Input 
+      <div className="p-4 rounded-lg border border-border/50 bg-card flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="relative w-full md:max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+          <Input
             placeholder={!selectedGroupId ? "Cari Kelompok (KU)..." : "Cari nama atlet di grup ini..."}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-12 h-14 rounded-2xl border-border/40 bg-background/40 focus-visible:ring-primary/20 focus-visible:border-primary/50 text-base shadow-inner"
+            className="pl-10 h-11"
           />
         </div>
-        
+
         {selectedGroupId && (
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="outline"
             onClick={() => { setSelectedGroupId(null); setSearchQuery(""); }}
-            className="h-14 px-6 rounded-2xl bg-secondary/5 border border-border/40 hover:bg-secondary/10 gap-2 font-bold uppercase tracking-widest text-[10px]"
+            className="h-11 font-bold uppercase tracking-widest text-xs"
           >
-            <ArrowLeft className="size-4" /> Kembali ke Daftar KU
+            <ArrowLeft className="size-4 mr-2" /> Kembali ke Daftar KU
           </Button>
         )}
       </div>
@@ -157,7 +157,7 @@ export default function PlayersPage() {
               className="flex flex-col items-center justify-center p-20 gap-4"
             >
               <Loader2 className="size-12 animate-spin text-primary opacity-50" />
-              <p className="text-xs font-bold tracking-[0.3em] uppercase animate-pulse">Menghubungkan Data ADORA...</p>
+              <p className="text-xs font-semibold tracking-widest uppercase">Menghubungkan Data ADORA...</p>
             </motion.div>
           ) : !selectedGroupId ? (
             /* VIEW: GROUPS GRID */
@@ -172,9 +172,9 @@ export default function PlayersPage() {
                 <div
                   key={group.id}
                   onClick={() => { setSelectedGroupId(group.id); setSearchQuery(""); }}
-                  className="group relative bg-[#111113] border border-primary/20 rounded-[2.5rem] p-10 cursor-pointer overflow-hidden transition-all duration-500 hover:border-primary/60 hover:bg-primary/[0.03] hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+                  className="group relative bg-card border border-border/50 rounded-lg p-6 cursor-pointer overflow-hidden transition-all hover:border-primary/50 hover:bg-primary/5"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-bl-[5rem] transition-all group-hover:bg-primary/10 group-hover:scale-110 duration-700" />
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-bl-lg transition-all group-hover:bg-primary/20" />
 
                   {/* Action Buttons */}
                   <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-20">
@@ -204,29 +204,29 @@ export default function PlayersPage() {
 
                   <div className="relative z-10 space-y-6">
                     <div className="flex items-center justify-between">
-                      <div className="size-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                        <Users className="size-7" />
+                      <div className="size-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+                        <Users className="size-6" />
                       </div>
-                      <span className="text-[10px] font-black uppercase tracking-[0.4em] bg-white/5 border border-white/10 px-4 py-1.5 rounded-full text-white/40 group-hover:text-primary group-hover:border-primary/30 transition-colors">
+                      <span className="text-xs font-semibold uppercase tracking-widest bg-muted/50 border border-border/50 px-3 py-1 rounded-full text-muted-foreground">
                         KELOMPOK UMUR
                       </span>
                     </div>
-                    
+
                     <div>
-                      <h3 className="font-heading text-4xl text-white tracking-widest uppercase mb-2 group-hover:translate-x-2 transition-transform duration-500">
+                      <h3 className="font-heading text-2xl text-foreground tracking-widest uppercase mb-2">
                         {group.name}
                       </h3>
-                      <p className="text-muted-foreground text-sm font-medium leading-relaxed italic opacity-70 group-hover:opacity-100 line-clamp-2">
+                      <p className="text-muted-foreground text-xs font-medium line-clamp-2">
                         {group.description || "Pembinaan fundamental dan teknik dasar basket berkelanjutan."}
                       </p>
                     </div>
 
-                    <div className="pt-4 flex items-center justify-between border-t border-white/5">
+                    <div className="pt-4 flex items-center justify-between border-t border-border/50">
                       <div className="flex flex-col">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground">Kapasitas Penuh</span>
-                        <span className="font-heading text-2xl text-primary">{group._count?.player || 0} Atlet</span>
+                        <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Jumlah Atlet</span>
+                        <span className="font-heading text-xl text-primary">{group._count?.player || 0}</span>
                       </div>
-                      <div className="size-10 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-black transition-all duration-500">
+                      <div className="size-10 rounded-lg bg-muted/50 flex items-center justify-center text-muted-foreground">
                         <ArrowLeft className="size-4 rotate-180" />
                       </div>
                     </div>
@@ -237,10 +237,10 @@ export default function PlayersPage() {
               {/* Add Group Quickie */}
               <div
                 onClick={() => setAddGroupOpen(true)}
-                className="border-2 border-dashed border-border/30 rounded-[2.5rem] p-10 flex flex-col items-center justify-center gap-4 text-muted-foreground/40 hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all duration-500 cursor-pointer group"
+                className="border-2 border-dashed border-border/50 rounded-lg p-6 flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
               >
-                  <FolderPlus className="size-12 group-hover:scale-110 transition-transform" />
-                  <span className="text-xs font-black uppercase tracking-widest">Tambah Kelompok Baru</span>
+                  <FolderPlus className="size-10 text-muted-foreground" />
+                  <span className="text-xs font-semibold uppercase tracking-widest">Tambah Kelompok Baru</span>
               </div>
             </motion.div>
           ) : (
@@ -253,37 +253,37 @@ export default function PlayersPage() {
               className="flex flex-col gap-4"
             >
               {filteredPlayers.length === 0 ? (
-                <div className="bg-muted/10 border border-dashed border-border/50 rounded-[2rem] p-20 text-center flex flex-col items-center gap-4">
-                  <Search className="size-12 text-muted-foreground/30" />
-                  <p className="text-sm font-bold tracking-widest uppercase text-muted-foreground">Tidak ada atlet di kelompok ini</p>
+                <div className="bg-muted/10 border border-dashed border-border/50 rounded-lg p-12 text-center flex flex-col items-center gap-4">
+                  <Search className="size-10 text-muted-foreground/30" />
+                  <p className="text-sm font-semibold tracking-widest uppercase text-muted-foreground">Tidak ada atlet di kelompok ini</p>
                   <Button onClick={() => setSelectedGroupId(null)} variant="link" className="text-primary text-xs">Kembali ke Daftar KU</Button>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {filteredPlayers.map((player: Player) => (
-                    <div 
+                    <div
                       key={player.id}
-                      className="group glass-card p-6 rounded-2xl flex items-center justify-between hover:bg-white/5 transition-all duration-300"
+                      className="group p-4 rounded-lg border border-border/50 bg-card flex items-center justify-between hover:bg-muted/50 transition-all"
                     >
-                      <div className="flex items-center gap-5">
-                         <div className="size-14 rounded-xl bg-gradient-to-br from-primary to-primary-foreground flex items-center justify-center font-heading text-xl text-black shadow-lg">
-                           {player.name.charAt(0)}
+                      <div className="flex items-center gap-4">
+                         <div className="size-12 rounded-lg bg-primary/20 flex items-center justify-center font-heading text-base text-primary">
+                           {player.name.charAt(0).toUpperCase()}
                          </div>
-                         <div className="flex flex-col">
-                            <h4 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{player.name}</h4>
-                            <div className="flex items-center gap-3">
-                              <span className="text-[10px] font-black tracking-widest uppercase text-muted-foreground/60">UID: {player.id.split("-")[0]}</span>
-                              <span className="size-1 rounded-full bg-border" />
-                              <span className="text-[10px] font-medium text-white/40 italic">{player.schoolOrigin || "Private Enrollment"}</span>
+                         <div className="flex flex-col min-w-0">
+                            <h4 className="font-semibold text-sm text-foreground truncate">{player.name}</h4>
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <span className="tracking-widest uppercase">UID: {player.id.split("-")[0]}</span>
+                              <span className="text-muted-foreground/30">•</span>
+                              <span className="truncate">{player.schoolOrigin || "-"}</span>
                             </div>
                          </div>
                       </div>
 
-                      <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button size="icon" variant="ghost" className="size-10 rounded-xl hover:bg-primary/20 hover:text-primary" onClick={() => setEditingPlayer(player)}>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg" onClick={() => setEditingPlayer(player)}>
                             <Edit2 className="size-4" />
                          </Button>
-                         <Button size="icon" variant="ghost" className="size-10 rounded-xl hover:bg-destructive/10 hover:text-destructive" onClick={() => setDeletingPlayer(player)}>
+                         <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg" onClick={() => setDeletingPlayer(player)}>
                             <Trash2 className="size-4" />
                          </Button>
                       </div>
@@ -296,9 +296,9 @@ export default function PlayersPage() {
         </AnimatePresence>
       </div>
 
-      <footer className="mt-10 pt-10 border-t border-border/30 text-center flex flex-col items-center gap-2">
-         <p className="text-[9px] font-black uppercase tracking-[0.5em] text-muted-foreground/50">Sistem Performa ADORA Basketball © {new Date().getFullYear()}</p>
-         <div className="flex items-center gap-4 text-xs font-bold text-primary/50">
+      <footer className="mt-10 pt-10 border-t border-border/50 text-center flex flex-col items-center gap-2">
+         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/60">Sistem Performa ADORA Basketball © {new Date().getFullYear()}</p>
+         <div className="flex items-center gap-4 text-xs text-muted-foreground">
            <span>{groups?.length || 0} Kelompok Terdaftar</span>
          </div>
       </footer>

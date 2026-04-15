@@ -6,6 +6,21 @@ datasource db {
   provider = "mysql"
 }
 
+model homebase {
+  id          String    @id @default(cuid())
+  name        String    @unique
+  address     String
+  phone       String?
+  description String?   @db.Text
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  groups      group[]
+  events      event[]
+  players     player[]    // ← ADD THIS LINE
+  
+  @@map("Homebase")
+}
 model account {
   id                String  @id
   userId            String
@@ -65,50 +80,67 @@ model certificate {
 }
 
 model event {
-  id          String   @id
+  id          String    @id @default(cuid())
   title       String
-  description String?  @db.Text
+  description String?   @db.Text
   date        DateTime
-  type        String   @default("LATIHAN")
+  type        String    @default("LATIHAN")
   location    String?
+  homebaseId  String?
   groupId     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime
-  group       group?   @relation(fields: [groupId], references: [id], map: "Event_groupId_fkey")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  group       group?    @relation(fields: [groupId], references: [id], map: "Event_groupId_fkey")
+  homebase    homebase? @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Event_homebaseId_fkey")
 
   @@index([groupId], map: "Event_groupId_fkey")
+  @@index([homebaseId], map: "Event_homebaseId_idx")
   @@index([date])
+  @@map("Event")
 }
 
 model group {
-  id          String        @id
+  id          String        @id @default(cuid())
   name        String        @unique(map: "Group_name_key")
   description String?       @db.Text
+  homebaseId  String?
   createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  
+  homebase    homebase?     @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Group_homebaseId_fkey")
   certificate certificate[]
   event       event[]
   player      player[]
+  
+  @@index([homebaseId], map: "Group_homebaseId_idx")
+  @@map("Group")
 }
 
 model player {
-  id           String        @id
-  name         String
-  dateOfBirth  DateTime
-  schoolOrigin String?
-  photoUrl     String?
-  isDeleted    Boolean       @default(false)
-  groupId      String?
-  parentId     String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime
-  attendance   attendance[]
-  certificate  certificate[]
-  group        group?        @relation(fields: [groupId], references: [id], map: "Player_groupId_fkey")
-  user         user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
-  statistic    statistic[]
+  id                  String        @id @default(cuid())
+  name                String
+  dateOfBirth         DateTime
+  schoolOrigin        String?
+  photoUrl            String?
+  isDeleted           Boolean       @default(false)
+  groupId             String?
+  parentId            String?
+  preferred_homebaseId String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  
+  attendance          attendance[]
+  certificate         certificate[]
+  group               group?        @relation(fields: [groupId], references: [id], onDelete: SetNull, map: "Player_groupId_fkey")
+  user                user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
+  preferred_homebase  homebase?     @relation(fields: [preferred_homebaseId], references: [id], onDelete: SetNull, map: "Player_preferred_homebaseId_fkey")
+  statistic           statistic[]
 
   @@index([groupId], map: "Player_groupId_idx")
   @@index([parentId], map: "Player_parentId_idx")
+  @@index([preferred_homebaseId], map: "Player_preferred_homebaseId_idx")
+  @@map("Player")
 }
 
 model session {

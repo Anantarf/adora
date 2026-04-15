@@ -211,7 +211,7 @@ export default function ParentDashboard() {
                 </CardHeader>
                 <CardContent className="p-6">
                   <div className="relative p-6 bg-secondary/5 rounded-xl border border-secondary/10">
-                    <span className="absolute -top-3 -left-2 text-6xl text-primary/20 font-serif leading-none">"</span>
+                    <span className="absolute -top-3 -left-2 text-6xl text-primary/20 font-serif leading-none">&quot;</span>
                     <p className="text-sm font-medium leading-relaxed text-secondary/80 relative z-10 pl-4 border-l-2 border-primary">
                       {radarData.length > 0 && stats && (stats.at(-1)?.metricsJson?.notes || "Pelatih tidak menitipkan pesan khusus/catatan tambahan pada evaluasi bulan ini. Anak berkembang dengan sangat baik di latihan regular.")}
                     </p>

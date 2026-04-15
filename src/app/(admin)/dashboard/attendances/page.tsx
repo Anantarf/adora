@@ -19,21 +19,8 @@ import { AttendanceStatus, Player } from "@/types/dashboard";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function AttendancesPage() {
   const [activeGroup, setActiveGroup] = useState<string>("all");
@@ -47,20 +34,18 @@ export default function AttendancesPage() {
   const { data: existingAttendances } = useAttendances(date, activeGroup !== "all" ? activeGroup : undefined);
 
   // Sync DB data into editable local state when date/query changes
-  // eslint-disable-next-line react-hooks/set-state-in-effect
+  // eslint-disable-next-line
   useEffect(() => {
-    setBatchStatus(
-      Object.fromEntries(existingAttendances?.map(a => [a.playerId, a.status]) ?? [])
-    );
+    setBatchStatus(Object.fromEntries(existingAttendances?.map((a) => [a.playerId, a.status]) ?? []));
   }, [existingAttendances]);
 
   const handleStatusChange = (playerId: string, status: AttendanceStatus) => {
-    setBatchStatus(prev => ({ ...prev, [playerId]: status }));
+    setBatchStatus((prev) => ({ ...prev, [playerId]: status }));
   };
 
   const handleMarkAll = (status: AttendanceStatus) => {
     if (!players) return;
-    const updated = Object.fromEntries(players.map(p => [p.id, status]));
+    const updated = Object.fromEntries(players.map((p) => [p.id, status]));
     setBatchStatus(updated);
     toast.info(`Semua ditandai sebagai ${status}.`);
   };
@@ -76,7 +61,7 @@ export default function AttendancesPage() {
     }
 
     // Use current state snapshot to avoid stale closure
-    setBatchStatus(currentStatus => {
+    setBatchStatus((currentStatus) => {
       const playerStatuses = players.map((p) => ({
         playerId: p.id,
         status: currentStatus[p.id] || "HADIR",
@@ -98,13 +83,13 @@ export default function AttendancesPage() {
   };
 
   const statsCount = useMemo(() => {
-    if (!players) return Object.fromEntries(Object.keys(ATTENDANCE_STATUSES).map(s => [s, 0]));
+    if (!players) return Object.fromEntries(Object.keys(ATTENDANCE_STATUSES).map((s) => [s, 0]));
     return players.reduce(
       (acc, p) => {
         const status = (batchStatus[p.id] || "HADIR") as AttendanceStatus;
         return { ...acc, [status]: (acc[status] || 0) + 1 };
       },
-      Object.fromEntries(Object.keys(ATTENDANCE_STATUSES).map(s => [s, 0]))
+      Object.fromEntries(Object.keys(ATTENDANCE_STATUSES).map((s) => [s, 0])),
     );
   }, [players, batchStatus]);
 
@@ -117,12 +102,12 @@ export default function AttendancesPage() {
           <p className="text-muted-foreground text-sm font-medium tracking-wide">Buku absen kelompok (Batching Input) untuk mempermudah pelatih di lapangan.</p>
         </div>
         <div className="flex items-center gap-2">
-            {Object.entries(statsCount).map(([label, count]) => (
-                <div key={label} className="flex flex-col items-center px-4 py-1.5 bg-card border border-border/40 rounded-xl">
-                    <span className="text-[10px] font-black tracking-widest text-muted-foreground">{label}</span>
-                    <span className="text-lg font-bold text-secondary">{count}</span>
-                </div>
-            ))}
+          {Object.entries(statsCount).map(([label, count]) => (
+            <div key={label} className="flex flex-col items-center px-4 py-1.5 bg-card border border-border/40 rounded-xl">
+              <span className="text-[10px] font-black tracking-widest text-muted-foreground">{label}</span>
+              <span className="text-lg font-bold text-secondary">{count}</span>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -139,7 +124,9 @@ export default function AttendancesPage() {
               <SelectContent>
                 <SelectItem value="all">Semua Pemain Lintas Kelas</SelectItem>
                 {groups?.map((group: { id: string; name: string }) => (
-                  <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -150,61 +137,51 @@ export default function AttendancesPage() {
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Tanggal Pertemuan</label>
           <div className="relative group">
             <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary z-10" />
-            <Input 
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30 font-bold"
-            />
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30 font-bold" />
           </div>
         </div>
 
         <div className="flex items-center gap-2 ml-auto w-full md:w-auto flex-wrap">
-            <Button
-                variant="outline"
-                size="lg"
-                onClick={() => handleMarkAll("HADIR")}
-                disabled={!players || players.length === 0}
-                className="h-11 font-bold uppercase tracking-widest text-xs text-green-600 border-green-500/30 hover:bg-green-500/10 hover:text-green-600 hover:border-green-500/50 flex-1 md:flex-none"
-            >
-                Semua Hadir
-            </Button>
-            <Button
-                variant="outline"
-                size="lg"
-                onClick={() => handleMarkAll("IZIN")}
-                disabled={!players || players.length === 0}
-                className="h-11 font-bold uppercase tracking-widest text-xs text-amber-500 border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-600 hover:border-amber-500/50 flex-1 md:flex-none"
-            >
-                Semua Izin
-            </Button>
-            <Button
-                variant="outline"
-                size="lg"
-                onClick={() => handleMarkAll("SAKIT")}
-                disabled={!players || players.length === 0}
-                className="h-11 font-bold uppercase tracking-widest text-xs text-orange-500 border-orange-500/30 hover:bg-orange-500/10 hover:text-orange-600 hover:border-orange-500/50 flex-1 md:flex-none"
-            >
-                Semua Sakit
-            </Button>
-            <Button
-                variant="outline"
-                size="lg"
-                onClick={() => handleMarkAll("ALPA")}
-                disabled={!players || players.length === 0}
-                className="h-11 font-bold uppercase tracking-widest text-xs text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/50 flex-1 md:flex-none"
-            >
-                Semua Alpa
-            </Button>
-            <Button
-                size="lg"
-                onClick={handleBatchSubmit}
-                disabled={isPending || !players || players.length === 0}
-                className="h-11 font-bold uppercase tracking-widest text-xs shadow-lg shadow-primary/20 flex-1 md:flex-none"
-            >
-                {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <CheckSquare className="size-4 mr-2" />}
-                Lapor Kehadiran
-            </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => handleMarkAll("HADIR")}
+            disabled={!players || players.length === 0}
+            className="h-11 font-bold uppercase tracking-widest text-xs text-green-600 border-green-500/30 hover:bg-green-500/10 hover:text-green-600 hover:border-green-500/50 flex-1 md:flex-none"
+          >
+            Semua Hadir
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => handleMarkAll("IZIN")}
+            disabled={!players || players.length === 0}
+            className="h-11 font-bold uppercase tracking-widest text-xs text-amber-500 border-amber-500/30 hover:bg-amber-500/10 hover:text-amber-600 hover:border-amber-500/50 flex-1 md:flex-none"
+          >
+            Semua Izin
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => handleMarkAll("SAKIT")}
+            disabled={!players || players.length === 0}
+            className="h-11 font-bold uppercase tracking-widest text-xs text-orange-500 border-orange-500/30 hover:bg-orange-500/10 hover:text-orange-600 hover:border-orange-500/50 flex-1 md:flex-none"
+          >
+            Semua Sakit
+          </Button>
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => handleMarkAll("ALPA")}
+            disabled={!players || players.length === 0}
+            className="h-11 font-bold uppercase tracking-widest text-xs text-red-500 border-red-500/30 hover:bg-red-500/10 hover:text-red-600 hover:border-red-500/50 flex-1 md:flex-none"
+          >
+            Semua Alpa
+          </Button>
+          <Button size="lg" onClick={handleBatchSubmit} disabled={isPending || !players || players.length === 0} className="h-11 font-bold uppercase tracking-widest text-xs shadow-lg shadow-primary/20 flex-1 md:flex-none">
+            {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <CheckSquare className="size-4 mr-2" />}
+            Lapor Kehadiran
+          </Button>
         </div>
       </div>
 
@@ -240,23 +217,26 @@ export default function AttendancesPage() {
                 <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
                 <TableCell className="font-semibold text-secondary">{player.name}</TableCell>
                 <TableCell>
-                  <span className="inline-flex items-center rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
-                    {player.group?.name || "-"}
-                  </span>
+                  <span className="inline-flex items-center rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">{player.group?.name || "-"}</span>
                 </TableCell>
                 <TableCell>
-                  <Select 
-                    value={batchStatus[player.id] || "HADIR"} 
-                    onValueChange={(val: string | null) => handleStatusChange(player.id, (val as AttendanceStatus) || "HADIR")}
-                  >
+                  <Select value={batchStatus[player.id] || "HADIR"} onValueChange={(val: string | null) => handleStatusChange(player.id, (val as AttendanceStatus) || "HADIR")}>
                     <SelectTrigger className="w-full h-9 font-black hover:border-primary/50 text-[10px] tracking-widest uppercase">
                       <SelectValue placeholder="STATUS" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="HADIR"><span className="text-green-600 font-black tracking-widest">HADIR</span></SelectItem>
-                      <SelectItem value="IZIN"><span className="text-amber-500 font-black tracking-widest">IZIN</span></SelectItem>
-                      <SelectItem value="SAKIT"><span className="text-orange-500 font-black tracking-widest">SAKIT</span></SelectItem>
-                      <SelectItem value="ALPA"><span className="text-destructive font-black tracking-widest">ALPA</span></SelectItem>
+                      <SelectItem value="HADIR">
+                        <span className="text-green-600 font-black tracking-widest">HADIR</span>
+                      </SelectItem>
+                      <SelectItem value="IZIN">
+                        <span className="text-amber-500 font-black tracking-widest">IZIN</span>
+                      </SelectItem>
+                      <SelectItem value="SAKIT">
+                        <span className="text-orange-500 font-black tracking-widest">SAKIT</span>
+                      </SelectItem>
+                      <SelectItem value="ALPA">
+                        <span className="text-destructive font-black tracking-widest">ALPA</span>
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </TableCell>

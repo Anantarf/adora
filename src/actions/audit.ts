@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import type { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -18,10 +19,7 @@ export type AuditLogRecord = {
 };
 
 // 1. List audit logs (Admin only) — paginated via cursor
-export async function getAuditLogsAction(options?: {
-  take?: number;
-  cursor?: string;
-}): Promise<{ logs: AuditLogRecord[]; nextCursor: string | null }> {
+export async function getAuditLogsAction(options?: { take?: number; cursor?: string }): Promise<{ logs: AuditLogRecord[]; nextCursor: string | null }> {
   await requireAdmin();
 
   const take = options?.take || 50;
@@ -46,15 +44,15 @@ export async function getAuditLogsAction(options?: {
 
 // 2. Log an audit action — Internal function for transactions
 export async function createAuditLog(
-  tx: any, // Prisma Transaction Client
+  tx: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   action: string,
   targetTable: string,
-  recordId?: string
+  recordId?: string,
 ) {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as { id?: string })?.id || null;
 
-    return await tx.auditlog.create({
+  return await tx.auditlog.create({
     data: {
       id: crypto.randomUUID(),
       action,
@@ -66,11 +64,7 @@ export async function createAuditLog(
 }
 
 // 3. Log an audit action — Public Server Action
-export async function createAuditLogAction(
-  action: string,
-  targetTable: string,
-  recordId?: string
-) {
+export async function createAuditLogAction(action: string, targetTable: string, recordId?: string) {
   try {
     await prisma.$transaction(async (tx) => {
       await createAuditLog(tx, action, targetTable, recordId);

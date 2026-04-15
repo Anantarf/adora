@@ -6,6 +6,8 @@ export type Group = {
   id: string;
   name: string;
   description: string | null;
+  homebaseId: string | null;
+  homebase: { id: string; name: string } | null;
   _count?: {
     player: number;
   };
@@ -37,7 +39,7 @@ export const useUpdateGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name?: string; description?: string } }) =>
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; description?: string; homebaseId?: string | null } }) =>
       updateGroupAction(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });

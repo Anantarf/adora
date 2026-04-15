@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Bebas_Neue } from "next/font/google";
+import { Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
 
 // Body Font Base
-const plusJakartaSans = Plus_Jakarta_Sans({
+const poppins = Poppins({
   variable: "--font-sans",
+  weight: ["400", "500", "600", "700", "800"],
   subsets: ["latin"],
 });
 
 // Title Heading Font
-const bebasNeue = Bebas_Neue({
+const montserrat = Montserrat({
   variable: "--font-heading",
-  weight: "400",
+  weight: ["600", "700", "800", "900"],
   subsets: ["latin"],
 });
 
@@ -30,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={`${plusJakartaSans.variable} ${bebasNeue.variable} dark scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="id" className={`${poppins.variable} ${montserrat.variable} dark scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`antialiased min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground`}>
         <Providers>
           {children}

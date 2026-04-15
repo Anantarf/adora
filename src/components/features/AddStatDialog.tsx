@@ -82,13 +82,11 @@ export function AddStatDialog({ player, date }: { player: Player; date: string }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger 
-        render={
-          <Button size="sm" variant="outline" className="h-8 border-primary/30 text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-[10px]">
-            <LineChart className="size-3 lg:mr-2" /> <span className="hidden lg:inline">Input Nilai</span>
-          </Button>
-        } 
-      />
+      <DialogTrigger>
+        <Button size="sm" variant="outline" className="h-8 border-primary/30 text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-xs">
+          <LineChart className="size-3 lg:mr-2" /> <span className="hidden lg:inline">Input Nilai</span>
+        </Button>
+      </DialogTrigger>
 
       <DialogContent className="sm:max-w-[450px] bg-card border-border/50">
         <DialogHeader>
@@ -130,17 +128,17 @@ export function AddStatDialog({ player, date }: { player: Player; date: string }
 
           {/* Chart Preview */}
           <div className="pt-4 border-t border-border/50">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">Preview Performa</p>
-            <ResponsiveContainer width="100%" height={240}>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Preview Performa</p>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" style={{ fontSize: "10px" }} />
-                <YAxis stroke="rgba(255,255,255,0.4)" domain={[0, 100]} style={{ fontSize: "10px" }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
+                <XAxis dataKey="name" stroke="currentColor" opacity={0.4} style={{ fontSize: "11px" }} />
+                <YAxis stroke="currentColor" opacity={0.4} domain={[0, 100]} style={{ fontSize: "11px" }} />
                 <Tooltip
-                  contentStyle={{ backgroundColor: "rgba(20,20,20,0.95)", border: "1px solid rgba(212,175,55,0.3)", borderRadius: "8px" }}
+                  contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px" }}
                   formatter={(value) => [`${value}`, "Nilai"]}
                 />
-                <Bar dataKey="value" fill="rgba(212,175,55,0.8)" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

@@ -7,14 +7,7 @@ import { useAddUser } from "@/hooks/use-users";
 import { Loader2, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 
 /**
@@ -24,7 +17,10 @@ import { useState } from "react";
 
 const userSchema = z.object({
   name: z.string().min(3, "Nama minimal 3 karakter"),
-  username: z.string().min(4, "Username minimal 4 karakter").regex(/^[a-z0-9_]+$/, "Hanya huruf kecil, angka, dan underscore"),
+  username: z
+    .string()
+    .min(4, "Username minimal 4 karakter")
+    .regex(/^[a-z0-9_]+$/, "Hanya huruf kecil, angka, dan underscore"),
   email: z.string().email("Email tidak valid").optional().or(z.literal("")),
   password: z.string().min(6, "Password minimal 6 karakter"),
 });
@@ -35,14 +31,19 @@ export function AddUserDialog() {
   const [open, setOpen] = useState(false);
   const { mutateAsync: addUser, isPending } = useAddUser();
 
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<UserForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<UserForm>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       name: "",
       username: "",
       email: "",
       password: "adora123",
-    }
+    },
   });
 
   const onSubmit = async (data: UserForm) => {
@@ -69,14 +70,12 @@ export function AddUserDialog() {
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-[425px] bg-card border-border/50">
+      <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
             <UserPlus className="size-5 text-primary" /> Buat Akun Parent
           </DialogTitle>
-          <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">
-            Username dan password default ini akan digunakan untuk login Orang Tua.
-          </DialogDescription>
+          <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Username dan password default ini akan digunakan untuk login Orang Tua.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -93,7 +92,9 @@ export function AddUserDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Email <span className="opacity-50">(Opsional)</span></label>
+            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">
+              Email <span className="opacity-50">(Opsional)</span>
+            </label>
             <Input {...register("email")} placeholder="parent@example.com" className="h-11 bg-background/50" />
           </div>
 

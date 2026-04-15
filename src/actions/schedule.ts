@@ -5,17 +5,18 @@ import { requireAdmin } from "@/lib/server-auth";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 import { ScheduleEvent } from "@/types/dashboard";
-import { getJakartaToday } from "@/lib/date-utils";
+import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
+import { createAuditLog } from "./audit";
 
 export async function getEventsAction(): Promise<ScheduleEvent[]> {
   await requireAdmin();
-  
+
   try {
     const events = await prisma.event.findMany({
       orderBy: { date: "asc" },
       include: {
-        group: { select: { name: true } }
-      }
+        group: { select: { name: true } },
+      },
     });
     return events as ScheduleEvent[];
   } catch (error) {
@@ -30,7 +31,7 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
 
     const events = await prisma.event.findMany({
       where: {
-        date: { gte: todayWib }
+        date: { gte: todayWib },
       },
       orderBy: { date: "asc" },
       take: 6,
@@ -41,7 +42,7 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
         date: true,
         type: true,
         location: true,
-      }
+      },
     });
 
     return events as Partial<ScheduleEvent>[];
@@ -51,30 +52,27 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
   }
 }
 
-export async function createEventAction(data: {
-  title: string;
-  description?: string;
-  date: string;
-  type: string;
-  location?: string;
-  groupId?: string;
-}) {
+export async function createEventAction(data: { title: string; description?: string; date: string; type: string; location?: string; groupId?: string; homebaseId?: string }) {
   await requireAdmin();
-  
+
   try {
-    await prisma.event.create({
+    await prisma.$transaction(async (tx) => {
+      const ev = await tx.event.create({
         data: {
           id: crypto.randomUUID(),
           title: data.title,
           description: data.description || null,
-          date: new Date(data.date),
+          date: toJakartaDate(data.date),
           type: data.type,
           location: data.location || null,
           groupId: data.groupId || null,
+          homebaseId: data.homebaseId || null,
           updatedAt: new Date(),
-        }
+        },
       });
-    
+      await createAuditLog(tx, "CREATE", "event", ev.id);
+    });
+
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/schedule");
     return { success: true };
@@ -84,11 +82,44 @@ export async function createEventAction(data: {
   }
 }
 
+export async function updateEventAction(id: string, data: { title: string; description?: string; date: string; type: string; location?: string; groupId?: string; homebaseId?: string }) {
+  await requireAdmin();
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.event.update({
+        where: { id },
+        data: {
+          title: data.title,
+          description: data.description || null,
+          date: toJakartaDate(data.date),
+          type: data.type,
+          location: data.location || null,
+          groupId: data.groupId || null,
+          homebaseId: data.homebaseId || null,
+          updatedAt: new Date(),
+        },
+      });
+      await createAuditLog(tx, "UPDATE", "event", id);
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/dashboard/schedule");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating event:", error);
+    throw new Error("Gagal mengubah jadwal");
+  }
+}
+
 export async function deleteEventAction(id: string) {
   await requireAdmin();
-  
+
   try {
-    await prisma.event.delete({ where: { id } });
+    await prisma.$transaction(async (tx) => {
+      await tx.event.delete({ where: { id } });
+      await createAuditLog(tx, "DELETE", "event", id);
+    });
     revalidatePath("/dashboard");
     revalidatePath("/dashboard/schedule");
     return { success: true };

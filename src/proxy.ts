@@ -6,7 +6,7 @@ import { getToken } from "next-auth/jwt";
  * ADORA Basketball - Global Unified Middleware
  * Menggabungkan Security Headers dan Proteksi Role-Based (NextAuth).
  */
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const response = NextResponse.next();
 
@@ -15,14 +15,8 @@ export async function middleware(request: NextRequest) {
   response.headers.set("X-Content-Type-Options", "nosniff");
   response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   response.headers.set("X-XSS-Protection", "1; mode=block");
-  response.headers.set(
-    "Strict-Transport-Security",
-    "max-age=31536000; includeSubDomains; preload"
-  );
-  response.headers.set(
-    "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;"
-  );
+  response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  response.headers.set("Content-Security-Policy", "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;");
 
   // --- 2. LAYER CORS ---
   const origin = request.headers.get("origin");
@@ -37,19 +31,12 @@ export async function middleware(request: NextRequest) {
   })();
   if (isCrossOrigin) {
     if (pathname.startsWith("/api/")) {
-      return new NextResponse(
-        JSON.stringify({ error: "Terdeteksi Akses Lintas Asal (CORS) yang Tidak Diizinkan." }),
-        { status: 403, headers: { "Content-Type": "application/json" } }
-      );
+      return new NextResponse(JSON.stringify({ error: "Terdeteksi Akses Lintas Asal (CORS) yang Tidak Diizinkan." }), { status: 403, headers: { "Content-Type": "application/json" } });
     }
   }
 
   // --- 3. LAYER OTORISASI (Role-Based Access Control) ---
-  const isProtectedRoute =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/parent") ||
-    pathname.startsWith("/api/admin") ||
-    pathname.startsWith("/api/parent");
+  const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/parent") || pathname.startsWith("/api/admin") || pathname.startsWith("/api/parent");
 
   if (isProtectedRoute) {
     const token = await getToken({
@@ -68,11 +55,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // C. Proteksi Parent (/parent) — hanya PARENT dan ADMIN yang boleh
-    if (
-      pathname.startsWith("/parent") &&
-      token.role !== "PARENT" &&
-      token.role !== "ADMIN"
-    ) {
+    if (pathname.startsWith("/parent") && token.role !== "PARENT" && token.role !== "ADMIN") {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
@@ -87,7 +70,5 @@ export async function middleware(request: NextRequest) {
 
 // Konfigurasi Matcher: semua route kecuali static & auth NextAuth
 export const config = {
-  matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
 };

@@ -2,18 +2,20 @@ import Link from "next/link";
 import { Starfield } from "@/components/ui/starfield";
 import { ClubSchedule } from "@/components/club-schedule";
 import { getPublicEventsAction } from "@/actions/schedule";
+import { getPublicHomebases } from "@/actions/homebase";
 import { type ScheduleEvent } from "@/types/dashboard";
 import { Metadata } from "next";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 import { HeroCarousel } from "@/components/features/hero-carousel";
+import { HomebaseSection } from "@/components/features/homebase-section";
 
 export const metadata: Metadata = {
 // ... existing Metadata & Constants ...
   title: "ADORA Basketball Club — Official Page",
-  description: "Pusat pembinaan bola basket untuk usia 7–18 tahun. Adora Basketball Club membentuk atlet muda berkarakter, berprestasi, dan siap bersaing di KEJURKOT, ASBC, dan Liga Basket Depok.",
+  description: "Klub bola basket Depok untuk usia 7–18 tahun. ADORA BBC membentuk atlet muda berkarakter melalui pelatihan modern — KEJURKOT, ASBC, dan Liga Basket Depok.",
   openGraph: {
     title: "ADORA Basketball Club",
-    description: "Membentuk masa depan bola basket Indonesia melalui pelatihan modern dan kompetitif.",
+    description: "Karakter. Prestasi. Kejuaraan. ADORA Basketball Club — membentuk atlet muda Depok yang siap bersaing di level nasional.",
     url: "https://adora.club",
     siteName: "ADORA Basketball",
     locale: "id_ID",
@@ -28,6 +30,7 @@ const NAV_LINKS = [
   { label: "Program", href: "#program" },
   { label: "Galeri", href: "#galeri" },
   { label: "Jadwal", href: "#jadwal" },
+  { label: "Lokasi", href: "#lokasi" },
   { label: "Daftar", href: "#daftar" },
 ];
 
@@ -91,9 +94,9 @@ const REGISTRATION_STEPS = [
 ];
 
 const CONTACT_INFO = {
-  whatsapp: "08388724552",
+  whatsapp: "6281213043753",
   email: "admin@adora.club",
-  address: "Home Court, Jakarta",
+  address: "Home Court, Cinere-Depok",
   instagram: "@adorabbc",
   tiktok: "adora_bbc",
 };
@@ -104,14 +107,15 @@ const CONTACT_INFO = {
 
 export default async function LandingPage() {
   const eventsResult = await getPublicEventsAction();
-  const events = (eventsResult as unknown as ScheduleEvent[]) || [];
+  const events       = (eventsResult as unknown as ScheduleEvent[]) || [];
+  const homebases    = await getPublicHomebases();
 
   return (
-    <main className="min-h-screen bg-[#0d0d0d] text-foreground relative overflow-hidden">
+    <main className="min-h-screen bg-[#0d0d0d] text-white relative overflow-hidden">
       <Starfield />
 
       {/* ── Sticky Navbar ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0d0d0d]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10/10 bg-[#0d0d0d]/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
 
           {/* Logo — clickable, scrolls to top */}
@@ -127,7 +131,7 @@ export default async function LandingPage() {
               <a
                 key={href}
                 href={href}
-                className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-primary transition-colors"
+                className="text-[10px] font-bold uppercase tracking-widest text-white/60 hover:text-primary transition-colors"
               >
                 {label}
               </a>
@@ -163,7 +167,7 @@ export default async function LandingPage() {
           </FadeIn>
           
           <FadeIn delay={0.3} direction="up">
-            <p className="font-heading text-xl md:text-3xl tracking-[0.5em] uppercase text-white/40 mb-8">
+            <p className="font-heading text-xl md:text-3xl tracking-[0.5em] uppercase text-white/60 mb-8">
               Basketball Club
             </p>
           </FadeIn>
@@ -173,9 +177,12 @@ export default async function LandingPage() {
           </FadeIn>
 
           <FadeIn delay={0.5} direction="up">
-            <p className="text-sm md:text-base text-white/60 max-w-xl mx-auto mb-10 leading-relaxed">
-              Klub basket untuk usia 7–18 tahun. Dari latihan rutin,
-              sparing day, Camp ADORA, hingga KEJURKOT dan kompetisi nasional.
+            <p className="font-heading text-lg md:text-xl text-secondary tracking-widest uppercase mb-4 drop-shadow-md italic">
+              "Sport Fun and Friendship"
+            </p>
+            <p className="text-sm md:text-base text-white/80 max-w-xl mx-auto mb-10 leading-relaxed font-medium">
+              Klub basket Depok untuk usia 7–18 tahun. Dari latihan rutin,
+              sparing day, Camp ADORA, hingga KEJURKOT, ASBC, dan Liga Basket Depok.
             </p>
           </FadeIn>
 
@@ -191,12 +198,12 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Stats Bar ── */}
-      <div className="relative z-10 w-full border-y border-white/8 bg-primary/[0.04]">
+      <div className="relative z-10 w-full border-y border-white/8 bg-primary/[0.04] border-y border-white/8">
         {/* dl/dt/dd — semantic untuk data statistik */}
         <StaggerContainer className="container mx-auto px-4 py-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center" delay={0.15}>
           {STATS.map(({ value, label }) => (
             <StaggerItem key={label}>
-              <dt className="text-white/40 text-[9px] font-bold uppercase tracking-[0.3em] mb-1">
+              <dt className="text-white/25 text-[9px] font-bold uppercase tracking-[0.3em] mb-1">
                 {label}
               </dt>
               <dd className="font-heading text-2xl md:text-3xl text-primary tracking-widest">
@@ -215,18 +222,18 @@ export default async function LandingPage() {
           </h2>
         </FadeIn>
         <StaggerContainer className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto" delay={0.2}>
-          <StaggerItem className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/[0.08] transition-colors">
+          <StaggerItem className="bg-white/[0.025]/5 border border-white/10 rounded-2xl p-8 hover:bg-white/[0.025]/[0.08] transition-colors">
             <div className="text-primary text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Visi</div>
-            <p className="text-white/70 leading-relaxed text-sm">
+            <p className="text-white/50 leading-relaxed text-sm">
               Menjadi pusat pembinaan basket terdepan di Indonesia yang menghasilkan
               atlet berintegritas dan berprestasi.
             </p>
           </StaggerItem>
-          <StaggerItem className="bg-white/5 border border-white/10 rounded-2xl p-8 hover:bg-white/[0.08] transition-colors">
+          <StaggerItem className="bg-white/[0.025]/5 border border-white/10 rounded-2xl p-8 hover:bg-white/[0.025]/[0.08] transition-colors">
             <div className="text-primary text-[10px] font-bold uppercase tracking-[0.3em] mb-4">Misi</div>
             <ul className="space-y-3">
               {MISSION_POINTS.map((point) => (
-                <li key={point} className="flex gap-3 text-white/70 text-sm leading-relaxed">
+                <li key={point} className="flex gap-3 text-white/50 text-sm leading-relaxed">
                   <span className="text-primary shrink-0 mt-0.5" aria-hidden="true">—</span>
                   {point}
                 </li>
@@ -248,7 +255,7 @@ export default async function LandingPage() {
             {PROGRAMS.map(({ label, ages, desc, icon }) => (
               <StaggerItem
                 key={label}
-                className="group bg-white/5 border border-white/10 hover:border-primary/40 rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/[0.08] hover:-translate-y-2 hover:shadow-[0_10px_40px_rgba(212,175,55,0.1)]"
+                className="group bg-white/[0.025]/5 border border-white/10 hover:border-primary/40 rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/[0.025]/[0.08] hover:-translate-y-2 hover:shadow-[0_10px_40px_rgba(212,175,55,0.1)]"
               >
                 <div className="text-4xl mb-5" aria-hidden="true">{icon}</div>
                 <div className="font-heading text-4xl text-white tracking-widest mb-1 group-hover:text-primary transition-colors">
@@ -311,15 +318,22 @@ export default async function LandingPage() {
         </StaggerContainer>
       </section>
 
-      {/* ── Jadwal Klub ── */}
+      {/* ── Input Jadwal Klub ── */}
       <div className="relative z-10 w-full border-y border-white/8 bg-white/[0.025]">
         <section id="jadwal" className="container mx-auto px-4 py-24">
           <h2 className="font-heading text-4xl text-primary uppercase tracking-widest mb-12 text-center">
-            Jadwal Klub
+            Input Jadwal Klub
           </h2>
           <ClubSchedule initialEvents={events} />
         </section>
       </div>
+
+      {/* ── Lokasi Homebase ── */}
+      {homebases.length > 0 && (
+        <div id="lokasi" className="relative z-10">
+          <HomebaseSection homebases={homebases} />
+        </div>
+      )}
 
       {/* ── Cara Mendaftar ── */}
       <section id="daftar" className="container mx-auto px-4 py-24 relative z-10">
@@ -337,12 +351,40 @@ export default async function LandingPage() {
               <h3 className="font-heading text-xl text-white uppercase tracking-widest mb-3">
                 {title}
               </h3>
-              <p className="text-white/60 text-sm leading-relaxed">
+              <p className="text-white/50 text-sm leading-relaxed">
                 {desc}
               </p>
             </StaggerItem>
           ))}
         </StaggerContainer>
+
+        {/* Pricing & Integration */}
+        <FadeIn delay={0.4} direction="up" className="max-w-3xl mx-auto mb-16 bg-white/[0.025]/5 border border-white/10 rounded-3xl p-8 backdrop-blur-sm">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div className="space-y-4">
+              <h3 className="font-heading text-2xl text-primary tracking-widest uppercase">Biaya & Iuran</h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-white/80">
+                  <span>Pendaftaran <span className="text-white/60 text-xs">(Termasuk Iuran Bln 1)</span></span>
+                  <span className="font-bold text-lg">Rp 470.000</span>
+                </div>
+                <div className="flex justify-between items-center text-white/80">
+                  <span>Iuran Bulanan</span>
+                  <span className="font-bold text-lg">Rp 350.000</span>
+                </div>
+              </div>
+            </div>
+            <div className="md:border-l border-white/10 md:pl-8 space-y-4">
+               <h3 className="font-heading text-xl text-primary tracking-widest uppercase">Pembayaran</h3>
+               <div className="bg-[#111113] border border-primary/20 rounded-xl p-4">
+                  <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Transfer Bank</p>
+                  <p className="font-bold text-white text-lg">BNI 1227456425</p>
+                  <p className="text-sm text-white/80">a.n. Dodi Aminullah</p>
+               </div>
+               <p className="text-xs text-white/50 italic text-center">* Pembayaran tunai juga dapat dilakukan saat jadwal latihan.</p>
+            </div>
+          </div>
+        </FadeIn>
 
         {/* CTA Button */}
         <FadeIn delay={0.6} direction="up" className="text-center">
@@ -368,9 +410,9 @@ export default async function LandingPage() {
               <Link href="/" className="font-heading text-3xl tracking-widest uppercase text-white block mb-3 hover:text-primary transition-colors">
                 ADORA <span className="text-primary">BC</span>
               </Link>
-              <p className="text-white/40 text-xs leading-relaxed">
-                Membentuk generasi atlet basket berkarakter, berprestasi, dan siap
-                bersaing di tingkat nasional.
+              <p className="text-white/60 text-xs leading-relaxed">
+                Membentuk atlet basket berkarakter, berprestasi, dan siap
+                bersaing — dari Depok untuk Indonesia.
               </p>
             </div>
 
@@ -380,7 +422,7 @@ export default async function LandingPage() {
               <ul className="space-y-2.5">
                 {NAV_LINKS.map(({ label, href }) => (
                   <li key={href}>
-                    <a href={href} className="text-xs text-white/40 hover:text-primary transition-colors font-medium">
+                    <a href={href} className="text-xs text-white/60 hover:text-primary transition-colors font-medium">
                       {label}
                     </a>
                   </li>
@@ -391,7 +433,7 @@ export default async function LandingPage() {
             {/* Contact — <address> adalah tag semantik untuk info kontak */}
             <address className="not-italic">
               <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/25 mb-4">Kontak</div>
-              <ul className="space-y-2.5 text-xs text-white/40 font-medium">
+              <ul className="space-y-2.5 text-xs text-white/60 font-medium">
                 <li>
                   <a href={`https://wa.me/${CONTACT_INFO.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                     💬 {CONTACT_INFO.whatsapp}
@@ -423,7 +465,7 @@ export default async function LandingPage() {
 
           {/* Bottom bar */}
           <div className="border-t border-white/8 pt-6 flex flex-col md:flex-row items-center justify-between gap-3">
-            <p className="text-white/20 text-[10px] font-medium">
+            <p className="text-white/25 text-[10px] font-medium">
               &copy; {new Date().getFullYear()} ADORA Basketball Club &ndash; Semua hak cipta dilindungi.
             </p>
             <Link

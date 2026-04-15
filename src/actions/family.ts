@@ -6,9 +6,9 @@ import { authOptions } from "@/lib/auth";
 
 export async function getFamilyPlayersAction() {
   const session = await getServerSession(authOptions);
-  
-  const userId = (session?.user as any)?.id;
-  
+
+  const userId = (session?.user as { id?: string })?.id;
+
   if (!userId) {
     throw new Error("Sesi tidak valid");
   }
@@ -20,8 +20,8 @@ export async function getFamilyPlayersAction() {
     },
     include: {
       group: {
-        select: { id: true, name: true }
-      }
+        select: { id: true, name: true },
+      },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -32,6 +32,6 @@ export async function getParentsAction() {
   return await prisma.user.findMany({
     where: { role: "PARENT" },
     select: { id: true, name: true, username: true },
-    orderBy: { name: "asc" }
+    orderBy: { name: "asc" },
   });
 }

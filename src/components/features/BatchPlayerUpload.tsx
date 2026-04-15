@@ -83,23 +83,23 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-primary/5 rounded-2xl p-4 border border-primary/20 flex gap-3 items-start">
+      <div className="bg-primary/5 rounded-lg p-4 border border-primary/20 flex gap-3 items-start">
         <Info className="size-5 text-primary shrink-0 mt-0.5" />
         <div className="space-y-1">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-primary">Panduan Format File</p>
-          <p className="text-[10px] text-muted-foreground leading-relaxed">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">Panduan Format File</p>
+          <p className="text-xs text-muted-foreground leading-relaxed">
             Pastikan file .csv memiliki header: <code className="text-primary font-bold">name, dateOfBirth, schoolOrigin, groupId</code>. Format tanggal: YYYY-MM-DD. Kolom parentId opsional.
           </p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Default Orang Tua / Wali</label>
+        <label className="text-xs uppercase font-semibold tracking-widest text-muted-foreground">Default Orang Tua / Wali</label>
         <Select value={defaultParentId} onValueChange={(val) => setDefaultParentId(val || "")} disabled={isParentsLoading || isProcessing}>
-          <SelectTrigger className="h-11 rounded-xl bg-background/40">
+          <SelectTrigger className="h-11 bg-background/50">
             <SelectValue placeholder={isParentsLoading ? "Memuat..." : "Pilih Akun Penanggung Jawab"} />
           </SelectTrigger>
-          <SelectContent className="rounded-xl">
+          <SelectContent>
             {parents?.map((parent) => (
               <SelectItem key={parent.id} value={parent.id} className="font-medium text-sm">
                 {parent.name || parent.username || parent.id}
@@ -113,28 +113,28 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
         {!selectedFile ? (
           <div
             onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-border/40 rounded-[2rem] p-12 
+            className="border-2 border-dashed border-border/40 rounded-lg p-12
             flex flex-col items-center justify-center gap-4 cursor-pointer
-            transition-all duration-300 hover:border-primary/50 hover:bg-primary/5 group"
+            transition-all hover:border-primary/50 hover:bg-primary/5"
           >
             <input type="file" ref={fileInputRef} className="hidden" accept=".csv" onChange={handleFileChange} />
-            <div className="size-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+            <div className="size-16 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
               <FileUp className="size-8" />
             </div>
             <div className="text-center">
               <h4 className="font-heading text-sm uppercase tracking-widest text-foreground">Pilih File CSV</h4>
-              <p className="text-[10px] font-medium text-muted-foreground uppercase opacity-60">Baris data tidak terbatas</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase opacity-60">Baris data tidak terbatas</p>
             </div>
           </div>
         ) : (
-          <div className="glass-card p-6 rounded-2xl flex items-center justify-between animate-in zoom-in-95 duration-200">
+          <div className="p-6 rounded-lg border border-border/50 bg-card flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+              <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <FileSpreadsheet className="size-6" />
               </div>
               <div>
                 <h4 className="text-sm font-bold truncate max-w-[200px]">{selectedFile.name}</h4>
-                <p className="text-[10px] text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
+                <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
               </div>
             </div>
             <Button variant="ghost" size="icon" onClick={() => setSelectedFile(null)} disabled={isProcessing} className="hover:text-destructive">
@@ -145,16 +145,16 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
 
         {isProcessing && (
           <div className="space-y-3">
-            <Progress value={progress} className="h-1.5" />
+            <Progress value={progress} className="h-2" />
             <div className="flex items-center justify-center gap-2 text-primary">
               <Loader2 className="size-4 animate-spin" />
-              <span className="text-[10px] font-black uppercase tracking-widest">Sinkronisasi {progress}%</span>
+              <span className="text-xs font-semibold uppercase tracking-widest">Sinkronisasi {progress}%</span>
             </div>
           </div>
         )}
 
         <Button
-          className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-[0.3em] text-xs shadow-xl shadow-primary/20 rounded-2xl"
+          className="w-full h-11 font-bold uppercase tracking-widest text-xs"
           onClick={startUpload}
           disabled={!selectedFile || isProcessing}
         >

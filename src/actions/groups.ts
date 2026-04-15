@@ -7,7 +7,7 @@ import { createAuditLog } from "./audit";
 import crypto from "crypto";
 
 // ─── Helper: Build group update data ────────────────────────────────────────
-const buildGroupUpdateData = (data: { name?: string; description?: string | undefined }) =>
+const buildGroupUpdateData = (data: { name?: string; description?: string | undefined; homebaseId?: string | null }) =>
   Object.fromEntries(
     Object.entries(data).filter(([_, v]) => v !== undefined)
   );
@@ -18,6 +18,7 @@ export async function getGroupsAction() {
     return await prisma.group.findMany({
       orderBy: { name: "asc" },
       include: {
+        homebase: { select: { id: true, name: true } },
         _count: {
           select: {
             player: { where: { isDeleted: false } }
@@ -31,7 +32,7 @@ export async function getGroupsAction() {
   }
 }
 
-export async function addGroupAction(data: { name: string; description?: string }) {
+export async function addGroupAction(data: { name: string; description?: string; homebaseId?: string | null }) {
   await requireAdmin();
   try {
     const group = await prisma.$transaction(async (tx) => {
@@ -40,6 +41,7 @@ export async function addGroupAction(data: { name: string; description?: string 
           id: crypto.randomUUID(),
           name: data.name,
           description: data.description || null,
+          homebaseId: data.homebaseId || null,
         },
       });
 
@@ -55,7 +57,7 @@ export async function addGroupAction(data: { name: string; description?: string 
   }
 }
 
-export async function updateGroupAction(id: string, data: { name?: string; description?: string }) {
+export async function updateGroupAction(id: string, data: { name?: string; description?: string; homebaseId?: string | null }) {
   await requireAdmin();
   try {
     const updated = await prisma.$transaction(async (tx) => {
