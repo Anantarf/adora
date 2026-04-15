@@ -57,16 +57,13 @@ function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) 
       </div>
 
       <div className="flex-1 min-w-0">
-        {/* Title row + badge: flex-wrap agar badge turun kalau title panjang */}
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mb-1.5">
-          <p className="font-bold text-foreground text-sm leading-snug min-w-0">
-            {ev.title}{ev.group ? ` · ${ev.group.name}` : ""}
-          </p>
-          <span className="flex-shrink-0 flex items-center gap-1 text-[9px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md">
-            <Clock className="size-2.5" />
-            {countdownLabel}
-          </span>
-        </div>
+        <p className="font-bold text-foreground text-sm leading-snug break-words mb-1.5">
+          {ev.title}{ev.group ? ` · ${ev.group.name}` : ""}
+        </p>
+        <span className="inline-flex items-center gap-1 text-[9px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md mb-1.5">
+          <Clock className="size-2.5" />
+          {countdownLabel}
+        </span>
 
         <div className="flex items-center gap-1.5">
           <CalendarDays className="size-3 text-muted-foreground flex-shrink-0" />
