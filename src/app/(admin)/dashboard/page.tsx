@@ -46,7 +46,7 @@ function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) 
 
   return (
     <div
-      className="group flex items-center gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-default animate-card-in"
+      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-default animate-card-in"
       style={{ animationDelay: `${delay}ms`, animationFillMode: "both" } as React.CSSProperties}
     >
       <div
@@ -70,9 +70,9 @@ function UpcomingEventCard({ ev, delay }: { ev: ScheduleEvent; delay: number }) 
           <span className="text-xs text-muted-foreground font-medium">{DATE_FORMATTER.format(evDate)}</span>
         </div>
         {ev.location && (
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <MapPin className="size-3 text-muted-foreground flex-shrink-0 mt-0.5 self-start" />
-            <span className="text-xs text-muted-foreground break-words">{ev.location}</span>
+          <div className="flex items-start gap-1.5 mt-0.5 min-w-0">
+            <MapPin className="size-3 text-muted-foreground flex-shrink-0 mt-0.5" />
+            <span className="text-xs text-muted-foreground truncate">{ev.location}</span>
           </div>
         )}
       </div>
