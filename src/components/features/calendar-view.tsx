@@ -145,7 +145,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                 </div>
 
                 <div className="p-6 pt-4 space-y-5 overflow-hidden">
-                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight break-all">{selectedEvent.originalTitle}</DialogTitle>
+                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight break-words">{selectedEvent.originalTitle}</DialogTitle>
 
                   {/* Tanggal */}
                   <div className="flex items-start gap-3 min-w-0">
@@ -177,7 +177,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                       </div>
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
-                        <div className="text-sm font-semibold text-white/80 break-all">{selectedEvent.location}</div>
+                        <div className="text-sm font-semibold text-white/80 break-words">{selectedEvent.location}</div>
                       </div>
                     </div>
                   )}
