@@ -129,7 +129,7 @@ export function CalendarView({ events }: CalendarViewProps) {
             const cfg = getEventConfig(selectedEvent.type);
             const Icon = cfg.icon;
             return (
-              <DialogContent className="bg-background border-primary/20 text-white sm:max-w-100 p-0 overflow-hidden">
+              <DialogContent className="bg-background border-primary/20 text-white w-[calc(100vw-2rem)] sm:max-w-100 p-0 overflow-hidden">
                 {/* Header */}
                 <div className="relative h-28 flex items-center justify-center overflow-hidden" style={{ backgroundColor: cfg.color + "22" }}>
                   <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 10px)" }} />
@@ -144,26 +144,26 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <div className="absolute bottom-0 left-0 w-full h-8 bg-linear-to-t from-[#0f0f11] to-transparent" />
                 </div>
 
-                <div className="p-6 pt-4 space-y-5">
-                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight break-words">{selectedEvent.originalTitle}</DialogTitle>
+                <div className="p-6 pt-4 space-y-5 overflow-hidden">
+                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight break-all">{selectedEvent.originalTitle}</DialogTitle>
 
                   {/* Tanggal */}
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
                     <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                       <CalendarDays size={14} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Hari & Tanggal</div>
-                      <div className="text-sm font-semibold text-white/80">{formatJakarta(selectedEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+                      <div className="text-sm font-semibold text-white/80 break-words">{formatJakarta(selectedEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
                     </div>
                   </div>
 
                   {/* Waktu */}
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-3 min-w-0">
                     <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                       <Clock size={14} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Waktu</div>
                       <div className="text-sm font-semibold text-white/80">{formatJakarta(selectedEvent.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
                     </div>
@@ -171,26 +171,26 @@ export function CalendarView({ events }: CalendarViewProps) {
 
                   {/* Lokasi */}
                   {selectedEvent.location && (
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
                       <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                         <MapPin size={14} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
-                        <div className="text-sm font-semibold text-white/80 break-words">{selectedEvent.location}</div>
+                        <div className="text-sm font-semibold text-white/80 break-all">{selectedEvent.location}</div>
                       </div>
                     </div>
                   )}
 
                   {/* Keterangan */}
                   {selectedEvent.description && (
-                    <div className="flex items-start gap-3">
+                    <div className="flex items-start gap-3 min-w-0">
                       <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary flex-shrink-0">
                         <AlignLeft size={14} />
                       </div>
-                      <div>
+                      <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Keterangan</div>
-                        <p className="text-xs leading-relaxed text-white/50">{selectedEvent.description}</p>
+                        <p className="text-xs leading-relaxed text-white/50 break-words">{selectedEvent.description}</p>
                       </div>
                     </div>
                   )}
