@@ -30,7 +30,7 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Arsip Data Atlet</AlertDialogTitle>
+          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Arsip Data Pemain</AlertDialogTitle>
           <AlertDialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Aksi ini membutuhkan konfirmasi tingkat tinggi.</AlertDialogDescription>
         </AlertDialogHeader>
 

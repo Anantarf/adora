@@ -43,12 +43,7 @@ export async function getAuditLogsAction(options?: { take?: number; cursor?: str
 }
 
 // 2. Log an audit action — Internal function for transactions
-export async function createAuditLog(
-  tx: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  action: string,
-  targetTable: string,
-  recordId?: string,
-) {
+export async function createAuditLog(tx: Omit<Prisma.TransactionClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">, action: string, targetTable: string, recordId?: string) {
   const session = await getServerSession(authOptions);
   const userId = (session?.user as { id?: string })?.id || null;
 
@@ -65,6 +60,8 @@ export async function createAuditLog(
 
 // 3. Log an audit action — Public Server Action
 export async function createAuditLogAction(action: string, targetTable: string, recordId?: string) {
+  await requireAdmin();
+
   try {
     await prisma.$transaction(async (tx) => {
       await createAuditLog(tx, action, targetTable, recordId);

@@ -70,7 +70,7 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
     try {
       const response = await addBatchPlayers(payload);
       setProgress(100);
-      toast.success(`Berhasil! ${response?.count || payload.length} atlet telah diserap ke MySQL Adora.`);
+      toast.success(`Berhasil! ${response?.count || payload.length} pemain telah diserap ke MySQL Adora.`);
       onDone();
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Cek format kolom Anda.";

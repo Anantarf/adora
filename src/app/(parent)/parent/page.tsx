@@ -88,7 +88,7 @@ export default function ParentDashboard() {
       {/* 1. Header & Family Switcher */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-secondary tracking-wide uppercase">Pantauan Atlet</h1>
+          <h1 className="font-heading text-4xl text-secondary tracking-wide uppercase">Pantauan Pemain</h1>
           <p className="text-muted-foreground text-sm font-medium">Laporan transparansi evaluasi kinerja spesifik anak Anda.</p>
         </div>
 
@@ -112,8 +112,8 @@ export default function ParentDashboard() {
         ) : (
           <div className="flex flex-col gap-1 w-full md:w-auto items-start md:items-end">
             <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Profil Aktif</span>
-            <div className="h-12 flex items-center px-5 rounded-md border border-primary/20 bg-primary/5">
-              <span className="font-bold text-secondary">{activeChild.name}</span>
+            <div className="h-auto min-h-12 flex items-center px-5 rounded-md border border-primary/20 bg-primary/5">
+              <span className="font-bold text-secondary break-words">{activeChild.name}</span>
               <span className="text-xs font-medium ml-2 px-2 py-0.5 rounded bg-primary/20 text-primary uppercase tracking-widest">{activeChild.group?.name || "Tanpa Kelas"}</span>
             </div>
           </div>

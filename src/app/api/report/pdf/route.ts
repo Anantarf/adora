@@ -342,7 +342,7 @@ export async function GET(req: NextRequest) {
   <div class="header">
     <div class="header-brand">ADORA <span>Basketball</span></div>
     <div class="header-meta">
-      Portofolio Prestasi Atlet<br>
+      Portofolio Prestasi Pemain<br>
       Dicetak: ${new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
     </div>
   </div>

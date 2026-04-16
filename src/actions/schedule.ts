@@ -73,8 +73,7 @@ export async function createEventAction(data: { title: string; description?: str
       await createAuditLog(tx, "CREATE", "event", ev.id);
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/schedule");
+    revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
     console.error("Error creating event:", error);
@@ -103,8 +102,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
       await createAuditLog(tx, "UPDATE", "event", id);
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/schedule");
+    revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
     console.error("Error updating event:", error);
@@ -120,8 +118,7 @@ export async function deleteEventAction(id: string) {
       await tx.event.delete({ where: { id } });
       await createAuditLog(tx, "DELETE", "event", id);
     });
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/schedule");
+    revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
     console.error("Error deleting event:", error);

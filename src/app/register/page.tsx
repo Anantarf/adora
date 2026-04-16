@@ -24,7 +24,7 @@ const FORM_FIELDS: Array<{
   required: boolean;
   placeholder: string;
 }> = [
-  { key: "name",  type: "text",  label: "Nama Lengkap Atlet",     required: true,  placeholder: "Contoh: Muhammad Arya Putra" },
+  { key: "name",  type: "text",  label: "Nama Lengkap Pemain",     required: true,  placeholder: "Contoh: Muhammad Arya Putra" },
   { key: "phone", type: "tel",   label: "No. WhatsApp Orang Tua", required: true,  placeholder: "Contoh: 08123456789" },
   { key: "email", type: "email", label: "Email",                  required: false, placeholder: "Contoh: orang.tua@email.com" },
 ];
@@ -249,7 +249,7 @@ function RegisterContent() {
       <div className="relative z-10 w-full border-y border-white/8 bg-white/[0.025]">
         <section className="container mx-auto px-4 py-20">
           <h2 className="font-heading text-3xl md:text-4xl text-primary uppercase tracking-widest mb-3 text-center">Program Kami</h2>
-          <p className="text-white/40 text-sm text-center mb-12">Pilih kelompok usia yang sesuai dengan atlet Anda</p>
+          <p className="text-white/40 text-sm text-center mb-12">Pilih kelompok usia yang sesuai dengan pemain Anda</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
             {AGE_GROUPS.map(({ label, ages, icon, desc }) => (
               <div

@@ -1,0 +1,17 @@
+export const QUERY_KEYS = {
+  SCHEDULE_EVENTS: ["schedule-events"],
+  PUBLIC_EVENTS: ["public-events"],
+  PLAYERS_BASE: ["players"],
+  PLAYERS: (groupId?: string) => ["players", groupId || "all"],
+  DASHBOARD_METRICS: ["dashboard-metrics"],
+  GROUPS: ["groups"],
+  HOMEBASES: ["homebases"],
+  USERS_BASE: ["users"],
+  USERS: (role?: string) => ["users", role],
+  ATTENDANCES_BASE: ["attendances"],
+  ATTENDANCES: (dateStr: string) => ["attendances", dateStr],
+  AUDIT_LOGS: ["audit-logs"],
+  CERTIFICATES: ["certificates"],
+  PLAYER_STATS_BASE: ["player-stats"],
+  PLAYER_STATS: (playerId: string) => ["player-stats", playerId],
+} as const;

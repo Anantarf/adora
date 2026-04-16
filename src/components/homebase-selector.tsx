@@ -63,15 +63,15 @@ export function HomebaseSelector({
               : "border-white/20 hover:border-primary hover:bg-primary/5"
           }`}
         >
-          <h3 className="font-bold text-xl text-primary mb-2">
+          <h3 className="font-bold text-xl text-primary mb-2 break-words">
             {homebase.name}
           </h3>
           {showFull && (
             <>
-              <p className="text-sm text-gray-400 mb-1">{homebase.address}</p>
-              <p className="text-sm text-gray-400">{homebase.phone}</p>
+              <p className="text-sm text-gray-400 mb-1 break-words">{homebase.address}</p>
+              <p className="text-sm text-gray-400 break-words">{homebase.phone}</p>
               {homebase.description && (
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-sm text-gray-500 mt-2 break-words">
                   {homebase.description}
                 </p>
               )}

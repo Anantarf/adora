@@ -20,7 +20,12 @@
       "Bash(findstr \"3306\\\\|3308\")",
       "Bash(cmd.exe /c \"netstat -an | findstr 3308\")",
       "mcp__Claude_in_Chrome__tabs_context_mcp",
-      "Bash(grep -E \"^-.*\\\\.\\(ts|js\\)$\")"
+      "Bash(grep -E \"^-.*\\\\.\\(ts|js\\)$\")",
+      "Bash(findstr \":3308\")",
+      "Bash(mysql -h 127.0.0.1 -P 3308 -u root -e \"SELECT 1 AS ok;\")",
+      "Bash(node -e \"const {createConnection} = require\\('net'\\); const c = createConnection\\({host:'127.0.0.1', port:3308}\\); c.on\\('connect', \\(\\) => {console.log\\('TCP OK'\\); c.end\\(\\)}\\); c.on\\('error', e => console.error\\('TCP Error:', e.message\\)\\);\")",
+      "Bash(git add:*)",
+      "Bash(git commit -m 'fix: high-priority security & correctness issues:*)"
     ]
   }
 }

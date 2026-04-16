@@ -8,14 +8,14 @@ Sistem Manajemen Akademi Basket ADORA saat ini telah mencakup modul inti untuk A
 ### Modul yang Sudah Selesai:
 - **Core Architecture**: Implementasi Next.js 16 (App Router) dengan Prisma ORM & MySQL (MariaDB).
 - **Dashboard Admin**:
-    - Statistik Performa Atlet (Recharts) dengan metrics JSON dinamis.
+    - Statistik Performa Pemain (Recharts) dengan metrics JSON dinamis.
     - Sistem Absensi Batch (Hadir, Izin, Sakit, Alpa).
     - Manajemen Event & Sertifikat (dengan helper Audit).
 - **Penghargaan & Sertifikat**: 
     - Manajemen sertifikat per individual atau per grup (Admin).
     - Akses sertifikat terintegrasi untuk orang tua.
 - **Generasi Rapor PDF (Native Print)**:
-    - Route `/api/report/pdf` sudah aktif untuk generate rapor atlet siap cetak.
+    - Route `/api/report/pdf` sudah aktif untuk generate rapor pemain siap cetak.
     - Menggunakan standar CSS Print Media untuk hasil PDF yang tajam dan profesional tanpa library eksternal yang berat.
 - **Portal Orang Tua (Parent Portal)**:
     - View Dashboard khusus orang tua untuk memantau progres anak (Aman dari IDOR).

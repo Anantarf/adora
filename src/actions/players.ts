@@ -7,18 +7,6 @@ import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import crypto from "crypto";
 
-// ─── Helper: Build update object only with provided fields ────────────────
-const buildPlayerUpdateData = (data: {
-  name?: string;
-  dateOfBirth?: string;
-  schoolOrigin?: string | undefined;
-  groupId?: string;
-}) => Object.fromEntries(
-  Object.entries(data)
-    .filter(([_, v]) => v !== undefined)
-    .map(([k, v]) => [k, k === "dateOfBirth" ? toJakartaDate(v as string) : v])
-);
-
 // 1. Ambil semua pemain (Read)
 export async function getPlayersAction(groupId?: string) {
   await requireAdmin();
@@ -29,21 +17,15 @@ export async function getPlayersAction(groupId?: string) {
     },
     include: {
       group: {
-        select: { id: true, name: true }
-      }
+        select: { id: true, name: true },
+      },
     },
     orderBy: { name: "asc" },
   });
 }
 
 // 2. Tambah pemain baru (Create)
-export async function addPlayerAction(data: {
-  name: string;
-  dateOfBirth: string;
-  schoolOrigin?: string;
-  groupId: string;
-  parentId?: string;
-}) {
+export async function addPlayerAction(data: { name: string; dateOfBirth: string; schoolOrigin?: string; groupId: string; parentId?: string }) {
   await requireAdmin();
   const player = await prisma.$transaction(async (tx) => {
     const p = await tx.player.create({
@@ -67,13 +49,15 @@ export async function addPlayerAction(data: {
 }
 
 // 2.5 Tambah massal pemain (Batch Create)
-export async function addBatchPlayersAction(playersData: Array<{
-  name: string;
-  dateOfBirth: string;
-  schoolOrigin?: string;
-  groupId: string;
-  parentId?: string;
-}>) {
+export async function addBatchPlayersAction(
+  playersData: Array<{
+    name: string;
+    dateOfBirth: string;
+    schoolOrigin?: string;
+    groupId: string;
+    parentId?: string;
+  }>,
+) {
   await requireAdmin();
 
   const formattedData = playersData.map((data) => ({
@@ -89,10 +73,13 @@ export async function addBatchPlayersAction(playersData: Array<{
   const result = await prisma.$transaction(async (tx) => {
     const res = await tx.player.createMany({
       data: formattedData,
-      skipDuplicates: true, 
+      skipDuplicates: true,
     });
 
-    await createAuditLog(tx, "CREATE", "player_batch", `Batch size: ${playersData.length}`);
+    // Create an audit log for each player added to keep recordId clean
+    for (const player of formattedData) {
+      await createAuditLog(tx, "CREATE", "player_batch", player.id);
+    }
     return res;
   });
 
@@ -101,18 +88,27 @@ export async function addBatchPlayersAction(playersData: Array<{
 }
 
 // 3. Update pemain (Update)
-export async function updatePlayerAction(id: string, data: {
-  name?: string;
-  dateOfBirth?: string;
-  schoolOrigin?: string;
-  groupId?: string;
-}) {
+export async function updatePlayerAction(
+  id: string,
+  data: {
+    name?: string;
+    dateOfBirth?: string;
+    schoolOrigin?: string;
+    groupId?: string;
+  },
+) {
   await requireAdmin();
 
   const updated = await prisma.$transaction(async (tx) => {
     const res = await tx.player.update({
       where: { id },
-      data: buildPlayerUpdateData(data),
+      data: {
+        name: data.name,
+        dateOfBirth: data.dateOfBirth ? toJakartaDate(data.dateOfBirth) : undefined,
+        schoolOrigin: data.schoolOrigin,
+        groupId: data.groupId,
+        updatedAt: new Date(),
+      },
     });
 
     await createAuditLog(tx, "UPDATE", "player", res.id);

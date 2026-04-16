@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAddPlayer } from "@/hooks/use-players";
@@ -20,7 +20,7 @@ const playerSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   dateOfBirth: z.string().nonempty("TTL wajib diisi"),
   schoolOrigin: z.string().min(3, "Asal Sekolah minimal 3 karakter"),
-  groupId: z.string().nonempty("Grup wajib dipilih"),
+  groupId: z.string().nonempty("Kelompok wajib dipilih"),
 });
 
 type PlayerForm = z.infer<typeof playerSchema>;
@@ -34,7 +34,7 @@ export function AddPlayerDialog() {
   const {
     register,
     handleSubmit,
-    setValue,
+    control,
     formState: { errors },
     reset,
   } = useForm<PlayerForm>({
@@ -46,7 +46,7 @@ export function AddPlayerDialog() {
       await addPlayer(data);
       reset();
       setOpen(false);
-      toast.success("Atlet baru berhasil didaftarkan!");
+      toast.success("Pemain baru berhasil didaftarkan!");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
       toast.error("Gagal menambahkan pemain: " + msg);
@@ -55,16 +55,18 @@ export function AddPlayerDialog() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button size="lg" className="w-full sm:w-auto uppercase font-bold tracking-widest text-xs h-11">
-          <Plus className="mr-2 size-4" /> Tambah Atlet
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger
+        render={
+          <Button size="lg" className="w-full sm:w-auto uppercase font-bold tracking-widest text-xs h-11">
+            <Plus className="mr-2 size-4" /> Tambah Pemain
+          </Button>
+        }
+      />
 
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
-          <DialogTitle className="text-xl font-heading uppercase text-foreground tracking-widest">Registrasi Atlet Baru</DialogTitle>
-          <DialogDescription className="text-sm font-medium tracking-wide">Masukkan data atlet ke dalam database Adora.</DialogDescription>
+          <DialogTitle className="text-xl font-heading uppercase text-foreground tracking-widest">Registrasi Pemain Baru</DialogTitle>
+          <DialogDescription className="text-sm font-medium tracking-wide">Masukkan data pemain ke dalam database Adora.</DialogDescription>
         </DialogHeader>
 
         {isBatchMode ? (
@@ -95,24 +97,25 @@ export function AddPlayerDialog() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Grup Latihan (KU)</label>
-              <Select
-                onValueChange={(val) => {
-                  if (val) setValue("groupId", val as string);
-                }}
-                disabled={isGroupsLoading}
-              >
-                <SelectTrigger className="h-11 rounded-xl bg-background/40">
-                  <SelectValue placeholder={isGroupsLoading ? "Memuat..." : "Pilih Kelompok Umur"} />
-                </SelectTrigger>
-                <SelectContent className="rounded-xl">
-                  {groups?.map((group: { id: string; name: string }) => (
-                    <SelectItem key={group.id} value={group.id} className="font-medium text-sm">
-                      {group.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Kelompok</label>
+              <Controller
+                control={control}
+                name="groupId"
+                render={({ field }) => (
+                  <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
+                    <SelectTrigger className="h-11 rounded-xl bg-background/40">
+                      <SelectValue placeholder={isGroupsLoading ? "Memuat..." : "Pilih Kelompok"} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl">
+                      {groups?.map((group: { id: string; name: string }) => (
+                        <SelectItem key={group.id} value={group.id} className="font-medium text-sm">
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
               {errors.groupId && <p className="text-destructive text-xs">{errors.groupId.message}</p>}
             </div>
 
@@ -122,7 +125,7 @@ export function AddPlayerDialog() {
                 Konfirmasi Simpan Data
               </Button>
               <Button type="button" variant="ghost" className="w-full text-xs font-semibold tracking-widest uppercase text-muted-foreground hover:text-primary" onClick={() => setIsBatchMode(true)}>
-                Unggah Banyak Atlet via Excel / CSV (Batch)
+                Unggah Banyak Pemain via Excel / CSV (Batch)
               </Button>
             </div>
           </form>

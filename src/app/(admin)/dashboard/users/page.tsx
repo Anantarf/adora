@@ -131,7 +131,7 @@ export default function UsersManagementPage() {
                 </div>
                 <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
                    <Baby className="size-3.5 text-primary/40" />
-                   <span>Terhubung dengan <strong className="text-secondary">{user._count.player} Data Atlet</strong></span>
+                   <span>Terhubung dengan <strong className="text-secondary">{user._count.player} Data Pemain</strong></span>
                 </div>
               </div>
 
@@ -164,7 +164,7 @@ export default function UsersManagementPage() {
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading uppercase text-foreground">Hapus Akun Parent?</AlertDialogTitle>
             <AlertDialogDescription className="text-muted-foreground">
-               Semua hak akses login untuk user ini akan dicabut permanen. Akun hanya bisa dihapus jika <strong>tidak memiliki data atlet</strong> aktif di dalamnya.
+               Semua hak akses login untuk user ini akan dicabut permanen. Akun hanya bisa dihapus jika <strong>tidak memiliki data pemain</strong> aktif di dalamnya.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

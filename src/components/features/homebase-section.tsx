@@ -22,21 +22,21 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
               key={homebase.id}
               className="bg-card border-2 border-primary p-6 md:p-8 rounded-[16px] shadow-sm hover:bg-white/20 transition-all duration-300 group"
             >
-              <h3 className="text-2xl font-bold text-primary mb-3 group-hover:text-yellow-400 transition">
+              <h3 className="text-2xl font-bold text-primary mb-3 group-hover:text-yellow-400 transition break-words">
                 {homebase.name}
               </h3>
               <div className="space-y-3 text-foreground/80 mb-6">
-                <p>
+                <p className="break-words">
                   <span className="text-primary font-semibold">📍 Alamat:</span>{" "}
                   {homebase.address}
                 </p>
-                <p>
+                <p className="break-words">
                   <span className="text-primary font-semibold">📞 Telepon:</span>{" "}
                   {homebase.phone}
                 </p>
               </div>
               {homebase.description && (
-                <p className="text-foreground/60 mb-6 italic">
+                <p className="text-foreground/60 mb-6 italic break-words">
                   {homebase.description}
                 </p>
               )}

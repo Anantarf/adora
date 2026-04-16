@@ -52,7 +52,7 @@ export default function AttendancesPage() {
 
   const handleBatchSubmit = async () => {
     if (!players || players.length === 0) {
-      toast.warning("Pilih grup latihan dulu.");
+      toast.warning("Pilih kelompok latihan dulu.");
       return;
     }
     if (!date) {
@@ -119,7 +119,7 @@ export default function AttendancesPage() {
             <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary z-10" />
             <Select value={activeGroup} onValueChange={(val: string | null) => setActiveGroup(val || "all")}>
               <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder="Pilih Grup" />
+                <SelectValue placeholder="Pilih Kelompok" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Pemain Lintas Kelas</SelectItem>
@@ -190,7 +190,7 @@ export default function AttendancesPage() {
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-border/50">
               <TableHead className="w-[80px] text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
-              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nama Atlet</TableHead>
+              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nama Pemain</TableHead>
               <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Kelas</TableHead>
               <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground text-right w-[200px]">Status Presensi</TableHead>
             </TableRow>
@@ -208,7 +208,7 @@ export default function AttendancesPage() {
             {!playersLoading && players?.length === 0 && (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground font-semibold">
-                  Grup kosong. Mohon pilih grup kelas yang lain.
+                  Kelompok kosong. Mohon pilih kelompok yang lain.
                 </TableCell>
               </TableRow>
             )}

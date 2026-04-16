@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface FadeInProps {
@@ -11,13 +11,9 @@ interface FadeInProps {
   duration?: number;
 }
 
-export function FadeIn({
-  children,
-  delay = 0,
-  direction = "up",
-  className = "",
-  duration = 0.8,
-}: FadeInProps) {
+export function FadeIn({ children, delay = 0, direction = "up", className = "", duration = 0.8 }: FadeInProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   const directions = {
     up: { y: 40, x: 0 },
     down: { y: -40, x: 0 },
@@ -25,6 +21,10 @@ export function FadeIn({
     right: { x: -40, y: 0 },
     none: { x: 0, y: 0 },
   };
+
+  if (shouldReduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <motion.div
@@ -51,15 +51,13 @@ export function FadeIn({
 }
 
 // Komponen helper untuk Stagger children berurutan
-export function StaggerContainer({
-  children,
-  className = "",
-  delay = 0.1,
-}: {
-  children: ReactNode;
-  className?: string;
-  delay?: number;
-}) {
+export function StaggerContainer({ children, className = "", delay = 0.1 }: { children: ReactNode; className?: string; delay?: number }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       initial="hidden"
@@ -80,6 +78,12 @@ export function StaggerContainer({
 }
 
 export function StaggerItem({ children, className = "" }: { children: ReactNode; className?: string }) {
+  const shouldReduceMotion = useReducedMotion();
+
+  if (shouldReduceMotion) {
+    return <div className={className}>{children}</div>;
+  }
+
   return (
     <motion.div
       variants={{

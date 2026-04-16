@@ -8,22 +8,9 @@ import { toast } from "sonner";
 import { FileBadge, Loader2, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type AssignMode = "player" | "group";
 
@@ -73,61 +60,45 @@ export function AddCertificateDialog() {
           <DialogTitle className="font-heading text-xl uppercase tracking-wider text-secondary flex items-center gap-2">
             <FileBadge className="size-5 text-primary" /> Upload Sertifikat
           </DialogTitle>
-          <DialogDescription className="text-xs">
-            Tambah sertifikat prestasi untuk pemain atau seluruh kelas.
-          </DialogDescription>
+          <DialogDescription className="text-xs">Tambah sertifikat prestasi untuk pemain atau seluruh kelas.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-2">
           {/* Certificate Title */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">
-              Judul Sertifikat
-            </label>
-            <Input
-              placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
-            />
+            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Judul Sertifikat</label>
+            <Input placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026" value={title} onChange={(e) => setTitle(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
           </div>
 
           {/* File URL */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">
-              URL File Sertifikat
-            </label>
-            <Input
-              placeholder="https://drive.google.com/... atau /uploads/cert-001.pdf"
-              value={fileUrl}
-              onChange={(e) => setFileUrl(e.target.value)}
-              className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
-            />
-            <p className="text-[10px] text-muted-foreground/70">
-              Gunakan link Google Drive, Dropbox, atau URL publik lainnya.
-            </p>
+            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">URL File Sertifikat</label>
+            <Input placeholder="https://drive.google.com/... atau /uploads/cert-001.pdf" value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
+            <p className="text-[10px] text-muted-foreground/70">Gunakan link Google Drive, Dropbox, atau URL publik lainnya.</p>
           </div>
 
           {/* Assignment Mode */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">
-              Assign Kepada
-            </label>
-            <Select value={mode} onValueChange={(v: string | null) => { setMode((v || "player") as AssignMode); setSelectedId(""); }}>
+            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Assign Kepada</label>
+            <Select
+              value={mode}
+              onValueChange={(v: string | null) => {
+                setMode((v || "player") as AssignMode);
+                setSelectedId("");
+              }}
+            >
               <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="player">Pemain Individual</SelectItem>
-                <SelectItem value="group">Seluruh Kelas / Grup</SelectItem>
+                <SelectItem value="group">Seluruh Kelompok</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
           {/* Dynamic Target Selection */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">
-              {mode === "player" ? "Pilih Pemain" : "Pilih Kelas"}
-            </label>
+            <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">{mode === "player" ? "Pilih Pemain" : "Pilih Kelas"}</label>
             <Select value={selectedId} onValueChange={(v: string | null) => setSelectedId(v || "")}>
               <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
                 <SelectValue placeholder={mode === "player" ? "Cari nama pemain..." : "Pilih kelas..."} />
@@ -149,16 +120,8 @@ export function AddCertificateDialog() {
           </div>
 
           {/* Submit */}
-          <Button
-            onClick={handleSubmit}
-            disabled={addCert.isPending}
-            className="h-11 uppercase font-bold tracking-widest text-xs shadow-lg shadow-primary/20 mt-2"
-          >
-            {addCert.isPending ? (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            ) : (
-              <FileBadge className="mr-2 size-4" />
-            )}
+          <Button onClick={handleSubmit} disabled={addCert.isPending} className="h-11 uppercase font-bold tracking-widest text-xs shadow-lg shadow-primary/20 mt-2">
+            {addCert.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <FileBadge className="mr-2 size-4" />}
             {addCert.isPending ? "Menyimpan..." : "Simpan Sertifikat"}
           </Button>
         </div>

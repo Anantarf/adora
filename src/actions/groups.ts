@@ -90,6 +90,6 @@ export async function deleteGroupAction(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting group:", error);
-    throw new Error("Gagal menghapus grup (mungkin masih ada atlet di dalamnya)");
+    throw new Error("Gagal menghapus grup (mungkin masih ada pemain di dalamnya)");
   }
 }

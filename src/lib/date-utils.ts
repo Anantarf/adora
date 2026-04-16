@@ -38,14 +38,13 @@ export function toYYYYMMDD(date: Date | string): string {
   return d.toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
 }
 
-
 /**
  * Generates human-friendly relative dates (Today, Tomorrow, X days left).
  */
 export function getCountdownLabel(targetDate: Date | string): string {
   const today = getJakartaToday();
   const evDate = toJakartaDate(targetDate);
-  
+
   const diffTime = evDate.getTime() - today.getTime();
   const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
 
@@ -58,6 +57,7 @@ export function getCountdownLabel(targetDate: Date | string): string {
 export function formatFullDate(date: Date | string): string {
   const d = new Date(date);
   return d.toLocaleDateString("id-ID", {
+    timeZone: "Asia/Jakarta",
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -66,11 +66,11 @@ export function formatFullDate(date: Date | string): string {
 
 export function getAge(dateOfBirth: Date | string): number {
   const today = getJakartaToday();
-  const birthDate = new Date(dateOfBirth);
-  
+  const birthDate = toJakartaDate(dateOfBirth);
+
   let age = today.getFullYear() - birthDate.getFullYear();
   const m = today.getMonth() - birthDate.getMonth();
-  
+
   if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
     age--;
   }

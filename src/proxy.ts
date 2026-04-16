@@ -1,6 +1,33 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
+import { LRUCache } from "lru-cache";
+
+const LOGIN_WINDOW_MS = 60 * 1000;
+const MAX_LOGIN_ATTEMPTS_PER_MINUTE = process.env.NODE_ENV === "development" ? 20 : 5;
+const MAX_API_REQUESTS_PER_MINUTE = 120;
+
+const loginRateLimit = new LRUCache<string, number>({
+  max: 1000,
+  ttl: LOGIN_WINDOW_MS,
+});
+
+const apiRateLimit = new LRUCache<string, number>({
+  max: 2000,
+  ttl: LOGIN_WINDOW_MS,
+});
+
+function getClientIp(request: NextRequest) {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+  const cfIp = request.headers.get("cf-connecting-ip");
+
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0]?.trim() || "127.0.0.1";
+  }
+
+  return realIp ?? cfIp ?? "127.0.0.1";
+}
 
 /**
  * ADORA Basketball - Global Unified Middleware
@@ -8,6 +35,32 @@ import { getToken } from "next-auth/jwt";
  */
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const ip = getClientIp(request);
+  const isLoginAction = request.method === "POST" && pathname.startsWith("/api/auth/callback/credentials");
+  const isApiRoute = pathname.startsWith("/api/");
+
+  // --- 0. LAYER RATE LIMITING ---
+  if (isLoginAction) {
+    const loginAttemptCount = (loginRateLimit.get(ip) ?? 0) + 1;
+    loginRateLimit.set(ip, loginAttemptCount);
+
+    if (loginAttemptCount > MAX_LOGIN_ATTEMPTS_PER_MINUTE) {
+      return new NextResponse("Terlalu banyak percobaan login. Harap tunggu 1 menit.", {
+        status: 429,
+        headers: { "Content-Type": "text/plain" },
+      });
+    }
+  }
+
+  if (isApiRoute) {
+    const apiRequestCount = (apiRateLimit.get(ip) ?? 0) + 1;
+    apiRateLimit.set(ip, apiRequestCount);
+
+    if (apiRequestCount > MAX_API_REQUESTS_PER_MINUTE) {
+      return new NextResponse("Rate limit terlampaui.", { status: 429 });
+    }
+  }
+
   const response = NextResponse.next();
 
   // --- 1. LAYER KEAMANAN (Global) ---
@@ -70,5 +123,5 @@ export async function proxy(request: NextRequest) {
 
 // Konfigurasi Matcher: semua route kecuali static & auth NextAuth
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|css|js|map|txt|xml|woff|woff2)$).*)"],
 };

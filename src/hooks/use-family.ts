@@ -24,7 +24,7 @@ export const useFamily = () => {
   });
 };
 
-// Hook (GET): Tarik daftar akun Parent (Admin only) — untuk form registrasi atlet
+// Hook (GET): Tarik daftar akun Parent (Admin only) — untuk form registrasi pemain
 export const useParents = () => {
   return useQuery<ParentUser[]>({
     queryKey: ["parents"],

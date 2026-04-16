@@ -9,21 +9,8 @@ import { getJakartaToday, toYYYYMMDD } from "@/lib/date-utils";
 import { type Player } from "@/types/dashboard";
 
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function StatisticsPage() {
   const [activeGroup, setActiveGroup] = useState<string>("all");
@@ -42,13 +29,11 @@ export default function StatisticsPage() {
         const groupId = player.groupId || null;
         return { ...acc, [groupId || "null"]: [...(acc[groupId || "null"] || []), player] };
       },
-      {} as Record<string, Player[]>
+      {} as Record<string, Player[]>,
     );
 
     // Map groups to players, filtering empty groups
-    return groups
-      .map(group => ({ group, players: grouped[group.id] || [] }))
-      .filter(g => g.players.length > 0);
+    return groups.map((group) => ({ group, players: grouped[group.id] || [] })).filter((g) => g.players.length > 0);
   }, [players, groups]);
 
   return (
@@ -63,17 +48,19 @@ export default function StatisticsPage() {
 
       <div className="flex flex-col md:flex-row gap-4 items-end bg-card p-4 rounded-xl border border-border/40 shadow-sm">
         <div className="flex flex-col gap-1.5 w-full md:w-[250px]">
-          <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Filter Grup / Kelas</label>
+          <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Filter Kelompok</label>
           <div className="relative group">
             <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary z-10" />
             <Select value={activeGroup} onValueChange={(val: string | null) => setActiveGroup(val || "all")}>
               <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder="Pilih Grup" />
+                <SelectValue placeholder="Pilih Kelompok" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Pemain Lintas Kelas</SelectItem>
                 {groups?.map((group) => (
-                  <SelectItem key={group.id} value={group.id}>{group.name}</SelectItem>
+                  <SelectItem key={group.id} value={group.id}>
+                    {group.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -84,12 +71,7 @@ export default function StatisticsPage() {
           <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Periode Pelaporan (Bulan/Tahun)</label>
           <div className="relative group">
             <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground group-focus-within:text-primary z-10" />
-            <Input 
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
-            />
+            <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
           </div>
         </div>
       </div>
@@ -99,7 +81,7 @@ export default function StatisticsPage() {
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-border/50">
               <TableHead className="w-[80px] text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
-              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nama Atlet</TableHead>
+              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nama Pemain</TableHead>
               <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Kelas</TableHead>
               <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground text-right border-border/50">Aksi Evaluasi</TableHead>
             </TableRow>
@@ -117,34 +99,34 @@ export default function StatisticsPage() {
             {playersByGroup.length === 0 && !playersLoading && (
               <TableRow>
                 <TableCell colSpan={4} className="h-24 text-center text-muted-foreground font-semibold">
-                  Tabel pemain kosong didalam filter grup ini.
+                  Tabel pemain kosong didalam filter kelompok ini.
                 </TableCell>
               </TableRow>
             )}
-            {playersByGroup.map(({ group, players: groupPlayers }) => (
-              <TableRow key={group.id} className="bg-muted/20 hover:bg-muted/20">
-                <TableCell colSpan={4} className="font-bold text-primary uppercase tracking-widest text-sm py-3">
-                  {group.name}
-                </TableCell>
-              </TableRow>
-            )).concat(
-              playersByGroup.flatMap(({ group, players: groupPlayers }, groupIdx) =>
-                groupPlayers.map((player: Player, playerIdx: number) => (
-                  <TableRow key={player.id} className="group hover:bg-muted/40 transition-colors">
-                    <TableCell className="font-medium text-muted-foreground">{playerIdx + 1}</TableCell>
-                    <TableCell className="font-semibold text-secondary">{player.name}</TableCell>
-                    <TableCell>
-                      <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary border border-primary/20">
-                        {player.group?.name || "-"}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <AddStatDialog player={player} date={date} />
-                    </TableCell>
-                  </TableRow>
-                ))
-              )
-            )}
+            {playersByGroup
+              .map(({ group, players: groupPlayers }) => (
+                <TableRow key={group.id} className="bg-muted/20 hover:bg-muted/20">
+                  <TableCell colSpan={4} className="font-bold text-primary uppercase tracking-widest text-sm py-3">
+                    {group.name}
+                  </TableCell>
+                </TableRow>
+              ))
+              .concat(
+                playersByGroup.flatMap(({ group, players: groupPlayers }, groupIdx) =>
+                  groupPlayers.map((player: Player, playerIdx: number) => (
+                    <TableRow key={player.id} className="group hover:bg-muted/40 transition-colors">
+                      <TableCell className="font-medium text-muted-foreground">{playerIdx + 1}</TableCell>
+                      <TableCell className="font-semibold text-secondary">{player.name}</TableCell>
+                      <TableCell>
+                        <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary border border-primary/20">{player.group?.name || "-"}</span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <AddStatDialog player={player} date={date} />
+                      </TableCell>
+                    </TableRow>
+                  )),
+                ),
+              )}
           </TableBody>
         </Table>
       </div>

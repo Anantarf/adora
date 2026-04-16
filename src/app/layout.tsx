@@ -22,7 +22,7 @@ import { Toaster } from "sonner";
 export const metadata: Metadata = {
   title: "ADORA Basketball Club | Akademi Basket Profesional Indonesia",
   description:
-    "ADORA Basketball Club — Membentuk generasi atlet basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-10, KU-15, KU-18.",
+    "ADORA Basketball Club — Membentuk generasi pemain basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-10, KU-15, KU-18.",
 };
 
 export default function RootLayout({

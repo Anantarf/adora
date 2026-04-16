@@ -1,3 +1,4 @@
+﻿/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
 import { useState, useMemo } from "react";
@@ -57,7 +58,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                 key={ev.id}
                 layoutId={`event-${ev.id}`}
                 onClick={() => setSelectedEvent(ev)}
-                className="group relative bg-card border border-primary/20 rounded-2xl p-6 text-left overflow-hidden transition-all hover:border-primary/50 hover:bg-primary/[0.02]"
+                className="group relative bg-card border border-primary/20 rounded-2xl p-6 text-left overflow-hidden transition-all hover:border-primary/50 hover:bg-primary/2"
               >
                 <div className="absolute inset-0 opacity-20 pointer-events-none" style={{ backgroundImage: "repeating-linear-gradient(135deg, rgba(212,175,55,0.1) 0px, rgba(212,175,55,0.1) 1px, transparent 1px, transparent 20px)" }} />
                 
@@ -72,7 +73,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                   </div>
                   
                   <div className="mb-2">
-                    <div className="font-heading text-xl text-white group-hover:text-primary transition-colors leading-tight">
+                    <div className="font-heading text-xl text-white group-hover:text-primary transition-colors leading-tight wrap-break-word">
                       {ev.title}
                     </div>
                   </div>
@@ -82,7 +83,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                        {formatJakarta(ev.date, { day: 'numeric', month: 'long', year: 'numeric' })} • {formatJakarta(ev.date, { hour: '2-digit', minute: '2-digit', hour12: false })} WIB
                     </span>
                     {ev.location && (
-                      <span className="text-[8px] font-medium text-white/20 uppercase tracking-widest truncate">
+                      <span className="text-[8px] font-medium text-white/20 uppercase tracking-widest wrap-break-word">
                         @ {ev.location}
                       </span>
                     )}
@@ -98,13 +99,13 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
 
       {/* Modal Detail */}
       <Dialog open={!!selectedEvent} onOpenChange={() => setSelectedEvent(null)}>
-        <DialogContent className="bg-background border-primary/20 text-white sm:max-w-[400px] p-0 overflow-hidden">
+        <DialogContent className="bg-background border-primary/20 text-white w-[calc(100vw-2rem)] sm:max-w-100 p-0 overflow-hidden">
           <div className="relative h-32 bg-primary flex items-center justify-center overflow-hidden">
              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 10px)" }} />
              <div className="relative z-10 font-heading text-5xl md:text-6xl tracking-[0.2em] text-black/20 uppercase select-none">
                 {selectedEvent ? getEventConfig(selectedEvent.type).accent : ''}
              </div>
-             <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-[#0f0f11] to-transparent" />
+             <div className="absolute bottom-0 left-0 w-full h-12 bg-linear-to-t from-[#0f0f11] to-transparent" />
           </div>
 
           <div className="p-8 pt-4">
@@ -114,7 +115,7 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                </span>
             </div>
 
-            <DialogTitle className="font-heading text-3xl tracking-widest uppercase mb-4 text-white">
+            <DialogTitle className="font-heading text-3xl tracking-widest uppercase mb-4 text-white wrap-break-word">
               {selectedEvent?.title}
             </DialogTitle>
 
@@ -144,25 +145,25 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
                </div>
 
                {selectedEvent?.location && (
-                 <div className="flex items-start gap-4">
+                 <div className="flex items-start gap-4 min-w-0">
                     <div className="mt-1 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                       <MapPin size={16} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Lokasi</div>
-                      <div className="text-sm font-semibold text-white/80">{selectedEvent.location}</div>
+                      <div className="text-sm font-semibold text-white/80 wrap-break-word">{selectedEvent.location}</div>
                     </div>
                  </div>
                )}
 
                {selectedEvent?.description && (
-                 <div className="flex items-start gap-4">
+                 <div className="flex items-start gap-4 min-w-0">
                     <div className="mt-1 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                       <AlignLeft size={16} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-1">Keterangan</div>
-                      <p className="text-xs leading-relaxed text-white/50">{selectedEvent.description}</p>
+                      <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{selectedEvent.description}</p>
                     </div>
                  </div>
                )}
@@ -182,3 +183,4 @@ export function ClubSchedule({ initialEvents }: { initialEvents: ScheduleEvent[]
     </div>
   );
 }
+

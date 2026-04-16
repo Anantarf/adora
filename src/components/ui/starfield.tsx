@@ -2,6 +2,21 @@
 
 import { useEffect, useRef } from "react";
 
+const MOBILE_BREAKPOINT = 768;
+const DESKTOP_STAR_DENSITY = 6000;
+const MOBILE_STAR_DENSITY = 9000;
+const MAX_DPR = 1.5;
+
+type Star = {
+  x: number;
+  y: number;
+  radius: number;
+  speed: number;
+  opacity: number;
+  isGold: boolean;
+  twinkleSpeed: number;
+};
+
 export function Starfield() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -12,94 +27,160 @@ export function Starfield() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationFrameId: number;
-    let stars: {
-      x: number;
-      y: number;
-      radius: number;
-      speed: number;
-      opacity: number;
-      isGold: boolean;
-      twinkleSpeed: number;
-    }[] = [];
+    let animationFrameId = 0;
+    let prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let isTabVisible = document.visibilityState === "visible";
+    let isAnimating = false;
+    let viewportWidth = window.innerWidth;
+    let viewportHeight = window.innerHeight;
+    let stars: Star[] = [];
 
-    const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initStars();
-    };
+    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const initStars = () => {
       stars = [];
-      // 1 star per 6000 pixels (not too crowded, very elegant)
-      const numStars = Math.floor((canvas.width * canvas.height) / 6000); 
+      const density = viewportWidth < MOBILE_BREAKPOINT ? MOBILE_STAR_DENSITY : DESKTOP_STAR_DENSITY;
+      const numStars = Math.floor((viewportWidth * viewportHeight) / density);
+
       for (let i = 0; i < numStars; i++) {
         stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          radius: Math.random() * 1.5 + 0.2, // Tiny specs to noticeable stars
-          speed: Math.random() * 0.3 + 0.05, // Very slow drifting
+          x: Math.random() * viewportWidth,
+          y: Math.random() * viewportHeight,
+          radius: Math.random() * 1.5 + 0.2,
+          speed: Math.random() * 0.3 + 0.05,
           opacity: Math.random(),
-          isGold: Math.random() > 0.7, // 30% of stars are Adora Gold
-          twinkleSpeed: (Math.random() - 0.5) * 0.03, // fade in/out
+          isGold: Math.random() > 0.7,
+          twinkleSpeed: (Math.random() - 0.5) * 0.03,
         });
       }
     };
 
-    const draw = () => {
-      // Clear canvas on each frame
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+    const resize = () => {
+      viewportWidth = window.innerWidth;
+      viewportHeight = window.innerHeight;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR);
+      canvas.width = Math.floor(viewportWidth * dpr);
+      canvas.height = Math.floor(viewportHeight * dpr);
+      canvas.style.width = `${viewportWidth}px`;
+      canvas.style.height = `${viewportHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      initStars();
+
+      if (prefersReducedMotion) {
+        render(false);
+      }
+    };
+
+    const render = (withMotion: boolean) => {
+      ctx.clearRect(0, 0, viewportWidth, viewportHeight);
+
       stars.forEach((star) => {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        
-        // Pure Gold (#D4AF37) vs Soft White
+
         const rgb = star.isGold ? "212, 175, 55" : "250, 250, 250";
         ctx.fillStyle = `rgba(${rgb}, ${star.opacity})`;
         ctx.fill();
 
-        // 1. Move upwards slowly
+        if (!withMotion) {
+          return;
+        }
+
         star.y -= star.speed;
-        // Optionally drift a tiny bit sideways
         star.x += (Math.random() - 0.5) * 0.05;
-        
-        // 2. Twinkle effect (breathing opacity)
+
         star.opacity += star.twinkleSpeed;
         if (star.opacity < 0.1) {
           star.opacity = 0.1;
-          star.twinkleSpeed = Math.abs(star.twinkleSpeed); // Force positive (fade in)
+          star.twinkleSpeed = Math.abs(star.twinkleSpeed);
         } else if (star.opacity > 1) {
           star.opacity = 1;
-          star.twinkleSpeed = -Math.abs(star.twinkleSpeed); // Force negative (fade out)
+          star.twinkleSpeed = -Math.abs(star.twinkleSpeed);
         }
 
-        // 3. Reset to bottom if it floats out of screen (top)
         if (star.y < 0) {
-          star.y = canvas.height + 10;
-          star.x = Math.random() * canvas.width;
-          star.opacity = 0.1; // reset to lowest visible opacity so it fades up
-          star.twinkleSpeed = Math.abs(star.twinkleSpeed); // Ensure it starts fading in
+          star.y = viewportHeight + 10;
+          star.x = Math.random() * viewportWidth;
+          star.opacity = 0.1;
+          star.twinkleSpeed = Math.abs(star.twinkleSpeed);
         }
       });
+    };
 
+    const draw = () => {
+      if (!isTabVisible || prefersReducedMotion) {
+        isAnimating = false;
+        return;
+      }
+
+      render(true);
       animationFrameId = requestAnimationFrame(draw);
+      isAnimating = true;
+    };
+
+    const stopAnimation = () => {
+      if (isAnimating) {
+        cancelAnimationFrame(animationFrameId);
+        isAnimating = false;
+      }
+    };
+
+    const startAnimation = () => {
+      if (!isAnimating) {
+        draw();
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      isTabVisible = document.visibilityState === "visible";
+
+      if (!isTabVisible) {
+        stopAnimation();
+        return;
+      }
+
+      if (prefersReducedMotion) {
+        render(false);
+        return;
+      }
+
+      startAnimation();
+    };
+
+    const handleReducedMotionChange = (event: MediaQueryListEvent) => {
+      prefersReducedMotion = event.matches;
+
+      if (prefersReducedMotion) {
+        stopAnimation();
+        render(false);
+        return;
+      }
+
+      if (isTabVisible) {
+        startAnimation();
+      }
     };
 
     window.addEventListener("resize", resize);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
+
     resize();
-    draw();
+    if (prefersReducedMotion) {
+      render(false);
+    } else {
+      startAnimation();
+    }
 
     return () => {
       window.removeEventListener("resize", resize);
-      cancelAnimationFrame(animationFrameId);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      reducedMotionQuery.removeEventListener("change", handleReducedMotionChange);
+      stopAnimation();
     };
   }, []);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 z-0 pointer-events-none opacity-80 mix-blend-screen"
-    />
-  );
+  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-80 mix-blend-screen" />;
 }

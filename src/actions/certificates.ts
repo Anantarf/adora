@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-
+import { createAuditLog } from "./audit";
 import crypto from "crypto";
 
 // ─── Types ───────────────────────────────────────────
@@ -42,18 +42,21 @@ export async function addCertificateAction(data: {
 }) {
   await requireAdmin();
 
-  const cert = await prisma.certificate.create({
-    data: {
-      id: crypto.randomUUID(),
-      title: data.title,
-      fileUrl: data.fileUrl,
-      playerId: data.playerId || null,
-      groupId: data.groupId || null,
-    },
-  });
+  const cert = await prisma.$transaction(async (tx) => {
+    const newCert = await tx.certificate.create({
+      data: {
+        id: crypto.randomUUID(),
+        title: data.title,
+        fileUrl: data.fileUrl,
+        playerId: data.playerId || null,
+        groupId: data.groupId || null,
+      },
+    });
 
-  // Log the action
-  await logAuditAction("CREATE", "certificate", cert.id);
+    // Log atomically with create
+    await createAuditLog(tx, "CREATE", "certificate", newCert.id);
+    return newCert;
+  });
 
   revalidatePath("/dashboard/certificates");
   return cert;
@@ -63,9 +66,12 @@ export async function addCertificateAction(data: {
 export async function deleteCertificateAction(id: string) {
   await requireAdmin();
 
-  await prisma.certificate.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await tx.certificate.delete({ where: { id } });
 
-  await logAuditAction("DELETE", "certificate", id);
+    // Log atomically with delete
+    await createAuditLog(tx, "DELETE", "certificate", id);
+  });
 
   revalidatePath("/dashboard/certificates");
   return { success: true };
@@ -101,23 +107,3 @@ export async function getPlayerCertificatesAction(playerId: string) {
   });
 }
 
-// ─── Audit Helper ────────────────────────────────────
-async function logAuditAction(action: string, targetTable: string, recordId?: string) {
-  try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id ?? null;
-
-    await prisma.auditlog.create({
-      data: {
-        id: crypto.randomUUID(),
-        action,
-        targetTable,
-        recordId: recordId || null,
-        userId,
-      },
-    });
-  } catch (e) {
-    // Silent fail — audit should never block main operations
-    console.error("[AUDIT_LOG_ERROR]:", e);
-  }
-}

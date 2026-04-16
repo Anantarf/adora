@@ -1,1 +1,0 @@
-import 'dotenv/config'; import { prisma } from './src/lib/prisma'; async function run(){ try { const user = await prisma.user.findUnique({where:{username:'superadmin'}}); console.log('GOT USER:', user); } catch(e) { console.error('CAUGHT ERROR:', e.message); } } run(); 

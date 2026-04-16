@@ -138,7 +138,7 @@ export async function deleteUserAction(id: string) {
   });
 
   if (playerCount > 0) {
-    throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} atlet aktif.`);
+    throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
   }
 
   

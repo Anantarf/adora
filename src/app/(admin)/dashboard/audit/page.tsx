@@ -40,6 +40,7 @@ const TIMESTAMP_FORMATTER = new Intl.DateTimeFormat("id-ID", {
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
+  hour12: false,
   timeZone: "Asia/Jakarta",
 });
 

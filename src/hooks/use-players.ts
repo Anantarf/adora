@@ -1,6 +1,7 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPlayersAction, addPlayerAction, updatePlayerAction, deletePlayerAction, addBatchPlayersAction } from "@/actions/players";
+import { QUERY_KEYS } from "@/lib/constants";
 
 /**
  * ADORA Basketball - Lean Player Management Hooks
@@ -10,7 +11,7 @@ import { getPlayersAction, addPlayerAction, updatePlayerAction, deletePlayerActi
 // 1. Hook (GET): Tarik data pemain via Server Action
 export const usePlayers = (groupId?: string) => {
   return useQuery({
-    queryKey: ["players", groupId],
+    queryKey: QUERY_KEYS.PLAYERS(groupId),
     queryFn: () => getPlayersAction(groupId),
     staleTime: 1000 * 60 * 5,
   });
@@ -23,7 +24,7 @@ export const useAddPlayer = () => {
   return useMutation({
     mutationFn: addPlayerAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
   });
 };
@@ -33,12 +34,9 @@ export const useUpdatePlayer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { 
-      id: string; 
-      data: { name?: string; dateOfBirth?: string; schoolOrigin?: string; groupId?: string; parentId?: string } 
-    }) => updatePlayerAction(id, data),
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; dateOfBirth?: string; schoolOrigin?: string; groupId?: string; parentId?: string } }) => updatePlayerAction(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
   });
 };
@@ -50,7 +48,7 @@ export const useDeletePlayer = () => {
   return useMutation({
     mutationFn: deletePlayerAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
   });
 };
@@ -62,7 +60,7 @@ export const useAddBatchPlayers = () => {
   return useMutation({
     mutationFn: addBatchPlayersAction,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["players"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
   });
 };

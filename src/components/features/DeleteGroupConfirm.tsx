@@ -17,7 +17,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
   const handleDelete = async () => {
     try {
       await deleteGroup(group.id);
-      toast.success(`Grup ${group.name} berhasil dihapus.`);
+      toast.success(`Kelompok ${group.name} berhasil dihapus.`);
       onOpenChange(false);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Gagal menghapus.";
@@ -31,7 +31,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">
             <AlertTriangle className="size-5" />
-            Hapus Grup
+            Hapus Kelompok
           </AlertDialogTitle>
           <AlertDialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Aksi ini membutuhkan konfirmasi.</AlertDialogDescription>
         </AlertDialogHeader>
@@ -39,7 +39,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
         <div className="py-6 flex flex-col gap-4">
           <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
             <p className="text-sm font-semibold text-foreground">
-              Apakah Anda yakin ingin menghapus grup <span className="font-bold underline">{group.name}</span>?
+              Apakah Anda yakin ingin menghapus kelompok <span className="font-bold underline">{group.name}</span>?
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
@@ -49,7 +49,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
 
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex gap-4 items-start">
             <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs font-medium text-muted-foreground">Pastikan tidak ada atlet di grup ini sebelum menghapus. Jika ada, pindahkan mereka terlebih dahulu.</p>
+            <p className="text-xs font-medium text-muted-foreground">Pastikan tidak ada pemain di kelompok ini sebelum menghapus. Jika ada, pindahkan mereka terlebih dahulu.</p>
           </div>
         </div>
 
@@ -66,7 +66,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
             className="h-11 font-bold tracking-widest uppercase text-xs"
           >
             {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <Trash2 className="size-4 mr-2" />}
-            Hapus Grup
+            Hapus Kelompok
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

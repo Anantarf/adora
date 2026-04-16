@@ -40,24 +40,31 @@ export async function submitAttendanceAction(data: {
       throw new Error(`Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}`);
     }
 
-    // Bulking operation (Create or Update)
-    for (const ps of data.playerStatuses) {
-      await tx.attendance.upsert({
-        where: {
-          playerId_date: {
+    // Bulking operation (Create or Update) — fail fast on any error
+    const upsertResults = await Promise.allSettled(
+      data.playerStatuses.map(ps =>
+        tx.attendance.upsert({
+          where: {
+            playerId_date: {
+              playerId: ps.playerId,
+              date: dateObj,
+            },
+          },
+          update: { status: ps.status, note: data.note },
+          create: {
+            id: crypto.randomUUID(),
             playerId: ps.playerId,
             date: dateObj,
+            status: ps.status,
+            note: data.note,
           },
-        },
-        update: { status: ps.status, note: data.note },
-        create: {
-          id: crypto.randomUUID(),
-          playerId: ps.playerId,
-          date: dateObj,
-          status: ps.status,
-          note: data.note,
-        },
-      });
+        })
+      )
+    );
+
+    const failed = upsertResults.filter(r => r.status === "rejected");
+    if (failed.length > 0) {
+      throw new Error(`Gagal mencatat kehadiran untuk ${failed.length} pemain`);
     }
 
     await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${data.playerStatuses.length}`);

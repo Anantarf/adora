@@ -1,18 +1,13 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
-import {
-  getHomebases,
-  getHomebaseById,
-  getGroupsByHomebase,
-  updateGroupHomebase,
-  createHomebaseEvent,
-} from "@/lib/homebase.service";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
+import { getHomebases, getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase.service";
+
+const getCachedPublicHomebases = unstable_cache(async () => getHomebases(), ["public-homebases"], { revalidate: 300, tags: ["public-homebases"] });
 
 export async function getPublicHomebases() {
   try {
-    return await getHomebases();
+    return await getCachedPublicHomebases();
   } catch (error) {
     console.error("Failed to fetch homebases:", error);
     return [];
@@ -28,13 +23,11 @@ export async function getPublicHomebaseById(id: string) {
   }
 }
 
-export async function updateGroupToHomebase(
-  groupId: string,
-  homebaseId: string
-) {
+export async function updateGroupToHomebase(groupId: string, homebaseId: string) {
   try {
     const result = await updateGroupHomebase(groupId, homebaseId);
     revalidatePath("/dashboard/groups");
+    revalidateTag("public-homebases", "max");
     return { success: true, data: result };
   } catch (error) {
     console.error("Failed to update group homebase:", error);
@@ -42,14 +35,7 @@ export async function updateGroupToHomebase(
   }
 }
 
-export async function createEventWithHomebase(
-  title: string,
-  date: Date,
-  homebaseId: string,
-  groupId?: string,
-  type?: string,
-  description?: string
-) {
+export async function createEventWithHomebase(title: string, date: Date, homebaseId: string, groupId?: string, type?: string, description?: string) {
   try {
     const result = await createHomebaseEvent({
       title,
@@ -60,6 +46,7 @@ export async function createEventWithHomebase(
       description,
     });
     revalidatePath("/dashboard/schedule");
+    revalidateTag("public-homebases", "max");
     return { success: true, data: result };
   } catch (error) {
     console.error("Failed to create event:", error);

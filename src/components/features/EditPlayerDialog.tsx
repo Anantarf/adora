@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useUpdatePlayer } from "@/hooks/use-players";
@@ -20,7 +20,7 @@ const playerSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   dateOfBirth: z.string().nonempty("TTL wajib diisi"),
   schoolOrigin: z.string().min(3, "Asal Sekolah minimal 3 karakter"),
-  groupId: z.string().nonempty("Grup wajib dipilih"),
+  groupId: z.string().nonempty("Kelompok wajib dipilih"),
 });
 
 type PlayerForm = z.infer<typeof playerSchema>;
@@ -38,8 +38,7 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
+    control,
     formState: { errors },
     reset,
   } = useForm<PlayerForm>({
@@ -51,8 +50,6 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
       groupId: player.groupId || "",
     },
   });
-
-  const watchedGroupId = watch("groupId");
 
   // Reset form when player or open state changes
   useEffect(() => {
@@ -89,7 +86,7 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2">
-            <Edit2 className="size-5 text-primary" /> Ubah Data Atlet
+            <Edit2 className="size-5 text-primary" /> Ubah Data Pemain
           </DialogTitle>
           <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Pastikan data yang diinput sesuai dengan identitas resmi.</DialogDescription>
         </DialogHeader>
@@ -114,25 +111,25 @@ export function EditPlayerDialog({ player, open, onOpenChange }: EditPlayerDialo
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs uppercase font-semibold tracking-widest text-muted-foreground">Grup Latihan</label>
-            <Select
-              value={watchedGroupId}
-              onValueChange={(val) => {
-                if (val) setValue("groupId", val);
-              }}
-              disabled={isGroupsLoading}
-            >
-              <SelectTrigger className="h-11 bg-background/50">
-                <SelectValue placeholder="Pilih Grup" />
-              </SelectTrigger>
-              <SelectContent>
-                {groups?.map((group: { id: string; name: string }) => (
-                  <SelectItem key={group.id} value={group.id}>
-                    {group.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <label className="text-xs uppercase font-semibold tracking-widest text-muted-foreground">Kelompok</label>
+            <Controller
+              control={control}
+              name="groupId"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
+                  <SelectTrigger className="h-11 bg-background/50">
+                    <SelectValue placeholder="Pilih Kelompok" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groups?.map((group: { id: string; name: string }) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.groupId && <p className="text-destructive text-xs font-semibold uppercase">{errors.groupId.message}</p>}
           </div>
 
