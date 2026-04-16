@@ -24,13 +24,7 @@ export const useAddAttendances = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: { 
-      date: string; 
-      playerStatuses: { playerId: string; status: AttendanceStatus }[]; 
-      note?: string 
-    }) => {
-      return await submitAttendanceAction(data);
-    },
+    mutationFn: submitAttendanceAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attendances"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });

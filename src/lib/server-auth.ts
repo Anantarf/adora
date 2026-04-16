@@ -7,3 +7,9 @@ export async function requireAdmin() {
     throw new Error("Unauthorized Access: Administrator privilege required.");
   }
 }
+
+export async function requireAuth() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) throw new Error("Sesi tidak valid. Silakan login kembali.");
+  return session;
+}

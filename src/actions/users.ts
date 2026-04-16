@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/server-auth";
+import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcrypt";
@@ -155,14 +155,7 @@ export async function updateSelfAction(data: {
   email?: string;
   password?: string;
 }) {
-  const { getServerSession } = await import("next-auth/next");
-  const { authOptions } = await import("@/lib/auth");
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    throw new Error("Sesi tidak valid. Silakan login kembali.");
-  }
-
+  const session = await requireAuth();
   const userId = session.user.id;
 
   const result = await prisma.$transaction(async (tx) => {

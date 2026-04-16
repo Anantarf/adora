@@ -2,13 +2,11 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/server-auth";
+import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import crypto from "crypto";
 import { AttendanceStatus } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
 
 // 1. Submit Attendance
 export async function submitAttendanceAction(data: {
@@ -115,11 +113,8 @@ export async function submitStatisticAction(data: {
 
 // 3. Get Player Stats
 export async function getPlayerStatsAction(playerId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session) throw new Error("Unauthorized");
-  
-  const userRole = session.user.role;
-  const userId = session.user.id;
+  const session = await requireAuth();
+  const { role: userRole, id: userId } = session.user;
 
   // Jika parent, pastikan dia hanya bisa menarik data anaknya sendiri
   if (userRole === "PARENT") {

@@ -2,9 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/server-auth";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import crypto from "crypto";
 
@@ -79,11 +77,8 @@ export async function deleteCertificateAction(id: string) {
 
 // 4. Get certificates for a specific player (Parent-safe)
 export async function getPlayerCertificatesAction(playerId: string) {
-  const session = await getServerSession(authOptions);
-  if (!session) throw new Error("Unauthorized");
-
-  const userRole = session.user.role;
-  const userId = session.user.id;
+  const session = await requireAuth();
+  const { role: userRole, id: userId } = session.user;
 
   const player = await prisma.player.findUnique({
     where: { id: playerId },

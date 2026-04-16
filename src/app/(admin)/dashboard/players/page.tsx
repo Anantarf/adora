@@ -172,15 +172,6 @@ export default function PlayersPage() {
                   </div>
                 );
               })}
-
-              {/* Add Group Quickie */}
-              <div
-                onClick={() => setAddGroupOpen(true)}
-                className="border-2 border-dashed border-border/50 rounded-lg p-6 flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
-              >
-                <FolderPlus className="size-10 text-muted-foreground" />
-                <span className="text-xs font-semibold uppercase tracking-widest">Tambah Kelompok</span>
-              </div>
             </motion.div>
           ) : (
             /* VIEW: PLAYER TILES (DRILL DOWN) */
