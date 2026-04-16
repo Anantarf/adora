@@ -4,10 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
 import { AttendanceStatus } from "@/types/dashboard";
+import { MS_PER_DAY, ATTENDANCE_LOOKBACK_DAYS, TREND_STATS_SAMPLE_SIZE } from "@/lib/constants";
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-const ATTENDANCE_LOOKBACK_DAYS = 30;
-const TREND_STATS_SAMPLE_SIZE = 200;
 const ATTENDANCE_STATUSES = ["HADIR", "IZIN", "SAKIT", "ALPA"] as const;
 
 // Initialize default attendance counts
@@ -40,7 +39,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
     ]);
 
     // Calculate 30 days ago in Jakarta time, preserving timezone offset
-    const thirtyDaysAgoMs = getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+    const thirtyDaysAgoMs = getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * MS_PER_DAY;
     const thirtyDaysAgo = toJakartaDate(new Date(thirtyDaysAgoMs).toISOString().split('T')[0]);
 
     const attendanceStats = await prisma.attendance.groupBy({

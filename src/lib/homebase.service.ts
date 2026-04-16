@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_EVENT_TYPE } from "@/lib/config/events";
 
 export async function getHomebases() {
   return prisma.homebase.findMany({
@@ -69,7 +70,7 @@ export async function createHomebaseEvent(data: {
   return prisma.event.create({
     data: {
       ...data,
-      type: data.type || "LATIHAN",
+      type: data.type || DEFAULT_EVENT_TYPE,
     },
   });
 }

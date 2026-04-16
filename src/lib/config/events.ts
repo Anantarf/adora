@@ -48,6 +48,8 @@ export const EVENT_TYPES: Record<string, EventConfig> = {
   },
 };
 
+export const DEFAULT_EVENT_TYPE: EventTypeKey = "LATIHAN";
+
 export const getEventConfig = (type: string): EventConfig => {
   return EVENT_TYPES[type] || EVENT_TYPES.KHUSUS;
 };

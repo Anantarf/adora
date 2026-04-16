@@ -2,8 +2,9 @@
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getHomebases, getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase.service";
+import { HOMEBASE_CACHE_TTL } from "@/lib/constants";
 
-const getCachedPublicHomebases = unstable_cache(async () => getHomebases(), ["public-homebases"], { revalidate: 300, tags: ["public-homebases"] });
+const getCachedPublicHomebases = unstable_cache(async () => getHomebases(), ["public-homebases"], { revalidate: HOMEBASE_CACHE_TTL, tags: ["public-homebases"] });
 
 export async function getPublicHomebases() {
   try {

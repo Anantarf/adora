@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
+import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { revalidatePath } from "next/cache";
@@ -88,11 +89,7 @@ export async function updateUserAction(id: string, data: {
   const updated = await prisma.$transaction(async (tx) => {
      const res = await tx.user.update({
        where: { id },
-       data: {
-         ...(data.name ? { name: data.name } : {}),
-         ...(data.username ? { username: data.username } : {}),
-         ...(data.email !== undefined ? { email: data.email } : {}),
-       }
+       data: buildUpdateData(data),
      });
 
      await createAuditLog(tx, "UPDATE", "user", id);

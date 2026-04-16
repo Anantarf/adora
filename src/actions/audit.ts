@@ -5,6 +5,7 @@ import type { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { DEFAULT_AUDIT_PAGE_SIZE } from "@/lib/constants";
 import crypto from "crypto";
 
 // ─── Types ───────────────────────────────────────────
@@ -22,7 +23,7 @@ export type AuditLogRecord = {
 export async function getAuditLogsAction(options?: { take?: number; cursor?: string }): Promise<{ logs: AuditLogRecord[]; nextCursor: string | null }> {
   await requireAdmin();
 
-  const take = options?.take || 50;
+  const take = options?.take || DEFAULT_AUDIT_PAGE_SIZE;
 
   const logs = await prisma.auditlog.findMany({
     take: take + 1, // Take one extra to check for next page

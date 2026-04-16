@@ -4,13 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
+import { buildUpdateData } from "@/lib/utils";
 import crypto from "crypto";
-
-// ─── Helper: Build group update data ────────────────────────────────────────
-const buildGroupUpdateData = (data: { name?: string; description?: string | undefined; homebaseId?: string | null }) =>
-  Object.fromEntries(
-    Object.entries(data).filter(([_, v]) => v !== undefined)
-  );
 
 export async function getGroupsAction() {
   await requireAdmin();
@@ -63,7 +58,7 @@ export async function updateGroupAction(id: string, data: { name?: string; descr
     const updated = await prisma.$transaction(async (tx) => {
       const g = await tx.group.update({
         where: { id },
-        data: buildGroupUpdateData(data),
+        data: buildUpdateData(data),
       });
 
       await createAuditLog(tx, "UPDATE", "group", g.id);

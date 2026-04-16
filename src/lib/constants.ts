@@ -15,3 +15,14 @@ export const QUERY_KEYS = {
   PLAYER_STATS_BASE: ["player-stats"],
   PLAYER_STATS: (playerId: string) => ["player-stats", playerId],
 } as const;
+
+// ─── Cache & Pagination ───────────────────────────────
+export const HOMEBASE_CACHE_TTL = 5 * 60; // 5 minutes in seconds
+export const DEFAULT_AUDIT_PAGE_SIZE = 50;
+
+// ─── Date/Time ────────────────────────────────────────
+export const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+// ─── Dashboard Metrics ─────────────────────────────────
+export const ATTENDANCE_LOOKBACK_DAYS = 30;
+export const TREND_STATS_SAMPLE_SIZE = 200;

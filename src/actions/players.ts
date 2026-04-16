@@ -76,10 +76,10 @@ export async function addBatchPlayersAction(
       skipDuplicates: true,
     });
 
-    // Create an audit log for each player added to keep recordId clean
-    for (const player of formattedData) {
-      await createAuditLog(tx, "CREATE", "player_batch", player.id);
-    }
+    // Create audit logs for all players atomically
+    await Promise.all(
+      formattedData.map(player => createAuditLog(tx, "CREATE", "player_batch", player.id))
+    );
     return res;
   });
 

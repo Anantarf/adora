@@ -25,7 +25,8 @@
       "Bash(mysql -h 127.0.0.1 -P 3308 -u root -e \"SELECT 1 AS ok;\")",
       "Bash(node -e \"const {createConnection} = require\\('net'\\); const c = createConnection\\({host:'127.0.0.1', port:3308}\\); c.on\\('connect', \\(\\) => {console.log\\('TCP OK'\\); c.end\\(\\)}\\); c.on\\('error', e => console.error\\('TCP Error:', e.message\\)\\);\")",
       "Bash(git add:*)",
-      "Bash(git commit -m 'fix: high-priority security & correctness issues:*)"
+      "Bash(git commit -m 'fix: high-priority security & correctness issues:*)",
+      "Bash(git commit -m 'refactor: medium & low priority code quality improvements:*)"
     ]
   }
 }

@@ -19,7 +19,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { toast } from "sonner";
-import { EVENT_TYPES, getEventConfig } from "@/lib/config/events";
+import { EVENT_TYPES, DEFAULT_EVENT_TYPE, getEventConfig } from "@/lib/config/events";
 import { combineDateAndTime, toYYYYMMDD, getJakartaToday, toJakartaDate, getCountdownLabel } from "@/lib/date-utils";
 
 const CalendarView = dynamic(() => import("@/components/features/calendar-view").then((mod) => mod.CalendarView), {
@@ -67,7 +67,7 @@ export default function SchedulePage() {
     };
   }, []);
 
-  const defaultType = Object.keys(EVENT_TYPES)[0] || "LATIHAN";
+  const defaultType = DEFAULT_EVENT_TYPE;
 
   const {
     register,
