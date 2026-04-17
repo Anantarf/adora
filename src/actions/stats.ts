@@ -23,7 +23,7 @@ export async function submitAttendanceAction(data: {
   await requireAdmin();
 
   if (!data.playerStatuses || data.playerStatuses.length === 0) {
-    throw new Error("Minimal ada 1 pemain untuk didaftarkan kehadirannya.");
+    return { success: false, error: "Minimal ada 1 pemain untuk didaftarkan kehadirannya." };
   }
 
   const dateObj = toJakartaDate(data.date);
@@ -39,7 +39,7 @@ export async function submitAttendanceAction(data: {
     const invalidPlayers = playerIds.filter(id => !existingPlayerIds.has(id));
 
     if (invalidPlayers.length > 0) {
-      throw new Error(`Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}`);
+      return { success: false, error: `Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}` };
     }
 
     const upsertResults = await Promise.allSettled(
@@ -53,7 +53,7 @@ export async function submitAttendanceAction(data: {
     );
 
     const failed = upsertResults.filter(r => r.status === "rejected");
-    if (failed.length > 0) throw new Error(`Gagal mencatat kehadiran untuk ${failed.length} pemain`);
+    if (failed.length > 0) return { success: false, error: `Gagal mencatat kehadiran untuk ${failed.length} pemain` };
 
     await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${data.playerStatuses.length}`);
   });
@@ -73,7 +73,7 @@ export async function submitStatisticAction(data: {
 
   const stat = await prisma.$transaction(async (tx) => {
     const period = await tx.evaluationPeriod.findUnique({ where: { id: data.periodId } });
-    if (!period) throw new Error("Periode evaluasi tidak ditemukan.");
+    if (!period) return { success: false, error: "Periode evaluasi tidak ditemukan." };
 
     const existing = await tx.statistic.findUnique({
       where: { playerId_periodId: { playerId: data.playerId, periodId: data.periodId } },

@@ -1,4 +1,5 @@
 "use client";
+import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   getCertificatesAction,
@@ -26,7 +27,7 @@ export const useAddCertificate = () => {
       fileUrl: string;
       playerId?: string;
       groupId?: string;
-    }) => addCertificateAction(data),
+    }) => addCertificateAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["certificates"] });
     },
@@ -38,7 +39,7 @@ export const useDeleteCertificate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteCertificateAction(id),
+    mutationFn: (id: string) => deleteCertificateAction(id).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["certificates"] });
     },

@@ -1,4 +1,5 @@
 "use client";
+import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   submitStatisticAction,
@@ -33,7 +34,7 @@ export const useSubmitStatistic = () => {
       periodId: string;
       metrics: MetricsJson;
       status: "Draft" | "Published";
-    }) => submitStatisticAction(data),
+    }) => submitStatisticAction(data).then(unwrapAction),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["statistics-period", variables.periodId] });
       queryClient.invalidateQueries({ queryKey: ["player-stats"] });

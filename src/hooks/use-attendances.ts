@@ -1,4 +1,5 @@
 "use client";
+import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAttendancesAction } from "@/actions/dashboard";
 import { submitAttendanceAction } from "@/actions/stats";
@@ -24,7 +25,7 @@ export const useAddAttendances = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: submitAttendanceAction,
+    mutationFn: (data: any) => submitAttendanceAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attendances"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });

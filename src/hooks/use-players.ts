@@ -1,4 +1,5 @@
 "use client";
+import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPlayersAction, addPlayerAction, updatePlayerAction, deletePlayerAction, addBatchPlayersAction } from "@/actions/players";
 import { QUERY_KEYS } from "@/lib/constants";
@@ -22,7 +23,7 @@ export const useAddPlayer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: addPlayerAction,
+    mutationFn: (data: any) => addPlayerAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
@@ -34,7 +35,7 @@ export const useUpdatePlayer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { name?: string; dateOfBirth?: string; schoolOrigin?: string; groupId?: string; parentId?: string } }) => updatePlayerAction(id, data),
+    mutationFn: ({ id, data }: { id: string; data: { name?: string; dateOfBirth?: string; schoolOrigin?: string; groupId?: string; parentId?: string } }) => updatePlayerAction(id, data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
@@ -46,7 +47,7 @@ export const useDeletePlayer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deletePlayerAction,
+    mutationFn: (data: any) => deletePlayerAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },
@@ -58,7 +59,7 @@ export const useAddBatchPlayers = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: addBatchPlayersAction,
+    mutationFn: (data: any) => addBatchPlayersAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
     },

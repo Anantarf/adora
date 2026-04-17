@@ -1,4 +1,5 @@
 "use client";
+import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
     getUsersAction,
@@ -25,7 +26,7 @@ export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
 export const useAddUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: createUserAction,
+    mutationFn: (data: any) => createUserAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("Akun orang tua berhasil dibuat!");
@@ -39,7 +40,7 @@ export const useAddUser = () => {
 export const useUpdateUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
-      mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateUserAction>[1] }) => updateUserAction(id, data),
+      mutationFn: ({ id, data }: { id: string; data: Parameters<typeof updateUserAction>[1] }) => updateUserAction(id, data).then(unwrapAction),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["users"] });
         toast.success("Data akun diperbarui!");
@@ -52,7 +53,7 @@ export const useUpdateUser = () => {
 
 export const useResetPassword = () => {
     return useMutation({
-      mutationFn: ({ id, newPassword }: { id: string; newPassword?: string }) => resetPasswordAction(id, newPassword),
+      mutationFn: ({ id, newPassword }: { id: string; newPassword?: string }) => resetPasswordAction(id, newPassword).then(unwrapAction),
       onSuccess: (res) => {
         toast.success(res.message);
       },
@@ -65,7 +66,7 @@ export const useResetPassword = () => {
 export const useDeleteUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
-      mutationFn: deleteUserAction,
+      mutationFn: (data: any) => deleteUserAction(data).then(unwrapAction),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["users"] });
         toast.success("Akun berhasil dihapus.");
@@ -78,7 +79,7 @@ export const useDeleteUser = () => {
 
 export const useUpdateSelf = () => {
   return useMutation({
-    mutationFn: updateSelfAction,
+    mutationFn: (data: any) => updateSelfAction(data).then(unwrapAction),
     onSuccess: () => {
       toast.success("Profil Anda berhasil diperbarui!");
     },

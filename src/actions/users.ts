@@ -48,12 +48,12 @@ export async function createUserAction(data: {
   });
 
   if (existing) {
-    throw new Error("Username sudah digunakan oleh akun lain.");
+    return { success: false, error: "Username sudah digunakan oleh akun lain." };
   }
 
   const defaultPassword = process.env.DEFAULT_RESET_PASSWORD;
   if (!data.password && !defaultPassword) {
-    throw new Error("Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment.");
+    return { success: false, error: "Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment." };
   }
   const hashedPassword = await bcrypt.hash(data.password || defaultPassword!, 10);
   
@@ -104,7 +104,7 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   const defaultPassword = process.env.DEFAULT_RESET_PASSWORD;
   const passwordToHash = newPassword || defaultPassword;
   if (!passwordToHash) {
-    throw new Error("Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment.");
+    return { success: false, error: "Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment." };
   }
   const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
@@ -133,7 +133,7 @@ export async function deleteUserAction(id: string) {
   });
 
   if (playerCount > 0) {
-    throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
+    return { success: false, error: `Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.` };
   }
 
   

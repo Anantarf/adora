@@ -70,7 +70,7 @@ export async function deletePeriodAction(periodId: string) {
 
   const statCount = await prisma.statistic.count({ where: { periodId } });
   if (statCount > 0) {
-    throw new Error(`Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.`);
+    return { success: false, error: `Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.` };
   }
 
   await prisma.$transaction(async (tx) => {
