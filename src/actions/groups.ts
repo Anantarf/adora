@@ -5,11 +5,9 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
-import crypto from "crypto";
-
 export async function getGroupsAction() {
-  await requireAdmin();
   try {
+    await requireAdmin();
     return await prisma.group.findMany({
       orderBy: { name: "asc" },
       include: {
@@ -28,12 +26,11 @@ export async function getGroupsAction() {
 }
 
 export async function addGroupAction(data: { name: string; description?: string; homebaseId?: string | null }) {
-  await requireAdmin();
   try {
+    await requireAdmin();
     const group = await prisma.$transaction(async (tx) => {
       const g = await tx.group.create({
         data: {
-          id: crypto.randomUUID(),
           name: data.name,
           description: data.description || null,
           homebaseId: data.homebaseId || null,
@@ -53,8 +50,8 @@ export async function addGroupAction(data: { name: string; description?: string;
 }
 
 export async function updateGroupAction(id: string, data: { name?: string; description?: string; homebaseId?: string | null }) {
-  await requireAdmin();
   try {
+    await requireAdmin();
     const updated = await prisma.$transaction(async (tx) => {
       const g = await tx.group.update({
         where: { id },
@@ -74,8 +71,8 @@ export async function updateGroupAction(id: string, data: { name?: string; descr
 }
 
 export async function deleteGroupAction(id: string) {
-  await requireAdmin();
   try {
+    await requireAdmin();
     await prisma.$transaction(async (tx) => {
       await tx.group.delete({ where: { id } });
       await createAuditLog(tx, "DELETE", "group", id);

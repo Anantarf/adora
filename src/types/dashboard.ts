@@ -5,21 +5,87 @@
 
 export type UserRole = "ADMIN" | "PARENT";
 
+// ─── Evaluation Period ────────────────────────────────
+export interface EvaluationPeriod {
+  id: string;
+  name: string;
+  startDate: Date | string;
+  endDate: Date | string;
+  isActive: boolean;
+  createdAt: Date | string;
+}
+
+// ─── Metrics (nested, per gambar raport) ─────────────
+export type DribbleMetrics = {
+  inAndOut: number;
+  crossover: number;
+  vLeft: number;
+  vRight: number;
+  betweenLegsLeft: number;
+  betweenLegsRight: number;
+};
+
+export type PassingMetrics = {
+  chestPass: number;
+  bouncePass: number;
+  overheadPass: number;
+};
+
+export type MetricsJson = {
+  dribble: DribbleMetrics;
+  passing: PassingMetrics;
+  layUp: number;
+  shooting: number;
+  notes?: string;
+};
+
+// ─── Statistic History ────────────────────────────────
+export interface StatisticHistory {
+  id: string;
+  statisticId: string;
+  metricsJson: MetricsJson;
+  status: string;
+  editedAt: Date | string;
+  editedBy: string | null;
+  user?: { name: string | null; username: string | null } | null;
+}
+
 export interface ScheduleEvent {
   id: string;
   title: string;
   description: string | null;
-  date: Date | string; // Normalized to Jakarta Time (WIB)
-  type: string; // e.g., 'Latihan', 'Sparing'
+  date: Date | string;
+  type: string;
   location: string | null;
-  groupId: string | null;
   homebaseId: string | null;
-  group?: {
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+  groups?: Array<{
+    id: string;
     name: string;
-  } | null;
+  }>;
 }
 
 export type AttendanceStatus = "HADIR" | "IZIN" | "SAKIT" | "ALPA";
+
+export interface Attendance {
+  id: string;
+  date: Date | string;
+  status: AttendanceStatus;
+  note: string | null;
+  playerId: string;
+  eventId: string | null;
+  createdAt: Date | string;
+  player?: Player;
+  event?: ScheduleEvent;
+}
+
+export interface AttendanceStats {
+  HADIR: number;
+  IZIN: number;
+  SAKIT: number;
+  ALPA: number;
+}
 
 export interface Player {
   id: string;

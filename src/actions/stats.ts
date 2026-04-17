@@ -4,19 +4,24 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
-import crypto from "crypto";
-import { AttendanceStatus } from "@/types/dashboard";
+import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
+
+// ─── Helper ──────────────────────────────────────────
+const safeParseMetrics = (json: string): MetricsJson => {
+  try { return JSON.parse(json) as MetricsJson; }
+  catch { return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 }; }
+};
 
 // 1. Submit Attendance
 export async function submitAttendanceAction(data: {
   date: string;
   playerStatuses: { playerId: string; status: AttendanceStatus }[];
   note?: string;
+  eventId?: string;
 }) {
   await requireAdmin();
 
-  // Validate input
   if (!data.playerStatuses || data.playerStatuses.length === 0) {
     throw new Error("Minimal ada 1 pemain untuk didaftarkan kehadirannya.");
   }
@@ -24,7 +29,6 @@ export async function submitAttendanceAction(data: {
   const dateObj = toJakartaDate(data.date);
 
   await prisma.$transaction(async (tx) => {
-    // Validate all players exist and are not deleted
     const playerIds = data.playerStatuses.map(ps => ps.playerId);
     const existingPlayers = await tx.player.findMany({
       where: { id: { in: playerIds }, isDeleted: false },
@@ -38,32 +42,18 @@ export async function submitAttendanceAction(data: {
       throw new Error(`Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}`);
     }
 
-    // Bulking operation (Create or Update) — fail fast on any error
     const upsertResults = await Promise.allSettled(
       data.playerStatuses.map(ps =>
         tx.attendance.upsert({
-          where: {
-            playerId_date: {
-              playerId: ps.playerId,
-              date: dateObj,
-            },
-          },
-          update: { status: ps.status, note: data.note },
-          create: {
-            id: crypto.randomUUID(),
-            playerId: ps.playerId,
-            date: dateObj,
-            status: ps.status,
-            note: data.note,
-          },
+          where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
+          update: { status: ps.status, note: data.note, eventId: data.eventId ?? null },
+          create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId ?? null },
         })
       )
     );
 
     const failed = upsertResults.filter(r => r.status === "rejected");
-    if (failed.length > 0) {
-      throw new Error(`Gagal mencatat kehadiran untuk ${failed.length} pemain`);
-    }
+    if (failed.length > 0) throw new Error(`Gagal mencatat kehadiran untuk ${failed.length} pemain`);
 
     await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${data.playerStatuses.length}`);
   });
@@ -71,52 +61,106 @@ export async function submitAttendanceAction(data: {
   revalidatePath("/dashboard/attendances");
 }
 
-// 2. Submit Statistics (Raport)
+// 2. Submit Statistics (period-based, dengan history revisi)
 export async function submitStatisticAction(data: {
   playerId: string;
-  date: string;
-  metrics: Record<string, number | string>;
+  periodId: string;
+  metrics: MetricsJson;
   status: "Draft" | "Published";
 }) {
-  await requireAdmin();
-  const targetDate = toJakartaDate(data.date);
+  const session = await requireAdmin();
+  const userId = session.user.id as string | undefined;
 
   const stat = await prisma.$transaction(async (tx) => {
-    const res = await tx.statistic.upsert({
-      where: {
-        playerId_date: {
-          playerId: data.playerId,
-          date: targetDate,
+    const period = await tx.evaluationPeriod.findUnique({ where: { id: data.periodId } });
+    if (!period) throw new Error("Periode evaluasi tidak ditemukan.");
+
+    const existing = await tx.statistic.findUnique({
+      where: { playerId_periodId: { playerId: data.playerId, periodId: data.periodId } },
+    });
+
+    if (existing) {
+      // Simpan snapshot lama ke history sebelum update
+      await tx.statisticHistory.create({
+        data: {
+          statisticId: existing.id,
+          metricsJson: existing.metricsJson as string,
+          status: existing.status,
+          editedBy: userId ?? null,
         },
-      },
-      update: {
-        metricsJson: JSON.stringify(data.metrics),
-        status: data.status,
-      },
-      create: {
-        id: crypto.randomUUID(),
+      });
+
+      const updated = await tx.statistic.update({
+        where: { id: existing.id },
+        data: {
+          metricsJson: JSON.stringify(data.metrics),
+          status: data.status,
+          updatedAt: new Date(),
+        },
+      });
+
+      await createAuditLog(tx, "UPDATE_STATS", "statistic", updated.id);
+      return updated;
+    }
+
+    const created = await tx.statistic.create({
+      data: {
         playerId: data.playerId,
-        date: targetDate,
+        periodId: data.periodId,
+        date: period.startDate,
         metricsJson: JSON.stringify(data.metrics),
         status: data.status,
         updatedAt: new Date(),
       },
     });
 
-    await createAuditLog(tx, "SUBMIT_STATS", "statistic", res.id);
-    return res;
+    await createAuditLog(tx, "CREATE_STATS", "statistic", created.id);
+    return created;
   });
 
   revalidatePath("/dashboard/statistics");
   return stat;
 }
 
-// 3. Get Player Stats
+// 3. Get all stats in a period (Admin — tabel per group)
+export async function getStatsByPeriodAction(periodId: string) {
+  await requireAdmin();
+
+  const stats = await prisma.statistic.findMany({
+    where: { periodId, player: { isDeleted: false } },
+    include: {
+      player: {
+        select: {
+          id: true, name: true, groupId: true,
+          group: { select: { id: true, name: true } },
+        },
+      },
+      period: { select: { id: true, name: true } },
+    },
+    orderBy: [{ player: { group: { name: "asc" } } }, { player: { name: "asc" } }],
+  });
+
+  return stats.map(s => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
+}
+
+// 4. Get history revisi untuk satu statistic
+export async function getStatHistoryAction(statisticId: string) {
+  await requireAdmin();
+
+  const history = await prisma.statisticHistory.findMany({
+    where: { statisticId },
+    include: { user: { select: { name: true, username: true } } },
+    orderBy: { editedAt: "desc" },
+  });
+
+  return history.map(h => ({ ...h, metricsJson: safeParseMetrics(h.metricsJson as string) }));
+}
+
+// 5. Get Player Stats (Parent-safe — untuk portal pemain)
 export async function getPlayerStatsAction(playerId: string) {
   const session = await requireAuth();
   const { role: userRole, id: userId } = session.user;
 
-  // Jika parent, pastikan dia hanya bisa menarik data anaknya sendiri
   if (userRole === "PARENT") {
     const parentOwnsChild = await prisma.player.findFirst({
       where: { id: playerId, parentId: userId, isDeleted: false }
@@ -127,16 +171,10 @@ export async function getPlayerStatsAction(playerId: string) {
   }
 
   const stats = await prisma.statistic.findMany({
-    where: { playerId, player: { isDeleted: false } },
+    where: { playerId, player: { isDeleted: false }, status: "Published" },
+    include: { period: { select: { id: true, name: true } } },
     orderBy: { date: "desc" },
   });
 
-  // Type-safe transform: Parse metricsJson with fallback
-  return stats.map(s => {
-    try {
-      return { ...s, metricsJson: JSON.parse(s.metricsJson as string) };
-    } catch {
-      return { ...s, metricsJson: {} };
-    }
-  });
+  return stats.map(s => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
 }

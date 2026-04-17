@@ -27,7 +27,8 @@
       "Bash(git add:*)",
       "Bash(git commit -m 'fix: high-priority security & correctness issues:*)",
       "Bash(git commit -m 'refactor: medium & low priority code quality improvements:*)",
-      "Bash(git commit -m 'refactor: standardize auth patterns & simplify hooks:*)"
+      "Bash(git commit -m 'refactor: standardize auth patterns & simplify hooks:*)",
+      "Bash(npx shadcn@latest add badge label switch --yes)"
     ]
   }
 }

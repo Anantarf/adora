@@ -6,8 +6,6 @@ import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { DEFAULT_AUDIT_PAGE_SIZE } from "@/lib/constants";
-import crypto from "crypto";
-
 // ─── Types ───────────────────────────────────────────
 export type AuditLogRecord = {
   id: string;
@@ -61,9 +59,8 @@ export async function createAuditLog(tx: Omit<Prisma.TransactionClient, "$connec
 
 // 3. Log an audit action — Public Server Action
 export async function createAuditLogAction(action: string, targetTable: string, recordId?: string) {
-  await requireAdmin();
-
   try {
+    await requireAdmin();
     await prisma.$transaction(async (tx) => {
       await createAuditLog(tx, action, targetTable, recordId);
     });

@@ -5,7 +5,6 @@ import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcrypt";
-import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -61,7 +60,6 @@ export async function createUserAction(data: {
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: {
-        id: crypto.randomUUID(),
         username: data.username,
         name: data.name,
         email: data.email || null,

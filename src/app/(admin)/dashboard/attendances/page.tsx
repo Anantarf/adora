@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, CheckSquare, CalendarDays, LayoutList as SelectIcon } from "lucide-react";
+import { Loader2, CheckSquare, CalendarDays, LayoutList as SelectIcon, LayoutGrid } from "lucide-react";
 
-// ─── Constants ──────────────────────────────────────────────────────────────
 const ATTENDANCE_STATUSES = {
   HADIR: "HADIR",
   IZIN: "IZIN",
@@ -21,10 +20,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { AttendanceCardView } from "@/components/features/AttendanceCardView";
 
 export default function AttendancesPage() {
+  const [viewMode, setViewMode] = useState<"table" | "card">("card");
   const [activeGroup, setActiveGroup] = useState<string>("all");
-  // Jakarta Midnight Date Sync
   const [date, setDate] = useState<string>(toYYYYMMDD(getJakartaToday()));
   const [batchStatus, setBatchStatus] = useState<Record<string, AttendanceStatus>>({});
 
@@ -99,18 +99,34 @@ export default function AttendancesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Daftar Hadir Latihan</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Buku absen kelompok (Batching Input) untuk mempermudah pelatih di lapangan.</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Buku absen kelompok untuk mempermudah pelatih di lapangan.</p>
         </div>
         <div className="flex items-center gap-2">
-          {Object.entries(statsCount).map(([label, count]) => (
-            <div key={label} className="flex flex-col items-center px-4 py-1.5 bg-card border border-border/40 rounded-xl">
-              <span className="text-[10px] font-black tracking-widest text-muted-foreground">{label}</span>
-              <span className="text-lg font-bold text-secondary">{count}</span>
-            </div>
-          ))}
+          <Button
+            size="sm"
+            variant={viewMode === "card" ? "default" : "outline"}
+            onClick={() => setViewMode("card")}
+            className="h-9"
+          >
+            <LayoutGrid className="size-4 mr-1.5" />
+            Agenda
+          </Button>
+          <Button
+            size="sm"
+            variant={viewMode === "table" ? "default" : "outline"}
+            onClick={() => setViewMode("table")}
+            className="h-9"
+          >
+            <SelectIcon className="size-4 mr-1.5" />
+            Manual
+          </Button>
         </div>
       </div>
 
+      {viewMode === "card" ? (
+        <AttendanceCardView />
+      ) : (
+        <>
       {/* Controller Top Bar */}
       <div className="flex flex-col md:flex-row gap-4 items-end bg-card p-4 rounded-xl border border-border/40 shadow-sm">
         <div className="flex flex-col gap-1.5 w-full md:w-[250px]">
@@ -245,6 +261,8 @@ export default function AttendancesPage() {
           </TableBody>
         </Table>
       </div>
+        </>
+      )}
     </div>
   );
 }

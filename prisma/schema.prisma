@@ -15,14 +15,14 @@ model homebase {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
-  groups      group[]
-  events      event[]
-  players     player[]    // ← ADD THIS LINE
-  
+  groups             group[]
+  events             event[]
+  preferredByPlayers player[] @relation("PreferredHomebase")
+
   @@map("Homebase")
 }
 model account {
-  id                String  @id
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
@@ -41,19 +41,23 @@ model account {
 }
 
 model attendance {
-  id        String            @id
+  id        String            @id @default(cuid())
   date      DateTime
   status    attendance_status
   note      String?           @db.Text
   playerId  String
+  eventId   String?
   createdAt DateTime          @default(now())
+
   player    player            @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Attendance_playerId_fkey")
+  event     event?            @relation(fields: [eventId], references: [id], onDelete: SetNull, map: "Attendance_eventId_fkey")
 
   @@unique([playerId, date], map: "Attendance_playerId_date_key")
+  @@index([eventId], map: "Attendance_eventId_idx")
 }
 
 model auditlog {
-  id          String   @id
+  id          String   @id @default(cuid())
   action      String
   targetTable String
   recordId    String?
@@ -66,7 +70,7 @@ model auditlog {
 }
 
 model certificate {
-  id         String   @id
+  id         String   @id @default(cuid())
   title      String
   fileUrl    String
   uploadedAt DateTime @default(now())
@@ -87,17 +91,30 @@ model event {
   type        String    @default("LATIHAN")
   location    String?
   homebaseId  String?
-  groupId     String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
-  group       group?    @relation(fields: [groupId], references: [id], map: "Event_groupId_fkey")
-  homebase    homebase? @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Event_homebaseId_fkey")
 
-  @@index([groupId], map: "Event_groupId_fkey")
+  eventGroups eventGroup[]
+  homebase    homebase? @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Event_homebaseId_fkey")
+  attendances attendance[]
+
   @@index([homebaseId], map: "Event_homebaseId_idx")
-  @@index([date])
+  @@index([date], map: "Event_date_idx")
   @@map("Event")
+}
+
+model eventGroup {
+  id      String @id @default(cuid())
+  eventId String
+  groupId String
+
+  event   event  @relation(fields: [eventId], references: [id], onDelete: Cascade, map: "EventGroup_eventId_fkey")
+  group   group  @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "EventGroup_groupId_fkey")
+
+  @@unique([eventId, groupId], map: "EventGroup_eventId_groupId_key")
+  @@index([eventId], map: "EventGroup_eventId_idx")
+  @@index([groupId], map: "EventGroup_groupId_idx")
+  @@map("EventGroup")
 }
 
 model group {
@@ -107,12 +124,12 @@ model group {
   homebaseId  String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
-  
+
   homebase    homebase?     @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Group_homebaseId_fkey")
   certificate certificate[]
-  event       event[]
+  eventGroups eventGroup[]
   player      player[]
-  
+
   @@index([homebaseId], map: "Group_homebaseId_idx")
   @@map("Group")
 }
@@ -134,7 +151,7 @@ model player {
   certificate         certificate[]
   group               group?        @relation(fields: [groupId], references: [id], onDelete: SetNull, map: "Player_groupId_fkey")
   user                user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
-  preferred_homebase  homebase?     @relation(fields: [preferred_homebaseId], references: [id], onDelete: SetNull, map: "Player_preferred_homebaseId_fkey")
+  preferred_homebase  homebase?     @relation("PreferredHomebase", fields: [preferred_homebaseId], references: [id], onDelete: SetNull, map: "Player_preferred_homebaseId_fkey")
   statistic           statistic[]
 
   @@index([groupId], map: "Player_groupId_idx")
@@ -144,7 +161,7 @@ model player {
 }
 
 model session {
-  id           String   @id
+  id           String   @id @default(cuid())
   sessionToken String   @unique(map: "Session_sessionToken_key")
   userId       String
   expires      DateTime
@@ -153,22 +170,55 @@ model session {
   @@index([userId], map: "Session_userId_fkey")
 }
 
-model statistic {
-  id          String   @id
-  date        DateTime
-  metricsJson String   @db.LongText
-  status      String   @default("Draft")
-  playerId    String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime
-  player      player   @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
+model evaluationPeriod {
+  id        String      @id @default(cuid())
+  name      String      // e.g. "Semester 1 2025"
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean     @default(false)
+  createdAt DateTime    @default(now())
 
-  @@unique([playerId, date], map: "Statistic_playerId_date_key")
+  statistic statistic[]
+
+  @@map("EvaluationPeriod")
+}
+
+model statistic {
+  id          String    @id @default(cuid())
+  date        DateTime
+  metricsJson String    @db.LongText
+  status      String    @default("Draft")
+  playerId    String
+  periodId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+
+  player      player             @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
+  period      evaluationPeriod?  @relation(fields: [periodId], references: [id], onDelete: SetNull, map: "Statistic_periodId_fkey")
+  history     statisticHistory[]
+
+  @@unique([playerId, periodId], map: "Statistic_playerId_periodId_key")
   @@index([status])
+  @@index([periodId], map: "Statistic_periodId_idx")
+}
+
+model statisticHistory {
+  id          String    @id @default(cuid())
+  statisticId String
+  metricsJson String    @db.LongText
+  status      String
+  editedAt    DateTime  @default(now())
+  editedBy    String?
+
+  statistic   statistic @relation(fields: [statisticId], references: [id], onDelete: Cascade, map: "StatisticHistory_statisticId_fkey")
+  user        user?     @relation(fields: [editedBy], references: [id], onDelete: SetNull, map: "StatisticHistory_editedBy_fkey")
+
+  @@index([statisticId], map: "StatisticHistory_statisticId_idx")
+  @@map("StatisticHistory")
 }
 
 model user {
-  id            String     @id
+  id            String     @id @default(cuid())
   name          String?
   email         String?    @unique(map: "User_email_key")
   emailVerified DateTime?
@@ -176,10 +226,11 @@ model user {
   username      String?    @unique(map: "User_username_key")
   password      String?
   role          user_role  @default(PARENT)
-  account       account[]
-  auditlog      auditlog[]
-  player        player[]
-  session       session[]
+  account          account[]
+  auditlog         auditlog[]
+  player           player[]
+  session          session[]
+  statisticHistory statisticHistory[]
 }
 
 model verificationtoken {

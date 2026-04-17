@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { useSchedule, useAddEvent, useUpdateEvent, useDeleteEvent } from "@/hooks/use-schedule";
 import { type ScheduleEvent } from "@/types/dashboard";
 import { useHomebases } from "@/hooks/use-homebases";
+import { useGroups } from "@/hooks/use-groups";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -51,7 +52,9 @@ export default function SchedulePage() {
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
   const [previewEvent, setPreviewEvent] = useState<ScheduleEvent | null>(null);
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const { data: homebases = [] } = useHomebases();
+  const { data: groups = [] } = useGroups();
 
   const isEditMode = editingEvent !== null;
 
@@ -131,9 +134,16 @@ export default function SchedulePage() {
       .slice(0, 5);
   }, [events]);
 
+  const toggleGroup = (groupId: string) => {
+    setSelectedGroupIds((prev) =>
+      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
+    );
+  };
+
   // Callback: Cancel edit mode and reset form
   const handleCancelEdit = () => {
     setEditingEvent(null);
+    setSelectedGroupIds([]);
     reset({
       title: "",
       location: "",
@@ -147,6 +157,7 @@ export default function SchedulePage() {
   const handleEditEvent = (ev: ScheduleEvent) => {
     setEditingEvent(ev);
     setDate(new Date(ev.date));
+    setSelectedGroupIds(ev.groups?.map((g) => g.id) ?? []);
   };
 
   const onSubmit = async (data: EventFormValues) => {
@@ -161,6 +172,7 @@ export default function SchedulePage() {
         type: data.type,
         date: isoWithWib,
         homebaseId: data.homebaseId || undefined,
+        groupIds: selectedGroupIds,
       };
 
       // Single mutation point
@@ -247,6 +259,32 @@ export default function SchedulePage() {
                   </Select>
                 </div>
               </div>
+
+              {/* Baris 1.5: Kelompok Peserta */}
+              {groups.length > 0 && (
+                <div className="space-y-1.5">
+                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Kelompok Peserta</label>
+                  <div className="flex flex-wrap gap-2">
+                    {groups.map((g: { id: string; name: string }) => {
+                      const checked = selectedGroupIds.includes(g.id);
+                      return (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() => toggleGroup(g.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                            checked
+                              ? "bg-primary text-primary-foreground border-primary"
+                              : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"
+                          }`}
+                        >
+                          {g.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Baris 2: Tanggal + Waktu + Lokasi + (Homebase) + Submit */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

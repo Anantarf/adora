@@ -9,10 +9,10 @@ import { QUERY_KEYS } from "@/lib/constants";
  */
 
 // 1. Hook (GET): Tarik data pemain via Server Action
-export const usePlayers = (groupId?: string) => {
+export const usePlayers = (groupId?: string, searchQuery?: string) => {
   return useQuery({
-    queryKey: QUERY_KEYS.PLAYERS(groupId),
-    queryFn: () => getPlayersAction(groupId),
+    queryKey: [...QUERY_KEYS.PLAYERS(groupId), searchQuery],
+    queryFn: () => getPlayersAction(groupId, searchQuery),
     staleTime: 1000 * 60 * 5,
   });
 };

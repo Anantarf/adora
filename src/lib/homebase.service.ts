@@ -32,8 +32,9 @@ export async function getGroupsByHomebase(homebaseId: string) {
       player: {
         where: { isDeleted: false },
       },
-      event: {
-        orderBy: { date: "desc" },
+      eventGroups: {
+        include: { event: true },
+        orderBy: { event: { date: "desc" } },
       },
     },
   });
@@ -44,7 +45,7 @@ export async function getEventsByHomebase(homebaseId: string) {
     where: { homebaseId },
     orderBy: { date: "desc" },
     include: {
-      group: true,
+      eventGroups: { include: { group: true } },
     },
   });
 }

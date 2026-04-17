@@ -6,6 +6,7 @@ export async function requireAdmin() {
   if (!session || session.user.role !== "ADMIN") {
     throw new Error("Unauthorized Access: Administrator privilege required.");
   }
+  return session;
 }
 
 export async function requireAuth() {

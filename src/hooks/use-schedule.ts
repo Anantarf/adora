@@ -6,7 +6,7 @@ import { QUERY_KEYS } from "@/lib/constants";
 export function useSchedule() {
   return useQuery<ScheduleEvent[]>({
     queryKey: QUERY_KEYS.SCHEDULE_EVENTS,
-    queryFn: () => getEventsAction(),
+    queryFn: async () => { const res = await getEventsAction(); if (res && !Array.isArray(res) && "error" in res) throw new Error(res.error); return res as ScheduleEvent[]; },
     staleTime: 1000 * 60 * 5, // 5 menit
   });
 }
@@ -15,7 +15,7 @@ export function useAddEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { title: string; date: string; type: string; location?: string; description?: string; groupId?: string; homebaseId?: string }) => createEventAction(data),
+    mutationFn: async (data: Parameters<typeof createEventAction>[0]) => { const res = await createEventAction(data); if (res && "error" in res) throw new Error(res.error); return res; },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SCHEDULE_EVENTS });
       // Invalidate dashboard metrics as well to update calendar
@@ -28,7 +28,7 @@ export function useUpdateEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: { title: string; date: string; type: string; location?: string; description?: string; groupId?: string; homebaseId?: string } }) => updateEventAction(id, data),
+    mutationFn: async ({ id, data }: { id: string; data: Parameters<typeof updateEventAction>[1] }) => { const res = await updateEventAction(id, data); if (res && "error" in res) throw new Error(res.error); return res; },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SCHEDULE_EVENTS });
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD_METRICS });
@@ -40,7 +40,7 @@ export function useDeleteEvent() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteEventAction(id),
+    mutationFn: async (id: string) => { const res = await deleteEventAction(id); if (res && "error" in res) throw new Error(res.error); return res; },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.SCHEDULE_EVENTS });
     },

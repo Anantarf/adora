@@ -3,25 +3,28 @@
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { revalidatePath } from "next/cache";
-import crypto from "crypto";
 import { ScheduleEvent } from "@/types/dashboard";
 import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 
-export async function getEventsAction(): Promise<ScheduleEvent[]> {
-  await requireAdmin();
-
+export async function getEventsAction() {
   try {
+    await requireAdmin();
     const events = await prisma.event.findMany({
       orderBy: { date: "asc" },
       include: {
-        group: { select: { name: true } },
+        eventGroups: {
+          include: { group: { select: { id: true, name: true } } },
+        },
       },
     });
-    return events as ScheduleEvent[];
+    return events.map((e) => ({
+      ...e,
+      groups: e.eventGroups.map((eg) => eg.group),
+    })) as ScheduleEvent[];
   } catch (error) {
     console.error("Error fetching events:", error);
-    throw new Error("Gagal mengambil jadwal kegiatan");
+    return { success: false, error: "Gagal mengambil jadwal kegiatan" };
   }
 }
 
@@ -52,24 +55,31 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
   }
 }
 
-export async function createEventAction(data: { title: string; description?: string; date: string; type: string; location?: string; groupId?: string; homebaseId?: string }) {
-  await requireAdmin();
-
+export async function createEventAction(data: { title: string; description?: string; date: string; type: string; location?: string; groupIds?: string[]; homebaseId?: string }) {
   try {
+    await requireAdmin();
     await prisma.$transaction(async (tx) => {
       const ev = await tx.event.create({
         data: {
-          id: crypto.randomUUID(),
           title: data.title,
           description: data.description || null,
           date: toJakartaDate(data.date),
           type: data.type,
           location: data.location || null,
-          groupId: data.groupId || null,
           homebaseId: data.homebaseId || null,
           updatedAt: new Date(),
         },
       });
+
+      if (data.groupIds && data.groupIds.length > 0) {
+        await tx.eventGroup.createMany({
+          data: data.groupIds.map((groupId) => ({
+            eventId: ev.id,
+            groupId,
+          })),
+        });
+      }
+
       await createAuditLog(tx, "CREATE", "event", ev.id);
     });
 
@@ -77,14 +87,13 @@ export async function createEventAction(data: { title: string; description?: str
     return { success: true };
   } catch (error) {
     console.error("Error creating event:", error);
-    throw new Error("Gagal membuat agenda baru");
+    return { success: false, error: "Gagal membuat agenda baru" };
   }
 }
 
-export async function updateEventAction(id: string, data: { title: string; description?: string; date: string; type: string; location?: string; groupId?: string; homebaseId?: string }) {
-  await requireAdmin();
-
+export async function updateEventAction(id: string, data: { title: string; description?: string; date: string; type: string; location?: string; groupIds?: string[]; homebaseId?: string }) {
   try {
+    await requireAdmin();
     await prisma.$transaction(async (tx) => {
       await tx.event.update({
         where: { id },
@@ -94,11 +103,23 @@ export async function updateEventAction(id: string, data: { title: string; descr
           date: toJakartaDate(data.date),
           type: data.type,
           location: data.location || null,
-          groupId: data.groupId || null,
           homebaseId: data.homebaseId || null,
           updatedAt: new Date(),
         },
       });
+
+      if (data.groupIds !== undefined) {
+        await tx.eventGroup.deleteMany({ where: { eventId: id } });
+        if (data.groupIds.length > 0) {
+          await tx.eventGroup.createMany({
+            data: data.groupIds.map((groupId) => ({
+              eventId: id,
+              groupId,
+            })),
+          });
+        }
+      }
+
       await createAuditLog(tx, "UPDATE", "event", id);
     });
 
@@ -106,14 +127,13 @@ export async function updateEventAction(id: string, data: { title: string; descr
     return { success: true };
   } catch (error) {
     console.error("Error updating event:", error);
-    throw new Error("Gagal mengubah jadwal");
+    return { success: false, error: "Gagal mengubah jadwal" };
   }
 }
 
 export async function deleteEventAction(id: string) {
-  await requireAdmin();
-
   try {
+    await requireAdmin();
     await prisma.$transaction(async (tx) => {
       await tx.event.delete({ where: { id } });
       await createAuditLog(tx, "DELETE", "event", id);
@@ -122,6 +142,95 @@ export async function deleteEventAction(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting event:", error);
-    throw new Error("Gagal menghapus jadwal");
+    return { success: false, error: "Gagal menghapus jadwal" };
+  }
+}
+
+export async function getEventsWithAttendanceAction() {
+  try {
+    await requireAdmin();
+    const events = await prisma.event.findMany({
+      orderBy: { date: "desc" },
+      include: {
+        eventGroups: {
+          include: { group: { select: { id: true, name: true } } },
+        },
+        attendances: {
+          select: { status: true },
+        },
+      },
+    });
+
+    return events.map((e) => {
+      const stats = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
+      e.attendances.forEach((a) => {
+        stats[a.status as keyof typeof stats]++;
+      });
+
+      return {
+        ...e,
+        groups: e.eventGroups.map((eg) => eg.group),
+        stats,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching events with attendance:", error);
+    throw new Error("Gagal mengambil data agenda dengan presensi");
+  }
+}
+
+export async function getEventAttendanceDetailAction(eventId: string) {
+  try {
+    await requireAdmin();
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+      include: {
+        eventGroups: {
+          include: { group: { select: { id: true, name: true } } },
+        },
+        attendances: {
+          include: {
+            player: { select: { id: true, name: true } },
+          },
+          orderBy: { player: { name: "asc" } },
+        },
+      },
+    });
+
+    if (!event) throw new Error("Event tidak ditemukan");
+
+    // Jika belum ada attendance, populate dengan daftar pemain dari group event tsb
+    let allAttendances = event.attendances;
+
+    if (event.attendances.length === 0 && event.eventGroups.length > 0) {
+      // Ambil pemain-pemain di group
+      const groupIds = event.eventGroups.map((eg) => eg.groupId);
+      const players = await prisma.player.findMany({
+        where: { groupId: { in: groupIds }, isDeleted: false },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      });
+
+      // Bikin fake attendance object untuk client
+      allAttendances = players.map((p) => ({
+        id: "draft-" + p.id,
+        date: event.date,
+        status: "HADIR" as const,
+        note: null,
+        playerId: p.id,
+        eventId: event.id,
+        createdAt: new Date(),
+        player: { id: p.id, name: p.name },
+      }));
+    }
+
+    return {
+      ...event,
+      groups: event.eventGroups.map((eg) => eg.group),
+      attendances: allAttendances,
+    };
+  } catch (error) {
+    console.error("Error fetching event attendance detail:", error);
+    throw new Error("Gagal mengambil detail presensi agenda");
   }
 }

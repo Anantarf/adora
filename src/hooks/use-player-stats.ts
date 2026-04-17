@@ -1,15 +1,9 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
 import { getPlayerStatsAction } from "@/actions/stats";
+import type { MetricsJson, StatisticHistory } from "@/types/dashboard";
 
-export type MetricsJson = {
-  shooting: number;
-  dribbling: number;
-  passing: number;
-  stamina: number;
-  attitude: number;
-  notes?: string;
-};
+export type { MetricsJson };
 
 export type PlayerStatRecord = {
   id: string;
@@ -17,8 +11,11 @@ export type PlayerStatRecord = {
   status: string;
   metricsJson: MetricsJson;
   playerId: string;
+  periodId: string | null;
   createdAt: Date;
   updatedAt: Date;
+  period?: { id: string; name: string } | null;
+  history?: StatisticHistory[];
 };
 
 // Hook (GET): Tarik data evaluasi rapor pemain via Server Action MySQL

@@ -5,15 +5,18 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
-import crypto from "crypto";
-
 // 1. Ambil semua pemain (Read)
-export async function getPlayersAction(groupId?: string) {
+export async function getPlayersAction(groupId?: string, searchQuery?: string) {
   await requireAdmin();
   return await prisma.player.findMany({
     where: {
       isDeleted: false,
       ...(groupId && groupId !== "all" ? { groupId } : {}),
+      ...(searchQuery
+        ? {
+            OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }],
+          }
+        : {}),
     },
     include: {
       group: {
@@ -30,7 +33,6 @@ export async function addPlayerAction(data: { name: string; dateOfBirth: string;
   const player = await prisma.$transaction(async (tx) => {
     const p = await tx.player.create({
       data: {
-        id: crypto.randomUUID(),
         name: data.name,
         dateOfBirth: toJakartaDate(data.dateOfBirth),
         schoolOrigin: data.schoolOrigin || undefined,
@@ -61,7 +63,6 @@ export async function addBatchPlayersAction(
   await requireAdmin();
 
   const formattedData = playersData.map((data) => ({
-    id: crypto.randomUUID(),
     name: data.name,
     dateOfBirth: toJakartaDate(data.dateOfBirth),
     schoolOrigin: data.schoolOrigin || undefined,
@@ -77,9 +78,7 @@ export async function addBatchPlayersAction(
     });
 
     // Create audit logs for all players atomically
-    await Promise.all(
-      formattedData.map(player => createAuditLog(tx, "CREATE", "player_batch", player.id))
-    );
+    await createAuditLog(tx, "CREATE", "player_batch", String(res.count));
     return res;
   });
 

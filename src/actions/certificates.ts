@@ -4,8 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
-import crypto from "crypto";
-
 // ─── Types ───────────────────────────────────────────
 export type CertificateRecord = {
   id: string;
@@ -43,7 +41,6 @@ export async function addCertificateAction(data: {
   const cert = await prisma.$transaction(async (tx) => {
     const newCert = await tx.certificate.create({
       data: {
-        id: crypto.randomUUID(),
         title: data.title,
         fileUrl: data.fileUrl,
         playerId: data.playerId || null,

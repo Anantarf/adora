@@ -4,164 +4,186 @@ import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useAddStatistic } from "@/hooks/use-statistics";
-import { type Player } from "@/types/dashboard";
+import { useSubmitStatistic } from "@/hooks/use-statistics";
+import type { Player, MetricsJson } from "@/types/dashboard";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { LineChart, Loader2 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
+
+// ─── Schema ───────────────────────────────────────────
+const score = z.coerce.number().min(0, "Min 0").max(999, "Terlalu besar");
 
 const statSchema = z.object({
-  shooting: z.coerce.number().min(0).max(100, "Maksimal skor 100"),
-  dribbling: z.coerce.number().min(0).max(100),
-  passing: z.coerce.number().min(0).max(100),
-  stamina: z.coerce.number().min(0).max(100),
-  attitude: z.coerce.number().min(0).max(100),
-  notes: z.string(),
+  dribble: z.object({
+    inAndOut: score, crossover: score, vLeft: score, vRight: score,
+    betweenLegsLeft: score, betweenLegsRight: score,
+  }),
+  passing: z.object({
+    chestPass: score, bouncePass: score, overheadPass: score,
+  }),
+  layUp: score,
+  shooting: score,
+  notes: z.string().optional(),
 });
 
 type StatForm = z.infer<typeof statSchema>;
 
-export function AddStatDialog({ player, date }: { player: Player; date: string }) {
-  const [open, setOpen] = useState(false);
-  const { mutateAsync: addStat, isPending } = useAddStatistic();
+const DRIBBLE_DEFAULTS = { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 };
+const PASSING_DEFAULTS = { chestPass: 0, bouncePass: 0, overheadPass: 0 };
+const DEFAULT_METRICS: StatForm = { dribble: DRIBBLE_DEFAULTS, passing: PASSING_DEFAULTS, layUp: 0, shooting: 0, notes: "" };
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    watch: watchForm,
-  } = useForm({
-    resolver: zodResolver(statSchema),
-    defaultValues: { shooting: 70, dribbling: 70, passing: 70, stamina: 70, attitude: 70, notes: "" },
+// ─── Helper: sum number values of an object ──────────
+const sumValues = (obj: Record<string, number>) => Object.values(obj).reduce((a, b) => a + b, 0);
+
+// ─── Sub-section Component ────────────────────────────
+function ScoreSection({ title, total, children }: { title: string; total: number; children: React.ReactNode }) {
+  return (
+    <div className="rounded-lg border border-border/40 bg-muted/20 overflow-hidden">
+      <div className="flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/30">
+        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</span>
+        <span className="text-sm font-bold text-primary tabular-nums">Total: {total}</span>
+      </div>
+      <div className="p-3 grid grid-cols-2 gap-2">{children}</div>
+    </div>
+  );
+}
+
+function ScoreField({ label, error, ...props }: { label: string; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className="text-[10px] font-medium text-muted-foreground">{label}</label>
+      <Input type="number" min={0} step={1} {...props} className="h-9 text-center font-bold tabular-nums" />
+      {error && <p className="text-[10px] text-destructive">{error}</p>}
+    </div>
+  );
+}
+
+// ─── Dialog ───────────────────────────────────────────
+type ExistingStat = { id: string; metrics: MetricsJson; status: "Draft" | "Published" };
+
+export function AddStatDialog({
+  player,
+  periodId,
+  existingStat,
+}: {
+  player: Player;
+  periodId: string;
+  existingStat?: ExistingStat;
+}) {
+  const [open, setOpen] = useState(false);
+  const { mutateAsync, isPending } = useSubmitStatistic();
+  const isEdit = !!existingStat;
+
+  const defaultValues: StatForm = existingStat?.metrics ?? DEFAULT_METRICS;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<StatForm>({
+    resolver: zodResolver(statSchema) as any,
+    defaultValues,
   });
 
-  const metrics = watchForm();
-  const chartData = useMemo(
-    () => [
-      { name: "Shooting", value: metrics.shooting || 0 },
-      { name: "Dribbling", value: metrics.dribbling || 0 },
-      { name: "Passing", value: metrics.passing || 0 },
-      { name: "Stamina", value: metrics.stamina || 0 },
-      { name: "Attitude", value: metrics.attitude || 0 },
-    ],
-    [metrics],
-  );
+  const values = watch();
+
+  const dribbleTotal = useMemo(() => sumValues(values.dribble ?? {}), [values.dribble]);
+  const passingTotal = useMemo(() => sumValues(values.passing ?? {}), [values.passing]);
 
   const onSubmit = async (data: StatForm) => {
-    if (!date) {
-      toast.warning("Pilih tanggal di bagian atas halaman terlebih dahulu!");
-      return;
-    }
-
     try {
-      await addStat({
-        playerId: player.id,
-        date: date,
-        status: "Published",
-        metrics: {
-          shooting: data.shooting,
-          dribbling: data.dribbling,
-          passing: data.passing,
-          stamina: data.stamina,
-          attitude: data.attitude,
-          notes: data.notes,
-        },
-      });
-      reset();
+      await mutateAsync({ playerId: player.id, periodId, metrics: data as MetricsJson, status: "Published" });
+      toast.success(`Nilai ${player.name} berhasil ${isEdit ? "diperbarui" : "disimpan"}.`);
       setOpen(false);
-      toast.success("Statistik sukses dipublikasikan.");
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
-      toast.error("Gagal mempublikasikan: " + msg);
+      if (!isEdit) reset(DEFAULT_METRICS);
+    } catch (e: any) {
+      toast.error(e.message || "Gagal menyimpan nilai.");
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button size="sm" variant="outline" className="h-8 border-primary/30 text-primary hover:bg-primary/10 font-bold uppercase tracking-widest text-xs">
-            <LineChart className="size-3 lg:mr-2" /> <span className="hidden lg:inline">Input Nilai</span>
-          </Button>
-        }
-      />
+    <>
+      <Button
+        size="sm"
+        variant={isEdit ? "outline" : "default"}
+        className="h-8 font-bold uppercase tracking-widest text-xs gap-1.5"
+        onClick={() => setOpen(true)}
+      >
+        {isEdit ? <><Pencil className="size-3" /><span className="hidden sm:inline">Edit</span></> : <><Plus className="size-3" /><span className="hidden sm:inline">Input Nilai</span></>}
+      </Button>
 
-      <DialogContent className="sm:max-w-112.5 bg-card border-border/50">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-heading uppercase text-foreground tracking-widest">Evaluasi Kinerja: {player.name}</DialogTitle>
-          <DialogDescription className="text-sm font-medium tracking-wide">Masukkan skala nilai kemampuan motorik dan mental (Skala 0 - 100).</DialogDescription>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <label htmlFor="shooting" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground cursor-pointer">
-                Shooting
-              </label>
-              <Input id="shooting" type="number" {...register("shooting")} className="h-10 text-center font-bold" />
-              {errors.shooting && <p className="text-destructive text-[10px]">{errors.shooting.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="dribbling" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground cursor-pointer">
-                Dribbling
-              </label>
-              <Input id="dribbling" type="number" {...register("dribbling")} className="h-10 text-center font-bold" />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="passing" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground cursor-pointer">
-                Passing
-              </label>
-              <Input id="passing" type="number" {...register("passing")} className="h-10 text-center font-bold" />
-            </div>
-            <div className="space-y-2">
-              <label htmlFor="stamina" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground cursor-pointer">
-                Ketahanan (Stamina)
-              </label>
-              <Input id="stamina" type="number" {...register("stamina")} className="h-10 text-center font-bold" />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[92vh] overflow-y-auto bg-card border-border/50">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="p-2 bg-primary/10 rounded-lg"><LineChart className="size-5 text-primary" /></div>
+            <div>
+              <DialogTitle className="text-base font-bold uppercase tracking-widest">{isEdit ? "Edit" : "Input"} Nilai — {player.name}</DialogTitle>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
+                {player.group?.name ?? "Tanpa Kelompok"}
+              </p>
             </div>
           </div>
-          <div className="space-y-2 pt-2 border-t border-border/50">
-            <label htmlFor="attitude" className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground cursor-pointer">
-              Attitude & Mental Block
-            </label>
-            <Input id="attitude" type="number" {...register("attitude")} className="h-10 text-center font-bold" />
-          </div>
 
-          <div className="space-y-2">
-            <label htmlFor="notes" className="text-[10px] font-medium uppercase tracking-widest text-muted-foreground cursor-pointer">
-              Catatan Laporan / Saran Pelatih
-            </label>
-            <Textarea id="notes" {...register("notes")} placeholder="Fokus pada transisi bertahan minggu depan..." className="h-24 resize-none" />
-          </div>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 mt-1">
+            {/* Dribble */}
+            <ScoreSection title="Dribble" total={dribbleTotal}>
+              <ScoreField label="In & Out" {...register("dribble.inAndOut")} error={errors.dribble?.inAndOut?.message} />
+              <ScoreField label="Crossover" {...register("dribble.crossover")} error={errors.dribble?.crossover?.message} />
+              <ScoreField label="V Dribble Kiri" {...register("dribble.vLeft")} error={errors.dribble?.vLeft?.message} />
+              <ScoreField label="V Dribble Kanan" {...register("dribble.vRight")} error={errors.dribble?.vRight?.message} />
+              <ScoreField label="Between Legs Kiri" {...register("dribble.betweenLegsLeft")} error={errors.dribble?.betweenLegsLeft?.message} />
+              <ScoreField label="Between Legs Kanan" {...register("dribble.betweenLegsRight")} error={errors.dribble?.betweenLegsRight?.message} />
+            </ScoreSection>
 
-          {/* Chart Preview */}
-          <div className="pt-4 border-t border-border/50">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground mb-3">Preview Performa</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" opacity={0.1} />
-                <XAxis dataKey="name" stroke="currentColor" opacity={0.4} style={{ fontSize: "11px" }} />
-                <YAxis stroke="currentColor" opacity={0.4} domain={[0, 100]} style={{ fontSize: "11px" }} />
-                <Tooltip contentStyle={{ backgroundColor: "hsl(var(--background))", border: "1px solid hsl(var(--border))", borderRadius: "6px" }} formatter={(value) => [`${value}`, "Nilai"]} />
-                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[6, 6, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+            {/* Passing */}
+            <ScoreSection title="Passing" total={passingTotal}>
+              <ScoreField label="Chest Pass" {...register("passing.chestPass")} error={errors.passing?.chestPass?.message} />
+              <ScoreField label="Bounce Pass" {...register("passing.bouncePass")} error={errors.passing?.bouncePass?.message} />
+              <ScoreField label="Overhead Pass" {...register("passing.overheadPass")} error={errors.passing?.overheadPass?.message} />
+            </ScoreSection>
 
-          <div className="pt-4 flex w-full justify-end">
-            <Button type="submit" disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11">
-              {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
-              Simpan & Publish
+            {/* Lay Up & Shooting */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Lay Up</span>
+                <Input type="number" min={0} {...register("layUp")} className="h-9 text-center font-bold tabular-nums" />
+                {errors.layUp && <p className="text-[10px] text-destructive">{errors.layUp.message}</p>}
+              </div>
+              <div className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Shooting</span>
+                <Input type="number" min={0} {...register("shooting")} className="h-9 text-center font-bold tabular-nums" />
+                {errors.shooting && <p className="text-[10px] text-destructive">{errors.shooting.message}</p>}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (opsional)</label>
+              <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
+            </div>
+
+            {/* Summary */}
+            <div className="grid grid-cols-4 gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              {[
+                { label: "Dribble", val: dribbleTotal },
+                { label: "Passing", val: passingTotal },
+                { label: "Lay Up", val: values.layUp ?? 0 },
+                { label: "Shooting", val: values.shooting ?? 0 },
+              ].map(({ label, val }) => (
+                <div key={label} className="text-center">
+                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{label}</p>
+                  <p className="text-lg font-bold text-primary tabular-nums">{val}</p>
+                </div>
+              ))}
+            </div>
+
+            <Button type="submit" disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 mt-1">
+              {isPending ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : isEdit ? "Simpan Perubahan" : "Simpan & Publish"}
             </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

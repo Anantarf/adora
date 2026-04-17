@@ -7,6 +7,7 @@ import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
 import { useState, useMemo } from "react";
+import { useDebounce } from "use-debounce";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { EditPlayerDialog } from "@/components/features/EditPlayerDialog";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
@@ -15,43 +16,38 @@ import { EditGroupDialog } from "@/components/features/EditGroupDialog";
 import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
 import { motion, AnimatePresence } from "framer-motion";
 
+type UIState = { type: "add-group" } | { type: "edit-group"; payload: Group } | { type: "delete-group"; payload: Group } | { type: "edit-player"; payload: Player } | { type: "delete-player"; payload: Player } | null;
+
 export default function PlayersPage() {
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch] = useDebounce(searchQuery, 300);
 
-  const [addGroupOpen, setAddGroupOpen] = useState(false);
-  const [editingGroup, setEditingGroup] = useState<Group | null>(null);
-  const [deletingGroup, setDeletingGroup] = useState<Group | null>(null);
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
+  const [uiState, setUiState] = useState<UIState>(null);
 
-  const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId || "all");
+  const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId || "all", debouncedSearch);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
 
-  // Filter Groups (Home View)
+  // Filter Groups (Home View) Client-side since groups count is small
   const filteredGroups = useMemo(() => {
     if (!groups) return [];
-    return groups.filter((g: Group) => g.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [groups, searchQuery]);
+    return groups.filter((g: Group) => g.name.toLowerCase().includes(debouncedSearch.toLowerCase()));
+  }, [groups, debouncedSearch]);
 
-  // Filter Players (Detail View)
-  const filteredPlayers = useMemo(() => {
-    if (!players) return [];
-    return players.filter((p: Player) => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.schoolOrigin?.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [players, searchQuery]);
+  const filteredPlayers = players || [];
 
   const isLoading = isPlayersLoading || isGroupsLoading;
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-20">
-      {/* Modals Manager */}
-      <AddGroupDialog externalOpen={addGroupOpen} onExternalOpenChange={setAddGroupOpen} hideTrigger />
-      {editingGroup && <EditGroupDialog group={editingGroup} open={!!editingGroup} onOpenChange={(open) => !open && setEditingGroup(null)} />}
-      {deletingGroup && <DeleteGroupConfirm group={deletingGroup} open={!!deletingGroup} onOpenChange={(open) => !open && setDeletingGroup(null)} />}
-      {editingPlayer && <EditPlayerDialog player={editingPlayer} open={!!editingPlayer} onOpenChange={(open) => !open && setEditingPlayer(null)} />}
-      {deletingPlayer && <DeletePlayerConfirm player={deletingPlayer} open={!!deletingPlayer} onOpenChange={(open) => !open && setDeletingPlayer(null)} />}
+      {/* Modals Manager (Single State) */}
+      <AddGroupDialog externalOpen={uiState?.type === "add-group"} onExternalOpenChange={(open) => setUiState(open ? { type: "add-group" } : null)} hideTrigger />
+      {uiState?.type === "edit-group" && <EditGroupDialog group={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
+      {uiState?.type === "delete-group" && <DeleteGroupConfirm group={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
+      {uiState?.type === "edit-player" && <EditPlayerDialog player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
+      {uiState?.type === "delete-player" && <DeletePlayerConfirm player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
 
       {/* Persistent Control Bar */}
       <div className="p-4 rounded-lg border border-border/50 bg-card flex flex-col gap-4">
@@ -74,7 +70,11 @@ export default function PlayersPage() {
                 <ArrowLeft className="size-4 mr-2" /> Kembali ke Daftar KU
               </Button>
             )}
-            {!selectedGroupId && <AddGroupDialog />}
+            {!selectedGroupId && (
+              <Button variant="outline" onClick={() => setUiState({ type: "add-group" })} className="h-11 font-bold uppercase tracking-widest text-xs">
+                <FolderPlus className="size-4 mr-2" /> Tambah KU
+              </Button>
+            )}
             <AddPlayerDialog />
           </div>
         </div>
@@ -128,7 +128,7 @@ export default function PlayersPage() {
                         className={`size-9 rounded-lg ${isSchoolGroup ? "hover:bg-emerald-500/20 hover:text-emerald-500" : "hover:bg-primary/20 hover:text-primary"}`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          setEditingGroup(group);
+                          setUiState({ type: "edit-group", payload: group });
                         }}
                       >
                         <Edit2 className="size-4" />
@@ -139,7 +139,7 @@ export default function PlayersPage() {
                         className="size-9 rounded-lg hover:bg-destructive/10 hover:text-destructive"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setDeletingGroup(group);
+                          setUiState({ type: "delete-group", payload: group });
                         }}
                       >
                         <Trash2 className="size-4" />
@@ -198,10 +198,10 @@ export default function PlayersPage() {
                       </div>
 
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg" onClick={() => setEditingPlayer(player)}>
+                        <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg" onClick={() => setUiState({ type: "edit-player", payload: player })}>
                           <Edit2 className="size-4" />
                         </Button>
-                        <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg" onClick={() => setDeletingPlayer(player)}>
+                        <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg" onClick={() => setUiState({ type: "delete-player", payload: player })}>
                           <Trash2 className="size-4" />
                         </Button>
                       </div>
