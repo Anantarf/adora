@@ -36,8 +36,8 @@ import {
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [resetTargetId, setResetTargetId] = useState<string | null>(null);
+  type UIState = { type: 'delete'; targetId: string } | { type: 'reset'; targetId: string } | null;
+  const [uiState, setUiState] = useState<UIState>(null);
 
   const { data: users, isLoading } = useUsers("PARENT");
   const { mutateAsync: deleteUser } = useDeleteUser();
@@ -137,7 +137,7 @@ export default function UsersManagementPage() {
 
               <div className="flex items-center gap-2 pt-4 border-t border-border/40">
                 <Button 
-                  onClick={() => setResetTargetId(user.id)}
+                  onClick={() => setUiState(user.id ? { type: 'reset', targetId: user.id } : null)}
                   variant="ghost" 
                   size="sm" 
                   className="flex-1 h-9 rounded-xl text-[10px] uppercase font-black tracking-widest gap-2 hover:bg-secondary/10 hover:text-secondary group-hover:border-border/50 transition-all border border-transparent"
@@ -145,7 +145,7 @@ export default function UsersManagementPage() {
                   <KeyRound className="size-3.5" /> Reset Pass
                 </Button>
                 <Button 
-                  onClick={() => setDeleteTargetId(user.id)}
+                  onClick={() => setUiState(user.id ? { type: 'delete', targetId: user.id } : null)}
                   variant="ghost" 
                   size="sm" 
                   className="flex-shrink-0 size-9 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors"
@@ -159,7 +159,7 @@ export default function UsersManagementPage() {
       </div>
 
       {/* ACTION DIALOGS */}
-      <AlertDialog open={!!deleteTargetId} onOpenChange={(val) => !val && setDeleteTargetId(null)}>
+      <AlertDialog open={!!(uiState?.type === 'delete' ? uiState.targetId : null)} onOpenChange={(val) => !val && setUiState(null)}>
         <AlertDialogContent className="bg-card border-border/50 rounded-[2.5rem]">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading uppercase text-foreground">Hapus Akun Parent?</AlertDialogTitle>
@@ -171,9 +171,9 @@ export default function UsersManagementPage() {
             <AlertDialogCancel className="font-bold rounded-xl border-border/50">Batal Saja</AlertDialogCancel>
             <AlertDialogAction 
               onClick={async () => {
-                if (deleteTargetId) {
-                   await deleteUser(deleteTargetId);
-                   setDeleteTargetId(null);
+                if ((uiState?.type === 'delete' ? uiState.targetId : null)) {
+                   await deleteUser(uiState?.type === 'delete' && uiState.targetId ? uiState.targetId : '');
+                   setUiState(null);
                 }
               }}
               className="bg-destructive text-white hover:bg-destructive/90 font-bold rounded-xl shadow-lg shadow-destructive/20"
@@ -184,7 +184,7 @@ export default function UsersManagementPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={!!resetTargetId} onOpenChange={(val) => !val && setResetTargetId(null)}>
+      <AlertDialog open={!!(uiState?.type === 'reset' ? uiState.targetId : null)} onOpenChange={(val) => !val && setUiState(null)}>
         <AlertDialogContent className="bg-card border-border/50 rounded-[2.5rem]">
           <AlertDialogHeader>
             <div className="size-16 rounded-full bg-secondary/5 border-2 border-primary/20 flex items-center justify-center mb-4">
@@ -199,9 +199,9 @@ export default function UsersManagementPage() {
             <AlertDialogCancel className="font-bold rounded-xl border-border/50">Batal</AlertDialogCancel>
             <AlertDialogAction 
               onClick={async () => {
-                if (resetTargetId) {
-                   await resetPassword({ id: resetTargetId });
-                   setResetTargetId(null);
+                if ((uiState?.type === 'reset' ? uiState.targetId : null)) {
+                   await resetPassword({ id: uiState?.type === 'reset' && uiState.targetId ? uiState.targetId : '' });
+                   setUiState(null);
                 }
               }}
               className="bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold rounded-xl px-8"

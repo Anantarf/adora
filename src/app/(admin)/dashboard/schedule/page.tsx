@@ -49,14 +49,13 @@ type EventFormValues = z.infer<typeof eventSchema>;
 
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(getJakartaToday());
-  const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
-  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
-  const [previewEvent, setPreviewEvent] = useState<ScheduleEvent | null>(null);
+  type UIState = { type: 'edit'; event: ScheduleEvent } | { type: 'delete'; targetId: string } | { type: 'preview'; event: ScheduleEvent } | null;
+  const [uiState, setUiState] = useState<UIState>(null);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const { data: homebases = [] } = useHomebases();
   const { data: groups = [] } = useGroups();
 
-  const isEditMode = editingEvent !== null;
+  const isEditMode = (uiState?.type === 'edit' ? uiState.event : null) !== null;
 
   // Memoized homebase lookup map for O(1) access
   const homebaseMap = useMemo(() => Object.fromEntries(homebases.map((h) => [h.id, h])), [homebases]);
@@ -83,11 +82,11 @@ export default function SchedulePage() {
     resolver: zodResolver(eventSchema),
     defaultValues: isEditMode
       ? {
-          title: editingEvent?.title || "",
-          location: editingEvent?.location || "",
-          type: editingEvent?.type || defaultType,
-          time: editingEvent?.date ? format(toJakartaDate(editingEvent.date), "HH:mm") : `${currentHH}:${currentMM}`,
-          homebaseId: editingEvent?.homebaseId || undefined,
+          title: (uiState?.type === 'edit' ? uiState.event : null)?.title || "",
+          location: (uiState?.type === 'edit' ? uiState.event : null)?.location || "",
+          type: (uiState?.type === 'edit' ? uiState.event : null)?.type || defaultType,
+          time: (uiState?.type === 'edit' ? uiState.event : null)?.date ? format(toJakartaDate((uiState?.type === 'edit' ? uiState.event.date : undefined)), "HH:mm") : `${currentHH}:${currentMM}`,
+          homebaseId: (uiState?.type === 'edit' ? uiState.event : null)?.homebaseId || undefined,
         }
       : {
           title: "",
@@ -142,7 +141,7 @@ export default function SchedulePage() {
 
   // Callback: Cancel edit mode and reset form
   const handleCancelEdit = () => {
-    setEditingEvent(null);
+    setUiState(null);
     setSelectedGroupIds([]);
     reset({
       title: "",
@@ -155,7 +154,7 @@ export default function SchedulePage() {
 
   // Callback: Start editing an event
   const handleEditEvent = (ev: ScheduleEvent) => {
-    setEditingEvent(ev);
+    setUiState(ev ? { type: 'edit', event: ev } : null);
     setDate(new Date(ev.date));
     setSelectedGroupIds(ev.groups?.map((g) => g.id) ?? []);
   };
@@ -176,8 +175,8 @@ export default function SchedulePage() {
       };
 
       // Single mutation point
-      if (isEditMode && editingEvent) {
-        await updateEvent({ id: editingEvent.id, data: eventData });
+      if (isEditMode && (uiState?.type === 'edit' ? uiState.event : null)) {
+        await updateEvent({ id: uiState?.type === 'edit' ? uiState.event.id : '', data: eventData });
         toast.success("Jadwal berhasil diperbarui!");
       } else {
         await addEvent(eventData);
@@ -413,7 +412,7 @@ export default function SchedulePage() {
                   return (
                     <div
                       key={ev.id}
-                      onClick={() => setPreviewEvent(ev)}
+                      onClick={() => setUiState(ev ? { type: 'preview', event: ev } : null)}
                       className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-pointer min-w-0 overflow-hidden"
                     >
                       <div
@@ -458,7 +457,7 @@ export default function SchedulePage() {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setDeleteTargetId(ev.id);
+                            setUiState(ev.id ? { type: 'delete', targetId: ev.id } : null);
                           }}
                           className="size-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         >
@@ -475,10 +474,10 @@ export default function SchedulePage() {
       </motion.div>
 
       {/* Modal Preview Event */}
-      <Dialog open={!!previewEvent} onOpenChange={() => setPreviewEvent(null)}>
-        {previewEvent &&
+      <Dialog open={!!(uiState?.type === 'preview' ? uiState.event : null)} onOpenChange={() => setUiState(null)}>
+        {(uiState?.type === 'preview' ? uiState.event : null) &&
           (() => {
-            const cfg = getEventConfig(previewEvent.type);
+            const cfg = getEventConfig(uiState?.type === 'preview' ? uiState.event.type : '');
             const Icon = cfg.icon;
             return (
               <DialogContent className="bg-background border-primary/20 text-white w-[calc(100vw-2rem)] sm:max-w-100 p-0 overflow-hidden">
@@ -495,14 +494,14 @@ export default function SchedulePage() {
                   <div className="absolute bottom-0 left-0 w-full h-8 bg-linear-to-t from-[#0f0f11] to-transparent" />
                 </div>
                 <div className="p-6 pt-4 space-y-5 overflow-hidden">
-                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{previewEvent.title}</DialogTitle>
+                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{(uiState?.type === 'preview' ? uiState.event.title : undefined)}</DialogTitle>
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                       <CalendarDays size={14} />
                     </div>
                     <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Hari & Tanggal</div>
-                      <div className="text-sm font-semibold text-white/80 wrap-break-word">{formatJakarta(previewEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+                      <div className="text-sm font-semibold text-white/80 wrap-break-word">{formatJakarta(uiState?.type === 'preview' ? uiState.event.date : new Date(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 min-w-0">
@@ -511,32 +510,32 @@ export default function SchedulePage() {
                     </div>
                     <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Waktu</div>
-                      <div className="text-sm font-semibold text-white/80">{formatJakarta(previewEvent.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
+                      <div className="text-sm font-semibold text-white/80">{formatJakarta(uiState?.type === 'preview' ? uiState.event.date : new Date(), { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
                     </div>
                   </div>
-                  {previewEvent.location && (
+                  {(uiState?.type === 'preview' ? uiState.event.location : undefined) && (
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                         <MapPin size={14} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
-                        <div className="text-sm font-semibold text-white/80 wrap-break-word">{previewEvent.location}</div>
+                        <div className="text-sm font-semibold text-white/80 wrap-break-word">{(uiState?.type === 'preview' ? uiState.event.location : undefined)}</div>
                       </div>
                     </div>
                   )}
-                  {previewEvent.description && (
+                  {(uiState?.type === 'preview' ? uiState.event.description : undefined) && (
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                         <AlignLeft size={14} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Keterangan</div>
-                        <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{previewEvent.description}</p>
+                        <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{(uiState?.type === 'preview' ? uiState.event.description : undefined)}</p>
                       </div>
                     </div>
                   )}
-                  <button onClick={() => setPreviewEvent(null)} className="w-full py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-white/60">
+                  <button onClick={() => setUiState(null)} className="w-full py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-white/60">
                     Tutup
                   </button>
                 </div>
@@ -546,9 +545,9 @@ export default function SchedulePage() {
       </Dialog>
 
       <AlertDialog
-        open={!!deleteTargetId}
+        open={!!(uiState?.type === 'delete' ? uiState.targetId : null)}
         onOpenChange={(isOpen: boolean) => {
-          if (!isOpen) setDeleteTargetId(null);
+          if (!isOpen) setUiState(null);
         }}
       >
         <AlertDialogContent className="bg-card border-border/50 rounded-3xl">
@@ -561,9 +560,9 @@ export default function SchedulePage() {
             <AlertDialogAction
               className="bg-destructive text-white hover:bg-destructive/90 font-bold rounded-xl"
               onClick={async () => {
-                if (deleteTargetId) {
-                  await deleteEvent(deleteTargetId);
-                  setDeleteTargetId(null);
+                if ((uiState?.type === 'delete' ? uiState.targetId : null)) {
+                  await deleteEvent(uiState?.type === 'delete' && uiState.targetId ? uiState.targetId : '');
+                  setUiState(null);
                   toast.success("Agenda telah dihapus.");
                 }
               }}

@@ -55,7 +55,9 @@ export default function StatisticsPage() {
     if (!players || !groups) return [];
     const grouped = players.reduce<Record<string, Player[]>>((acc, p) => {
       const key = p.groupId || "ungrouped";
-      return { ...acc, [key]: [...(acc[key] ?? []), p] };
+      acc[key] = acc[key] || [];
+      acc[key].push(p);
+      return acc;
     }, {});
     return groups
       .map(group => ({ group, players: grouped[group.id] ?? [] }))
