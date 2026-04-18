@@ -10,8 +10,9 @@ export function parseGroupMetaDescription(description?: string | null): GroupMet
 
   try {
     const parsed = JSON.parse(description) as Partial<GroupMetaConfig>;
+    const targetKu = typeof parsed.targetKu === "number" ? parsed.targetKu : typeof parsed.targetKu === "string" ? parseInt(parsed.targetKu, 10) : undefined;
     return {
-      targetKu: typeof parsed.targetKu === "number" ? parsed.targetKu : undefined,
+      targetKu: Number.isFinite(targetKu) ? targetKu : undefined,
       schoolLevel: typeof parsed.schoolLevel === "string" ? parsed.schoolLevel : undefined,
     };
   } catch {

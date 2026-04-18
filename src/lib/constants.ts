@@ -8,6 +8,8 @@ export const QUERY_KEYS = {
   HOMEBASES: ["homebases"],
   USERS_BASE: ["users"],
   USERS: (role?: string) => ["users", role],
+  EVALUATION_PERIODS_BASE: ["evaluation-periods"],
+  EVALUATION_PERIODS_ACTIVE: ["evaluation-periods", "active"],
   ATTENDANCES_BASE: ["attendances"],
   ATTENDANCES: (dateStr: string) => ["attendances", dateStr],
   AUDIT_LOGS: ["audit-logs"],

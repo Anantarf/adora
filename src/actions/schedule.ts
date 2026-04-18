@@ -156,7 +156,7 @@ export async function getEventsWithAttendanceAction() {
           include: { group: { select: { id: true, name: true } } },
         },
         attendances: {
-          select: { status: true },
+          select: { status: true, createdAt: true },
         },
       },
     });
@@ -167,10 +167,14 @@ export async function getEventsWithAttendanceAction() {
         stats[a.status as keyof typeof stats]++;
       });
 
+      const attendanceMarkedAt = e.attendances.length > 0 ? e.attendances.reduce((latest, current) => (current.createdAt > latest ? current.createdAt : latest), e.attendances[0].createdAt) : null;
+
       return {
         ...e,
         groups: e.eventGroups.map((eg) => eg.group),
         stats,
+        isAttendanceSubmitted: e.attendances.length > 0,
+        attendanceMarkedAt,
       };
     });
   } catch (error) {

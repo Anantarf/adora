@@ -9,65 +9,79 @@ import { createAuditLog } from "./audit";
 
 // ─── Helper ──────────────────────────────────────────
 const safeParseMetrics = (json: string): MetricsJson => {
-  try { return JSON.parse(json) as MetricsJson; }
-  catch { return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 }; }
+  try {
+    return JSON.parse(json) as MetricsJson;
+  } catch {
+    return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 };
+  }
 };
 
 // 1. Submit Attendance
-export async function submitAttendanceAction(data: {
-  date: string;
-  playerStatuses: { playerId: string; status: AttendanceStatus }[];
-  note?: string;
-  eventId?: string;
-}) {
+export async function submitAttendanceAction(data: { date: string; playerStatuses: { playerId: string; status: AttendanceStatus }[]; note?: string; eventId: string }) {
   await requireAdmin();
 
   if (!data.playerStatuses || data.playerStatuses.length === 0) {
-    return { success: false, error: "Minimal ada 1 pemain untuk didaftarkan kehadirannya." };
+    throw new Error("Minimal ada 1 pemain untuk didaftarkan kehadirannya.");
+  }
+
+  const dedupedStatuses = Array.from(new Map(data.playerStatuses.filter((ps) => ps.playerId).map((ps) => [ps.playerId, ps.status] as const)).entries()).map(([playerId, status]) => ({ playerId, status }));
+
+  if (dedupedStatuses.length === 0) {
+    throw new Error("Data pemain untuk presensi tidak valid.");
+  }
+
+  if (!data.eventId.trim()) {
+    throw new Error("Agenda tidak valid untuk submit presensi.");
   }
 
   const dateObj = toJakartaDate(data.date);
 
   await prisma.$transaction(async (tx) => {
-    const playerIds = data.playerStatuses.map(ps => ps.playerId);
+    const playerIds = dedupedStatuses.map((ps) => ps.playerId);
     const existingPlayers = await tx.player.findMany({
       where: { id: { in: playerIds }, isDeleted: false },
-      select: { id: true }
+      select: { id: true },
     });
 
-    const existingPlayerIds = new Set(existingPlayers.map(p => p.id));
-    const invalidPlayers = playerIds.filter(id => !existingPlayerIds.has(id));
+    const existingPlayerIds = new Set(existingPlayers.map((p) => p.id));
+    const invalidPlayers = playerIds.filter((id) => !existingPlayerIds.has(id));
 
     if (invalidPlayers.length > 0) {
-      return { success: false, error: `Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}` };
+      throw new Error(`Pemain tidak ditemukan atau sudah dihapus: ${invalidPlayers.join(", ")}`);
     }
 
-    const upsertResults = await Promise.allSettled(
-      data.playerStatuses.map(ps =>
+    const sameDayAttendances = await tx.attendance.findMany({
+      where: {
+        playerId: { in: playerIds },
+        date: dateObj,
+      },
+      select: { playerId: true, eventId: true },
+    });
+
+    const conflicts = sameDayAttendances.filter((attendance) => attendance.eventId && attendance.eventId !== data.eventId);
+    if (conflicts.length > 0) {
+      throw new Error("Sebagian pemain sudah punya absensi dari agenda lain pada tanggal yang sama.");
+    }
+
+    await Promise.all(
+      dedupedStatuses.map((ps) =>
         tx.attendance.upsert({
           where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
-          update: { status: ps.status, note: data.note, eventId: data.eventId ?? null },
-          create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId ?? null },
-        })
-      )
+          update: { status: ps.status, note: data.note, eventId: data.eventId },
+          create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
+        }),
+      ),
     );
 
-    const failed = upsertResults.filter(r => r.status === "rejected");
-    if (failed.length > 0) return { success: false, error: `Gagal mencatat kehadiran untuk ${failed.length} pemain` };
-
-    await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${data.playerStatuses.length}`);
+    await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${dedupedStatuses.length}`);
   });
 
   revalidatePath("/dashboard/attendances");
+  return { success: true as const, savedCount: dedupedStatuses.length };
 }
 
 // 2. Submit Statistics (period-based, dengan history revisi)
-export async function submitStatisticAction(data: {
-  playerId: string;
-  periodId: string;
-  metrics: MetricsJson;
-  status: "Draft" | "Published";
-}) {
+export async function submitStatisticAction(data: { playerId: string; periodId: string; metrics: MetricsJson; status: "Draft" | "Published" }) {
   const session = await requireAdmin();
   const userId = session.user.id as string | undefined;
 
@@ -131,7 +145,9 @@ export async function getStatsByPeriodAction(periodId: string) {
     include: {
       player: {
         select: {
-          id: true, name: true, groupId: true,
+          id: true,
+          name: true,
+          groupId: true,
           group: { select: { id: true, name: true } },
         },
       },
@@ -140,7 +156,7 @@ export async function getStatsByPeriodAction(periodId: string) {
     orderBy: [{ player: { group: { name: "asc" } } }, { player: { name: "asc" } }],
   });
 
-  return stats.map(s => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
+  return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
 }
 
 // 4. Get history revisi untuk satu statistic
@@ -153,7 +169,7 @@ export async function getStatHistoryAction(statisticId: string) {
     orderBy: { editedAt: "desc" },
   });
 
-  return history.map(h => ({ ...h, metricsJson: safeParseMetrics(h.metricsJson as string) }));
+  return history.map((h) => ({ ...h, metricsJson: safeParseMetrics(h.metricsJson as string) }));
 }
 
 // 5. Get Player Stats (Parent-safe — untuk portal pemain)
@@ -163,7 +179,7 @@ export async function getPlayerStatsAction(playerId: string) {
 
   if (userRole === "PARENT") {
     const parentOwnsChild = await prisma.player.findFirst({
-      where: { id: playerId, parentId: userId, isDeleted: false }
+      where: { id: playerId, parentId: userId, isDeleted: false },
     });
     if (!parentOwnsChild) {
       throw new Error("Akses Terlarang: Anda tidak diizinkan melihat evaluasi anak dari keluarga lain.");
@@ -176,5 +192,5 @@ export async function getPlayerStatsAction(playerId: string) {
     orderBy: { date: "desc" },
   });
 
-  return stats.map(s => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
+  return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
 }

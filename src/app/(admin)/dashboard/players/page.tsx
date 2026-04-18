@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Edit2, Trash2, Users, FolderPlus, Eye } from "lucide-react";
+import { Loader2, Search, Edit2, Trash2, Users, FolderPlus } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
@@ -151,10 +151,15 @@ export default function PlayersPage() {
                   <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup.description) || "Grup Latihan"}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="h-8 font-bold uppercase tracking-widest text-[10px]" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup })}>
+                  <Button size="sm" variant="outline" className="h-8 px-3 font-semibold text-xs" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup })}>
                     <Edit2 className="size-3 mr-1.5" /> Edit
                   </Button>
-                  <Button size="sm" variant="ghost" className="h-8 font-bold uppercase tracking-widest text-[10px] text-destructive hover:bg-destructive/10" onClick={() => setUiState({ type: "delete-group", payload: selectedGroup })}>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="h-8 px-3 font-semibold text-xs border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
+                    onClick={() => setUiState({ type: "delete-group", payload: selectedGroup })}
+                  >
                     <Trash2 className="size-3 mr-1.5" /> Hapus
                   </Button>
                 </div>
@@ -169,30 +174,13 @@ export default function PlayersPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                 {filteredPlayers.map((player: Player) => (
-                  <div
-                    key={player.id}
-                    className="group bg-card border border-border/50 p-4 rounded-lg flex items-center justify-between hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => setUiState({ type: "view-player", payload: player })}
-                  >
+                  <div key={player.id} className="bg-card border border-border/50 p-4 rounded-lg flex items-center hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUiState({ type: "view-player", payload: player })}>
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-heading text-lg text-primary shrink-0">{player.name.charAt(0).toUpperCase()}</div>
                       <div className="flex flex-col min-w-0 gap-0.5">
                         <h4 className="font-heading tracking-widest uppercase text-sm text-foreground truncate">{player.name}</h4>
                         <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.schoolOrigin || "—"}</span>
                       </div>
-                    </div>
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="size-8 rounded-lg"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setUiState({ type: "view-player", payload: player });
-                        }}
-                      >
-                        <Eye className="size-4" />
-                      </Button>
                     </div>
                   </div>
                 ))}

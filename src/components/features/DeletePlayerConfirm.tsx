@@ -30,8 +30,8 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Arsip Data Pemain</AlertDialogTitle>
-          <AlertDialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Aksi ini membutuhkan konfirmasi tingkat tinggi.</AlertDialogDescription>
+          <AlertDialogTitle className="text-xl font-heading tracking-wide flex items-center gap-2 text-destructive">Arsip Data Pemain</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-muted-foreground">Tindakan ini perlu konfirmasi.</AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="py-6 flex flex-col gap-4">
@@ -41,7 +41,7 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-destructive">Bukan penghapusan permanen</span>
+              <span className="text-xs font-semibold text-destructive">Bukan penghapusan permanen</span>
             </div>
           </div>
 
@@ -52,7 +52,7 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
         </div>
 
         <AlertDialogFooter className="sm:flex-row flex-col gap-2 sm:gap-0">
-          <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-11 font-bold uppercase tracking-widest text-xs border-border/50">
+          <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-10 font-semibold text-sm border-border/50">
             Batalkan
           </AlertDialogCancel>
           <AlertDialogAction
@@ -61,10 +61,10 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
               handleDelete();
             }}
             disabled={isPending}
-            className="h-11 font-bold tracking-widest uppercase text-xs"
+            className="h-10 font-semibold text-sm"
           >
             {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <Trash2 className="size-4 mr-2" />}
-            Izin Arsipkan Data
+            Arsipkan Data
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
