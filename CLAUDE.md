@@ -87,6 +87,44 @@ Event types are config objects in `src/lib/config/events.ts` — `EVENT_TYPES` r
 
 ---
 
+## UI Copywriting & User-Friendliness Standards
+
+Berlaku untuk semua laman admin dan komponen dialog. Wajib dicek sebelum menambah atau mengubah UI.
+
+### Bahasa & Teks
+- **Bahasa Indonesia baku** — hindari campuran Inggris-Indonesia dalam satu label/tombol (contoh: "Simpan Edit" ❌ → "Simpan Perubahan" ✓)
+- **Tidak ada singkatan non-standar** — "cth:" ❌ → "Contoh:" ✓
+- **Kata baku** — "Diabsen" ❌ → "Diisi" ✓ ; "tanpa kelompok" (teknis) ❌ → "tidak memiliki kelompok" ✓
+- **Istilah teknis Inggris** diganti jika ada padanan kontekstual — "Homebase" → "Lokasi Latihan"
+
+### Tombol & Aksi
+- Cancel button **selalu** `"Batal"` — bukan "Batalkan", bukan "Cancel"
+- Submit button edit mode: `"Simpan Perubahan"` (bukan "Update", "Edit", dsb.)
+- Submit button create mode: `"Simpan"`
+- Tombol hapus destructive: nama + aksi, contoh `"Hapus Kelompok"`, bukan hanya "Hapus"
+
+### Label Form
+- Label field: `text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50` — **jangan pakai `text-[9px]`**, terlalu kecil untuk aksesibilitas
+- Field opsional: tandai dengan `(Opsional)` di label, bukan asterisk kosong
+- Field dengan format khusus (waktu, tanggal): **selalu sertakan hint teks** di bawah input yang terlihat sejak awal, bukan hanya saat error
+- Label dengan dua makna (slash label) **dilarang** — pisahkan menjadi label utama + hint teks kecil di bawahnya
+
+### Dialog & Konfirmasi
+- `AlertDialogDescription` wajib informatif — langsung sebut konsekuensi aksi, bukan kalimat generik seperti "Aksi ini membutuhkan konfirmasi."
+- Dialog hapus: sertakan **dua blok** — (1) konfirmasi destructive merah, (2) peringatan amber tentang efek samping
+- Error toast: **jangan expose raw error message** (`Error: ${msg}`) — tampilkan pesan user-friendly + saran tindakan
+
+### Empty State
+- Setiap empty state wajib punya **dua baris**: (1) pesan kondisi, (2) guidance tindakan yang bisa dilakukan user
+- Contoh: `"Tidak ada agenda mendatang"` + `"Buat agenda menggunakan form di atas."`
+
+### Hierarki & Spacing
+- Form dengan banyak field: **pisah per kelompok logis** dengan baris grid terpisah — jangan jejalkan 4+ field dalam satu baris
+- Checkbox group: gunakan `border-t border-border/30` sebagai visual separator antar sub-grup
+- Modal lebar penuh (`w-[94vw]`): tambahkan `xl:max-w-4xl` agar tidak stretched di layar besar
+
+---
+
 ## Code Style Directives
 
 - **Lean over verbose** — prefer declarative expressions, `map/filter/reduce`, and config objects over imperative `for` loops and `if/else` chains.

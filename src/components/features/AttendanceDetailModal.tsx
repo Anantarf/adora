@@ -47,17 +47,17 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
       .finally(() => setLoading(false));
   }, [eventId]);
 
-  const handleMarkAll = (status: AttendanceStatus) => {
+  const handleMarkAllHadir = () => {
     if (!event) return;
-    setStatuses(Object.fromEntries(event.attendances.map((a) => [a.playerId, status])));
-    toast.success(`Semua ditandai ${STATUS_STYLE[status].label}`);
+    setStatuses(Object.fromEntries(event.attendances.map((a) => [a.playerId, "HADIR"] as const)));
+    toast.success("Semua ditandai HADIR");
   };
 
   const handleSave = async () => {
     if (!event) return;
     setIsSaving(true);
     try {
-      await submitAttendanceAction({
+      const result = await submitAttendanceAction({
         date: toYYYYMMDD(new Date(event.date)),
         playerStatuses: event.attendances.map((a) => ({
           playerId: a.playerId,
@@ -65,7 +65,12 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         })),
         eventId,
       });
-      toast.success("Presensi berhasil disimpan");
+
+      if (!result?.success) {
+        throw new Error("Gagal menyimpan presensi.");
+      }
+
+      toast.success(`Presensi berhasil disimpan (${result.savedCount} pemain)`);
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Gagal menyimpan");
@@ -75,20 +80,21 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
   };
 
   const stats = event?.attendances.reduce(
-    (acc, a) => {
-      const s = statuses[a.playerId] ?? "HADIR";
-      return { ...acc, [s]: acc[s] + 1 };
+    (acc, attendance) => {
+      const status = statuses[attendance.playerId] ?? "HADIR";
+      acc[status] += 1;
+      return acc;
     },
     { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 },
   );
 
   return (
     <Dialog open={!!eventId} onOpenChange={onClose}>
-      <DialogContent className="w-[98vw] sm:w-[97vw] lg:w-[96vw] xl:w-[94vw] max-w-none sm:max-w-none h-[92vh] p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
+      <DialogContent className="w-[98vw] sm:w-[97vw] lg:w-[96vw] xl:max-w-4xl max-w-none sm:max-w-none h-[92vh] p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-20 gap-3">
             <Loader2 className="size-8 animate-spin text-primary/50" />
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Memuat Data...</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Memuat data absensi...</p>
           </div>
         ) : event ? (
           <>
@@ -141,24 +147,21 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                   <span>Tandai Semua</span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
-                    <Button
-                      key={s}
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleMarkAll(s)}
-                      className={`h-8 px-3 text-[10px] font-bold uppercase tracking-widest border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE[s].color}`}
-                    >
-                      {STATUS_STYLE[s].label}
-                    </Button>
-                  ))}
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleMarkAllHadir}
+                    className={`h-8 px-3 text-[10px] font-bold uppercase tracking-widest border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE.HADIR.color}`}
+                  >
+                    Semua Hadir
+                  </Button>
                 </div>
               </div>
 
               {/* Player List */}
               <div className="space-y-3 flex-1 min-h-0 flex flex-col">
                 <div className="flex items-center justify-between px-1 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Daftar Pemain ({event.attendances.length})</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pemain ({event.attendances.length})</span>
                 </div>
 
                 <div className="grid gap-2 overflow-y-auto overflow-x-hidden pr-1">
@@ -200,7 +203,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               </Button>
               <Button onClick={handleSave} disabled={isSaving} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest px-8">
                 {isSaving ? <Loader2 className="size-4 mr-2 animate-spin" /> : <CheckCircle2 className="size-4 mr-2" />}
-                Simpan Presensi
+                Simpan Absensi
               </Button>
             </div>
           </>

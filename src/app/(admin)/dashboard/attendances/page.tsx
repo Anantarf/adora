@@ -9,7 +9,7 @@ export default function AttendancesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Daftar Hadir Latihan</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Buku absen kelompok untuk mempermudah pelatih di lapangan.</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola kehadiran pemain per agenda latihan.</p>
         </div>
       </div>
 

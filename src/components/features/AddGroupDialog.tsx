@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAddGroup } from "@/hooks/use-groups";
 import { useHomebases } from "@/hooks/use-homebases";
+import { buildGroupDescriptionPayload } from "@/lib/group-meta";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -63,10 +64,10 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
     }
 
     try {
-      const configObj: Record<string, any> = {};
-      if (isKu && targetKu) configObj.targetKu = parseInt(targetKu, 10);
-      if (isSchool && schoolLevel) configObj.schoolLevel = schoolLevel;
-      const descPayload = Object.keys(configObj).length > 0 ? JSON.stringify(configObj) : "";
+      const descPayload = buildGroupDescriptionPayload({
+        targetKu: isKu && targetKu ? parseInt(targetKu, 10) : undefined,
+        schoolLevel: isSchool && schoolLevel ? schoolLevel : undefined,
+      });
 
       await addGroup({ ...data, description: descPayload });
 
@@ -80,7 +81,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       toast.success("Kelompok baru berhasil ditambahkan!");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
-      toast.error("Gagal menambahkan kelompok: " + msg);
+      toast.error("Gagal menambahkan kelompok. Coba lagi atau hubungi admin.");
     }
   };
 
@@ -89,30 +90,31 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       {!hideTrigger && (
         <DialogTrigger
           render={
-            <Button size="lg" className="w-full sm:w-auto uppercase font-bold tracking-widest text-xs h-11">
+            <Button size="lg" className="w-full sm:w-auto h-10 font-semibold text-sm">
               <Plus className="mr-2 size-4" /> Tambah Kelompok
             </Button>
           }
         />
       )}
 
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
-          <DialogTitle className="text-xl font-heading uppercase text-foreground tracking-widest">Tambah Kelompok Latihan</DialogTitle>
-          <DialogDescription className="text-sm font-medium tracking-wide">Buat pengelompokan baru berdasarkan kategori usia atau asal sekolah.</DialogDescription>
+          <DialogTitle className="text-xl font-heading text-foreground tracking-wide">Tambah Kelompok Latihan</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground">Buat kelompok baru berdasarkan usia atau sekolah.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-2">
-            <label htmlFor="group_name" className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground cursor-pointer">
-              Nama Kelompok / Asal Sekolah
+            <label htmlFor="group_name" className="text-xs font-semibold text-muted-foreground cursor-pointer">
+              Nama Kelompok
             </label>
+            <p className="text-[10px] text-muted-foreground/60">Bisa berdasarkan usia atau asal sekolah</p>
             <Input id="group_name" {...register("name")} placeholder="Contoh: KU-16 Putra" className="h-11" />
             {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
           </div>
 
-          <div className="space-y-4 pt-2 pb-2">
-            <div className="flex flex-wrap items-center gap-3">
+          <div className="space-y-4 pt-2 pb-2 border-t border-border/30">
+            <div className="flex flex-wrap items-center gap-3 pt-3">
               <div className="flex items-center space-x-2">
                 <input
                   type="checkbox"
@@ -124,7 +126,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
                   }}
                   className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
                 />
-                <label htmlFor="isUsia" className="text-xs uppercase font-semibold tracking-widest text-muted-foreground cursor-pointer whitespace-nowrap">
+                <label htmlFor="isUsia" className="text-xs font-semibold text-muted-foreground cursor-pointer whitespace-nowrap">
                   Kelompok Umur
                 </label>
               </div>
@@ -132,7 +134,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
               {isKu && (
                 <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
                   <Input type="text" pattern="\d*" maxLength={2} value={targetKu} onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))} placeholder="16" className="h-9 w-12 text-center text-sm font-medium" />
-                  <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">TAHUN</span>
+                  <span className="text-xs font-semibold text-muted-foreground">Tahun</span>
                 </div>
               )}
             </div>
@@ -149,7 +151,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
                   }}
                   className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
                 />
-                <label htmlFor="isSekolah" className="text-xs uppercase font-semibold tracking-widest text-muted-foreground cursor-pointer whitespace-nowrap">
+                <label htmlFor="isSekolah" className="text-xs font-semibold text-muted-foreground cursor-pointer whitespace-nowrap">
                   Sekolah
                 </label>
               </div>
@@ -174,7 +176,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
 
           {homebases.length > 0 && (
             <div className="space-y-2">
-              <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Homebase (Opsional)</label>
+              <label className="text-xs font-semibold text-muted-foreground">Lokasi Latihan (Opsional)</label>
               <Select value={watch("homebaseId") ?? HOMEBASE_NONE} onValueChange={(val) => setValue("homebaseId", !val || val === HOMEBASE_NONE ? undefined : val)}>
                 <SelectTrigger className="h-11 font-semibold">
                   <SelectValue />
@@ -194,7 +196,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
           )}
 
           <div className="pt-4 flex w-full justify-end">
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto font-bold uppercase tracking-widest text-xs h-11">
+            <Button type="submit" disabled={isPending} className="w-full sm:w-auto h-10 font-semibold text-sm">
               {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
               Simpan
             </Button>

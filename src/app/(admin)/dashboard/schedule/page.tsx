@@ -10,7 +10,7 @@ import { useGroups } from "@/hooks/use-groups";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CalendarDays, Loader2, Trash2, MapPinned, AlignLeft, Pencil, Clock, ChevronRight, MapPin } from "lucide-react";
+import { CalendarDays, Loader2, Trash2, AlignLeft, Pencil, Clock, ChevronRight, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,7 @@ export default function SchedulePage() {
   const { data: homebases = [] } = useHomebases();
   const { data: groups = [] } = useGroups();
 
-  const isEditMode = (uiState?.type === "edit" ? uiState.event : null) !== null;
+  const isEditMode = uiState?.type === "edit";
 
   // Memoized homebase lookup map for O(1) access
   const homebaseMap = useMemo(() => Object.fromEntries(homebases.map((h) => [h.id, h])), [homebases]);
@@ -199,7 +199,7 @@ export default function SchedulePage() {
         toast.success("Jadwal berhasil diperbarui!");
       } else {
         await addEvent(eventData);
-        toast.success("Jadwal sukses ditambahkan!");
+        toast.success("Jadwal berhasil ditambahkan!");
       }
 
       handleCancelEdit();
@@ -232,7 +232,7 @@ export default function SchedulePage() {
                     return <Icon className="size-5 text-white" strokeWidth={2.5} />;
                   })()}
                 </div>
-                <span className="text-[17px] font-semibold tracking-wide text-foreground">{isEditMode ? "Edit Agenda" : "Tambah Agenda"}</span>
+                <span className="text-[17px] font-semibold tracking-wide text-foreground">{isEditMode ? "Ubah Agenda" : "Tambah Agenda"}</span>
               </div>
               {isEditMode && (
                 <button type="button" onClick={handleCancelEdit} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/40 hover:text-muted-foreground transition-colors">
@@ -245,14 +245,14 @@ export default function SchedulePage() {
               {/* Baris 1: Nama + Jenis */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="sm:col-span-2 space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                     Nama <span className="text-destructive">*</span>
                   </label>
-                  <Input {...register("title")} placeholder="cth: Latihan Rutin" className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
+                  <Input {...register("title")} placeholder="Contoh: Latihan Rutin" className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
                   {errors.title && <p className="text-[10px] text-destructive">{errors.title.message}</p>}
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                     Jenis <span className="text-destructive">*</span>
                   </label>
                   <Select
@@ -281,7 +281,7 @@ export default function SchedulePage() {
               {/* Baris 1.5: Kelompok Peserta */}
               {groups.length > 0 && (
                 <div className="space-y-1.5">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Kelompok Peserta</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Kelompok Peserta</label>
                   <div className="flex flex-wrap gap-2">
                     {groups.map((g: { id: string; name: string }) => {
                       const checked = selectedGroupIds.includes(g.id);
@@ -308,21 +308,21 @@ export default function SchedulePage() {
                         selectedGroupIds.length === groups.length && groups.length > 0 ? "bg-primary/20 text-primary border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"
                       }`}
                     >
-                      {selectedGroupIds.length === groups.length && groups.length > 0 ? "Batal Pilih Semua" : "Pilih Semua"}
+                      {selectedGroupIds.length === groups.length && groups.length > 0 ? "Hapus Pilihan" : "Pilih Semua"}
                     </button>
                   </div>
                 </div>
               )}
 
               <div className="space-y-1">
-                <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Keterangan (Opsional)</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Keterangan (Opsional)</label>
                 <Textarea {...register("description")} placeholder="Catatan tambahan agenda..." className="min-h-22 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all resize-y" />
               </div>
 
-              {/* Baris 2: Tanggal + Waktu + Lokasi + (Homebase) + Submit */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {/* Baris 2: Tanggal + Waktu */}
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                     Tanggal <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -333,7 +333,7 @@ export default function SchedulePage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
                     Waktu <span className="text-destructive">*</span>
                   </label>
                   <Input
@@ -347,44 +347,43 @@ export default function SchedulePage() {
                     }}
                     className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all"
                   />
-                  {errors.time && <p className="text-[10px] text-destructive">{errors.time.message}</p>}
+                  {errors.time ? (
+                    <p className="text-[10px] text-destructive">{errors.time.message}</p>
+                  ) : (
+                    <p className="text-[10px] text-muted-foreground/40">Format 24 jam, cth: 08:00</p>
+                  )}
                 </div>
+              </div>
+
+              {/* Baris 3: Lokasi + Homebase + Submit */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi</label>
                   <Input {...register("location")} placeholder="GOR Adora" className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
                 </div>
-                {homebases.length > 0 ? (
-                  <>
-                    <div className="space-y-1">
-                      <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Homebase</label>
-                      <Select value={homebaseId ?? ""} onValueChange={(val: string | null) => setValue("homebaseId", val || undefined)}>
-                        <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
-                          <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua"}</SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          {homebases.map((hb) => (
-                            <SelectItem key={hb.id} value={hb.id}>
-                              {hb.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="col-span-2 sm:col-span-4 flex justify-end">
-                      <Button type="submit" disabled={isPending} className="h-10 px-8 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground">
-                        {isPending && <Loader2 className="animate-spin size-3.5 mr-1.5" />}
-                        {isEditMode ? "Simpan Edit" : "Simpan"}
-                      </Button>
-                    </div>
-                  </>
-                ) : (
-                  <div className="flex items-end">
-                    <Button type="submit" disabled={isPending} className="w-full h-10 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground">
-                      {isPending && <Loader2 className="animate-spin size-3.5 mr-1.5" />}
-                      {isEditMode ? "Simpan Edit" : "Simpan"}
-                    </Button>
+                {homebases.length > 0 && (
+                  <div className="space-y-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Homebase</label>
+                    <Select value={homebaseId ?? ""} onValueChange={(val: string | null) => setValue("homebaseId", val || undefined)}>
+                      <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
+                        <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua Homebase"}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {homebases.map((hb) => (
+                          <SelectItem key={hb.id} value={hb.id}>
+                            {hb.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 )}
+                <div className="flex items-end">
+                  <Button type="submit" disabled={isPending} className="w-full h-10 text-sm font-bold bg-primary hover:bg-primary/90 text-primary-foreground">
+                    {isPending && <Loader2 className="animate-spin size-3.5 mr-1.5" />}
+                    {isEditMode ? "Simpan Perubahan" : "Simpan"}
+                  </Button>
+                </div>
               </div>
             </form>
           </div>
@@ -438,9 +437,10 @@ export default function SchedulePage() {
                 <div className="flex flex-col items-center justify-center py-14 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
                   <CalendarDays className="size-8 text-muted-foreground/30" />
                   <p className="text-xs text-muted-foreground font-medium">Tidak ada agenda mendatang</p>
+                  <p className="text-[10px] text-muted-foreground/50">Buat agenda menggunakan form di atas.</p>
                 </div>
               ) : (
-                upcomingEvents.map((ev, i) => {
+                upcomingEvents.map((ev) => {
                   const cfg = getEventConfig(ev.type);
                   const Icon = cfg.icon;
                   return (
@@ -457,7 +457,7 @@ export default function SchedulePage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-bold text-foreground text-sm leading-snug wrap-break-word mb-1.5">{ev.title}</p>
-                        <span className="inline-flex items-center gap-1 text-[9px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md mb-1.5">
+                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md mb-1.5">
                           <Clock className="size-2.5" />
                           {getCountdownLabel(ev.date)}
                         </span>
@@ -533,7 +533,7 @@ export default function SchedulePage() {
                       <CalendarDays size={14} />
                     </div>
                     <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Hari & Tanggal</div>
+                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Tanggal</div>
                       <div className="text-sm font-semibold text-white/80 wrap-break-word">
                         {formatJakarta(uiState?.type === "preview" ? uiState.event.date : new Date(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                       </div>
@@ -588,7 +588,7 @@ export default function SchedulePage() {
         <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Agenda</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Aksi ini membutuhkan konfirmasi.</AlertDialogDescription>
+            <AlertDialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Agenda yang dihapus tidak bisa dikembalikan.</AlertDialogDescription>
           </AlertDialogHeader>
 
           <div className="py-6 flex flex-col gap-4">
