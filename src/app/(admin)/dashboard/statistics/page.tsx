@@ -173,14 +173,14 @@ export default function StatisticsPage() {
           <Table className="min-w-175">
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
-                <TableHead className="w-10 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
+                <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
                 <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nama Pemain</TableHead>
-                <TableHead className="text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Dribble</TableHead>
-                <TableHead className="text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Passing</TableHead>
-                <TableHead className="text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Lay Up</TableHead>
-                <TableHead className="text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Shooting</TableHead>
-                <TableHead className="text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Status</TableHead>
-                <TableHead className="text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
+                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Dribble</TableHead>
+                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Passing</TableHead>
+                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Lay Up</TableHead>
+                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Shooting</TableHead>
+                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Status</TableHead>
+                <TableHead className="w-36 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -199,7 +199,7 @@ export default function StatisticsPage() {
                   <React.Fragment key={group.id}>
                     {/* Group header row */}
                     <TableRow className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={8} className="font-bold text-primary uppercase tracking-widest text-sm py-2.5 pl-4">
+                      <TableCell colSpan={8} className="font-bold text-primary uppercase tracking-widest text-sm py-2.5 pl-3 border-l-4 border-primary">
                         {group.name}
                       </TableCell>
                     </TableRow>
@@ -210,8 +210,8 @@ export default function StatisticsPage() {
                       const m = stat?.metricsJson as MetricsJson | undefined;
 
                       return (
-                        <TableRow key={player.id} className="hover:bg-muted/40 transition-colors">
-                          <TableCell className="text-muted-foreground font-medium">{idx + 1}</TableCell>
+                        <TableRow key={player.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
+                          <TableCell className="text-center text-muted-foreground font-medium">{idx + 1}</TableCell>
                           <TableCell className="font-semibold">{player.name}</TableCell>
                           <TableCell className="text-center font-mono text-sm">{m ? <span className="font-bold text-primary">{dribbleTotal(m.dribble)}</span> : <span className="text-muted-foreground">—</span>}</TableCell>
                           <TableCell className="text-center font-mono text-sm">{m ? <span className="font-bold text-primary">{passingTotal(m.passing)}</span> : <span className="text-muted-foreground">—</span>}</TableCell>

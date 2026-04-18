@@ -35,7 +35,7 @@ export default function CertificatesPage() {
       await deleteCert.mutateAsync(id);
       toast.success("Sertifikat berhasil dihapus.");
     } catch {
-      toast.error("Gagal menghapus sertifikat.");
+      toast.error("Gagal menghapus sertifikat. Coba lagi.");
     }
   };
 
@@ -55,23 +55,23 @@ export default function CertificatesPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm">
-        <Table>
+      <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
+        <Table className="min-w-150">
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-border/50">
-              <TableHead className="w-[60px] text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
+              <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
                 No
               </TableHead>
               <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
                 Judul Sertifikat
               </TableHead>
-              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
+              <TableHead className="w-44 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
                 Ditujukan Kepada
               </TableHead>
-              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
+              <TableHead className="w-36 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
                 Tanggal Upload
               </TableHead>
-              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground text-right">
+              <TableHead className="w-28 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
                 Aksi
               </TableHead>
             </TableRow>
@@ -81,7 +81,7 @@ export default function CertificatesPage() {
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex items-center justify-center gap-2 text-primary font-bold">
-                    <Loader2 className="size-5 animate-spin" /> Mengambil Data Sertifikat...
+                    <Loader2 className="size-5 animate-spin" /> Memuat data sertifikat...
                   </div>
                 </TableCell>
               </TableRow>
@@ -89,21 +89,20 @@ export default function CertificatesPage() {
             {!isLoading && (!certificates || certificates.length === 0) && (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center">
-                  <div className="flex flex-col items-center gap-2">
+                  <div className="flex flex-col items-center gap-1.5">
                     <FileBadge className="size-8 text-muted-foreground/30" />
-                    <p className="text-muted-foreground font-semibold">
-                      Belum ada sertifikat. Klik &quot;Tambah Sertifikat&quot; untuk memulai.
-                    </p>
+                    <p className="text-muted-foreground font-semibold">Belum ada sertifikat.</p>
+                    <p className="text-muted-foreground/60 text-sm">Tambah sertifikat menggunakan tombol di atas.</p>
                   </div>
                 </TableCell>
               </TableRow>
             )}
             {certificates?.map((cert, idx) => (
-              <TableRow key={cert.id} className="group hover:bg-muted/40 transition-colors">
-                <TableCell className="font-medium text-muted-foreground">{idx + 1}</TableCell>
+              <TableRow key={cert.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
+                <TableCell className="text-center font-medium text-muted-foreground">{idx + 1}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <FileBadge className="size-4 text-primary flex-shrink-0" />
+                    <FileBadge className="size-4 text-primary shrink-0" />
                     <span className="font-semibold text-secondary">{cert.title}</span>
                   </div>
                 </TableCell>
@@ -131,7 +130,6 @@ export default function CertificatesPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    {/* Preview Link */}
                     <a
                       href={cert.fileUrl}
                       target="_blank"
@@ -142,7 +140,6 @@ export default function CertificatesPage() {
                       <span className="text-[10px] uppercase font-bold tracking-wider">Lihat</span>
                     </a>
 
-                    {/* Delete Button with Confirmation */}
                     <AlertDialog>
                       <AlertDialogTrigger
                         render={
@@ -160,8 +157,13 @@ export default function CertificatesPage() {
                           <AlertDialogTitle className="font-heading uppercase tracking-wider text-secondary">
                             Hapus Sertifikat?
                           </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Sertifikat &quot;{cert.title}&quot; akan dihapus permanen. Tindakan ini tidak bisa dibatalkan.
+                          <AlertDialogDescription className="flex flex-col gap-2">
+                            <span className="text-destructive font-semibold">
+                              Sertifikat &quot;{cert.title}&quot; akan dihapus permanen.
+                            </span>
+                            <span className="text-muted-foreground text-sm">
+                              Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi.
+                            </span>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
@@ -170,7 +172,7 @@ export default function CertificatesPage() {
                             onClick={() => handleDelete(cert.id)}
                             className="bg-destructive text-white hover:bg-destructive/90"
                           >
-                            Ya, Hapus
+                            Hapus Sertifikat
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
