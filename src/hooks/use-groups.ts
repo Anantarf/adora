@@ -1,5 +1,4 @@
 "use client";
-import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroupsAction, addGroupAction, updateGroupAction, deleteGroupAction } from "@/actions/groups";
 
@@ -33,7 +32,7 @@ export const useAddGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: AddGroupInput) => addGroupAction(data).then(unwrapAction),
+    mutationFn: addGroupAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
@@ -45,7 +44,7 @@ export const useUpdateGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateGroupInput }) => updateGroupAction(id, data).then(unwrapAction),
+    mutationFn: ({ id, data }: { id: string; data: UpdateGroupInput }) => updateGroupAction(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },
@@ -57,7 +56,7 @@ export const useDeleteGroup = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: DeleteGroupInput) => deleteGroupAction(data).then(unwrapAction),
+    mutationFn: deleteGroupAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["groups"] });
     },

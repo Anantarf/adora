@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import { SCHOOL_CLASS_TO_GROUP_NAME } from "@/lib/config/player-import";
 
 export type RawCsvRow = Record<string, unknown>;
 
@@ -10,8 +11,18 @@ export type UploadRowError = {
 export type NormalizedPlayerPayload = {
   name: string;
   dateOfBirth: string;
+  placeOfBirth?: string;
+  gender?: string;
+  weight?: string;
+  height?: string;
   schoolOrigin?: string;
+  address?: string;
+  email?: string;
   phoneNumber?: string;
+  medicalHistory?: string;
+  parentName?: string;
+  parentAddress?: string;
+  parentPhoneNumber?: string;
   groupId: string;
 };
 
@@ -24,6 +35,7 @@ export const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spr
 export const ACCEPTED_EXCEL_FILE_FORMATS = `.xlsx,${XLSX_MIME_TYPE}`;
 
 const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const SIMPLE_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EXCEL_DATE_EPOCH_UTC = Date.UTC(1899, 11, 30);
 const HEADER_SCAN_ROW_LIMIT = 12;
 const TEMPLATE_FONT = "Poppins";
@@ -63,6 +75,17 @@ const KNOWN_HEADER_KEYS = new Set([
   "groupname",
   "namakelompok",
   "groupid",
+  "kelas",
+  "tempatlahir",
+  "jeniskelamin",
+  "beratbadan",
+  "tinggibadan",
+  "alamatrumah",
+  "email",
+  "riwayatpenyakitbawaan",
+  "namaorangtua",
+  "alamatorangtua",
+  "nomortelforangtua",
 ]);
 
 export const isSupportedExcelFile = (file: File): boolean => {
@@ -84,6 +107,21 @@ const formatDateToISO = (date: Date): string => {
 };
 
 const excelSerialToDate = (excelSerial: number): Date => new Date(EXCEL_DATE_EPOCH_UTC + Math.round(excelSerial * 24 * 60 * 60 * 1000));
+
+const normalizePhoneNumber = (value: string): string | undefined => {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+
+  const digitsOnly = trimmed.replace(/[^\d+]/g, "");
+  return digitsOnly || undefined;
+};
+
+const normalizeText = (value: string): string | undefined => {
+  const trimmed = value.trim();
+  return trimmed || undefined;
+};
 
 const parseDate = (value: unknown): string | null => {
   if (value instanceof Date && !Number.isNaN(value.getTime())) {
@@ -224,10 +262,21 @@ export const normalizeAndValidateRows = (rows: RawCsvRow[], groupsById: Set<stri
 
     const name = normalized.namalengkap ?? normalized.nama ?? normalized.playername ?? normalized.name ?? "";
     const dateOfBirthInput = normalized.tanggallahiryyyymmdd ?? normalized.tanggallahir ?? normalized.dateofbirth ?? normalized.dob ?? normalized.birthdate ?? "";
+    const placeOfBirth = normalized.tempatlahir ?? "";
+    const gender = normalized.jeniskelamin ?? "";
+    const weight = normalized.beratbadan ?? "";
+    const height = normalized.tinggibadan ?? "";
     const schoolOrigin = normalized.asalsekolah ?? normalized.sekolahasal ?? normalized.schoolorigin ?? normalized.school ?? normalized.sekolah ?? "";
+    const address = normalized.alamatrumah ?? "";
+    const email = normalized.email ?? "";
     const groupIdInput = normalized.groupid ?? normalized.idkelompok ?? normalized.grupid ?? "";
     const groupNameInput = normalized.kelompok ?? normalized.kelompokumur ?? normalized.kelompokumurganjil ?? normalized.namakelompok ?? normalized.groupname ?? "";
+    const schoolClassInput = normalized.kelas ?? "";
     const phoneNumber = normalized.notelf ?? normalized.nohp ?? normalized.telepon ?? normalized.phonenumber ?? normalized.phone ?? normalized.hp ?? "";
+    const medicalHistory = normalized.riwayatpenyakitbawaan ?? "";
+    const parentName = normalized.namaorangtua ?? "";
+    const parentAddress = normalized.alamatorangtua ?? "";
+    const parentPhoneNumber = normalized.nomortelforangtua ?? "";
 
     if (name.length < 2) {
       errors.push({ rowNumber, message: "Nama pemain belum diisi dengan benar." });
@@ -240,18 +289,54 @@ export const normalizeAndValidateRows = (rows: RawCsvRow[], groupsById: Set<stri
       return;
     }
 
-    const resolvedGroupId = groupIdInput && groupsById.has(groupIdInput) ? groupIdInput : groupNameInput ? groupsByName.get(groupNameInput.toLowerCase()) : undefined;
+    const normalizedParentName = normalizeText(parentName);
+    if (!normalizedParentName || normalizedParentName.length < 2) {
+      errors.push({ rowNumber, message: "Nama orang tua wajib diisi minimal 2 karakter." });
+      return;
+    }
+
+    const normalizedEmail = normalizeText(email);
+    if (normalizedEmail && !SIMPLE_EMAIL_REGEX.test(normalizedEmail)) {
+      errors.push({ rowNumber, message: "Format email belum valid." });
+      return;
+    }
+
+    const mappedGroupNameFromClass = schoolClassInput ? SCHOOL_CLASS_TO_GROUP_NAME[schoolClassInput.trim()] : undefined;
+
+    if (!schoolClassInput.trim() && !groupIdInput.trim() && !groupNameInput.trim()) {
+      errors.push({ rowNumber, message: "Kelas kosong. Isi kolom Kelas atau isi kolom Kelompok secara manual." });
+      return;
+    }
+
+    const resolvedGroupId =
+      (groupIdInput && groupsById.has(groupIdInput) ? groupIdInput : undefined) ||
+      (groupNameInput ? groupsByName.get(groupNameInput.toLowerCase()) : undefined) ||
+      (mappedGroupNameFromClass ? groupsByName.get(mappedGroupNameFromClass.trim().toLowerCase()) : undefined);
 
     if (!resolvedGroupId) {
-      errors.push({ rowNumber, message: "Kelompok tidak ditemukan. Cek nama kelompoknya." });
+      if (schoolClassInput) {
+        errors.push({ rowNumber, message: `Kelas \"${schoolClassInput}\" belum dipetakan ke kelompok sistem.` });
+      } else {
+        errors.push({ rowNumber, message: "Kelompok tidak ditemukan. Cek nama kelompoknya." });
+      }
       return;
     }
 
     validRows.push({
       name,
       dateOfBirth,
-      schoolOrigin: schoolOrigin || undefined,
-      phoneNumber: phoneNumber || undefined,
+      placeOfBirth: normalizeText(placeOfBirth),
+      gender: normalizeText(gender),
+      weight: normalizeText(weight),
+      height: normalizeText(height),
+      schoolOrigin: normalizeText(schoolOrigin),
+      address: normalizeText(address),
+      email: normalizedEmail,
+      phoneNumber: normalizePhoneNumber(phoneNumber),
+      medicalHistory: normalizeText(medicalHistory),
+      parentName: normalizedParentName,
+      parentAddress: normalizeText(parentAddress),
+      parentPhoneNumber: normalizePhoneNumber(parentPhoneNumber),
       groupId: resolvedGroupId,
     });
   });
@@ -287,13 +372,24 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   dataSheet.columns = [
     { key: "no", width: 7 },
     { key: "name", width: 32 },
-    { key: "dateOfBirth", width: 30 },
-    { key: "schoolOrigin", width: 28 },
+    { key: "placeOfBirth", width: 22 },
+    { key: "dateOfBirth", width: 24 },
+    { key: "gender", width: 16 },
+    { key: "weight", width: 16 },
+    { key: "height", width: 16 },
+    { key: "schoolClass", width: 16 },
+    { key: "schoolOrigin", width: 24 },
+    { key: "address", width: 34 },
     { key: "phoneNumber", width: 24 },
-    { key: "groupName", width: 28 },
+    { key: "email", width: 28 },
+    { key: "medicalHistory", width: 28 },
+    { key: "parentName", width: 24 },
+    { key: "parentAddress", width: 34 },
+    { key: "parentPhoneNumber", width: 26 },
+    { key: "groupName", width: 24 },
   ];
 
-  dataSheet.mergeCells("A1:F1");
+  dataSheet.mergeCells("A1:Q1");
   const titleRow = dataSheet.getRow(1);
   titleRow.height = 34;
   titleRow.getCell(1).value = "TEMPLATE UPLOAD PEMAIN - ADORA BASKETBALL";
@@ -305,7 +401,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   };
   titleRow.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
 
-  dataSheet.mergeCells("A2:F2");
+  dataSheet.mergeCells("A2:Q2");
   const subtitleRow = dataSheet.getRow(2);
   subtitleRow.height = 26;
   subtitleRow.getCell(1).value = "Isi kolom sesuai contoh. Kolom bertanda (Opsional) boleh dikosongkan.";
@@ -320,7 +416,25 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   dataSheet.getRow(3).height = 10;
 
   const headerRow = dataSheet.getRow(4);
-  headerRow.values = ["No.", "Nama Lengkap", "Tanggal Lahir (YYYY-MM-DD)", "Asal Sekolah (Opsional)", "No. Telepon (Opsional)", "Kelompok"];
+  headerRow.values = [
+    "No.",
+    "Nama Lengkap",
+    "Tempat Lahir (Opsional)",
+    "Tanggal Lahir (YYYY-MM-DD)",
+    "Jenis Kelamin (Opsional)",
+    "Berat Badan (Opsional)",
+    "Tinggi Badan (Opsional)",
+    "Kelas",
+    "Asal Sekolah (Opsional)",
+    "Alamat Rumah (Opsional)",
+    "Nomor Telf. (Opsional)",
+    "Email (Opsional)",
+    "Riwayat Penyakit Bawaan (Opsional)",
+    "Nama Orang Tua",
+    "Alamat Orang Tua (Opsional)",
+    "Nomor Telf. Orang Tua (Opsional)",
+    "Kelompok (Opsional)",
+  ];
   headerRow.height = 26;
   headerRow.eachCell((cell) => {
     cell.font = { bold: true, color: { argb: BRAND_TEXT_DARK }, name: TEMPLATE_FONT, size: 11 };
@@ -342,28 +456,50 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
     {
       no: 1,
       name: "Budi Santoso",
+      placeOfBirth: "Depok",
       dateOfBirth: "2012-08-17",
-      schoolOrigin: "SMP Negeri 1",
-      phoneNumber: "+6281234567890",
-      groupName: "KU 16 Putra",
+      gender: "Laki-laki",
+      weight: "18 kg",
+      height: "118 cm",
+      schoolClass: "1",
+      schoolOrigin: "SDN Gandul 2",
+      address: "Jl. Melati No. 10",
+      phoneNumber: "081234567890",
+      email: "",
+      medicalHistory: "",
+      parentName: "Devi",
+      parentAddress: "Jl. Melati No. 10",
+      parentPhoneNumber: "081212300838",
+      groupName: "",
     },
     {
       no: 2,
       name: "Nadia Putri",
+      placeOfBirth: "Jakarta",
       dateOfBirth: "2011-04-03",
-      schoolOrigin: "",
+      gender: "Perempuan",
+      weight: "",
+      height: "",
+      schoolClass: "2",
+      schoolOrigin: "SDN Gandul 2",
+      address: "",
       phoneNumber: "",
-      groupName: "KU 16 Putri",
+      email: "",
+      medicalHistory: "Asma ringan",
+      parentName: "Suhartini",
+      parentAddress: "Gandul, Cinere",
+      parentPhoneNumber: "085159717735",
+      groupName: "",
     },
   ]);
 
   dataSheet.autoFilter = {
     from: "A4",
-    to: "F4",
+    to: "Q4",
   };
 
   dataSheet.getColumn(1).numFmt = "0";
-  dataSheet.getColumn(3).numFmt = "@";
+  dataSheet.getColumn(4).numFmt = "@";
 
   [5, 6].forEach((rowNumber) => {
     const row = dataSheet.getRow(rowNumber);
@@ -385,7 +521,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
     });
 
     row.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
-    row.getCell(3).alignment = { vertical: "middle", horizontal: "center" };
+    row.getCell(4).alignment = { vertical: "middle", horizontal: "center" };
   });
 
   const guideSheet = workbook.addWorksheet("Panduan");
@@ -394,11 +530,12 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
 
   const guideRows = [
     "1) Isi data pada sheet 'Template Pemain' mulai baris contoh.",
-    "2) Kolom wajib: Nama Lengkap, Tanggal Lahir (YYYY-MM-DD), Kelompok.",
-    "3) Kolom opsional: Asal Sekolah, No. Telepon — boleh dikosongkan.",
+    "2) Kolom wajib: Nama Lengkap, Tanggal Lahir (YYYY-MM-DD), Nama Orang Tua.",
+    "3) Isi Kelas untuk memakai mapping Kelas -> Kelompok. Jika Kelas kosong, kolom Kelompok wajib diisi.",
     "4) Gunakan format tanggal: YYYY-MM-DD (contoh: 2012-08-17).",
-    "5) Kolom Kelompok wajib sesuai nama kelompok di sistem.",
-    "6) Format No. Telepon bebas (contoh: +6281234567890 atau 081234567890).",
+    "5) Nomor telepon gunakan angka saja (boleh diawali +62).",
+    "6) Jika email diisi, formatnya harus valid (contoh: nama@email.com).",
+    "7) Jika kelas belum terpetakan, data tidak akan tersimpan sampai mapping diperbarui.",
   ];
 
   guideRows.forEach((text) => {

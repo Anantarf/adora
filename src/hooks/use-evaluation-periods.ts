@@ -1,5 +1,4 @@
 "use client";
-import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getPeriodsAction, getActivePeriodAction, createPeriodAction, setActivePeriodAction, deletePeriodAction } from "@/actions/evaluation-periods";
 import { QUERY_KEYS } from "@/lib/constants";
@@ -27,7 +26,7 @@ export const useActivePeriod = () =>
 export const useCreatePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: CreatePeriodInput) => createPeriodAction(data).then(unwrapAction),
+    mutationFn: createPeriodAction,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.EVALUATION_PERIODS_BASE }),
   });
 };
@@ -35,7 +34,7 @@ export const useCreatePeriod = () => {
 export const useSetActivePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: SetActivePeriodInput) => setActivePeriodAction(data).then(unwrapAction),
+    mutationFn: setActivePeriodAction,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.EVALUATION_PERIODS_BASE }),
   });
 };
@@ -43,7 +42,7 @@ export const useSetActivePeriod = () => {
 export const useDeletePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: DeletePeriodInput) => deletePeriodAction(data).then(unwrapAction),
+    mutationFn: deletePeriodAction,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: QUERY_KEYS.EVALUATION_PERIODS_BASE }),
   });
 };

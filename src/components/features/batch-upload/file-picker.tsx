@@ -25,9 +25,9 @@ export function BatchUploadFilePicker({ selectedFile, fileInputRef, acceptedFile
           <FileUp className="size-8" />
         </div>
         <div className="text-center">
-          <h4 className="font-heading text-lg text-foreground">Pilih File Excel</h4>
-          <p className="text-sm text-muted-foreground">Klik area ini untuk memilih file .xlsx</p>
-          <p className="text-xs text-muted-foreground mt-1">Disarankan maksimal 1000 baris per upload</p>
+          <h4 className="font-heading text-lg text-foreground">Pilih Berkas Excel</h4>
+          <p className="text-sm text-muted-foreground">Klik area ini untuk memilih berkas .xlsx</p>
+          <p className="text-xs text-muted-foreground mt-1">Disarankan maksimal 1000 baris per unggahan</p>
         </div>
       </div>
     );

@@ -25,6 +25,9 @@ export default function UsersManagementPage() {
     return users.filter((user) => user.name?.toLowerCase().includes(normalizedSearch) || (user.username || "").toLowerCase().includes(normalizedSearch) || user.email?.toLowerCase().includes(normalizedSearch));
   }, [users, normalizedSearch]);
 
+  const hasUsers = (users?.length ?? 0) > 0;
+  const isSearchActive = normalizedSearch.length > 0;
+
   const activeTargetId = uiState?.targetId || null;
 
   const handleDeleteConfirm = async () => {
@@ -56,7 +59,8 @@ export default function UsersManagementPage() {
         ) : filteredUsers.length === 0 ? (
           <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card border-dashed border-2 rounded-[3rem] opacity-60">
             <Users className="size-10 text-muted-foreground/40" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Tidak Ada Data Akun</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{hasUsers && isSearchActive ? "Akun tidak ditemukan" : "Belum ada akun orang tua"}</p>
+            <p className="text-xs text-muted-foreground/80 text-center">{hasUsers && isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : "Tambahkan akun baru menggunakan tombol di bagian atas."}</p>
           </div>
         ) : (
           filteredUsers.map((user) => <UserAccountCard key={user.id} user={user} onReset={(id) => setUiState({ type: "reset", targetId: id })} onDelete={(id) => setUiState({ type: "delete", targetId: id })} />)

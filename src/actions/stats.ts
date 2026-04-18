@@ -87,7 +87,7 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
 
   const stat = await prisma.$transaction(async (tx) => {
     const period = await tx.evaluationPeriod.findUnique({ where: { id: data.periodId } });
-    if (!period) return { success: false, error: "Periode evaluasi tidak ditemukan." };
+    if (!period) throw new Error("Periode evaluasi tidak ditemukan.");
 
     const existing = await tx.statistic.findUnique({
       where: { playerId_periodId: { playerId: data.playerId, periodId: data.periodId } },

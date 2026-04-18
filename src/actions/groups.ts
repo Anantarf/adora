@@ -42,10 +42,10 @@ export async function addGroupAction(data: { name: string; description?: string;
     });
 
     revalidatePath("/dashboard/players");
-    return { success: true, data: group };
+    return group;
   } catch (error) {
     console.error("Error adding group:", error);
-    return { success: false, error: "Gagal menambahkan grup baru" };
+    throw new Error("Gagal menambahkan grup baru");
   }
 }
 
@@ -63,10 +63,10 @@ export async function updateGroupAction(id: string, data: { name?: string; descr
     });
 
     revalidatePath("/dashboard/players");
-    return { success: true, data: updated };
+    return updated;
   } catch (error) {
     console.error("Error updating group:", error);
-    return { success: false, error: "Gagal mengubah grup" };
+    throw new Error("Gagal mengubah grup");
   }
 }
 
@@ -86,9 +86,9 @@ export async function deleteGroupAction(id: string) {
     });
 
     revalidatePath("/dashboard/players");
-    return { success: true };
+    return { success: true as const };
   } catch (error) {
     console.error("Error deleting group:", error);
-    return { success: false, error: "Gagal menghapus grup" };
+    throw new Error("Gagal menghapus grup");
   }
 }

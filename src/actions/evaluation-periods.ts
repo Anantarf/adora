@@ -21,12 +21,7 @@ export async function getActivePeriodAction(): Promise<EvaluationPeriod | null> 
 }
 
 // 3. Create period
-export async function createPeriodAction(data: {
-  name: string;
-  startDate: string;
-  endDate: string;
-  setActive?: boolean;
-}) {
+export async function createPeriodAction(data: { name: string; startDate: string; endDate: string; setActive?: boolean }) {
   await requireAdmin();
 
   const period = await prisma.$transaction(async (tx) => {
@@ -70,7 +65,7 @@ export async function deletePeriodAction(periodId: string) {
 
   const statCount = await prisma.statistic.count({ where: { periodId } });
   if (statCount > 0) {
-    return { success: false, error: `Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.` };
+    throw new Error(`Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.`);
   }
 
   await prisma.$transaction(async (tx) => {

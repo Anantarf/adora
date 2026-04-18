@@ -13,14 +13,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2, Phone } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 
 // Schema Sinkron dengan MySQL/Prisma
 const playerSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   dateOfBirth: z.string().nonempty("TTL wajib diisi"),
+  placeOfBirth: z.string().optional(),
+  gender: z.string().optional(),
+  weight: z.string().optional(),
+  height: z.string().optional(),
   schoolOrigin: z.string().optional(),
+  address: z.string().optional(),
+  email: z.string().optional(),
   phoneNumber: z.string().optional(),
+  medicalHistory: z.string().optional(),
+  parentName: z.string().optional(),
+  parentAddress: z.string().optional(),
+  parentPhoneNumber: z.string().optional(),
   groupId: z.string().nonempty("Kelompok wajib dipilih"),
 });
 
@@ -71,10 +81,10 @@ export function AddPlayerDialog() {
         }
       />
 
-      <DialogContent className={`${isBatchMode ? "sm:max-w-2xl" : "sm:max-w-md"} bg-card border-border/50`}>
+      <DialogContent className={`${isBatchMode ? "sm:max-w-2xl" : "sm:max-w-3xl"} bg-card border-border/50`}>
         <DialogHeader>
           <DialogTitle className="text-xl font-heading text-foreground tracking-wide">{isBatchMode ? "Tambah Banyak Pemain" : "Registrasi Pemain Baru"}</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">{isBatchMode ? "Upload file Excel, cek datanya, lalu simpan." : "Masukkan data pemain satu per satu."}</DialogDescription>
+          <DialogDescription className="text-sm text-muted-foreground">{isBatchMode ? "Unggah berkas Excel, periksa datanya, lalu simpan." : "Masukkan data pemain satu per satu."}</DialogDescription>
         </DialogHeader>
 
         {isBatchMode ? (
@@ -86,49 +96,125 @@ export function AddPlayerDialog() {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground">Nama Lengkap</label>
-              <Input {...register("name")} placeholder="Contoh: Dimas Anggara" className="h-11" />
-              {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">Nama Lengkap</label>
+                <Input {...register("name")} placeholder="Contoh: Dimas Anggara" className="h-11" />
+                {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground">Tanggal Lahir</label>
-              <Input type="date" {...register("dateOfBirth")} className="h-11 rounded-xl bg-background/40 scheme-dark [&::-webkit-calendar-picker-indicator]:invert" />
-              {errors.dateOfBirth && <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>}
-            </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">Tanggal Lahir</label>
+                <Input type="date" {...register("dateOfBirth")} className="h-11 rounded-xl bg-background/40 scheme-dark [&::-webkit-calendar-picker-indicator]:invert" />
+                {errors.dateOfBirth && <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>}
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground">Asal Sekolah <span className="text-muted-foreground/50 font-normal">(Opsional)</span></label>
-              <Input {...register("schoolOrigin")} placeholder="Contoh: SMA Gonzaga" className="h-11 rounded-xl bg-background/40" />
-            </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Tempat Lahir <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("placeOfBirth")} placeholder="Contoh: Depok" className="h-11 rounded-xl bg-background/40" />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground">No. Telepon <span className="text-muted-foreground/50 font-normal">(Opsional)</span></label>
-              <Input type="tel" {...register("phoneNumber")} placeholder="Contoh: +6281234567890" className="h-11 rounded-xl bg-background/40" />
-            </div>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Jenis Kelamin <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("gender")} placeholder="Contoh: Laki-laki" className="h-11 rounded-xl bg-background/40" />
+              </div>
 
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground">Kelompok</label>
-              <Controller
-                control={control}
-                name="groupId"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
-                    <SelectTrigger className="h-11 rounded-xl bg-background/40">
-                      <SelectValue>{groups?.find((g: Group) => g.id === field.value)?.name || (isGroupsLoading ? "Memuat..." : "Pilih Kelompok")}</SelectValue>
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl">
-                      {groups?.map((group: Group) => (
-                        <SelectItem key={group.id} value={group.id} className="font-medium text-sm">
-                          {group.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.groupId && <p className="text-destructive text-xs">{errors.groupId.message}</p>}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Berat Badan <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("weight")} placeholder="Contoh: 28 Kg" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Tinggi Badan <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("height")} placeholder="Contoh: 125 CM" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Asal Sekolah <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("schoolOrigin")} placeholder="Contoh: SDN Gandul 2" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Email <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input type="email" {...register("email")} placeholder="Contoh: nama@email.com" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Alamat Rumah <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("address")} placeholder="Contoh: Jl. Melati No. 10" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  No. Telepon <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input type="tel" {...register("phoneNumber")} placeholder="Contoh: +6281234567890" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  No. Telepon Orang Tua <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input type="tel" {...register("parentPhoneNumber")} placeholder="Contoh: +628129999999" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Nama Orang Tua <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("parentName")} placeholder="Contoh: Ibu Suryani" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Riwayat Penyakit Bawaan <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("medicalHistory")} placeholder="Contoh: Asma" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground">
+                  Alamat Orang Tua <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+                </label>
+                <Input {...register("parentAddress")} placeholder="Contoh: Gandul, Cinere" className="h-11 rounded-xl bg-background/40" />
+              </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <label className="text-xs font-semibold text-muted-foreground">Kelompok</label>
+                <Controller
+                  control={control}
+                  name="groupId"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
+                      <SelectTrigger className="h-11 rounded-xl bg-background/40">
+                        <SelectValue>{groups?.find((g: Group) => g.id === field.value)?.name || (isGroupsLoading ? "Memuat..." : "Pilih Kelompok")}</SelectValue>
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        {groups?.map((group: Group) => (
+                          <SelectItem key={group.id} value={group.id} className="font-medium text-sm">
+                            {group.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.groupId && <p className="text-destructive text-xs">{errors.groupId.message}</p>}
+              </div>
             </div>
 
             <div className="pt-6 flex flex-col gap-2">

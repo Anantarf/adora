@@ -1,11 +1,6 @@
 "use client";
-import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  submitStatisticAction,
-  getStatsByPeriodAction,
-  getStatHistoryAction,
-} from "@/actions/stats";
+import { submitStatisticAction, getStatsByPeriodAction, getStatHistoryAction } from "@/actions/stats";
 import type { MetricsJson } from "@/types/dashboard";
 
 // Hook (GET): Semua stats dalam suatu periode (Admin — untuk tabel per group)
@@ -29,12 +24,7 @@ export const useStatHistory = (statisticId: string | null) =>
 export const useSubmitStatistic = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: {
-      playerId: string;
-      periodId: string;
-      metrics: MetricsJson;
-      status: "Draft" | "Published";
-    }) => submitStatisticAction(data).then(unwrapAction),
+    mutationFn: (data: { playerId: string; periodId: string; metrics: MetricsJson; status: "Draft" | "Published" }) => submitStatisticAction(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["statistics-period", variables.periodId] });
       queryClient.invalidateQueries({ queryKey: ["player-stats"] });

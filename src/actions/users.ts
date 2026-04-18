@@ -15,7 +15,7 @@ import { revalidatePath } from "next/cache";
 // 1. List users (Admin only) - Focused on PARENT role by default
 export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
   await requireAdmin();
-  
+
   return await prisma.user.findMany({
     where: { role },
     select: {
@@ -26,37 +26,32 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
       role: true,
       image: true,
       _count: {
-        select: { player: { where: { isDeleted: false } } }
-      }
+        select: { player: { where: { isDeleted: false } } },
+      },
     },
     orderBy: { name: "asc" },
   });
 }
 
 // 2. Create New Parent Account
-export async function createUserAction(data: {
-  username: string;
-  name: string;
-  email?: string;
-  password?: string;
-}) {
+export async function createUserAction(data: { username: string; name: string; email?: string; password?: string }) {
   await requireAdmin();
 
   // Validate existence
   const existing = await prisma.user.findUnique({
-    where: { username: data.username }
+    where: { username: data.username },
   });
 
   if (existing) {
-    return { success: false, error: "Username sudah digunakan oleh akun lain." };
+    throw new Error("Username sudah digunakan oleh akun lain.");
   }
 
   const defaultPassword = process.env.DEFAULT_RESET_PASSWORD;
   if (!data.password && !defaultPassword) {
-    return { success: false, error: "Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment." };
+    throw new Error("Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment.");
   }
   const hashedPassword = await bcrypt.hash(data.password || defaultPassword!, 10);
-  
+
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: {
@@ -65,7 +60,7 @@ export async function createUserAction(data: {
         email: data.email || null,
         password: hashedPassword,
         role: "PARENT",
-      }
+      },
     });
 
     await createAuditLog(tx, "CREATE", "user", newUser.id);
@@ -77,21 +72,24 @@ export async function createUserAction(data: {
 }
 
 // 3. Update User Profile (Admin manual update)
-export async function updateUserAction(id: string, data: {
-  name?: string;
-  username?: string;
-  email?: string;
-}) {
+export async function updateUserAction(
+  id: string,
+  data: {
+    name?: string;
+    username?: string;
+    email?: string;
+  },
+) {
   await requireAdmin();
-  
-  const updated = await prisma.$transaction(async (tx) => {
-     const res = await tx.user.update({
-       where: { id },
-       data: buildUpdateData(data),
-     });
 
-     await createAuditLog(tx, "UPDATE", "user", id);
-     return res;
+  const updated = await prisma.$transaction(async (tx) => {
+    const res = await tx.user.update({
+      where: { id },
+      data: buildUpdateData(data),
+    });
+
+    await createAuditLog(tx, "UPDATE", "user", id);
+    return res;
   });
 
   revalidatePath("/dashboard/users");
@@ -104,21 +102,20 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   const defaultPassword = process.env.DEFAULT_RESET_PASSWORD;
   const passwordToHash = newPassword || defaultPassword;
   if (!passwordToHash) {
-    return { success: false, error: "Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment." };
+    throw new Error("Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment.");
   }
   const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
-  
-    await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id },
-      data: { password: hashedPassword }
+      data: { password: hashedPassword },
     });
 
     await createAuditLog(tx, "RESET_PASSWORD", "user", id);
   });
 
-  return { success: true, message: "Password berhasil direset." };
+  return { message: "Password berhasil direset." };
 }
 
 // 5. Delete User (Account Termination) — Hardened with Restrict Check
@@ -129,30 +126,25 @@ export async function deleteUserAction(id: string) {
   // Need current session in logic? Or just ID check if known.
   // We check if the user has active players.
   const playerCount = await prisma.player.count({
-    where: { parentId: id, isDeleted: false }
+    where: { parentId: id, isDeleted: false },
   });
 
   if (playerCount > 0) {
-    return { success: false, error: `Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.` };
+    throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
   }
 
-  
-    await prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     // Audit before hard delete
     await createAuditLog(tx, "DELETE", "user", id);
     await tx.user.delete({ where: { id } });
   });
 
   revalidatePath("/dashboard/users");
-  return { success: true };
+  return { success: true as const };
 }
 
 // 6. Update SELF (Member/Parent updating their own data)
-export async function updateSelfAction(data: {
-  name?: string;
-  email?: string;
-  password?: string;
-}) {
+export async function updateSelfAction(data: { name?: string; email?: string; password?: string }) {
   const session = await requireAuth();
   const userId = session.user.id;
 

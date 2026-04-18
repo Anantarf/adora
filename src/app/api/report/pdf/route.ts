@@ -2,6 +2,37 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import type { MetricsJson } from "@/types/dashboard";
+
+type ReportMetrics = {
+  dribble: number;
+  passing: number;
+  layUp: number;
+  shooting: number;
+};
+
+function toNumber(value: unknown): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
+}
+
+function extractReportMetrics(raw: unknown): { metrics: ReportMetrics; notes: string } {
+  const parsed = raw as Partial<MetricsJson> & { notes?: unknown };
+
+  const dribble =
+    toNumber(parsed.dribble?.inAndOut) + toNumber(parsed.dribble?.crossover) + toNumber(parsed.dribble?.vLeft) + toNumber(parsed.dribble?.vRight) + toNumber(parsed.dribble?.betweenLegsLeft) + toNumber(parsed.dribble?.betweenLegsRight);
+
+  const passing = toNumber(parsed.passing?.chestPass) + toNumber(parsed.passing?.bouncePass) + toNumber(parsed.passing?.overheadPass);
+
+  return {
+    metrics: {
+      dribble,
+      passing,
+      layUp: toNumber(parsed.layUp),
+      shooting: toNumber(parsed.shooting),
+    },
+    notes: typeof parsed.notes === "string" ? parsed.notes : "",
+  };
+}
 
 /**
  * ADORA Basketball - PDF Report Generator API Route
@@ -36,10 +67,7 @@ export async function GET(req: NextRequest) {
         where: { id: playerId, parentId: userId },
       });
       if (!ownsChild) {
-        return NextResponse.json(
-          { error: "Akses Terlarang: Anda tidak memiliki izin untuk data ini." },
-          { status: 403 }
-        );
+        return NextResponse.json({ error: "Akses Terlarang: Anda tidak memiliki izin untuk data ini." }, { status: 403 });
       }
     }
 
@@ -69,39 +97,28 @@ export async function GET(req: NextRequest) {
 
     // 5. Calculate embedded metrics
     const latestStat = player.statistic[0];
-    let latestMetrics: Record<string, number> = {};
+    let latestMetrics: ReportMetrics | null = null;
     let coachNotes = "";
 
     if (latestStat) {
       try {
         const parsed = JSON.parse(latestStat.metricsJson as string);
-        latestMetrics = {
-          shooting: parsed.shooting || 0,
-          dribbling: parsed.dribbling || 0,
-          passing: parsed.passing || 0,
-          stamina: parsed.stamina || 0,
-          attitude: parsed.attitude || 0,
-        };
-        coachNotes = parsed.notes || "";
+        const extracted = extractReportMetrics(parsed);
+        latestMetrics = extracted.metrics;
+        coachNotes = extracted.notes;
       } catch {
         // malformed JSON
       }
     }
 
-    const overallScore = Object.values(latestMetrics).length > 0
-      ? (Object.values(latestMetrics).reduce((a, b) => a + b, 0) / Object.values(latestMetrics).length).toFixed(1)
-      : "N/A";
+    const overallScore = latestMetrics ? (Object.values(latestMetrics).reduce((a, b) => a + b, 0) / Object.values(latestMetrics).length).toFixed(1) : "N/A";
 
     const totalAttendance = player.attendance.length;
     const hadirCount = player.attendance.filter((a: { status: string }) => a.status === "HADIR").length;
-    const attendanceRate = totalAttendance > 0
-      ? ((hadirCount / totalAttendance) * 100).toFixed(0)
-      : "N/A";
+    const attendanceRate = totalAttendance > 0 ? ((hadirCount / totalAttendance) * 100).toFixed(0) : "N/A";
 
     const age = getAge(player.dateOfBirth);
-    const evalDate = latestStat
-      ? new Date(latestStat.date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })
-      : "Belum ada evaluasi";
+    const evalDate = latestStat ? new Date(latestStat.date).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "Belum ada evaluasi";
 
     // 6. Generate printable HTML
     const html = `<!DOCTYPE html>
@@ -202,7 +219,7 @@ export async function GET(req: NextRequest) {
 
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 12px;
       margin-bottom: 28px;
     }
@@ -379,34 +396,54 @@ export async function GET(req: NextRequest) {
   </div>
 
   <!-- Skill Metrics -->
-  ${Object.keys(latestMetrics).length > 0 ? `
+  ${
+    latestMetrics
+      ? `
   <div class="section-title">Komposisi Kemampuan Terakhir</div>
   <div class="metrics-grid">
-    ${Object.entries(latestMetrics).map(([key, val]) => `
+    ${Object.entries(latestMetrics)
+      .map(
+        ([key, val]) => `
     <div class="metric-card">
       <div class="metric-label">${key}</div>
       <div class="metric-value">${val}</div>
-    </div>`).join("")}
-  </div>` : ""}
+    </div>`,
+      )
+      .join("")}
+  </div>`
+      : ""
+  }
 
   <!-- Coach Notes -->
-  ${coachNotes ? `
+  ${
+    coachNotes
+      ? `
   <div class="section-title">Catatan Pelatih</div>
-  <div class="notes-box">"${coachNotes}"</div>` : ""}
+  <div class="notes-box">"${coachNotes}"</div>`
+      : ""
+  }
 
   <!-- Certificates -->
-  ${player.certificate.length > 0 ? `
+  ${
+    player.certificate.length > 0
+      ? `
   <div class="section-title">Riwayat Sertifikat Prestasi</div>
   <div class="cert-list">
-    ${player.certificate.map((c: { title: string; uploadedAt: Date }) => `
+    ${player.certificate
+      .map(
+        (c: { title: string; uploadedAt: Date }) => `
     <div class="cert-item">
       <span class="cert-badge">🏆 Prestasi</span>
       ${c.title}
       <span style="margin-left:auto; color:#999; font-size:10px;">
         ${new Date(c.uploadedAt).toLocaleDateString("id-ID", { month: "short", year: "numeric" })}
       </span>
-    </div>`).join("")}
-  </div>` : ""}
+    </div>`,
+      )
+      .join("")}
+  </div>`
+      : ""
+  }
 
   <!-- Footer -->
   <div class="footer">
@@ -423,10 +460,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("[PDF_REPORT_ERROR]:", error);
-    return NextResponse.json(
-      { error: "Gagal generate laporan." },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Gagal generate laporan." }, { status: 500 });
   }
 }
 

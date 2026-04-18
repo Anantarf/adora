@@ -138,8 +138,18 @@ model player {
   id                  String        @id @default(cuid())
   name                String
   dateOfBirth         DateTime
+  placeOfBirth        String?
+  gender              String?
+  weight              String?
+  height              String?
   schoolOrigin        String?
+  address             String?
+  email               String?
   phoneNumber         String?
+  medicalHistory      String?       @db.Text
+  parentName          String?
+  parentAddress       String?
+  parentPhoneNumber   String?
   photoUrl            String?
   isDeleted           Boolean       @default(false)
   groupId             String?

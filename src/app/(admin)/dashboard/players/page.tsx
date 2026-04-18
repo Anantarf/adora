@@ -57,9 +57,9 @@ export default function PlayersPage() {
       {uiState?.type === "delete-player" && <DeletePlayerConfirm player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
 
       <section className="flex flex-col gap-4">
-        <div>
-          <h1 className="font-heading text-2xl uppercase tracking-widest text-foreground">Data Pemain & Kelompok</h1>
-          <p className="text-xs text-muted-foreground mt-1">Kelola roster latihan ADORA Basketball</p>
+        <div className="border-b border-border/50 pb-6">
+          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Data Pemain & Kelompok</h1>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">Kelola roster latihan ADORA Basketball</p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

@@ -73,15 +73,15 @@ export function AddUserDialog() {
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
-            <UserPlus className="size-5 text-primary" /> Buat Akun Parent
+            <UserPlus className="size-5 text-primary" /> Buat Akun Orang Tua
           </DialogTitle>
-          <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Username dan password default ini akan digunakan untuk login Orang Tua.</DialogDescription>
+          <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Username dan kata sandi bawaan ini akan digunakan untuk login orang tua.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Nama Lengkap Orang Tua</label>
-            <Input {...register("name")} placeholder="Contoh: Bpk. Kurniawan" className="h-11 bg-background/50" />
+            <Input {...register("name")} placeholder="Contoh: Bapak Kurniawan" className="h-11 bg-background/50" />
             {errors.name && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.name.message}</p>}
           </div>
 
@@ -99,9 +99,9 @@ export function AddUserDialog() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Password Awal</label>
+            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Kata Sandi Awal</label>
             <Input {...register("password")} type="text" className="h-11 bg-background/50 font-mono" />
-            <p className="text-[8px] text-muted-foreground italic mt-0.5 ml-1">* Berikan password ini kepada orang tua untuk login pertama.</p>
+            <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-1">Berikan kata sandi ini kepada orang tua untuk login pertama.</p>
           </div>
 
           <Button type="submit" disabled={isPending} className="w-full h-11 mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs">

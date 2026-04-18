@@ -30,13 +30,19 @@ export async function getCertificatesAction(): Promise<CertificateRecord[]> {
 }
 
 // 2. Create certificate (Admin)
-export async function addCertificateAction(data: {
-  title: string;
-  fileUrl: string;
-  playerId?: string;
-  groupId?: string;
-}) {
+export async function addCertificateAction(data: { title: string; fileUrl: string; playerId?: string; groupId?: string }) {
   await requireAdmin();
+
+  const hasPlayerTarget = Boolean(data.playerId);
+  const hasGroupTarget = Boolean(data.groupId);
+
+  // Valid combinations:
+  // - Umum (tanpa target)
+  // - Khusus pemain (playerId)
+  // - Khusus kelompok (groupId)
+  if (hasPlayerTarget && hasGroupTarget) {
+    throw new Error("Sertifikat hanya boleh ditujukan ke satu target: pemain atau kelompok.");
+  }
 
   const cert = await prisma.$transaction(async (tx) => {
     const newCert = await tx.certificate.create({
@@ -77,8 +83,8 @@ export async function getPlayerCertificatesAction(playerId: string) {
   const session = await requireAuth();
   const { role: userRole, id: userId } = session.user;
 
-  const player = await prisma.player.findUnique({
-    where: { id: playerId },
+  const player = await prisma.player.findFirst({
+    where: { id: playerId, isDeleted: false },
   });
 
   if (!player) return [];
@@ -90,12 +96,8 @@ export async function getPlayerCertificatesAction(playerId: string) {
 
   return await prisma.certificate.findMany({
     where: {
-      OR: [
-        { playerId },
-        ...(player.groupId ? [{ groupId: player.groupId }] : []),
-      ],
+      OR: [{ playerId }, ...(player.groupId ? [{ groupId: player.groupId }] : [])],
     },
     orderBy: { uploadedAt: "desc" },
   });
 }
-

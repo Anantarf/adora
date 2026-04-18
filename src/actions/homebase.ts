@@ -3,6 +3,7 @@
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 import { getHomebases, getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase.service";
 import { HOMEBASE_CACHE_TTL } from "@/lib/constants";
+import { requireAdmin } from "@/lib/server-auth";
 
 const getCachedPublicHomebases = unstable_cache(async () => getHomebases(), ["public-homebases"], { revalidate: HOMEBASE_CACHE_TTL, tags: ["public-homebases"] });
 
@@ -26,18 +27,20 @@ export async function getPublicHomebaseById(id: string) {
 
 export async function updateGroupToHomebase(groupId: string, homebaseId: string) {
   try {
+    await requireAdmin();
     const result = await updateGroupHomebase(groupId, homebaseId);
     revalidatePath("/dashboard/groups");
     revalidateTag("public-homebases", "max");
-    return { success: true, data: result };
+    return result;
   } catch (error) {
     console.error("Failed to update group homebase:", error);
-    return { success: false, error: "Failed to update group homebase" };
+    throw new Error("Gagal memperbarui homebase kelompok.");
   }
 }
 
 export async function createEventWithHomebase(title: string, date: Date, homebaseId: string, groupId?: string, type?: string, description?: string) {
   try {
+    await requireAdmin();
     const result = await createHomebaseEvent({
       title,
       date,
@@ -48,9 +51,9 @@ export async function createEventWithHomebase(title: string, date: Date, homebas
     });
     revalidatePath("/dashboard/schedule");
     revalidateTag("public-homebases", "max");
-    return { success: true, data: result };
+    return result;
   } catch (error) {
     console.error("Failed to create event:", error);
-    return { success: false, error: "Failed to create event" };
+    throw new Error("Gagal membuat agenda dari homebase.");
   }
 }

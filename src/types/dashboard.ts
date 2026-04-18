@@ -90,8 +90,18 @@ export interface AttendanceStats {
 export interface Player {
   id: string;
   name: string;
+  placeOfBirth?: string | null;
+  gender?: string | null;
+  weight?: string | null;
+  height?: string | null;
   schoolOrigin: string | null;
+  address?: string | null;
+  email?: string | null;
   phoneNumber: string | null;
+  medicalHistory?: string | null;
+  parentName?: string | null;
+  parentAddress?: string | null;
+  parentPhoneNumber?: string | null;
   dateOfBirth: Date | string;
   groupId: string | null;
   parentId: string | null;

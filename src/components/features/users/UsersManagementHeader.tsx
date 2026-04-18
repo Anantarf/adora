@@ -15,7 +15,7 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
     <>
       <section className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 px-1">
         <div className="space-y-1">
-          <h1 className="text-5xl md:text-6xl font-heading uppercase tracking-widest text-foreground">Akses Akun</h1>
+          <h1 className="text-4xl font-heading uppercase tracking-widest text-foreground">Akses Akun</h1>
           <p className="text-muted-foreground font-medium max-w-lg border-l-2 border-primary/40 pl-4 py-1 tracking-wide">Manajemen hak akses akun orang tua.</p>
         </div>
         <AddUserDialog />

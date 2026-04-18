@@ -183,7 +183,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={HOMEBASE_NONE} className="text-muted-foreground">
-                    — Tanpa Homebase —
+                    — Tanpa Lokasi Latihan —
                   </SelectItem>
                   {homebases.map((hb) => (
                     <SelectItem key={hb.id} value={hb.id}>

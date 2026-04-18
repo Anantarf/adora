@@ -10,8 +10,18 @@ import { z } from "zod";
 const batchPlayerSchema = z.object({
   name: z.string().trim().min(2),
   dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  placeOfBirth: z.string().trim().optional(),
+  gender: z.string().trim().optional(),
+  weight: z.string().trim().optional(),
+  height: z.string().trim().optional(),
   schoolOrigin: z.string().trim().optional(),
+  address: z.string().trim().optional(),
+  email: z.string().trim().optional(),
   phoneNumber: z.string().trim().optional(),
+  medicalHistory: z.string().trim().optional(),
+  parentName: z.string().trim().optional(),
+  parentAddress: z.string().trim().optional(),
+  parentPhoneNumber: z.string().trim().optional(),
   groupId: z.string().trim().min(1),
   parentId: z.string().trim().optional(),
 });
@@ -40,15 +50,42 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
 }
 
 // 2. Tambah pemain baru (Create)
-export async function addPlayerAction(data: { name: string; dateOfBirth: string; schoolOrigin?: string; phoneNumber?: string; groupId: string; parentId?: string }) {
+export async function addPlayerAction(data: {
+  name: string;
+  dateOfBirth: string;
+  placeOfBirth?: string;
+  gender?: string;
+  weight?: string;
+  height?: string;
+  schoolOrigin?: string;
+  address?: string;
+  email?: string;
+  phoneNumber?: string;
+  medicalHistory?: string;
+  parentName?: string;
+  parentAddress?: string;
+  parentPhoneNumber?: string;
+  groupId: string;
+  parentId?: string;
+}) {
   await requireAdmin();
   const player = await prisma.$transaction(async (tx) => {
     const p = await tx.player.create({
       data: {
         name: data.name,
         dateOfBirth: toJakartaDate(data.dateOfBirth),
+        placeOfBirth: data.placeOfBirth || undefined,
+        gender: data.gender || undefined,
+        weight: data.weight || undefined,
+        height: data.height || undefined,
         schoolOrigin: data.schoolOrigin || undefined,
+        address: data.address || undefined,
+        email: data.email || undefined,
         phoneNumber: data.phoneNumber || undefined,
+        medicalHistory: data.medicalHistory || undefined,
+        parentName: data.parentName || undefined,
+        parentAddress: data.parentAddress || undefined,
+        parentPhoneNumber: data.parentPhoneNumber || undefined,
         groupId: data.groupId,
         parentId: data.parentId || undefined,
         updatedAt: new Date(),
@@ -68,8 +105,18 @@ export async function addBatchPlayersAction(
   playersData: Array<{
     name: string;
     dateOfBirth: string;
+    placeOfBirth?: string;
+    gender?: string;
+    weight?: string;
+    height?: string;
     schoolOrigin?: string;
+    address?: string;
+    email?: string;
     phoneNumber?: string;
+    medicalHistory?: string;
+    parentName?: string;
+    parentAddress?: string;
+    parentPhoneNumber?: string;
     groupId: string;
     parentId?: string;
   }>,
@@ -124,8 +171,18 @@ export async function addBatchPlayersAction(
   const formattedData = dedupedPayload.map((data) => ({
     name: data.name.trim(),
     dateOfBirth: toJakartaDate(data.dateOfBirth),
+    placeOfBirth: data.placeOfBirth?.trim() || undefined,
+    gender: data.gender?.trim() || undefined,
+    weight: data.weight?.trim() || undefined,
+    height: data.height?.trim() || undefined,
     schoolOrigin: data.schoolOrigin?.trim() || undefined,
+    address: data.address?.trim() || undefined,
+    email: data.email?.trim() || undefined,
     phoneNumber: data.phoneNumber?.trim() || undefined,
+    medicalHistory: data.medicalHistory?.trim() || undefined,
+    parentName: data.parentName?.trim() || undefined,
+    parentAddress: data.parentAddress?.trim() || undefined,
+    parentPhoneNumber: data.parentPhoneNumber?.trim() || undefined,
     groupId: data.groupId,
     parentId: data.parentId?.trim() || undefined,
     updatedAt: new Date(),
@@ -156,8 +213,18 @@ export async function updatePlayerAction(
   data: {
     name?: string;
     dateOfBirth?: string;
+    placeOfBirth?: string;
+    gender?: string;
+    weight?: string;
+    height?: string;
     schoolOrigin?: string;
+    address?: string;
+    email?: string;
     phoneNumber?: string;
+    medicalHistory?: string;
+    parentName?: string;
+    parentAddress?: string;
+    parentPhoneNumber?: string;
     groupId?: string;
   },
 ) {
@@ -169,8 +236,18 @@ export async function updatePlayerAction(
       data: {
         name: data.name,
         dateOfBirth: data.dateOfBirth ? toJakartaDate(data.dateOfBirth) : undefined,
+        placeOfBirth: data.placeOfBirth,
+        gender: data.gender,
+        weight: data.weight,
+        height: data.height,
         schoolOrigin: data.schoolOrigin,
+        address: data.address,
+        email: data.email,
         phoneNumber: data.phoneNumber,
+        medicalHistory: data.medicalHistory,
+        parentName: data.parentName,
+        parentAddress: data.parentAddress,
+        parentPhoneNumber: data.parentPhoneNumber,
         groupId: data.groupId,
         updatedAt: new Date(),
       },

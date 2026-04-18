@@ -39,7 +39,7 @@ export function UserAccountCard({ user, onReset, onDelete }: UserAccountCardProp
       <div className="space-y-3 mb-8">
         <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
           <Mail className="size-3.5 text-primary/40" />
-          <span className="truncate">{user.email || "- No Email -"}</span>
+          <span className="truncate">{user.email || "- Tidak ada email -"}</span>
         </div>
         <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
           <Baby className="size-3.5 text-primary/40" />
@@ -56,7 +56,7 @@ export function UserAccountCard({ user, onReset, onDelete }: UserAccountCardProp
           size="sm"
           className="flex-1 h-9 rounded-xl text-[10px] uppercase font-black tracking-widest gap-2 hover:bg-secondary/10 hover:text-secondary group-hover:border-border/50 transition-all border border-transparent"
         >
-          <KeyRound className="size-3.5" /> Reset Pass
+          <KeyRound className="size-3.5" /> Atur Ulang Sandi
         </Button>
         <Button onClick={() => onDelete(user.id)} variant="ghost" size="sm" className="shrink-0 size-9 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors">
           <Trash2 className="size-4" />

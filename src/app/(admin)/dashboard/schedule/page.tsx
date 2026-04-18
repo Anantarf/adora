@@ -347,15 +347,11 @@ export default function SchedulePage() {
                     }}
                     className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all"
                   />
-                  {errors.time ? (
-                    <p className="text-[10px] text-destructive">{errors.time.message}</p>
-                  ) : (
-                    <p className="text-[10px] text-muted-foreground/40">Format 24 jam, cth: 08:00</p>
-                  )}
+                  {errors.time ? <p className="text-[10px] text-destructive">{errors.time.message}</p> : <p className="text-[10px] text-muted-foreground/40">Format 24 jam, Contoh: 08:00</p>}
                 </div>
               </div>
 
-              {/* Baris 3: Lokasi + Homebase + Submit */}
+              {/* Baris 3: Lokasi + Lokasi Latihan + Submit */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div className="space-y-1">
                   <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi</label>
@@ -363,10 +359,10 @@ export default function SchedulePage() {
                 </div>
                 {homebases.length > 0 && (
                   <div className="space-y-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Homebase</label>
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi Latihan</label>
                     <Select value={homebaseId ?? ""} onValueChange={(val: string | null) => setValue("homebaseId", val || undefined)}>
                       <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
-                        <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua Homebase"}</SelectValue>
+                        <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua Lokasi Latihan"}</SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {homebases.map((hb) => (

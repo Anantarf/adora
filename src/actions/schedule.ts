@@ -4,8 +4,13 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { revalidatePath } from "next/cache";
 import { ScheduleEvent } from "@/types/dashboard";
-import { getJakartaToday } from "@/lib/date-utils";
+import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
+
+function parseEventDate(input: string): Date {
+  // Preserve explicit time payloads; fallback to Jakarta midnight for date-only strings.
+  return input.includes("T") ? new Date(input) : toJakartaDate(input);
+}
 
 export async function getEventsAction() {
   try {
@@ -24,7 +29,7 @@ export async function getEventsAction() {
     })) as ScheduleEvent[];
   } catch (error) {
     console.error("Error fetching events:", error);
-    return { success: false, error: "Gagal mengambil jadwal kegiatan" };
+    throw new Error("Gagal mengambil jadwal kegiatan");
   }
 }
 
@@ -63,7 +68,7 @@ export async function createEventAction(data: { title: string; description?: str
         data: {
           title: data.title,
           description: data.description || null,
-          date: new Date(data.date),
+          date: parseEventDate(data.date),
           type: data.type,
           location: data.location || null,
           homebaseId: data.homebaseId || null,
@@ -87,7 +92,7 @@ export async function createEventAction(data: { title: string; description?: str
     return { success: true };
   } catch (error) {
     console.error("Error creating event:", error);
-    return { success: false, error: "Gagal membuat agenda baru" };
+    throw new Error("Gagal membuat agenda baru");
   }
 }
 
@@ -100,7 +105,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
         data: {
           title: data.title,
           description: data.description || null,
-          date: new Date(data.date),
+          date: parseEventDate(data.date),
           type: data.type,
           location: data.location || null,
           homebaseId: data.homebaseId || null,
@@ -127,7 +132,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
     return { success: true };
   } catch (error) {
     console.error("Error updating event:", error);
-    return { success: false, error: "Gagal mengubah jadwal" };
+    throw new Error("Gagal mengubah jadwal");
   }
 }
 
@@ -142,7 +147,7 @@ export async function deleteEventAction(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting event:", error);
-    return { success: false, error: "Gagal menghapus jadwal" };
+    throw new Error("Gagal menghapus jadwal");
   }
 }
 
