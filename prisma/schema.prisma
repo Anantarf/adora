@@ -139,6 +139,7 @@ model player {
   name                String
   dateOfBirth         DateTime
   schoolOrigin        String?
+  phoneNumber         String?
   photoUrl            String?
   isDeleted           Boolean       @default(false)
   groupId             String?

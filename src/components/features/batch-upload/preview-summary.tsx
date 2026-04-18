@@ -1,0 +1,52 @@
+import { AlertTriangle, CheckCircle2 } from "lucide-react";
+import type { UploadRowError } from "@/components/features/batch-upload/excel-utils";
+
+type BatchUploadPreviewSummaryProps = {
+  previewStats: { total: number; valid: number; invalid: number } | null;
+  previewErrors: UploadRowError[];
+};
+
+export function BatchUploadPreviewSummary({ previewStats, previewErrors }: BatchUploadPreviewSummaryProps) {
+  if (!previewStats) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-xl border border-border/50 p-3 bg-background/40 space-y-2">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <CheckCircle2 className="size-4 text-primary" />
+        Hasil Cek Data
+      </div>
+      <div className="grid grid-cols-3 gap-2 text-xs">
+        <div className="rounded-md border border-border/40 px-2 py-1.5">
+          <p className="text-muted-foreground">Total</p>
+          <p className="font-semibold">{previewStats.total}</p>
+        </div>
+        <div className="rounded-md border border-border/40 px-2 py-1.5">
+          <p className="text-muted-foreground">Siap Disimpan</p>
+          <p className="font-semibold text-primary">{previewStats.valid}</p>
+        </div>
+        <div className="rounded-md border border-border/40 px-2 py-1.5">
+          <p className="text-muted-foreground">Perlu Diperbaiki</p>
+          <p className="font-semibold text-destructive">{previewStats.invalid}</p>
+        </div>
+      </div>
+
+      {previewErrors.length > 0 && (
+        <div className="rounded-md border border-destructive/30 bg-destructive/5 p-2.5 space-y-1.5">
+          <div className="flex items-center gap-2 text-xs font-semibold text-destructive">
+            <AlertTriangle className="size-4" />
+            Contoh Data yang Perlu Diperbaiki
+          </div>
+          <ul className="space-y-1">
+            {previewErrors.map((error) => (
+              <li key={`${error.rowNumber}-${error.message}`} className="text-xs text-destructive/90">
+                Baris {error.rowNumber}: {error.message}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}

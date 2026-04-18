@@ -91,6 +91,7 @@ export interface Player {
   id: string;
   name: string;
   schoolOrigin: string | null;
+  phoneNumber: string | null;
   dateOfBirth: Date | string;
   groupId: string | null;
   parentId: string | null;
