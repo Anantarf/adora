@@ -9,15 +9,21 @@ import {
   deletePeriodAction,
 } from "@/actions/evaluation-periods";
 
+type PeriodsList = Awaited<ReturnType<typeof getPeriodsAction>>;
+type ActivePeriod = Awaited<ReturnType<typeof getActivePeriodAction>>;
+type CreatePeriodInput = Parameters<typeof createPeriodAction>[0];
+type SetActivePeriodInput = Parameters<typeof setActivePeriodAction>[0];
+type DeletePeriodInput = Parameters<typeof deletePeriodAction>[0];
+
 export const usePeriods = () =>
-  useQuery({
+  useQuery<PeriodsList>({
     queryKey: ["evaluation-periods"],
     queryFn: getPeriodsAction,
     staleTime: 1000 * 60 * 5,
   });
 
 export const useActivePeriod = () =>
-  useQuery({
+  useQuery<ActivePeriod>({
     queryKey: ["evaluation-periods", "active"],
     queryFn: getActivePeriodAction,
     staleTime: 1000 * 60 * 5,
@@ -26,7 +32,7 @@ export const useActivePeriod = () =>
 export const useCreatePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => createPeriodAction(data).then(unwrapAction),
+    mutationFn: (data: CreatePeriodInput) => createPeriodAction(data).then(unwrapAction),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["evaluation-periods"] }),
   });
 };
@@ -34,7 +40,7 @@ export const useCreatePeriod = () => {
 export const useSetActivePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => setActivePeriodAction(data).then(unwrapAction),
+    mutationFn: (data: SetActivePeriodInput) => setActivePeriodAction(data).then(unwrapAction),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["evaluation-periods"] }),
   });
 };
@@ -42,7 +48,7 @@ export const useSetActivePeriod = () => {
 export const useDeletePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => deletePeriodAction(data).then(unwrapAction),
+    mutationFn: (data: DeletePeriodInput) => deletePeriodAction(data).then(unwrapAction),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["evaluation-periods"] }),
   });
 };

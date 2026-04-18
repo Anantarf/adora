@@ -84,7 +84,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
   return (
     <Dialog open={!!eventId} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl">
+      <DialogContent className="w-[98vw] sm:w-[97vw] lg:w-[96vw] xl:w-[94vw] max-w-none sm:max-w-none h-[92vh] p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-20 gap-3">
             <Loader2 className="size-8 animate-spin text-primary/50" />
@@ -110,7 +110,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                         <span className="opacity-30">•</span>
                         <div className="flex items-center gap-1.5">
                           <MapPin className="size-3.5" />
-                          <span className="truncate max-w-[200px]">{event.location}</span>
+                          <span className="truncate max-w-50">{event.location}</span>
                         </div>
                       </>
                     )}
@@ -133,7 +133,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
             </div>
 
             {/* Main Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-6 flex-1 min-h-0 flex flex-col gap-6 overflow-hidden">
               {/* Quick Actions */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/20 border border-muted/50">
                 <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
@@ -156,16 +156,16 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               </div>
 
               {/* Player List */}
-              <div className="space-y-3">
+              <div className="space-y-3 flex-1 min-h-0 flex flex-col">
                 <div className="flex items-center justify-between px-1 mb-2">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Daftar Pemain ({event.attendances.length})</span>
                 </div>
 
-                <div className="grid gap-2">
+                <div className="grid gap-2 overflow-y-auto overflow-x-hidden pr-1">
                   {event.attendances.map((a) => {
                     const currentStatus = statuses[a.playerId] ?? "HADIR";
                     return (
-                      <div key={a.playerId} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors gap-4">
+                      <div key={a.playerId} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors gap-3 sm:gap-4 min-w-0">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-heading text-sm shrink-0">{a.player.name.charAt(0).toUpperCase()}</div>
                           <div className="flex flex-col min-w-0">
@@ -175,7 +175,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                         </div>
 
                         <Select value={currentStatus} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
-                          <SelectTrigger className={`w-[110px] h-9 text-[10px] font-bold uppercase tracking-widest ${STATUS_STYLE[currentStatus].badge} transition-colors shrink-0`}>
+                          <SelectTrigger className={`w-full sm:w-27.5 h-9 text-[10px] font-bold uppercase tracking-widest ${STATUS_STYLE[currentStatus].badge} transition-colors shrink-0`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-border/50">

@@ -5,6 +5,9 @@ import { getAttendancesAction } from "@/actions/dashboard";
 import { submitAttendanceAction } from "@/actions/stats";
 import { type AttendanceStatus } from "@/types/dashboard";
 
+type AttendancesList = Awaited<ReturnType<typeof getAttendancesAction>>;
+type SubmitAttendanceInput = Parameters<typeof submitAttendanceAction>[0];
+
 export type AttendanceInput = {
   playerId: string;
   status: AttendanceStatus;
@@ -13,7 +16,7 @@ export type AttendanceInput = {
 
 // Hook (GET): Tarik presensi tersimpan via Server Action
 export const useAttendances = (date: string, groupId?: string) => {
-  return useQuery({
+  return useQuery<AttendancesList>({
     queryKey: ["attendances", date, groupId],
     queryFn: () => getAttendancesAction(date, groupId),
     enabled: !!date,
@@ -25,7 +28,7 @@ export const useAddAttendances = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: any) => submitAttendanceAction(data).then(unwrapAction),
+    mutationFn: (data: SubmitAttendanceInput) => submitAttendanceAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["attendances"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });

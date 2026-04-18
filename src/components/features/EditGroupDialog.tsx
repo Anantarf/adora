@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { buildGroupDescriptionPayload, parseGroupMetaDescription } from "@/lib/group-meta";
 import { Edit2, Loader2 } from "lucide-react";
 
 const HOMEBASE_NONE = "__none__";
@@ -56,23 +57,11 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
 
   useEffect(() => {
     if (open) {
-      let isK = false,
-        tK = "",
-        isS = false,
-        sL = "";
-      try {
-        if (group.description?.startsWith("{")) {
-          const parsed = JSON.parse(group.description);
-          if (parsed.targetKu) {
-            isK = true;
-            tK = String(parsed.targetKu);
-          }
-          if (parsed.schoolLevel) {
-            isS = true;
-            sL = parsed.schoolLevel;
-          }
-        }
-      } catch (e) {}
+      const parsed = parseGroupMetaDescription(group.description);
+      const isK = typeof parsed.targetKu === "number";
+      const tK = parsed.targetKu ? String(parsed.targetKu) : "";
+      const isS = typeof parsed.schoolLevel === "string";
+      const sL = parsed.schoolLevel || "";
 
       setIsKu(isK);
       setTargetKu(tK);
@@ -98,10 +87,10 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
     }
 
     try {
-      const configObj: Record<string, any> = {};
-      if (isKu && targetKu) configObj.targetKu = parseInt(targetKu, 10);
-      if (isSchool && schoolLevel) configObj.schoolLevel = schoolLevel;
-      const descPayload = Object.keys(configObj).length > 0 ? JSON.stringify(configObj) : "";
+      const descPayload = buildGroupDescriptionPayload({
+        targetKu: isKu && targetKu ? parseInt(targetKu, 10) : undefined,
+        schoolLevel: isSchool && schoolLevel ? schoolLevel : undefined,
+      });
 
       await updateGroup({
         id: group.id,

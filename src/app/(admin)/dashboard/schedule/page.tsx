@@ -22,7 +22,7 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { toast } from "sonner";
 import { EVENT_TYPES, DEFAULT_EVENT_TYPE, getEventConfig } from "@/lib/config/events";
-import { combineDateAndTime, toYYYYMMDD, getJakartaToday, toJakartaDate, getCountdownLabel } from "@/lib/date-utils";
+import { combineDateAndTime, toYYYYMMDD, getJakartaToday, getCountdownLabel } from "@/lib/date-utils";
 
 const CalendarView = dynamic(() => import("@/components/features/calendar-view").then((mod) => mod.CalendarView), {
   ssr: false,
@@ -480,7 +480,6 @@ export default function SchedulePage() {
                           onClick={(e) => {
                             e.stopPropagation();
                             handleEditEvent(ev);
-                            setDate(new Date(ev.date));
                           }}
                           className="size-6 text-primary/40 hover:text-primary hover:bg-primary/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         >

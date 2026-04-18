@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Search, Edit2, Trash2, Users, FolderPlus, School, Eye, UserPlus } from "lucide-react";
+import { Loader2, Search, Edit2, Trash2, Users, FolderPlus, Eye } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
@@ -14,6 +14,7 @@ import { AddGroupDialog } from "@/components/features/AddGroupDialog";
 import { EditGroupDialog } from "@/components/features/EditGroupDialog";
 import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
 import { ViewPlayerDialog } from "@/components/features/ViewPlayerDialog";
+import { getGroupDisplayDescription } from "@/lib/group-meta";
 import { motion, AnimatePresence } from "framer-motion";
 
 type UIState =
@@ -30,7 +31,6 @@ export default function PlayersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebounce(searchQuery, 300);
   const [uiState, setUiState] = useState<UIState>(null);
-  const tabsRef = useRef<HTMLDivElement>(null);
 
   const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId || "all", debouncedSearch, !!selectedGroupId);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
@@ -46,23 +46,6 @@ export default function PlayersPage() {
   const filteredPlayers = players || [];
 
   const totalPlayers = useMemo(() => groups?.reduce((sum: number, g: Group) => sum + (g._count?.player || 0), 0) ?? 0, [groups]);
-
-  function parseGroupMeta(group: Group): { isSchoolGroup: boolean; displayDesc: string } {
-    let isSchoolGroup = false;
-    let displayDesc = group.description || "";
-    try {
-      if (group.description?.startsWith("{")) {
-        const parsed = JSON.parse(group.description);
-        if (parsed.schoolLevel) {
-          isSchoolGroup = true;
-          displayDesc = parsed.schoolLevel;
-        } else if (parsed.targetKu) {
-          displayDesc = `${parsed.targetKu} Tahun`;
-        }
-      }
-    } catch {}
-    return { isSchoolGroup, displayDesc };
-  }
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
@@ -131,7 +114,7 @@ export default function PlayersPage() {
           </Button>
         </div>
       ) : (
-        <div ref={tabsRef} className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
           {groups?.map((group: Group) => {
             const isActive = selectedGroupId === group.id;
             return (
@@ -165,7 +148,7 @@ export default function PlayersPage() {
               <div className="flex items-center justify-between gap-4 flex-wrap bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <div className="flex flex-col">
                   <h2 className="font-heading text-xl uppercase tracking-widest text-foreground">{selectedGroup.name}</h2>
-                  <p className="text-xs text-muted-foreground">{parseGroupMeta(selectedGroup).displayDesc || "Grup Latihan"}</p>
+                  <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup.description) || "Grup Latihan"}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="h-8 font-bold uppercase tracking-widest text-[10px]" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup })}>

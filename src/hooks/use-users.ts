@@ -11,13 +11,18 @@ import {
 } from "@/actions/users";
 import { toast } from "sonner";
 
+type UsersList = Awaited<ReturnType<typeof getUsersAction>>;
+type CreateUserInput = Parameters<typeof createUserAction>[0];
+type DeleteUserInput = Parameters<typeof deleteUserAction>[0];
+type UpdateSelfInput = Parameters<typeof updateSelfAction>[0];
+
 /**
  * ADORA Basketball - Global User Hooks (Admin Only)
  * Leverages React Query 5 for caching and optimistic updates.
  */
 
 export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
-  return useQuery({
+  return useQuery<UsersList>({
     queryKey: ["users", role],
     queryFn: () => getUsersAction(role),
   });
@@ -26,7 +31,7 @@ export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
 export const useAddUser = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (data: any) => createUserAction(data).then(unwrapAction),
+    mutationFn: (data: CreateUserInput) => createUserAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       toast.success("Akun orang tua berhasil dibuat!");
@@ -66,7 +71,7 @@ export const useResetPassword = () => {
 export const useDeleteUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
-      mutationFn: (data: any) => deleteUserAction(data).then(unwrapAction),
+  mutationFn: (data: DeleteUserInput) => deleteUserAction(data).then(unwrapAction),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ["users"] });
         toast.success("Akun berhasil dihapus.");
@@ -79,7 +84,7 @@ export const useDeleteUser = () => {
 
 export const useUpdateSelf = () => {
   return useMutation({
-    mutationFn: (data: any) => updateSelfAction(data).then(unwrapAction),
+    mutationFn: (data: UpdateSelfInput) => updateSelfAction(data).then(unwrapAction),
     onSuccess: () => {
       toast.success("Profil Anda berhasil diperbarui!");
     },

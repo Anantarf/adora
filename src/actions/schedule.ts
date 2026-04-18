@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { revalidatePath } from "next/cache";
 import { ScheduleEvent } from "@/types/dashboard";
-import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
+import { getJakartaToday } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 
 export async function getEventsAction() {
