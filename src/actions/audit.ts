@@ -42,17 +42,27 @@ export async function getAuditLogsAction(options?: { take?: number; cursor?: str
 }
 
 // 2. Log an audit action — Internal function for transactions
-export async function createAuditLog(tx: Omit<Prisma.TransactionClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">, action: string, targetTable: string, recordId?: string) {
-  const session = await getServerSession(authOptions);
-  const userId = (session?.user as { id?: string })?.id || null;
+// userId harus diambil SEBELUM memulai transaksi agar tidak memperlama TX
+export async function createAuditLog(
+  tx: Omit<Prisma.TransactionClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">,
+  action: string,
+  targetTable: string,
+  recordId?: string,
+  userId?: string | null,
+) {
+  // Fallback ke session hanya jika userId tidak diberikan (backward compat sementara migrasi)
+  const resolvedUserId =
+    userId !== undefined
+      ? userId
+      : (((await getServerSession(authOptions))?.user as { id?: string } | undefined)?.id ?? null);
 
   return await tx.auditlog.create({
     data: {
       id: crypto.randomUUID(),
       action,
       targetTable,
-      recordId: recordId || null,
-      userId,
+      recordId: recordId ?? null,
+      userId: resolvedUserId,
     },
   });
 }
@@ -60,9 +70,10 @@ export async function createAuditLog(tx: Omit<Prisma.TransactionClient, "$connec
 // 3. Log an audit action — Public Server Action
 export async function createAuditLogAction(action: string, targetTable: string, recordId?: string) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
+    const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
-      await createAuditLog(tx, action, targetTable, recordId);
+      await createAuditLog(tx, action, targetTable, recordId, userId);
     });
   } catch (e) {
     console.error("[AUDIT_LOG_ERROR]:", e);

@@ -1,6 +1,7 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getGroupsAction, addGroupAction, updateGroupAction, deleteGroupAction } from "@/actions/groups";
+import { QUERY_KEYS } from "@/lib/constants";
 
 type GroupsList = Awaited<ReturnType<typeof getGroupsAction>>;
 type AddGroupInput = Parameters<typeof addGroupAction>[0];
@@ -21,7 +22,7 @@ export type Group = {
 // Hook (GET): Tarik data Grup Latihan via Server Action
 export const useGroups = () => {
   return useQuery<GroupsList>({
-    queryKey: ["groups"],
+    queryKey: QUERY_KEYS.GROUPS,
     queryFn: () => getGroupsAction(),
     staleTime: 1000 * 60 * 10, // 10 mins cache
   });

@@ -3,18 +3,12 @@ import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { LRUCache } from "lru-cache";
 
-const LOGIN_WINDOW_MS = 60 * 1000;
-const MAX_LOGIN_ATTEMPTS_PER_MINUTE = process.env.NODE_ENV === "development" ? 20 : 5;
+const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const MAX_API_REQUESTS_PER_MINUTE = 120;
-
-const loginRateLimit = new LRUCache<string, number>({
-  max: 1000,
-  ttl: LOGIN_WINDOW_MS,
-});
 
 const apiRateLimit = new LRUCache<string, number>({
   max: 2000,
-  ttl: LOGIN_WINDOW_MS,
+  ttl: RATE_LIMIT_WINDOW_MS,
 });
 
 function getClientIp(request: NextRequest) {
@@ -36,22 +30,11 @@ function getClientIp(request: NextRequest) {
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const ip = getClientIp(request);
-  const isLoginAction = request.method === "POST" && pathname.startsWith("/api/auth/callback/credentials");
   const isApiRoute = pathname.startsWith("/api/");
 
   // --- 0. LAYER RATE LIMITING ---
-  if (isLoginAction) {
-    const loginAttemptCount = (loginRateLimit.get(ip) ?? 0) + 1;
-    loginRateLimit.set(ip, loginAttemptCount);
-
-    if (loginAttemptCount > MAX_LOGIN_ATTEMPTS_PER_MINUTE) {
-      return new NextResponse("Terlalu banyak percobaan login. Harap tunggu 1 menit.", {
-        status: 429,
-        headers: { "Content-Type": "text/plain" },
-      });
-    }
-  }
-
+  // Login failure rate limiting is handled in src/lib/auth.ts (authorize fn)
+  // to only count actual failed attempts, not successful logins.
   if (isApiRoute) {
     const apiRequestCount = (apiRateLimit.get(ip) ?? 0) + 1;
     apiRateLimit.set(ip, apiRequestCount);
@@ -83,7 +66,10 @@ export async function proxy(request: NextRequest) {
     }
   })();
   if (isCrossOrigin) {
-    if (pathname.startsWith("/api/")) {
+    // Block all cross-origin non-safe requests: covers /api/ and Server Actions
+    // (Server Actions are POSTed to page routes with Next-Action header)
+    const isReadOnly = request.method === "GET" || request.method === "HEAD";
+    if (!isReadOnly) {
       return new NextResponse(JSON.stringify({ error: "Terdeteksi Akses Lintas Asal (CORS) yang Tidak Diizinkan." }), { status: 403, headers: { "Content-Type": "application/json" } });
     }
   }

@@ -1,20 +1,19 @@
 "use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { getHomebases, getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase.service";
+import { getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase.service";
+import { prisma } from "@/lib/prisma";
 import { HOMEBASE_CACHE_TTL } from "@/lib/constants";
 import { requireAdmin } from "@/lib/server-auth";
 
-const getCachedPublicHomebases = unstable_cache(async () => getHomebases(), ["public-homebases"], { revalidate: HOMEBASE_CACHE_TTL, tags: ["public-homebases"] });
-
-export async function getPublicHomebases() {
-  try {
-    return await getCachedPublicHomebases();
-  } catch (error) {
-    console.error("Failed to fetch homebases:", error);
+export const getPublicHomebases = unstable_cache(
+  () => prisma.homebase.findMany({ orderBy: { name: "asc" } }).catch((err) => {
+    console.error("Failed to fetch homebases:", err);
     return [];
-  }
-}
+  }),
+  ["public-homebases"],
+  { revalidate: HOMEBASE_CACHE_TTL, tags: ["public-homebases"] },
+);
 
 export async function getPublicHomebaseById(id: string) {
   try {

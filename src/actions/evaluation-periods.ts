@@ -6,12 +6,11 @@ import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import type { EvaluationPeriod } from "@/types/dashboard";
+
 // 1. List all periods
 export async function getPeriodsAction(): Promise<EvaluationPeriod[]> {
   await requireAdmin();
-  return prisma.evaluationPeriod.findMany({
-    orderBy: { startDate: "desc" },
-  });
+  return prisma.evaluationPeriod.findMany({ orderBy: { startDate: "desc" } });
 }
 
 // 2. Get active period (if any)
@@ -22,13 +21,13 @@ export async function getActivePeriodAction(): Promise<EvaluationPeriod | null> 
 
 // 3. Create period
 export async function createPeriodAction(data: { name: string; startDate: string; endDate: string; setActive?: boolean }) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   const period = await prisma.$transaction(async (tx) => {
     if (data.setActive) {
       await tx.evaluationPeriod.updateMany({ where: { isActive: true }, data: { isActive: false } });
     }
-
     const p = await tx.evaluationPeriod.create({
       data: {
         name: data.name,
@@ -37,8 +36,7 @@ export async function createPeriodAction(data: { name: string; startDate: string
         isActive: data.setActive ?? false,
       },
     });
-
-    await createAuditLog(tx, "CREATE", "evaluationPeriod", p.id);
+    await createAuditLog(tx, "CREATE", "evaluationPeriod", p.id, userId);
     return p;
   });
 
@@ -48,12 +46,13 @@ export async function createPeriodAction(data: { name: string; startDate: string
 
 // 4. Set active period (deactivates others)
 export async function setActivePeriodAction(periodId: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   await prisma.$transaction(async (tx) => {
     await tx.evaluationPeriod.updateMany({ where: { isActive: true }, data: { isActive: false } });
     await tx.evaluationPeriod.update({ where: { id: periodId }, data: { isActive: true } });
-    await createAuditLog(tx, "SET_ACTIVE", "evaluationPeriod", periodId);
+    await createAuditLog(tx, "SET_ACTIVE", "evaluationPeriod", periodId, userId);
   });
 
   revalidatePath("/dashboard/statistics");
@@ -61,16 +60,16 @@ export async function setActivePeriodAction(periodId: string) {
 
 // 5. Delete period (hanya jika belum ada statistic terkait)
 export async function deletePeriodAction(periodId: string) {
-  await requireAdmin();
-
-  const statCount = await prisma.statistic.count({ where: { periodId } });
-  if (statCount > 0) {
-    throw new Error(`Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.`);
-  }
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   await prisma.$transaction(async (tx) => {
+    const statCount = await tx.statistic.count({ where: { periodId } });
+    if (statCount > 0) {
+      throw new Error(`Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.`);
+    }
     await tx.evaluationPeriod.delete({ where: { id: periodId } });
-    await createAuditLog(tx, "DELETE", "evaluationPeriod", periodId);
+    await createAuditLog(tx, "DELETE", "evaluationPeriod", periodId, userId);
   });
 
   revalidatePath("/dashboard/statistics");

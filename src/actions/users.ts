@@ -7,11 +7,6 @@ import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcrypt";
 import { revalidatePath } from "next/cache";
 
-/**
- * ADORA Basketball - Unified User/Account Management
- * Security-hardened for Admin operations.
- */
-
 // 1. List users (Admin only) - Focused on PARENT role by default
 export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
   await requireAdmin();
@@ -35,13 +30,10 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
 
 // 2. Create New Parent Account
 export async function createUserAction(data: { username: string; name: string; email?: string; password?: string }) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
-  // Validate existence
-  const existing = await prisma.user.findUnique({
-    where: { username: data.username },
-  });
-
+  const existing = await prisma.user.findUnique({ where: { username: data.username } });
   if (existing) {
     throw new Error("Username sudah digunakan oleh akun lain.");
   }
@@ -62,8 +54,7 @@ export async function createUserAction(data: { username: string; name: string; e
         role: "PARENT",
       },
     });
-
-    await createAuditLog(tx, "CREATE", "user", newUser.id);
+    await createAuditLog(tx, "CREATE", "user", newUser.id, userId);
     return newUser;
   });
 
@@ -74,21 +65,14 @@ export async function createUserAction(data: { username: string; name: string; e
 // 3. Update User Profile (Admin manual update)
 export async function updateUserAction(
   id: string,
-  data: {
-    name?: string;
-    username?: string;
-    email?: string;
-  },
+  data: { name?: string; username?: string; email?: string },
 ) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   const updated = await prisma.$transaction(async (tx) => {
-    const res = await tx.user.update({
-      where: { id },
-      data: buildUpdateData(data),
-    });
-
-    await createAuditLog(tx, "UPDATE", "user", id);
+    const res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
+    await createAuditLog(tx, "UPDATE", "user", id, userId);
     return res;
   });
 
@@ -98,7 +82,9 @@ export async function updateUserAction(
 
 // 4. Reset User Password (Admin bypass)
 export async function resetPasswordAction(id: string, newPassword?: string) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
+
   const defaultPassword = process.env.DEFAULT_RESET_PASSWORD;
   const passwordToHash = newPassword || defaultPassword;
   if (!passwordToHash) {
@@ -107,12 +93,8 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
   await prisma.$transaction(async (tx) => {
-    await tx.user.update({
-      where: { id },
-      data: { password: hashedPassword },
-    });
-
-    await createAuditLog(tx, "RESET_PASSWORD", "user", id);
+    await tx.user.update({ where: { id }, data: { password: hashedPassword } });
+    await createAuditLog(tx, "RESET_PASSWORD", "user", id, userId);
   });
 
   return { message: "Password berhasil direset." };
@@ -120,22 +102,17 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
 
 // 5. Delete User (Account Termination) — Hardened with Restrict Check
 export async function deleteUserAction(id: string) {
-  await requireAdmin();
-
-  // Guard: Admin can't delete themselves (basic safety)
-  // Need current session in logic? Or just ID check if known.
-  // We check if the user has active players.
-  const playerCount = await prisma.player.count({
-    where: { parentId: id, isDeleted: false },
-  });
-
-  if (playerCount > 0) {
-    throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
-  }
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   await prisma.$transaction(async (tx) => {
-    // Audit before hard delete
-    await createAuditLog(tx, "DELETE", "user", id);
+    const playerCount = await tx.player.count({
+      where: { parentId: id, isDeleted: false },
+    });
+    if (playerCount > 0) {
+      throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
+    }
+    await createAuditLog(tx, "DELETE", "user", id, userId);
     await tx.user.delete({ where: { id } });
   });
 
@@ -146,7 +123,7 @@ export async function deleteUserAction(id: string) {
 // 6. Update SELF (Member/Parent updating their own data)
 export async function updateSelfAction(data: { name?: string; email?: string; password?: string }) {
   const session = await requireAuth();
-  const userId = session.user.id;
+  const userId = session.user.id ?? null;
 
   const result = await prisma.$transaction(async (tx) => {
     const updateData: Partial<{ name: string; email: string | null; password: string }> = {
@@ -155,12 +132,8 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
     };
     if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
 
-    const res = await tx.user.update({
-      where: { id: userId },
-      data: updateData,
-    });
-
-    await createAuditLog(tx, "UPDATE_SELF", "user", userId);
+    const res = await tx.user.update({ where: { id: userId! }, data: updateData });
+    await createAuditLog(tx, "UPDATE_SELF", "user", userId!, userId);
     return res;
   });
 

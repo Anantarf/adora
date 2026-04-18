@@ -7,14 +7,12 @@ import { z } from "zod";
 import { useUpdateGroup, type Group } from "@/hooks/use-groups";
 import { useHomebases } from "@/hooks/use-homebases";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { buildGroupDescriptionPayload, parseGroupMetaDescription } from "@/lib/group-meta";
-import { Edit2, Loader2 } from "lucide-react";
+import { GroupFormFields } from "@/components/features/GroupFormFields";
 
-const HOMEBASE_NONE = "__none__";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Edit2, Loader2 } from "lucide-react";
 
 const groupSchema = z.object({
   name: z.string().min(2, "Nama Kelompok minimal 2 karakter"),
@@ -36,73 +34,38 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
 
   const [isKu, setIsKu] = useState(false);
   const [targetKu, setTargetKu] = useState("");
-  const [isSchool, setIsSekolah] = useState(false);
+  const [isSchool, setIsSchool] = useState(false);
   const [schoolLevel, setSchoolLevel] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    watch,
-    formState: { errors },
-    reset,
-  } = useForm<GroupForm>({
+  const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<GroupForm>({
     resolver: zodResolver(groupSchema),
-    defaultValues: {
-      name: group.name,
-      description: group.description || "",
-      homebaseId: group.homebase?.id,
-    },
+    defaultValues: { name: group.name, description: group.description || "", homebaseId: group.homebase?.id },
   });
 
   useEffect(() => {
     if (open) {
       const parsed = parseGroupMetaDescription(group.description);
-      const isK = typeof parsed.targetKu === "number";
-      const tK = parsed.targetKu ? String(parsed.targetKu) : "";
-      const isS = typeof parsed.schoolLevel === "string";
-      const sL = parsed.schoolLevel || "";
-
-      setIsKu(isK);
-      setTargetKu(tK);
-      setIsSekolah(isS);
-      setSchoolLevel(sL);
-
-      reset({
-        name: group.name,
-        description: group.description || "",
-        homebaseId: group.homebase?.id,
-      });
+      setIsKu(typeof parsed.targetKu === "number");
+      setTargetKu(parsed.targetKu ? String(parsed.targetKu) : "");
+      setIsSchool(typeof parsed.schoolLevel === "string");
+      setSchoolLevel(parsed.schoolLevel || "");
+      reset({ name: group.name, description: group.description || "", homebaseId: group.homebase?.id });
     }
   }, [group, open, reset]);
 
   const onSubmit = async (data: GroupForm) => {
-    if (isKu && !targetKu) {
-      toast.error("Umur tidak boleh kosong untuk Kelompok Umur!");
-      return;
-    }
-    if (isSchool && !schoolLevel) {
-      toast.error("Silakan pilih tingkat sekolah yang sesuai!");
-      return;
-    }
+    if (isKu && !targetKu) { toast.error("Umur tidak boleh kosong untuk Kelompok Umur!"); return; }
+    if (isSchool && !schoolLevel) { toast.error("Silakan pilih tingkat sekolah yang sesuai!"); return; }
 
     try {
       const descPayload = buildGroupDescriptionPayload({
         targetKu: isKu && targetKu ? parseInt(targetKu, 10) : undefined,
         schoolLevel: isSchool && schoolLevel ? schoolLevel : undefined,
       });
-
-      await updateGroup({
-        id: group.id,
-        data: {
-          name: data.name,
-          description: descPayload,
-          homebaseId: data.homebaseId || null,
-        },
-      });
+      await updateGroup({ id: group.id, data: { name: data.name, description: descPayload, homebaseId: data.homebaseId || null } });
       toast.success(`${group.name} berhasil diperbarui!`);
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast.error("Gagal memperbarui kelompok. Coba lagi.");
     }
   };
@@ -112,103 +75,30 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading text-foreground tracking-wide flex items-center gap-2">
-            <Edit2 className="size-5 text-primary" />
-            Ubah Kelompok
+            <Edit2 className="size-5 text-primary" /> Ubah Kelompok
           </DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground">Perbarui nama, kategori usia, sekolah, atau lokasi latihan.</DialogDescription>
+          <DialogDescription className="text-sm text-muted-foreground">
+            Perbarui nama, kategori usia, sekolah, atau lokasi latihan.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <label htmlFor="group_name" className="text-xs font-semibold text-muted-foreground cursor-pointer">
-              Nama Kelompok
-            </label>
-            <p className="text-[10px] text-muted-foreground/60">Bisa berdasarkan usia atau asal sekolah</p>
-            <Input id="group_name" {...register("name")} placeholder="Contoh: KU-16 Putra" className="h-11" />
-            {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
-          </div>
-
-          <div className="space-y-4 pt-2 pb-2 border-t border-border/30">
-            <div className="flex flex-wrap items-center gap-3 pt-3">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isUsia_edit"
-                  checked={isKu}
-                  onChange={(e) => {
-                    setIsKu(e.target.checked);
-                    if (e.target.checked) setIsSekolah(false);
-                  }}
-                  className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
-                />
-                <label htmlFor="isUsia_edit" className="text-xs font-semibold text-muted-foreground cursor-pointer whitespace-nowrap">
-                  Kelompok Umur
-                </label>
-              </div>
-
-              {isKu && (
-                <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
-                  <Input type="text" pattern="\d*" maxLength={2} value={targetKu} onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))} placeholder="16" className="h-9 w-12 text-center text-sm font-medium" />
-                  <span className="text-xs font-semibold text-muted-foreground">Tahun</span>
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="isSekolah_edit"
-                  checked={isSchool}
-                  onChange={(e) => {
-                    setIsSekolah(e.target.checked);
-                    if (e.target.checked) setIsKu(false);
-                  }}
-                  className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
-                />
-                <label htmlFor="isSekolah_edit" className="text-xs font-semibold text-muted-foreground cursor-pointer whitespace-nowrap">
-                  Sekolah
-                </label>
-              </div>
-
-              {isSchool && (
-                <div className="animate-in fade-in zoom-in-95 duration-200">
-                  <Select value={schoolLevel} onValueChange={(val: string | null) => setSchoolLevel(val || "")}>
-                    <SelectTrigger className="h-9 w-full sm:w-48 font-medium">
-                      <SelectValue placeholder="Pilih Tingkat Sekolah" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="TK/RA">TK/RA</SelectItem>
-                      <SelectItem value="SD/MI">SD/MI</SelectItem>
-                      <SelectItem value="SMP/MTS">SMP/MTS</SelectItem>
-                      <SelectItem value="SMA/MA">SMA/MA</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {homebases.length > 0 && (
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-muted-foreground">Lokasi Latihan</label>
-              <Select value={watch("homebaseId") ?? HOMEBASE_NONE} onValueChange={(val) => setValue("homebaseId", !val || val === HOMEBASE_NONE ? undefined : val)}>
-                <SelectTrigger className="h-11 font-semibold">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={HOMEBASE_NONE} className="text-muted-foreground">
-                    — Tanpa Lokasi Latihan —
-                  </SelectItem>
-                  {homebases.map((hb) => (
-                    <SelectItem key={hb.id} value={hb.id}>
-                      {hb.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          <GroupFormFields
+            register={register}
+            errors={errors}
+            watch={watch}
+            setValue={setValue}
+            isKu={isKu}
+            setIsKu={setIsKu}
+            targetKu={targetKu}
+            setTargetKu={setTargetKu}
+            isSchool={isSchool}
+            setIsSchool={setIsSchool}
+            schoolLevel={schoolLevel}
+            setSchoolLevel={setSchoolLevel}
+            homebases={homebases}
+            checkboxIdSuffix="_edit"
+          />
 
           <div className="pt-4 flex w-full justify-end gap-3">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending} className="h-10 font-semibold text-sm">
@@ -216,7 +106,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             </Button>
             <Button type="submit" disabled={isPending} className="h-10 font-semibold text-sm">
               {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
-              Simpan
+              Simpan Perubahan
             </Button>
           </div>
         </form>

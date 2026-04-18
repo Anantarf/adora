@@ -62,7 +62,8 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
 
 export async function createEventAction(data: { title: string; description?: string; date: string; type: string; location?: string; groupIds?: string[]; homebaseId?: string }) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
+    const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
       const ev = await tx.event.create({
         data: {
@@ -85,7 +86,7 @@ export async function createEventAction(data: { title: string; description?: str
         });
       }
 
-      await createAuditLog(tx, "CREATE", "event", ev.id);
+      await createAuditLog(tx, "CREATE", "event", ev.id, userId);
     });
 
     revalidatePath("/dashboard", "layout");
@@ -98,7 +99,8 @@ export async function createEventAction(data: { title: string; description?: str
 
 export async function updateEventAction(id: string, data: { title: string; description?: string; date: string; type: string; location?: string; groupIds?: string[]; homebaseId?: string }) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
+    const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
       await tx.event.update({
         where: { id },
@@ -125,7 +127,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
         }
       }
 
-      await createAuditLog(tx, "UPDATE", "event", id);
+      await createAuditLog(tx, "UPDATE", "event", id, userId);
     });
 
     revalidatePath("/dashboard", "layout");
@@ -138,10 +140,11 @@ export async function updateEventAction(id: string, data: { title: string; descr
 
 export async function deleteEventAction(id: string) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
+    const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
       await tx.event.delete({ where: { id } });
-      await createAuditLog(tx, "DELETE", "event", id);
+      await createAuditLog(tx, "DELETE", "event", id, userId);
     });
     revalidatePath("/dashboard", "layout");
     return { success: true };
@@ -237,6 +240,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
       ...event,
       groups: event.eventGroups.map((eg) => eg.group),
       attendances: allAttendances,
+      isDraftAttendance: event.attendances.length === 0,
     };
   } catch (error) {
     console.error("Error fetching event attendance detail:", error);

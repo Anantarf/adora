@@ -27,6 +27,14 @@ const batchPlayerSchema = z.object({
 });
 
 const batchPlayersInputSchema = z.array(batchPlayerSchema).min(1).max(1000);
+
+const OPTIONAL_PLAYER_FIELDS = [
+  "placeOfBirth", "gender", "weight", "height", "schoolOrigin",
+  "address", "email", "phoneNumber", "medicalHistory",
+  "parentName", "parentAddress", "parentPhoneNumber", "parentId",
+] as const;
+type OptionalPlayerField = (typeof OPTIONAL_PLAYER_FIELDS)[number];
+
 // 1. Ambil semua pemain (Read)
 export async function getPlayersAction(groupId?: string, searchQuery?: string) {
   await requireAdmin();
@@ -35,16 +43,10 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
       isDeleted: false,
       ...(groupId && groupId !== "all" ? { groupId } : {}),
       ...(searchQuery
-        ? {
-            OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }],
-          }
+        ? { OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }] }
         : {}),
     },
-    include: {
-      group: {
-        select: { id: true, name: true },
-      },
-    },
+    include: { group: { select: { id: true, name: true } } },
     orderBy: { name: "asc" },
   });
 }
@@ -68,31 +70,23 @@ export async function addPlayerAction(data: {
   groupId: string;
   parentId?: string;
 }) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
+
   const player = await prisma.$transaction(async (tx) => {
+    const optionalData = Object.fromEntries(
+      OPTIONAL_PLAYER_FIELDS.map((k) => [k, (data[k as OptionalPlayerField] as string | undefined) || undefined])
+    );
     const p = await tx.player.create({
       data: {
         name: data.name,
         dateOfBirth: toJakartaDate(data.dateOfBirth),
-        placeOfBirth: data.placeOfBirth || undefined,
-        gender: data.gender || undefined,
-        weight: data.weight || undefined,
-        height: data.height || undefined,
-        schoolOrigin: data.schoolOrigin || undefined,
-        address: data.address || undefined,
-        email: data.email || undefined,
-        phoneNumber: data.phoneNumber || undefined,
-        medicalHistory: data.medicalHistory || undefined,
-        parentName: data.parentName || undefined,
-        parentAddress: data.parentAddress || undefined,
-        parentPhoneNumber: data.parentPhoneNumber || undefined,
         groupId: data.groupId,
-        parentId: data.parentId || undefined,
+        ...optionalData,
         updatedAt: new Date(),
       },
     });
-
-    await createAuditLog(tx, "CREATE", "player", p.id);
+    await createAuditLog(tx, "CREATE", "player", p.id, userId);
     return p;
   });
 
@@ -121,7 +115,8 @@ export async function addBatchPlayersAction(
     parentId?: string;
   }>,
 ) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   const parsedInput = batchPlayersInputSchema.safeParse(playersData);
   if (!parsedInput.success) {
@@ -130,7 +125,6 @@ export async function addBatchPlayersAction(
 
   const validPayload = parsedInput.data;
 
-  // Deduplicate rows from a single upload payload to avoid accidental double entries in one file.
   const dedupedPayload = Array.from(
     new Map(
       validPayload.map((row) => {
@@ -141,94 +135,69 @@ export async function addBatchPlayersAction(
   );
 
   const uniqueGroupIds = Array.from(new Set(dedupedPayload.map((row) => row.groupId)));
-  const uniqueParentIds = Array.from(new Set(dedupedPayload.map((row) => row.parentId).filter((parentId): parentId is string => Boolean(parentId))));
+  const uniqueParentIds = Array.from(new Set(dedupedPayload.map((row) => row.parentId).filter((id): id is string => Boolean(id))));
 
   const [foundGroups, foundParents] = await Promise.all([
-    prisma.group.findMany({
-      where: { id: { in: uniqueGroupIds } },
-      select: { id: true },
-    }),
+    prisma.group.findMany({ where: { id: { in: uniqueGroupIds } }, select: { id: true } }),
     uniqueParentIds.length
-      ? prisma.user.findMany({
-          where: { id: { in: uniqueParentIds } },
-          select: { id: true },
-        })
+      ? prisma.user.findMany({ where: { id: { in: uniqueParentIds } }, select: { id: true } })
       : Promise.resolve([]),
   ]);
 
-  const existingGroupIds = new Set(foundGroups.map((group) => group.id));
-  const invalidGroupIds = uniqueGroupIds.filter((groupId) => !existingGroupIds.has(groupId));
+  const existingGroupIds = new Set(foundGroups.map((g) => g.id));
+  const invalidGroupIds = uniqueGroupIds.filter((id) => !existingGroupIds.has(id));
   if (invalidGroupIds.length > 0) {
     throw new Error(`Ada groupId tidak ditemukan: ${invalidGroupIds.slice(0, 5).join(", ")}`);
   }
 
-  const existingParentIds = new Set(foundParents.map((parent) => parent.id));
-  const invalidParentIds = uniqueParentIds.filter((parentId) => !existingParentIds.has(parentId));
+  const existingParentIds = new Set(foundParents.map((p) => p.id));
+  const invalidParentIds = uniqueParentIds.filter((id) => !existingParentIds.has(id));
   if (invalidParentIds.length > 0) {
     throw new Error(`Ada parentId tidak ditemukan: ${invalidParentIds.slice(0, 5).join(", ")}`);
   }
 
-  const formattedData = dedupedPayload.map((data) => ({
-    name: data.name.trim(),
-    dateOfBirth: toJakartaDate(data.dateOfBirth),
-    placeOfBirth: data.placeOfBirth?.trim() || undefined,
-    gender: data.gender?.trim() || undefined,
-    weight: data.weight?.trim() || undefined,
-    height: data.height?.trim() || undefined,
-    schoolOrigin: data.schoolOrigin?.trim() || undefined,
-    address: data.address?.trim() || undefined,
-    email: data.email?.trim() || undefined,
-    phoneNumber: data.phoneNumber?.trim() || undefined,
-    medicalHistory: data.medicalHistory?.trim() || undefined,
-    parentName: data.parentName?.trim() || undefined,
-    parentAddress: data.parentAddress?.trim() || undefined,
-    parentPhoneNumber: data.parentPhoneNumber?.trim() || undefined,
-    groupId: data.groupId,
-    parentId: data.parentId?.trim() || undefined,
+  const formattedData = dedupedPayload.map((row) => ({
+    name: row.name.trim(),
+    dateOfBirth: toJakartaDate(row.dateOfBirth),
+    placeOfBirth: row.placeOfBirth?.trim() || undefined,
+    gender: row.gender?.trim() || undefined,
+    weight: row.weight?.trim() || undefined,
+    height: row.height?.trim() || undefined,
+    schoolOrigin: row.schoolOrigin?.trim() || undefined,
+    address: row.address?.trim() || undefined,
+    email: row.email?.trim() || undefined,
+    phoneNumber: row.phoneNumber?.trim() || undefined,
+    medicalHistory: row.medicalHistory?.trim() || undefined,
+    parentName: row.parentName?.trim() || undefined,
+    parentAddress: row.parentAddress?.trim() || undefined,
+    parentPhoneNumber: row.parentPhoneNumber?.trim() || undefined,
+    groupId: row.groupId,
+    parentId: row.parentId?.trim() || undefined,
     updatedAt: new Date(),
   }));
 
   const result = await prisma.$transaction(async (tx) => {
-    const res = await tx.player.createMany({
-      data: formattedData,
-      skipDuplicates: true,
-    });
-
-    // Create audit logs for all players atomically
-    await createAuditLog(tx, "CREATE", "player_batch", String(res.count));
+    const res = await tx.player.createMany({ data: formattedData, skipDuplicates: true });
+    await createAuditLog(tx, "CREATE", "player_batch", String(res.count), userId);
     return res;
   });
 
   revalidatePath("/dashboard/players");
-  return {
-    count: result.count,
-    submitted: validPayload.length,
-    deduped: dedupedPayload.length,
-  };
+  return { count: result.count, submitted: validPayload.length, deduped: dedupedPayload.length };
 }
 
 // 3. Update pemain (Update)
 export async function updatePlayerAction(
   id: string,
   data: {
-    name?: string;
-    dateOfBirth?: string;
-    placeOfBirth?: string;
-    gender?: string;
-    weight?: string;
-    height?: string;
-    schoolOrigin?: string;
-    address?: string;
-    email?: string;
-    phoneNumber?: string;
-    medicalHistory?: string;
-    parentName?: string;
-    parentAddress?: string;
-    parentPhoneNumber?: string;
-    groupId?: string;
+    name?: string; dateOfBirth?: string; placeOfBirth?: string; gender?: string;
+    weight?: string; height?: string; schoolOrigin?: string; address?: string;
+    email?: string; phoneNumber?: string; medicalHistory?: string;
+    parentName?: string; parentAddress?: string; parentPhoneNumber?: string; groupId?: string;
   },
 ) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   const updated = await prisma.$transaction(async (tx) => {
     const res = await tx.player.update({
@@ -252,8 +221,7 @@ export async function updatePlayerAction(
         updatedAt: new Date(),
       },
     });
-
-    await createAuditLog(tx, "UPDATE", "player", res.id);
+    await createAuditLog(tx, "UPDATE", "player", res.id, userId);
     return res;
   });
 
@@ -263,14 +231,12 @@ export async function updatePlayerAction(
 
 // 4. Hapus pemain (Soft Delete)
 export async function deletePlayerAction(id: string) {
-  await requireAdmin();
-  await prisma.$transaction(async (tx) => {
-    await tx.player.update({
-      where: { id },
-      data: { isDeleted: true },
-    });
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
-    await createAuditLog(tx, "DELETE", "player", id);
+  await prisma.$transaction(async (tx) => {
+    await tx.player.update({ where: { id }, data: { isDeleted: true } });
+    await createAuditLog(tx, "DELETE", "player", id, userId);
   });
 
   revalidatePath("/dashboard/players");

@@ -11,11 +11,18 @@ export const QUERY_KEYS = {
   EVALUATION_PERIODS_BASE: ["evaluation-periods"],
   EVALUATION_PERIODS_ACTIVE: ["evaluation-periods", "active"],
   ATTENDANCES_BASE: ["attendances"],
-  ATTENDANCES: (dateStr: string) => ["attendances", dateStr],
-  AUDIT_LOGS: ["audit-logs"],
+  ATTENDANCES: (dateStr: string, groupId?: string) => ["attendances", dateStr, groupId],
+  AUDIT_LOGS_BASE: ["audit-logs"],
+  AUDIT_LOGS: (cursor?: string) => ["audit-logs", cursor],
   CERTIFICATES: ["certificates"],
   PLAYER_STATS_BASE: ["player-stats"],
   PLAYER_STATS: (playerId: string) => ["player-stats", playerId],
+  EVENTS_WITH_ATTENDANCE: ["events-attendance"],
+  STATISTICS_BY_PERIOD_BASE: ["statistics-period"],
+  STATISTICS_BY_PERIOD: (periodId: string | null) => ["statistics-period", periodId],
+  STATISTIC_HISTORY: (statisticId: string | null) => ["statistic-history", statisticId],
+  FAMILY_PLAYERS: ["family-players"],
+  PARENTS: ["parents"],
 } as const;
 
 // ─── Cache & Pagination ───────────────────────────────

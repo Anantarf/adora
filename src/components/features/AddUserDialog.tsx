@@ -42,7 +42,7 @@ export function AddUserDialog() {
       name: "",
       username: "",
       email: "",
-      password: "adora123",
+      password: "",
     },
   });
 
@@ -52,7 +52,7 @@ export function AddUserDialog() {
         name: data.name,
         username: data.username,
         email: data.email || undefined,
-        password: data.password || "adora123",
+        password: data.password,
       });
       setOpen(false);
       reset();

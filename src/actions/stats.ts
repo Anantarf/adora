@@ -18,7 +18,8 @@ const safeParseMetrics = (json: string): MetricsJson => {
 
 // 1. Submit Attendance
 export async function submitAttendanceAction(data: { date: string; playerStatuses: { playerId: string; status: AttendanceStatus }[]; note?: string; eventId: string }) {
-  await requireAdmin();
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
 
   if (!data.playerStatuses || data.playerStatuses.length === 0) {
     throw new Error("Minimal ada 1 pemain untuk didaftarkan kehadirannya.");
@@ -58,22 +59,21 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
       select: { playerId: true, eventId: true },
     });
 
-    const conflicts = sameDayAttendances.filter((attendance) => attendance.eventId && attendance.eventId !== data.eventId);
+    // eventId === null = presensi legacy standalone; jangan diam-diam overwrite
+    const conflicts = sameDayAttendances.filter((attendance) => attendance.eventId == null || attendance.eventId !== data.eventId);
     if (conflicts.length > 0) {
       throw new Error("Sebagian pemain sudah punya absensi dari agenda lain pada tanggal yang sama.");
     }
 
-    await Promise.all(
-      dedupedStatuses.map((ps) =>
-        tx.attendance.upsert({
-          where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
-          update: { status: ps.status, note: data.note, eventId: data.eventId },
-          create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
-        }),
-      ),
-    );
+    for (const ps of dedupedStatuses) {
+      await tx.attendance.upsert({
+        where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
+        update: { status: ps.status, note: data.note, eventId: data.eventId },
+        create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
+      });
+    }
 
-    await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${dedupedStatuses.length}`);
+    await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${dedupedStatuses.length}`, userId);
   });
 
   revalidatePath("/dashboard/attendances");
@@ -113,7 +113,7 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
         },
       });
 
-      await createAuditLog(tx, "UPDATE_STATS", "statistic", updated.id);
+      await createAuditLog(tx, "UPDATE_STATS", "statistic", updated.id, userId);
       return updated;
     }
 
@@ -128,7 +128,7 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
       },
     });
 
-    await createAuditLog(tx, "CREATE_STATS", "statistic", created.id);
+    await createAuditLog(tx, "CREATE_STATS", "statistic", created.id, userId);
     return created;
   });
 

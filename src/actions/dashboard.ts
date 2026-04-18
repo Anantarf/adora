@@ -38,9 +38,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       }),
     ]);
 
-    // Calculate 30 days ago in Jakarta time, preserving timezone offset
-    const thirtyDaysAgoMs = getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * MS_PER_DAY;
-    const thirtyDaysAgo = toJakartaDate(new Date(thirtyDaysAgoMs).toISOString().split('T')[0]);
+    const thirtyDaysAgo = new Date(getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * MS_PER_DAY);
 
     const attendanceStats = await prisma.attendance.groupBy({
       by: ['status'],

@@ -61,11 +61,7 @@ export default function StatisticsPage() {
 
   const periodDisplayLabel = (period: { id: string; name: string; startDate: Date | string; endDate: Date | string; isActive?: boolean }) => {
     const trimmedName = (period.name || "").trim();
-    const looksLikeRawId = /^[a-z0-9]{18,}$/i.test(trimmedName);
-
-    if (trimmedName && !looksLikeRawId) {
-      return trimmedName;
-    }
+    if (trimmedName) return trimmedName;
 
     const start = new Date(period.startDate);
     const end = new Date(period.endDate);

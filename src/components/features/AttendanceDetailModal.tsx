@@ -38,14 +38,19 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
     getEventAttendanceDetailAction(eventId)
       .then((data) => {
         setEvent(data);
-        setStatuses(Object.fromEntries(data.attendances.map((a) => [a.playerId, a.status as AttendanceStatus])));
+        // Draft: kosongkan agar admin wajib pilih eksplisit, bukan assume semua HADIR
+        if (data.isDraftAttendance) {
+          setStatuses({});
+        } else {
+          setStatuses(Object.fromEntries(data.attendances.map((a) => [a.playerId, a.status as AttendanceStatus])));
+        }
       })
       .catch((err) => {
         toast.error(err instanceof Error ? err.message : "Terjadi kesalahan");
         onClose();
       })
       .finally(() => setLoading(false));
-  }, [eventId]);
+  }, [eventId, onClose]);
 
   const handleMarkAllHadir = () => {
     if (!event) return;
@@ -55,13 +60,20 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
   const handleSave = async () => {
     if (!event) return;
+
+    const unsetCount = event.attendances.filter((a) => !statuses[a.playerId]).length;
+    if (unsetCount > 0) {
+      toast.error(`${unsetCount} pemain belum dipilih statusnya. Pilih semua sebelum menyimpan.`);
+      return;
+    }
+
     setIsSaving(true);
     try {
       const result = await submitAttendanceAction({
         date: toYYYYMMDD(new Date(event.date)),
         playerStatuses: event.attendances.map((a) => ({
           playerId: a.playerId,
-          status: statuses[a.playerId] ?? "HADIR",
+          status: statuses[a.playerId]!,
         })),
         eventId,
       });
@@ -79,10 +91,12 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
     }
   };
 
+  const unsetCount = event?.attendances.filter((a) => !statuses[a.playerId]).length ?? 0;
+
   const stats = event?.attendances.reduce(
     (acc, attendance) => {
-      const status = statuses[attendance.playerId] ?? "HADIR";
-      acc[status] += 1;
+      const status = statuses[attendance.playerId];
+      if (status) acc[status] += 1;
       return acc;
     },
     { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 },
@@ -124,9 +138,15 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                 </div>
 
                 <div className="flex flex-wrap gap-2">
+                  {unsetCount > 0 && (
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-destructive/30 bg-destructive/5 text-destructive">
+                      <span className="text-[10px] font-bold uppercase tracking-widest">Belum Dipilih</span>
+                      <span className="text-sm font-black">{unsetCount}</span>
+                    </div>
+                  )}
                   {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => {
                     const count = stats?.[s] ?? 0;
-                    if (count === 0 && s !== "HADIR") return null; // Only show non-zero or HADIR to keep it clean
+                    if (count === 0) return null;
                     return (
                       <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
                         <span className="text-[10px] font-bold uppercase tracking-widest">{STATUS_STYLE[s].label}</span>
@@ -166,7 +186,10 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
                 <div className="grid gap-2 overflow-y-auto overflow-x-hidden pr-1">
                   {event.attendances.map((a) => {
-                    const currentStatus = statuses[a.playerId] ?? "HADIR";
+                    const currentStatus = statuses[a.playerId] as AttendanceStatus | undefined;
+                    const triggerStyle = currentStatus
+                      ? STATUS_STYLE[currentStatus].badge
+                      : "border-destructive/30 text-destructive/60 bg-destructive/5";
                     return (
                       <div key={a.playerId} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors gap-3 sm:gap-4 min-w-0">
                         <div className="flex items-center gap-3 min-w-0">
@@ -177,9 +200,9 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                           </div>
                         </div>
 
-                        <Select value={currentStatus} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
-                          <SelectTrigger className={`w-full sm:w-27.5 h-9 text-[10px] font-bold uppercase tracking-widest ${STATUS_STYLE[currentStatus].badge} transition-colors shrink-0`}>
-                            <SelectValue />
+                        <Select value={currentStatus ?? ""} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
+                          <SelectTrigger className={`w-full sm:w-27.5 h-9 text-[10px] font-bold uppercase tracking-widest ${triggerStyle} transition-colors shrink-0`}>
+                            <SelectValue placeholder="— Pilih Status —" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-border/50">
                             {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (

@@ -3,6 +3,7 @@ import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAttendancesAction } from "@/actions/dashboard";
 import { submitAttendanceAction } from "@/actions/stats";
+import { QUERY_KEYS } from "@/lib/constants";
 import { type AttendanceStatus } from "@/types/dashboard";
 
 type AttendancesList = Awaited<ReturnType<typeof getAttendancesAction>>;
@@ -17,7 +18,7 @@ export type AttendanceInput = {
 // Hook (GET): Tarik presensi tersimpan via Server Action
 export const useAttendances = (date: string, groupId?: string) => {
   return useQuery<AttendancesList>({
-    queryKey: ["attendances", date, groupId],
+    queryKey: QUERY_KEYS.ATTENDANCES(date, groupId),
     queryFn: () => getAttendancesAction(date, groupId),
     enabled: !!date,
   });
@@ -30,8 +31,8 @@ export const useAddAttendances = () => {
   return useMutation({
     mutationFn: (data: SubmitAttendanceInput) => submitAttendanceAction(data).then(unwrapAction),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attendances"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.ATTENDANCES_BASE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD_METRICS });
     },
   });
 };
