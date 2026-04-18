@@ -133,7 +133,7 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
                 <FileSpreadsheet className="size-6" />
               </div>
               <div>
-                <h4 className="text-sm font-bold truncate max-w-[200px]">{selectedFile.name}</h4>
+                <h4 className="font-heading text-sm font-bold truncate max-w-[200px]">{selectedFile.name}</h4>
                 <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB</p>
               </div>
             </div>

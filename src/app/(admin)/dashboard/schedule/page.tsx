@@ -14,6 +14,7 @@ import { CalendarDays, Loader2, Trash2, MapPinned, AlignLeft, Pencil, Clock, Che
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
@@ -38,10 +39,12 @@ const CalendarView = dynamic(() => import("@/components/features/calendar-view")
  */
 
 const eventSchema = z.object({
+  eventId: z.string().optional(),
   title: z.string().min(3, "Judul minimal 3 karakter"),
+  description: z.string().optional(),
   location: z.string().optional(),
   type: z.string().min(1, "Tipe agenda wajib dipilih"),
-  time: z.string().min(1, "Waktu wajib diisi"),
+  time: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Waktu harus format 24 jam (opsi: 08:30 atau 14:00)"),
   homebaseId: z.string().optional(),
 });
 
@@ -49,13 +52,13 @@ type EventFormValues = z.infer<typeof eventSchema>;
 
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(getJakartaToday());
-  type UIState = { type: 'edit'; event: ScheduleEvent } | { type: 'delete'; targetId: string } | { type: 'preview'; event: ScheduleEvent } | null;
+  type UIState = { type: "edit"; event: ScheduleEvent } | { type: "delete"; targetId: string } | { type: "preview"; event: ScheduleEvent } | null;
   const [uiState, setUiState] = useState<UIState>(null);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const { data: homebases = [] } = useHomebases();
   const { data: groups = [] } = useGroups();
 
-  const isEditMode = (uiState?.type === 'edit' ? uiState.event : null) !== null;
+  const isEditMode = (uiState?.type === "edit" ? uiState.event : null) !== null;
 
   // Memoized homebase lookup map for O(1) access
   const homebaseMap = useMemo(() => Object.fromEntries(homebases.map((h) => [h.id, h])), [homebases]);
@@ -82,14 +85,18 @@ export default function SchedulePage() {
     resolver: zodResolver(eventSchema),
     defaultValues: isEditMode
       ? {
-          title: (uiState?.type === 'edit' ? uiState.event : null)?.title || "",
-          location: (uiState?.type === 'edit' ? uiState.event : null)?.location || "",
-          type: (uiState?.type === 'edit' ? uiState.event : null)?.type || defaultType,
-          time: (uiState?.type === 'edit' ? uiState.event : null)?.date ? format(toJakartaDate((uiState?.type === 'edit' ? uiState.event.date : undefined)), "HH:mm") : `${currentHH}:${currentMM}`,
-          homebaseId: (uiState?.type === 'edit' ? uiState.event : null)?.homebaseId || undefined,
+          eventId: (uiState?.type === "edit" ? uiState.event : null)?.id || undefined,
+          title: (uiState?.type === "edit" ? uiState.event : null)?.title || "",
+          description: (uiState?.type === "edit" ? uiState.event : null)?.description || "",
+          location: (uiState?.type === "edit" ? uiState.event : null)?.location || "",
+          type: (uiState?.type === "edit" ? uiState.event : null)?.type || defaultType,
+          time: uiState?.type === "edit" && uiState.event?.date ? new Date(uiState.event.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }) : `${currentHH}:${currentMM}`,
+          homebaseId: (uiState?.type === "edit" ? uiState.event : null)?.homebaseId || undefined,
         }
       : {
+          eventId: undefined,
           title: "",
+          description: "",
           location: "",
           type: defaultType,
           time: `${currentHH}:${currentMM}`,
@@ -134,9 +141,7 @@ export default function SchedulePage() {
   }, [events]);
 
   const toggleGroup = (groupId: string) => {
-    setSelectedGroupIds((prev) =>
-      prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]
-    );
+    setSelectedGroupIds((prev) => (prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]));
   };
 
   // Callback: Cancel edit mode and reset form
@@ -144,7 +149,9 @@ export default function SchedulePage() {
     setUiState(null);
     setSelectedGroupIds([]);
     reset({
+      eventId: undefined,
       title: "",
+      description: "",
       location: "",
       type: defaultType,
       time: `${currentHH}:${currentMM}`,
@@ -154,9 +161,20 @@ export default function SchedulePage() {
 
   // Callback: Start editing an event
   const handleEditEvent = (ev: ScheduleEvent) => {
-    setUiState(ev ? { type: 'edit', event: ev } : null);
+    setUiState(ev ? { type: "edit", event: ev } : null);
     setDate(new Date(ev.date));
     setSelectedGroupIds(ev.groups?.map((g) => g.id) ?? []);
+    if (ev) {
+      reset({
+        eventId: ev.id,
+        title: ev.title,
+        description: ev.description || "",
+        location: ev.location || "",
+        type: ev.type,
+        time: new Date(ev.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }),
+        homebaseId: ev.homebaseId || undefined,
+      });
+    }
   };
 
   const onSubmit = async (data: EventFormValues) => {
@@ -167,6 +185,7 @@ export default function SchedulePage() {
 
       const eventData = {
         title: data.title,
+        description: data.description?.trim() || undefined,
         location: data.location,
         type: data.type,
         date: isoWithWib,
@@ -175,8 +194,8 @@ export default function SchedulePage() {
       };
 
       // Single mutation point
-      if (isEditMode && (uiState?.type === 'edit' ? uiState.event : null)) {
-        await updateEvent({ id: uiState?.type === 'edit' ? uiState.event.id : '', data: eventData });
+      if (data.eventId) {
+        await updateEvent({ id: data.eventId, data: eventData });
         toast.success("Jadwal berhasil diperbarui!");
       } else {
         await addEvent(eventData);
@@ -272,18 +291,33 @@ export default function SchedulePage() {
                           type="button"
                           onClick={() => toggleGroup(g.id)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
-                            checked
-                              ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"
+                            checked ? "bg-primary text-primary-foreground border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"
                           }`}
                         >
                           {g.name}
                         </button>
                       );
                     })}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = selectedGroupIds.length === groups.length && groups.length > 0;
+                        setSelectedGroupIds(allSelected ? [] : groups.map((g: { id: string }) => g.id));
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${
+                        selectedGroupIds.length === groups.length && groups.length > 0 ? "bg-primary/20 text-primary border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"
+                      }`}
+                    >
+                      {selectedGroupIds.length === groups.length && groups.length > 0 ? "Batal Pilih Semua" : "Pilih Semua"}
+                    </button>
                   </div>
                 </div>
               )}
+
+              <div className="space-y-1">
+                <label className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/50">Keterangan (Opsional)</label>
+                <Textarea {...register("description")} placeholder="Catatan tambahan agenda..." className="min-h-22 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all resize-y" />
+              </div>
 
               {/* Baris 2: Tanggal + Waktu + Lokasi + (Homebase) + Submit */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -391,7 +425,7 @@ export default function SchedulePage() {
                 <div className="size-10 rounded-[0.8rem] flex items-center justify-center shrink-0 shadow-lg shadow-black/20 bg-primary">
                   <CalendarDays className="size-5 text-primary-foreground" strokeWidth={2.5} />
                 </div>
-                <h2 className="text-[17px] font-semibold tracking-wide text-foreground">Agenda Mendatang</h2>
+                <h2 className="font-heading text-[17px] font-semibold tracking-wide text-foreground">Agenda Mendatang</h2>
               </div>
             </div>
 
@@ -412,7 +446,7 @@ export default function SchedulePage() {
                   return (
                     <div
                       key={ev.id}
-                      onClick={() => setUiState(ev ? { type: 'preview', event: ev } : null)}
+                      onClick={() => setUiState(ev ? { type: "preview", event: ev } : null)}
                       className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-pointer min-w-0 overflow-hidden"
                     >
                       <div
@@ -457,7 +491,7 @@ export default function SchedulePage() {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setUiState(ev.id ? { type: 'delete', targetId: ev.id } : null);
+                            setUiState(ev.id ? { type: "delete", targetId: ev.id } : null);
                           }}
                           className="size-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         >
@@ -474,10 +508,10 @@ export default function SchedulePage() {
       </motion.div>
 
       {/* Modal Preview Event */}
-      <Dialog open={!!(uiState?.type === 'preview' ? uiState.event : null)} onOpenChange={() => setUiState(null)}>
-        {(uiState?.type === 'preview' ? uiState.event : null) &&
+      <Dialog open={!!(uiState?.type === "preview" ? uiState.event : null)} onOpenChange={() => setUiState(null)}>
+        {(uiState?.type === "preview" ? uiState.event : null) &&
           (() => {
-            const cfg = getEventConfig(uiState?.type === 'preview' ? uiState.event.type : '');
+            const cfg = getEventConfig(uiState?.type === "preview" ? uiState.event.type : "");
             const Icon = cfg.icon;
             return (
               <DialogContent className="bg-background border-primary/20 text-white w-[calc(100vw-2rem)] sm:max-w-100 p-0 overflow-hidden">
@@ -494,14 +528,16 @@ export default function SchedulePage() {
                   <div className="absolute bottom-0 left-0 w-full h-8 bg-linear-to-t from-[#0f0f11] to-transparent" />
                 </div>
                 <div className="p-6 pt-4 space-y-5 overflow-hidden">
-                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{(uiState?.type === 'preview' ? uiState.event.title : undefined)}</DialogTitle>
+                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{uiState?.type === "preview" ? uiState.event.title : undefined}</DialogTitle>
                   <div className="flex items-start gap-3 min-w-0">
                     <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                       <CalendarDays size={14} />
                     </div>
                     <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Hari & Tanggal</div>
-                      <div className="text-sm font-semibold text-white/80 wrap-break-word">{formatJakarta(uiState?.type === 'preview' ? uiState.event.date : new Date(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
+                      <div className="text-sm font-semibold text-white/80 wrap-break-word">
+                        {formatJakarta(uiState?.type === "preview" ? uiState.event.date : new Date(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-start gap-3 min-w-0">
@@ -510,28 +546,28 @@ export default function SchedulePage() {
                     </div>
                     <div className="min-w-0">
                       <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Waktu</div>
-                      <div className="text-sm font-semibold text-white/80">{formatJakarta(uiState?.type === 'preview' ? uiState.event.date : new Date(), { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
+                      <div className="text-sm font-semibold text-white/80">{formatJakarta(uiState?.type === "preview" ? uiState.event.date : new Date(), { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
                     </div>
                   </div>
-                  {(uiState?.type === 'preview' ? uiState.event.location : undefined) && (
+                  {(uiState?.type === "preview" ? uiState.event.location : undefined) && (
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                         <MapPin size={14} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
-                        <div className="text-sm font-semibold text-white/80 wrap-break-word">{(uiState?.type === 'preview' ? uiState.event.location : undefined)}</div>
+                        <div className="text-sm font-semibold text-white/80 wrap-break-word">{uiState?.type === "preview" ? uiState.event.location : undefined}</div>
                       </div>
                     </div>
                   )}
-                  {(uiState?.type === 'preview' ? uiState.event.description : undefined) && (
+                  {(uiState?.type === "preview" ? uiState.event.description : undefined) && (
                     <div className="flex items-start gap-3 min-w-0">
                       <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
                         <AlignLeft size={14} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Keterangan</div>
-                        <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{(uiState?.type === 'preview' ? uiState.event.description : undefined)}</p>
+                        <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{uiState?.type === "preview" ? uiState.event.description : undefined}</p>
                       </div>
                     </div>
                   )}
@@ -545,29 +581,40 @@ export default function SchedulePage() {
       </Dialog>
 
       <AlertDialog
-        open={!!(uiState?.type === 'delete' ? uiState.targetId : null)}
+        open={!!(uiState?.type === "delete" ? uiState.targetId : null)}
         onOpenChange={(isOpen: boolean) => {
           if (!isOpen) setUiState(null);
         }}
       >
-        <AlertDialogContent className="bg-card border-border/50 rounded-3xl">
+        <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
           <AlertDialogHeader>
-            <AlertDialogTitle className="font-heading uppercase text-foreground">Hapus Agenda?</AlertDialogTitle>
-            <AlertDialogDescription className="text-muted-foreground">Jadwal ini akan dihapus permanen dari database. Aksi ini tidak bisa dibatalkan.</AlertDialogDescription>
+            <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Agenda</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Aksi ini membutuhkan konfirmasi.</AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="font-bold rounded-xl">Batal</AlertDialogCancel>
+
+          <div className="py-6 flex flex-col gap-4">
+            <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
+              <p className="text-sm font-medium text-foreground leading-relaxed">Apakah Anda yakin ingin menghapus agenda ini secara permanen?</p>
+              <div className="flex items-center gap-3">
+                <div className="size-2 rounded-full bg-destructive" />
+                <span className="text-xs font-semibold uppercase tracking-widest text-destructive">Tidak dapat dipulihkan</span>
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter className="sm:flex-row flex-col gap-2 sm:gap-0">
+            <AlertDialogCancel className="sm:mr-2 h-11 font-bold uppercase tracking-widest text-xs border-border/50">Batal</AlertDialogCancel>
             <AlertDialogAction
-              className="bg-destructive text-white hover:bg-destructive/90 font-bold rounded-xl"
+              className="h-11 font-bold tracking-widest uppercase text-xs"
               onClick={async () => {
-                if ((uiState?.type === 'delete' ? uiState.targetId : null)) {
-                  await deleteEvent(uiState?.type === 'delete' && uiState.targetId ? uiState.targetId : '');
+                if (uiState?.type === "delete" ? uiState.targetId : null) {
+                  await deleteEvent(uiState?.type === "delete" && uiState.targetId ? uiState.targetId : "");
                   setUiState(null);
                   toast.success("Agenda telah dihapus.");
                 }
               }}
             >
-              Hapus
+              <Trash2 className="size-4 mr-2" /> Hapus Permanen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

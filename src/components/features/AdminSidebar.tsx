@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
   { title: "Input Jadwal Klub", url: "/schedule", icon: CalendarDays },
-  { title: "Kelompok Umur (KU)", url: "/players", icon: Layers },
+  { title: "Kelompok Latihan", url: "/players", icon: Layers },
   { title: "Input Absensi", url: "/attendances", icon: CheckSquare },
   { title: "Input Penilaian", url: "/statistics", icon: LineChart },
   { title: "Sertifikat Digital", url: "/certificates", icon: FileBadge },

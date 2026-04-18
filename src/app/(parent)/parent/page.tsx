@@ -122,7 +122,7 @@ export default function ParentDashboard() {
       ) : !stats?.length ? (
         <div className="p-8 border border-border/50 rounded-xl bg-card text-center flex flex-col items-center gap-2">
           <Activity className="size-8 text-muted-foreground opacity-50" />
-          <h3 className="font-bold text-secondary">Belum Ada Evaluasi</h3>
+          <h3 className="font-heading font-bold text-secondary">Belum Ada Evaluasi</h3>
           <p className="text-sm text-muted-foreground">Pelatih belum mengunggah nilai rapor untuk {activeChild.name}.</p>
         </div>
       ) : (

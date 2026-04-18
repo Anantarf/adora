@@ -135,7 +135,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             <label htmlFor="group_name" className="text-xs uppercase font-semibold tracking-widest text-muted-foreground cursor-pointer">
               Nama Kelompok / Asal Sekolah
             </label>
-            <Input id="group_name" {...register("name")} placeholder="Contoh: KU-16 Putra" className="h-11" />
+            <Input id="group_name" {...register("name")} defaultValue={group.name} placeholder="Contoh: KU-16 Putra" className="h-11" />
             {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
           </div>
 

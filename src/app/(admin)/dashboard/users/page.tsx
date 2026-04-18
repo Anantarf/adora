@@ -113,7 +113,7 @@ export default function UsersManagementPage() {
                     <UserCircle2 className="size-7 text-primary group-hover:text-primary-foreground" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-lg text-secondary leading-tight truncate max-w-[140px]">{user.name}</h3>
+                    <h3 className="font-heading font-bold text-lg text-secondary leading-tight truncate max-w-[140px]">{user.name}</h3>
                     <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
                       <AtSign className="size-3" /> {user.username}
                     </div>

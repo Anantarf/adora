@@ -31,7 +31,7 @@ export default function AdminDashboardPage() {
         <div className="w-full flex flex-col gap-4 min-w-0 overflow-hidden">
           {/* Welcome Greeting */}
           <div className="mb-4">
-            <h3 className="text-muted-foreground text-[10px] uppercase font-medium tracking-[0.2em] leading-none mb-1">Selamat Datang,</h3>
+            <h3 className="font-heading text-muted-foreground text-[10px] uppercase font-medium tracking-[0.2em] leading-none mb-1">Selamat Datang,</h3>
             <p className="font-heading text-3xl tracking-wider text-foreground uppercase truncate">{getUserDisplayName()} 👋</p>
             {liveDate && <p className="text-sm font-semibold text-muted-foreground mt-1.5 tracking-tight">{liveDate}</p>}
           </div>

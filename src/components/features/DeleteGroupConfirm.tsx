@@ -38,8 +38,8 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
 
         <div className="py-6 flex flex-col gap-4">
           <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
-            <p className="text-sm font-semibold text-foreground">
-              Apakah Anda yakin ingin menghapus kelompok <span className="font-bold underline">{group.name}</span>?
+            <p className="text-sm font-medium text-foreground leading-relaxed">
+              Apakah Anda yakin ingin menghapus kelompok <span className="font-heading tracking-widest uppercase">{group.name}</span>?
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
@@ -49,7 +49,9 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
 
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex gap-4 items-start">
             <AlertTriangle className="size-5 text-amber-600 shrink-0 mt-0.5" />
-            <p className="text-xs font-medium text-muted-foreground">Pastikan tidak ada pemain di kelompok ini sebelum menghapus. Jika ada, pindahkan mereka terlebih dahulu.</p>
+            <p className="text-xs font-medium text-muted-foreground">
+              Menghapus kelompok akan mengubah status pemain di dalamnya menjadi <span className="font-bold underline">tanpa kelompok</span>. Data pemain tidak akan dihapus.
+            </p>
           </div>
         </div>
 

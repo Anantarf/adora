@@ -17,7 +17,7 @@ export default async function ParentLayout({ children }: { children: React.React
   }
 
   return (
-    <div className="flex relative w-full flex-col min-h-[100dvh] bg-background selection:bg-primary/20 animate-in fade-in duration-700">
+    <div className="flex relative w-full flex-col min-h-dvh bg-background selection:bg-primary/20 animate-in fade-in duration-700">
       {/* Navigation Bar - Glassmorphism Style */}
       <header className="flex h-20 w-full shrink-0 items-center justify-between border-b border-border/40 px-6 md:px-12 sticky top-0 bg-background/60 backdrop-blur-xl z-50 transition-all">
         <div className="flex items-center gap-4 group">
@@ -48,7 +48,7 @@ export default async function ParentLayout({ children }: { children: React.React
       </header>
 
       {/* Dynamic Content Area */}
-      <main className="w-full flex-1 mx-auto max-w-[1300px] p-6 lg:p-10">
+      <main className="w-full flex-1 mx-auto max-w-325 p-6 lg:p-10">
         <div className="w-full animate-in slide-in-from-bottom-4 duration-1000 ease-out fill-mode-both">{children}</div>
       </main>
 

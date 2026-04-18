@@ -57,8 +57,8 @@ export function AddPlayerDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="lg" className="w-full sm:w-auto uppercase font-bold tracking-widest text-xs h-11">
-            <Plus className="mr-2 size-4" /> Tambah Pemain
+          <Button size="xl" className="w-full sm:w-auto">
+            <Plus className="size-4" /> Tambah Pemain
           </Button>
         }
       />
@@ -86,7 +86,7 @@ export function AddPlayerDialog() {
 
             <div className="space-y-2">
               <label className="text-[10px] uppercase font-bold tracking-[0.2em] text-muted-foreground/60">Tanggal Lahir</label>
-              <Input type="date" {...register("dateOfBirth")} className="h-11 rounded-xl bg-background/40" />
+              <Input type="date" {...register("dateOfBirth")} className="h-11 rounded-xl bg-background/40 scheme-dark [&::-webkit-calendar-picker-indicator]:invert" />
               {errors.dateOfBirth && <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>}
             </div>
 
@@ -104,7 +104,7 @@ export function AddPlayerDialog() {
                 render={({ field }) => (
                   <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
                     <SelectTrigger className="h-11 rounded-xl bg-background/40">
-                      <SelectValue placeholder={isGroupsLoading ? "Memuat..." : "Pilih Kelompok"} />
+                      <SelectValue>{groups?.find((g: any) => g.id === field.value)?.name || (isGroupsLoading ? "Memuat..." : "Pilih Kelompok")}</SelectValue>
                     </SelectTrigger>
                     <SelectContent className="rounded-xl">
                       {groups?.map((group: { id: string; name: string }) => (

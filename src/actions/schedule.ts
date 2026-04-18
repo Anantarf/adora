@@ -63,7 +63,7 @@ export async function createEventAction(data: { title: string; description?: str
         data: {
           title: data.title,
           description: data.description || null,
-          date: toJakartaDate(data.date),
+          date: new Date(data.date),
           type: data.type,
           location: data.location || null,
           homebaseId: data.homebaseId || null,
@@ -100,7 +100,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
         data: {
           title: data.title,
           description: data.description || null,
-          date: toJakartaDate(data.date),
+          date: new Date(data.date),
           type: data.type,
           location: data.location || null,
           homebaseId: data.homebaseId || null,
@@ -190,7 +190,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         },
         attendances: {
           include: {
-            player: { select: { id: true, name: true } },
+            player: { select: { id: true, name: true, schoolOrigin: true } },
           },
           orderBy: { player: { name: "asc" } },
         },
@@ -207,7 +207,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
       const groupIds = event.eventGroups.map((eg) => eg.groupId);
       const players = await prisma.player.findMany({
         where: { groupId: { in: groupIds }, isDeleted: false },
-        select: { id: true, name: true },
+        select: { id: true, name: true, schoolOrigin: true },
         orderBy: { name: "asc" },
       });
 
@@ -220,7 +220,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         playerId: p.id,
         eventId: event.id,
         createdAt: new Date(),
-        player: { id: p.id, name: p.name },
+        player: { id: p.id, name: p.name, schoolOrigin: p.schoolOrigin },
       }));
     }
 

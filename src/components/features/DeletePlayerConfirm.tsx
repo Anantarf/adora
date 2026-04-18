@@ -36,8 +36,8 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
 
         <div className="py-6 flex flex-col gap-4">
           <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
-            <p className="text-sm font-semibold text-foreground">
-              Apakah Anda yakin ingin mengarsipkan data <span className="font-bold underline">{player.name}</span>?
+            <p className="text-sm font-medium text-foreground leading-relaxed">
+              Apakah Anda yakin ingin mengarsipkan data <span className="font-heading tracking-widest uppercase">{player.name}</span>?
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />

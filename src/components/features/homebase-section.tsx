@@ -9,7 +9,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
   return (
     <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl md:text-5xl font-bold text-primary mb-4 text-center uppercase tracking-widest">
+        <h2 className="font-heading text-4xl md:text-5xl font-bold text-primary mb-4 text-center uppercase tracking-widest">
           Lokasi Kami
         </h2>
         <p className="text-center text-foreground/60 mb-16 text-lg">
@@ -22,7 +22,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
               key={homebase.id}
               className="bg-card border-2 border-primary p-6 md:p-8 rounded-[16px] shadow-sm hover:bg-white/20 transition-all duration-300 group"
             >
-              <h3 className="text-2xl font-bold text-primary mb-3 group-hover:text-yellow-400 transition break-words">
+              <h3 className="font-heading text-2xl font-bold text-primary mb-3 group-hover:text-yellow-400 transition break-words">
                 {homebase.name}
               </h3>
               <div className="space-y-3 text-foreground/80 mb-6">

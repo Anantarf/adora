@@ -63,7 +63,7 @@ export function HomebaseSelector({
               : "border-white/20 hover:border-primary hover:bg-primary/5"
           }`}
         >
-          <h3 className="font-bold text-xl text-primary mb-2 break-words">
+          <h3 className="font-heading font-bold text-xl text-primary mb-2 break-words">
             {homebase.name}
           </h3>
           {showFull && (

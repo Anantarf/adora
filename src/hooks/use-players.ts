@@ -10,11 +10,12 @@ import { QUERY_KEYS } from "@/lib/constants";
  */
 
 // 1. Hook (GET): Tarik data pemain via Server Action
-export const usePlayers = (groupId?: string, searchQuery?: string) => {
+export const usePlayers = (groupId?: string, searchQuery?: string, enabled = true) => {
   return useQuery({
     queryKey: [...QUERY_KEYS.PLAYERS(groupId), searchQuery],
     queryFn: () => getPlayersAction(groupId, searchQuery),
     staleTime: 1000 * 60 * 5,
+    enabled,
   });
 };
 
@@ -26,6 +27,7 @@ export const useAddPlayer = () => {
     mutationFn: (data: any) => addPlayerAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUPS });
     },
   });
 };
@@ -38,6 +40,7 @@ export const useUpdatePlayer = () => {
     mutationFn: ({ id, data }: { id: string; data: { name?: string; dateOfBirth?: string; schoolOrigin?: string; groupId?: string; parentId?: string } }) => updatePlayerAction(id, data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUPS });
     },
   });
 };
@@ -50,6 +53,7 @@ export const useDeletePlayer = () => {
     mutationFn: (data: any) => deletePlayerAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUPS });
     },
   });
 };
@@ -62,6 +66,7 @@ export const useAddBatchPlayers = () => {
     mutationFn: (data: any) => addBatchPlayersAction(data).then(unwrapAction),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PLAYERS_BASE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUPS });
     },
   });
 };

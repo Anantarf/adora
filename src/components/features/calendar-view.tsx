@@ -102,6 +102,11 @@ export function CalendarView({ events }: CalendarViewProps) {
           right: "today",
         }}
         events={events}
+        eventTimeFormat={{
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        }}
         height="auto"
         contentHeight="auto"
         aspectRatio={2.8}

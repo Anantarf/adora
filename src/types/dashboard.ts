@@ -94,6 +94,7 @@ export interface Player {
   dateOfBirth: Date | string;
   groupId: string | null;
   parentId: string | null;
+  createdAt?: string | Date;
   group?: {
     id: string;
     name: string;

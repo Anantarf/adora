@@ -13,10 +13,10 @@ import { AttendanceStatus } from "@/types/dashboard";
 type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[number];
 
 const STATUS_CONFIG: Record<AttendanceStatus, { label: string; color: string }> = {
-  HADIR: { label: "Hadir", color: "bg-green-100 text-green-700 border-green-300" },
-  IZIN:  { label: "Izin",  color: "bg-amber-100 text-amber-700 border-amber-300" },
-  SAKIT: { label: "Sakit", color: "bg-orange-100 text-orange-700 border-orange-300" },
-  ALPA:  { label: "Alpa",  color: "bg-red-100 text-red-700 border-red-300" },
+  HADIR: { label: "HADIR", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
+  IZIN: { label: "IZIN", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
+  SAKIT: { label: "SAKIT", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" },
+  ALPA: { label: "ALPA", color: "bg-destructive/10 text-destructive border-destructive/20" },
 };
 
 export function StatsBadge({ status, value }: { status: AttendanceStatus; value: number }) {
@@ -67,33 +67,20 @@ export function AttendanceCardView() {
     <div className="space-y-8">
       {months.map((monthKey) => (
         <div key={monthKey}>
-          <h2 className="text-xl font-bold uppercase tracking-widest text-foreground mb-4 pl-2 border-l-4 border-primary">
-            {monthKey}
-          </h2>
+          <h2 className="font-heading text-xl font-bold uppercase tracking-widest text-foreground mb-4 pl-2 border-l-4 border-primary">{monthKey}</h2>
           <div className="space-y-3">
             {groupedByMonth[monthKey].map((event) => (
-              <Button
-                key={event.id}
-                variant="outline"
-                onClick={() => setSelectedEventId(event.id)}
-                className="w-full h-auto p-4 justify-start hover:bg-muted/60 transition-colors"
-              >
-                <div className="flex w-full items-center gap-4">
-                  <div className="flex gap-2 min-w-fit">
+              <Button key={event.id} variant="outline" onClick={() => setSelectedEventId(event.id)} className="w-full h-auto p-4 sm:p-5 justify-start hover:bg-muted/60 transition-colors rounded-xl border border-border/50">
+                <div className="flex flex-col md:flex-row w-full md:items-center justify-between gap-4 md:gap-6">
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="font-heading tracking-widest uppercase text-lg text-foreground mb-1 truncate">{event.title}</div>
+                    <div className="text-xs font-bold text-muted-foreground opacity-80">{format(new Date(event.date), "dd MMM yyyy • HH:mm", { locale: idLocale })}</div>
+                    {event.groups.length > 0 && <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground opacity-50 mt-1.5 truncate">{event.groups.map((g) => g.name).join(", ")}</div>}
+                  </div>
+                  <div className="flex flex-wrap gap-2 shrink-0">
                     {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
                       <StatsBadge key={s} status={s} value={event.stats[s]} />
                     ))}
-                  </div>
-                  <div className="flex-1 text-left">
-                    <div className="font-bold text-sm">{event.title}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {format(new Date(event.date), "dd MMM yyyy HH:mm", { locale: idLocale })}
-                    </div>
-                    {event.groups.length > 0 && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        {event.groups.map((g) => g.name).join(", ")}
-                      </div>
-                    )}
                   </div>
                 </div>
               </Button>
@@ -102,9 +89,7 @@ export function AttendanceCardView() {
         </div>
       ))}
 
-      {selectedEventId && (
-        <AttendanceDetailModal eventId={selectedEventId} onClose={() => setSelectedEventId(null)} />
-      )}
+      {selectedEventId && <AttendanceDetailModal eventId={selectedEventId} onClose={() => setSelectedEventId(null)} />}
     </div>
   );
 }

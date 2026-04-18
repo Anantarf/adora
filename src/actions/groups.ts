@@ -14,10 +14,10 @@ export async function getGroupsAction() {
         homebase: { select: { id: true, name: true } },
         _count: {
           select: {
-            player: { where: { isDeleted: false } }
-          }
-        }
-      }
+            player: { where: { isDeleted: false } },
+          },
+        },
+      },
     });
   } catch (error) {
     console.error("Error fetching groups:", error);
@@ -74,6 +74,13 @@ export async function deleteGroupAction(id: string) {
   try {
     await requireAdmin();
     await prisma.$transaction(async (tx) => {
+      // 1. Lepaskan semua pemain yang terikat ke kelompok ini
+      await tx.player.updateMany({
+        where: { groupId: id },
+        data: { groupId: null },
+      });
+
+      // 2. Hapus kelompok
       await tx.group.delete({ where: { id } });
       await createAuditLog(tx, "DELETE", "group", id);
     });
@@ -82,6 +89,6 @@ export async function deleteGroupAction(id: string) {
     return { success: true };
   } catch (error) {
     console.error("Error deleting group:", error);
-    return { success: false, error: "Gagal menghapus grup (mungkin masih ada pemain di dalamnya)" };
+    return { success: false, error: "Gagal menghapus grup" };
   }
 }
