@@ -50,15 +50,15 @@ export function AddCertificateDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="sm" className="h-10 px-4 uppercase font-bold tracking-widest text-[10px] shadow-lg shadow-primary/20">
-            <Plus className="mr-2 size-3.5" /> Tambah Sertifikat
+          <Button size="xl" className="w-full sm:w-auto shadow-lg shadow-primary/20">
+            <Plus className="size-4" /> Tambah Sertifikat
           </Button>
         }
       />
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="font-heading text-xl uppercase tracking-wider text-secondary flex items-center gap-2">
-            <FileBadge className="size-5 text-primary" /> Upload Sertifikat
+            <FileBadge className="size-5 text-primary" /> Unggah Sertifikat
           </DialogTitle>
           <DialogDescription className="text-xs">Tambah sertifikat prestasi untuk pemain atau seluruh kelompok.</DialogDescription>
         </DialogHeader>
@@ -73,7 +73,7 @@ export function AddCertificateDialog() {
           <div className="flex flex-col gap-1.5">
             <label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">URL File Sertifikat</label>
             <Input placeholder="https://drive.google.com/... atau /uploads/cert-001.pdf" value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
-            <p className="text-[10px] text-muted-foreground/70">Gunakan link Google Drive, Dropbox, atau URL publik lainnya.</p>
+            <p className="text-[10px] text-muted-foreground/70">Gunakan tautan Google Drive, Dropbox, atau URL publik lainnya.</p>
           </div>
 
           {/* Assignment Mode */}

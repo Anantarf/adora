@@ -5,26 +5,9 @@ import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates"
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
 import { toast } from "sonner";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export default function CertificatesPage() {
   const { data: certificates, isLoading } = useCertificates();
@@ -44,12 +27,8 @@ export default function CertificatesPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">
-            Manajemen Sertifikat
-          </h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">
-            Upload, kelola, dan assign sertifikat prestasi digital kepada pemain atau kelas.
-          </p>
+          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Manajemen Sertifikat</h1>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Unggah, kelola, dan tetapkan sertifikat prestasi digital kepada pemain atau kelompok.</p>
         </div>
         <AddCertificateDialog />
       </div>
@@ -59,21 +38,11 @@ export default function CertificatesPage() {
         <Table className="min-w-150">
           <TableHeader className="bg-muted/30">
             <TableRow className="hover:bg-transparent border-b border-border/50">
-              <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
-                No
-              </TableHead>
-              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
-                Judul Sertifikat
-              </TableHead>
-              <TableHead className="w-44 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
-                Ditujukan Kepada
-              </TableHead>
-              <TableHead className="w-36 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
-                Tanggal Upload
-              </TableHead>
-              <TableHead className="w-28 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">
-                Aksi
-              </TableHead>
+              <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
+              <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Judul Sertifikat</TableHead>
+              <TableHead className="w-44 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Ditujukan Kepada</TableHead>
+              <TableHead className="w-36 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Tanggal Unggah</TableHead>
+              <TableHead className="w-28 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -130,12 +99,7 @@ export default function CertificatesPage() {
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <a
-                      href={cert.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center h-8 px-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors text-sm"
-                    >
+                    <a href={cert.fileUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center h-8 px-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors text-sm">
                       <ExternalLink className="size-3.5 mr-1" />
                       <span className="text-[10px] uppercase font-bold tracking-wider">Lihat</span>
                     </a>
@@ -143,35 +107,22 @@ export default function CertificatesPage() {
                     <AlertDialog>
                       <AlertDialogTrigger
                         render={
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-2 hover:bg-destructive/10 hover:text-destructive"
-                          >
+                          <Button variant="ghost" size="sm" className="h-8 px-2 hover:bg-destructive/10 hover:text-destructive">
                             <Trash2 className="size-3.5" />
                           </Button>
                         }
                       />
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle className="font-heading uppercase tracking-wider text-secondary">
-                            Hapus Sertifikat?
-                          </AlertDialogTitle>
+                          <AlertDialogTitle className="font-heading uppercase tracking-wider text-secondary">Hapus Sertifikat?</AlertDialogTitle>
                           <AlertDialogDescription className="flex flex-col gap-2">
-                            <span className="text-destructive font-semibold">
-                              Sertifikat &quot;{cert.title}&quot; akan dihapus permanen.
-                            </span>
-                            <span className="text-muted-foreground text-sm">
-                              Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi.
-                            </span>
+                            <span className="text-destructive font-semibold">Sertifikat &quot;{cert.title}&quot; akan dihapus permanen.</span>
+                            <span className="text-muted-foreground text-sm">Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi.</span>
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Batal</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(cert.id)}
-                            className="bg-destructive text-white hover:bg-destructive/90"
-                          >
+                          <AlertDialogAction onClick={() => handleDelete(cert.id)} className="bg-destructive text-white hover:bg-destructive/90">
                             Hapus Sertifikat
                           </AlertDialogAction>
                         </AlertDialogFooter>
