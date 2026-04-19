@@ -40,7 +40,7 @@ export default function PlayersPage() {
     if (groups && groups.length > 0 && !selectedGroupId) {
       setSelectedGroupId(groups[0].id);
     }
-  }, [groups, selectedGroupId]);
+  }, [groups]);
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
   const filteredPlayers = players || [];
@@ -56,11 +56,12 @@ export default function PlayersPage() {
       {uiState?.type === "view-player" && <ViewPlayerDialog player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} onDelete={() => setUiState({ type: "delete-player", payload: uiState.payload })} />}
       {uiState?.type === "delete-player" && <DeletePlayerConfirm player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
 
-      <section className="flex flex-col gap-4">
-        <div className="border-b border-border/50 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
+        <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Data Pemain & Kelompok</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">Kelola roster latihan ADORA Basketball</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola roster latihan ADORA Basketball</p>
         </div>
+      </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
@@ -82,13 +83,12 @@ export default function PlayersPage() {
             </div>
           </div>
         </div>
-      </section>
 
       {/* Control Bar */}
       <div className="bg-card border border-border/50 rounded-lg p-3 flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-50">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <Input placeholder={selectedGroup ? `Cari pemain di ${selectedGroup.name}...` : "Cari pemain..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-10 w-full bg-background/50" />
+          <Input placeholder={selectedGroup?.name ? `Cari pemain di ${selectedGroup.name}...` : "Cari pemain..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-10 w-full bg-background/50" />
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setUiState({ type: "add-group" })} className="h-10 font-bold uppercase tracking-widest text-xs hidden sm:flex">
@@ -147,18 +147,18 @@ export default function PlayersPage() {
             {selectedGroup && (
               <div className="flex items-center justify-between gap-4 flex-wrap bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <div className="flex flex-col">
-                  <h2 className="font-heading text-xl uppercase tracking-widest text-foreground">{selectedGroup.name}</h2>
-                  <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup.description) || "Grup Latihan"}</p>
+                  <h2 className="font-heading text-xl uppercase tracking-widest text-foreground">{selectedGroup?.name}</h2>
+                  <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup?.description ?? null) || "Grup Latihan"}</p>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" variant="outline" className="h-8 px-3 font-semibold text-xs" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup })}>
+                  <Button size="sm" variant="outline" className="h-8 px-3 font-semibold text-xs" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup as Group })}>
                     <Edit2 className="size-3 mr-1.5" /> Edit
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     className="h-8 px-3 font-semibold text-xs border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => setUiState({ type: "delete-group", payload: selectedGroup })}
+                    onClick={() => setUiState({ type: "delete-group", payload: selectedGroup as Group })}
                   >
                     <Trash2 className="size-3 mr-1.5" /> Hapus
                   </Button>

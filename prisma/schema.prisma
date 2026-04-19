@@ -202,7 +202,7 @@ model statistic {
   playerId    String
   periodId    String?
   createdAt   DateTime  @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime  @default(now()) @updatedAt
 
   player      player             @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
   period      evaluationPeriod?  @relation(fields: [periodId], references: [id], onDelete: SetNull, map: "Statistic_periodId_fkey")
@@ -237,6 +237,7 @@ model user {
   username      String?    @unique(map: "User_username_key")
   password      String?
   role          user_role  @default(PARENT)
+  isDeleted     Boolean    @default(false)
   account          account[]
   auditlog         auditlog[]
   player           player[]

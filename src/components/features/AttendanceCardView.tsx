@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Loader2 } from "lucide-react";
+import { Loader2, Search } from "lucide-react";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { Button } from "@/components/ui/button";
@@ -13,18 +13,29 @@ type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[numbe
 
 export function AttendanceCardView() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { data: events, isLoading } = useEventsWithAttendance();
   const eventList = events ?? [];
 
-  const groupedByMonth = useMemo(() => {
-    const grouped: Record<string, EventItem[]> = {};
-    for (const event of eventList) {
-      const key = format(new Date(event.date), "MMMM yyyy", { locale: idLocale });
-      if (!grouped[key]) grouped[key] = [];
-      grouped[key].push(event);
-    }
-    return grouped;
-  }, [eventList]);
+  const filteredEvents = useMemo(() => {
+    if (!searchQuery.trim()) return eventList;
+    const q = searchQuery.toLowerCase();
+    return eventList.filter(
+      (e) =>
+        e.title.toLowerCase().includes(q) ||
+        e.groups.some((g) => g.name.toLowerCase().includes(q))
+    );
+  }, [eventList, searchQuery]);
+
+  const groupedByMonth = useMemo(
+    () =>
+      filteredEvents.reduce<Record<string, EventItem[]>>((acc, event) => {
+        const key = format(new Date(event.date), "MMMM yyyy", { locale: idLocale });
+        (acc[key] ??= []).push(event);
+        return acc;
+      }, {}),
+    [filteredEvents],
+  );
 
   const months = useMemo(
     () =>
@@ -46,18 +57,29 @@ export function AttendanceCardView() {
     );
   }
 
-  if (months.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
-        <p className="text-sm text-muted-foreground font-medium">Belum ada agenda tercatat.</p>
-        <p className="text-xs text-muted-foreground">Buat agenda di halaman Jadwal, lalu pilih kelompok pesertanya.</p>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-5">
-      {months.map((monthKey) => (
+    <div className="flex flex-col gap-6">
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
+        <input
+          type="text"
+          placeholder="Cari Agenda atau Nama Kelompok..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/50 bg-background/50 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm font-medium"
+        />
+      </div>
+
+      {months.length === 0 ? (
+        <div className="flex flex-col items-center justify-center h-64 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
+          <p className="text-sm text-muted-foreground font-medium">
+            {searchQuery ? "Hasil tidak ditemukan untuk pencarian ini." : "Belum ada agenda yang tercatat."}
+          </p>
+          {!searchQuery && <p className="text-xs text-muted-foreground">Silakan buat agenda baru di menu Jadwal.</p>}
+        </div>
+      ) : (
+        <div className="space-y-5">
+          {months.map((monthKey) => (
         <div key={monthKey}>
           <h2 className="font-heading text-lg font-bold uppercase tracking-widest text-foreground mb-2.5 pl-2 border-l-4 border-primary">{monthKey}</h2>
           <div className="space-y-2">
@@ -96,6 +118,8 @@ export function AttendanceCardView() {
           </div>
         </div>
       ))}
+        </div>
+      )}
 
       {selectedEventId && <AttendanceDetailModal eventId={selectedEventId} onClose={() => setSelectedEventId(null)} />}
     </div>

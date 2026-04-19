@@ -15,11 +15,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { dribbleTotal, passingTotal } from "@/lib/metrics";
 
-// ─── Helpers ─────────────────────────────────────────
-const dribbleTotal = (m: MetricsJson["dribble"]) => m.inAndOut + m.crossover + m.vLeft + m.vRight + m.betweenLegsLeft + m.betweenLegsRight;
-
-const passingTotal = (m: MetricsJson["passing"]) => m.chestPass + m.bouncePass + m.overheadPass;
+const periodDisplayLabel = (period: { name: string; startDate: Date | string; endDate: Date | string }) => {
+  const trimmedName = (period.name || "").trim();
+  if (trimmedName) return trimmedName;
+  const start = new Date(period.startDate);
+  const end = new Date(period.endDate);
+  const startLabel = Number.isNaN(start.getTime()) ? "?" : start.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  const endLabel = Number.isNaN(end.getTime()) ? "?" : end.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
+  return `Periode ${startLabel} - ${endLabel}`;
+};
 
 // ─── Page ─────────────────────────────────────────────
 export default function StatisticsPage() {
@@ -40,7 +46,7 @@ export default function StatisticsPage() {
       if (active) setSelectedPeriodId(active.id);
       else if (periods.length > 0) setSelectedPeriodId(periods[0].id);
     }
-  }, [periods, selectedPeriodId]);
+  }, [periods]);
 
   // Build stats lookup: playerId → stat record
   const statsMap = useMemo(() => Object.fromEntries((stats ?? []).map((s) => [s.player.id, s])), [stats]);
@@ -48,28 +54,17 @@ export default function StatisticsPage() {
   // Group players by group (preserving group order from groups list)
   const playersByGroup = useMemo(() => {
     if (!players || !groups) return [];
-    const grouped = players.reduce<Record<string, Player[]>>((acc, p) => {
-      const key = p.groupId || "ungrouped";
-      acc[key] = acc[key] || [];
-      acc[key].push(p);
-      return acc;
-    }, {});
-    return groups.map((group) => ({ group, players: grouped[group.id] ?? [] })).filter((g) => g.players.length > 0);
+    return groups
+      .map((group) => ({ group, players: players.filter((p) => p.groupId === group.id) }))
+      .filter((g) => g.players.length > 0);
   }, [players, groups]);
 
+  const statsSummary = useMemo(() => ({
+    published: stats?.filter((s) => s.status === "Published").length ?? 0,
+    draft: stats?.filter((s) => s.status === "Draft").length ?? 0,
+  }), [stats]);
+
   const selectedPeriod = periods?.find((p) => p.id === selectedPeriodId);
-
-  const periodDisplayLabel = (period: { id: string; name: string; startDate: Date | string; endDate: Date | string; isActive?: boolean }) => {
-    const trimmedName = (period.name || "").trim();
-    if (trimmedName) return trimmedName;
-
-    const start = new Date(period.startDate);
-    const end = new Date(period.endDate);
-    const startLabel = Number.isNaN(start.getTime()) ? "?" : start.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
-    const endLabel = Number.isNaN(end.getTime()) ? "?" : end.toLocaleDateString("id-ID", { day: "2-digit", month: "short", year: "numeric" });
-
-    return `Periode ${startLabel} - ${endLabel}`;
-  };
 
   const handleSetActive = async (periodId: string) => {
     try {
@@ -85,16 +80,16 @@ export default function StatisticsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Evaluasi Rapor Kinerja</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Rekam dan finalisasi data performa individual anak didik per periode evaluasi.</p>
+          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Rapor & Statistik Pemain</h1>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola hasil evaluasi dan statistik performa teknis pemain.</p>
         </div>
         <AddPeriodDialog />
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 items-end bg-card p-4 rounded-xl border border-border/40 shadow-sm">
+      <div className="flex flex-col md:flex-row gap-4 items-start bg-card p-4 rounded-xl border border-border/40 shadow-sm">
         {/* Period selector */}
-        <div className="flex flex-col gap-1.5 w-full md:w-75">
+        <div className="flex flex-col gap-1.5 w-full md:min-w-[16rem]">
           <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Periode Evaluasi</label>
           <div className="relative group">
             <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
@@ -102,7 +97,7 @@ export default function StatisticsPage() {
               <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
                 <SelectValue placeholder={periods?.length === 0 ? "Belum ada periode - buat dulu" : "Pilih Periode"}>{selectedPeriod ? periodDisplayLabel(selectedPeriod) : undefined}</SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
                 {periods?.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
                     {periodDisplayLabel(p)} {p.isActive && <span className="text-primary font-bold">(Aktif)</span>}
@@ -119,15 +114,17 @@ export default function StatisticsPage() {
         </div>
 
         {/* Group filter */}
-        <div className="flex flex-col gap-1.5 w-full md:w-62.5">
+        <div className="flex flex-col gap-1.5 w-full md:min-w-[14rem]">
           <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Filter Kelompok</label>
           <div className="relative group">
             <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
             <Select value={activeGroup} onValueChange={(v) => setActiveGroup(v ?? "all")}>
               <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder="Pilih Kelompok" />
+                <SelectValue placeholder="Pilih Kelompok">
+                  {activeGroup === "all" ? "Semua Kelompok" : groups?.find((g) => g.id === activeGroup)?.name}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
                 <SelectItem value="all">Semua Kelompok</SelectItem>
                 {groups?.map((g) => (
                   <SelectItem key={g.id} value={g.id}>
@@ -139,16 +136,25 @@ export default function StatisticsPage() {
           </div>
         </div>
 
-        {/* Stats summary */}
+        {/* Stats summary - Precise Alignment Structure */}
         {selectedPeriodId && !statsLoading && (
-          <div className="flex gap-3 ml-auto">
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Sudah Dinilai</p>
-              <p className="text-xl font-bold text-primary">{stats?.filter((s) => s.status === "Published").length ?? 0}</p>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total Pemain</p>
-              <p className="text-xl font-bold text-foreground">{players?.length ?? 0}</p>
+          <div className="md:self-end ml-auto">
+            <div className="flex items-center gap-6 h-11">
+              <div className="w-px h-6 bg-border/60 mx-2" />
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Selesai</span>
+                <span className="text-sm font-bold text-primary tabular-nums">{statsSummary.published}</span>
+              </div>
+              <div className="size-1 rounded-full bg-border/60" />
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Draft</span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{statsSummary.draft}</span>
+              </div>
+              <div className="size-1 rounded-full bg-border/60" />
+              <div className="flex items-center gap-2 whitespace-nowrap">
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Total</span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{players?.length ?? 0}</span>
+              </div>
             </div>
           </div>
         )}
@@ -220,24 +226,20 @@ export default function StatisticsPage() {
                               </Badge>
                             )}
                             {stat?.status === "Draft" && (
-                              <Badge variant="outline" className="border-yellow-500/50 text-yellow-600 bg-yellow-500/10 text-[10px]">
+                              <Badge variant="outline" className="border-sky-500/50 text-sky-400 bg-sky-500/10 text-[10px] uppercase tracking-widest font-bold">
                                 Draft
                               </Badge>
                             )}
                             {stat?.status === "Published" && (
-                              <Badge variant="outline" className="border-green-500/50 text-green-600 bg-green-500/10 text-[10px]">
-                                Published
+                              <Badge variant="outline" className="border-primary/50 text-primary bg-primary/10 text-[10px] uppercase tracking-widest font-bold font-heading">
+                                Selesai
                               </Badge>
                             )}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
-                              {stat && (
-                                <Button variant="ghost" size="icon" className="size-8 text-muted-foreground hover:text-foreground" onClick={() => setHistoryTarget(stat.id)} title="Lihat riwayat revisi">
-                                  <History className="size-4" />
-                                </Button>
-                              )}
-                              <AddStatDialog player={player} periodId={selectedPeriodId} existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined} />
+
+                              <AddStatDialog player={player} periodId={selectedPeriodId} isPeriodActive={selectedPeriod?.isActive} existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined} />
                             </div>
                           </TableCell>
                         </TableRow>

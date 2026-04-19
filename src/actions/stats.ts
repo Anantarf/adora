@@ -88,28 +88,18 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
   const stat = await prisma.$transaction(async (tx) => {
     const period = await tx.evaluationPeriod.findUnique({ where: { id: data.periodId } });
     if (!period) throw new Error("Periode evaluasi tidak ditemukan.");
+    if (!period.isActive) throw new Error("Akses Ditolak: Periode evaluasi ini sudah dikunci/ditutup. Perubahan nilai tidak lagi diizinkan.");
 
     const existing = await tx.statistic.findUnique({
       where: { playerId_periodId: { playerId: data.playerId, periodId: data.periodId } },
     });
 
     if (existing) {
-      // Simpan snapshot lama ke history sebelum update
-      await tx.statisticHistory.create({
-        data: {
-          statisticId: existing.id,
-          metricsJson: existing.metricsJson as string,
-          status: existing.status,
-          editedBy: userId ?? null,
-        },
-      });
-
       const updated = await tx.statistic.update({
         where: { id: existing.id },
         data: {
           metricsJson: JSON.stringify(data.metrics),
           status: data.status,
-          updatedAt: new Date(),
         },
       });
 
@@ -124,7 +114,6 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
         date: period.startDate,
         metricsJson: JSON.stringify(data.metrics),
         status: data.status,
-        updatedAt: new Date(),
       },
     });
 

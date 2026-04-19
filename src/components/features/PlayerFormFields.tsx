@@ -26,13 +26,17 @@ export function PlayerFormFields({
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-muted-foreground">Nama Lengkap</label>
+        <label className="text-xs font-semibold text-muted-foreground">
+          Nama Lengkap <span className="text-destructive">*</span>
+        </label>
         <Input {...register("name")} placeholder="Contoh: Dimas Anggara" className={inputClassName} />
         {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-muted-foreground">Tanggal Lahir</label>
+        <label className="text-xs font-semibold text-muted-foreground">
+          Tanggal Lahir <span className="text-destructive">*</span>
+        </label>
         <Input type="date" {...register("dateOfBirth")} className={`${inputClassName} scheme-dark [&::-webkit-calendar-picker-indicator]:invert`} />
         {errors.dateOfBirth && <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>}
       </div>
@@ -122,7 +126,9 @@ export function PlayerFormFields({
       </div>
 
       <div className="space-y-2 md:col-span-2">
-        <label className="text-xs font-semibold text-muted-foreground">Kelompok</label>
+        <label className="text-xs font-semibold text-muted-foreground">
+          Kelompok <span className="text-destructive">*</span>
+        </label>
         <Controller
           control={control}
           name="groupId"

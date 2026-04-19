@@ -29,7 +29,16 @@
       "Bash(git commit -m 'refactor: medium & low priority code quality improvements:*)",
       "Bash(git commit -m 'refactor: standardize auth patterns & simplify hooks:*)",
       "Bash(npx shadcn@latest add badge label switch --yes)",
-      "Bash(node -e \"const x=require\\('xlsx'\\); const wb=x.readFile\\('./2026 - Biodata Peserta Didik ADORA Gandul .xlsx'\\); console.log\\('Sheet Names:', wb.SheetNames\\); const ws=wb.Sheets[wb.SheetNames[0]]; console.log\\(JSON.stringify\\(x.utils.sheet_to_json\\(ws,{header:1}\\).slice\\(0,8\\),null,2\\)\\);\")"
+      "Bash(node -e \"const x=require\\('xlsx'\\); const wb=x.readFile\\('./2026 - Biodata Peserta Didik ADORA Gandul .xlsx'\\); console.log\\('Sheet Names:', wb.SheetNames\\); const ws=wb.Sheets[wb.SheetNames[0]]; console.log\\(JSON.stringify\\(x.utils.sheet_to_json\\(ws,{header:1}\\).slice\\(0,8\\),null,2\\)\\);\")",
+      "Bash(grep *)",
+      "Bash(mysql -h 127.0.0.1 -P 3308 -u root -e \"SHOW VARIABLES LIKE 'lower_case_table_names';\")",
+      "Bash(2>&1)",
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma migrate deploy)",
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db pull --print)",
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script)",
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --stdin)",
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --file prisma/migrations/20260419121320_sync_schema_history/migration.sql)",
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --file prisma/migrations/20260419121829_statistic_updatedAt_drop_db_default/migration.sql)"
     ]
   }
 }

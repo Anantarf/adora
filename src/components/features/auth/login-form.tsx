@@ -8,22 +8,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { 
-  Trophy, 
-  Lock, 
-  User, 
-  ArrowRight, 
-  Loader2,
-  ShieldCheck,
-  AlertCircle,
-  Cone,
-  Eye,
-  EyeOff
-} from "lucide-react";
+import { Lock, User, ArrowRight, Loader2, ShieldCheck, AlertCircle, Cone, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
-  password: z.string().min(5, "Sandi minimal 5 karakter"),
+  password: z.string().min(5, "Kata sandi minimal 5 karakter"),
 });
 
 type LoginFormValues = z.infer<typeof loginSchema>;
@@ -42,12 +31,12 @@ export function LoginForm() {
     defaultValues: {
       username: "",
       password: "",
-    }
+    },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     setLoading(true);
-    
+
     try {
       const result = await signIn("credentials", {
         redirect: false,
@@ -56,14 +45,14 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error("Gagal Masuk", {
-          description: result.error || "Username atau sandi salah.",
-          icon: <AlertCircle className="size-4" />
+        toast.error("Gagal masuk", {
+          description: result.error || "Username atau kata sandi tidak sesuai.",
+          icon: <AlertCircle className="size-4" />,
         });
       } else {
-        toast.success("Login Berhasil", {
-          description: "Mengarahkan ke portal...",
-          icon: <ShieldCheck className="size-4" />
+        toast.success("Masuk berhasil", {
+          description: "Anda akan diarahkan ke portal sesuai akses.",
+          icon: <ShieldCheck className="size-4" />,
         });
         // Fetch fresh session to read role, then navigate to the correct portal
         const session = await getSession();
@@ -71,8 +60,8 @@ export function LoginForm() {
         router.push(role === "ADMIN" ? "/dashboard" : "/parent");
       }
     } catch (err) {
-      toast.error("Sistem Bermasalah", {
-        description: "Terjadi kesalahan pada server. Coba lagi nanti."
+      toast.error("Terjadi gangguan sistem", {
+        description: "Silakan coba kembali beberapa saat lagi.",
       });
     } finally {
       setLoading(false);
@@ -80,109 +69,79 @@ export function LoginForm() {
   };
 
   return (
-    <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-[420px] z-10"
-      >
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-          {/* Logo & Header */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center size-16 bg-gradient-to-tr from-primary to-primary/60 rounded-2xl mb-4 shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]">
-              <Cone className="size-10 text-white animate-bounce-subtle" />
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-120 z-10">
+      <div className="bg-[#171717]/95 border border-white/10 rounded-3xl px-7 py-8 shadow-[0_14px_30px_rgba(0,0,0,0.42)] sm:px-8">
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center size-15 bg-[#A98E33] rounded-2xl mb-5 shadow-[0_0_10px_rgba(169,142,51,0.14)]">
+            <Cone className="size-9 text-white" strokeWidth={2.1} />
+          </div>
+          <h1 className="text-white font-heading uppercase tracking-widest leading-none">
+            <span className="block text-[34px]">Adora</span>
+            <span className="block text-[22px] mt-1.5 text-white/85">Basketball Club</span>
+          </h1>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Username</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <User className="size-5 text-white/30 group-focus-within:text-[#D9B741] transition-colors" />
+                </div>
+                <input
+                  {...register("username")}
+                  type="text"
+                  disabled={loading}
+                  className="w-full bg-[#242424] border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-[#D9B741]/25 focus:border-[#D9B741]/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                  placeholder="Masukkan username"
+                />
+              </div>
+              {errors.username && <p className="text-xs text-red-400 mt-1 ml-1">{errors.username.message}</p>}
             </div>
-            <h1 className="text-4xl font-heading text-white tracking-[0.2em] uppercase mb-2">
-              Adora <span className="text-primary">Cloud</span>
-            </h1>
-            <p className="text-white/50 font-medium text-[10px] uppercase tracking-widest">
-              Portal Akses Pengurus & Orang Tua Siswa
-            </p>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Kata Sandi</label>
+              <div className="relative group">
+                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                  <Lock className="size-5 text-white/30 group-focus-within:text-[#D9B741] transition-colors" />
+                </div>
+                <input
+                  {...register("password")}
+                  type={showPassword ? "text" : "password"}
+                  disabled={loading}
+                  className="w-full bg-[#242424] border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-[#D9B741]/25 focus:border-[#D9B741]/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                  placeholder="••••••••"
+                />
+                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-5 flex items-center text-white/35 hover:text-white focus:outline-none transition-colors">
+                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
+                </button>
+              </div>
+              {errors.password && <p className="text-xs text-red-400 mt-1 ml-1">{errors.password.message}</p>}
+            </div>
           </div>
 
-          {/* Form Login */}
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div className="space-y-4">
-              {/* Username Input */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-medium text-white/40 uppercase tracking-[0.2em] ml-1">
-                  USERNAME
-                </label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <User className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
-                  </div>
-                  <input
-                    {...register("username")}
-                    type="text"
-                    disabled={loading}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
-                    placeholder="Masukkan Username Anda"
-                  />
-                </div>
-                {errors.username && (
-                  <p className="text-xs text-red-400 mt-1 ml-1">{errors.username.message}</p>
-                )}
-              </div>
+          <motion.button
+            whileTap={{ scale: 0.985 }}
+            type="submit"
+            disabled={loading}
+            className="w-full h-14 rounded-2xl bg-[#CFAC36] hover:bg-[#D7B74D] text-white font-bold tracking-widest text-xl uppercase shadow-[0_8px_18px_rgba(207,172,54,0.26)] transition-all group disabled:opacity-70 flex items-center justify-center"
+          >
+            {loading ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <span className="inline-flex items-center gap-2.5">
+                MASUK
+                <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
+              </span>
+            )}
+          </motion.button>
 
-              {/* Password Input */}
-              <div className="space-y-2">
-                <label className="text-[10px] font-medium text-white/40 uppercase tracking-[0.2em] ml-1">
-                  Kata Sandi
-                </label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Lock className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
-                  </div>
-                  <input
-                    {...register("password")}
-                    type={showPassword ? "text" : "password"}
-                    disabled={loading}
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
-                    placeholder="••••••••"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-white/30 hover:text-white focus:outline-none transition-colors"
-                  >
-                    {showPassword ? (
-                      <EyeOff className="size-5" />
-                    ) : (
-                      <Eye className="size-5" />
-                    )}
-                  </button>
-                </div>
-                {errors.password && (
-                  <p className="text-xs text-red-400 mt-1 ml-1">{errors.password.message}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Login Button */}
-            <motion.button
-              whileTap={{ scale: 0.98 }}
-              type="submit"
-              disabled={loading}
-              className="w-full bg-primary hover:bg-primary/90 text-white font-bold py-4 rounded-2xl shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all group disabled:opacity-70 uppercase tracking-widest text-xs"
-            >
-              {loading ? (
-                <Loader2 className="size-5 animate-spin" />
-              ) : (
-                <div className="flex items-center justify-center gap-2">
-                  <span>Masuk</span>
-                  <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
-                </div>
-              )}
-            </motion.button>
-
-            {/* Footer Links */}
-            <div className="text-center pt-2">
-              <p className="text-white/30 text-xs font-medium">
-                Kendala akses? Hubungi Admin Adora.
-              </p>
-            </div>
-          </form>
-        </div>
-      </motion.div>
+          <div className="text-center pt-1">
+            <p className="text-white/45 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>
+          </div>
+        </form>
+      </div>
+    </motion.div>
   );
 }

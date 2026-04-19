@@ -12,7 +12,7 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
   await requireAdmin();
 
   return await prisma.user.findMany({
-    where: { role },
+    where: { role, isDeleted: false },
     select: {
       id: true,
       name: true,
@@ -36,6 +36,10 @@ export async function createUserAction(data: { username: string; name: string; e
   const existing = await prisma.user.findUnique({ where: { username: data.username } });
   if (existing) {
     throw new Error("Username sudah digunakan oleh akun lain.");
+  }
+  if (data.email) {
+    const emailConflict = await prisma.user.findUnique({ where: { email: data.email } });
+    if (emailConflict) throw new Error("Email sudah terdaftar pada akun lain.");
   }
 
   const defaultPassword = process.env.DEFAULT_RESET_PASSWORD;
@@ -71,6 +75,15 @@ export async function updateUserAction(
   const userId = session.user.id ?? null;
 
   const updated = await prisma.$transaction(async (tx) => {
+    if (data.username) {
+      const usernameConflict = await tx.user.findFirst({ where: { username: data.username, id: { not: id } } });
+      if (usernameConflict) throw new Error("Username sudah digunakan oleh akun lain.");
+    }
+    if (data.email) {
+      const emailConflict = await tx.user.findFirst({ where: { email: data.email, id: { not: id } } });
+      if (emailConflict) throw new Error("Email sudah terdaftar pada akun lain.");
+    }
+
     const res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
     await createAuditLog(tx, "UPDATE", "user", id, userId);
     return res;
@@ -113,7 +126,7 @@ export async function deleteUserAction(id: string) {
       throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
     }
     await createAuditLog(tx, "DELETE", "user", id, userId);
-    await tx.user.delete({ where: { id } });
+    await tx.user.update({ where: { id }, data: { isDeleted: true } });
   });
 
   revalidatePath("/dashboard/users");
@@ -126,9 +139,14 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
   const userId = session.user.id ?? null;
 
   const result = await prisma.$transaction(async (tx) => {
+    if (data.email) {
+      const emailConflict = await tx.user.findFirst({ where: { email: data.email, id: { not: userId! } } });
+      if (emailConflict) throw new Error("Email tersebut sudah digunakan oleh akun lain.");
+    }
+
     const updateData: Partial<{ name: string; email: string | null; password: string }> = {
       ...(data.name ? { name: data.name } : {}),
-      ...(data.email !== undefined ? { email: data.email === "" ? null : data.email } : {}),
+      ...(data.email !== undefined ? { email: data.email || null } : {}),
     };
     if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
 

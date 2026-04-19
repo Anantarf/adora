@@ -54,5 +54,5 @@ ALTER TABLE `Player` ADD CONSTRAINT `Player_parentId_fkey` FOREIGN KEY (`parentI
 ALTER TABLE `Player` ADD CONSTRAINT `Player_preferred_homebaseId_fkey` FOREIGN KEY (`preferred_homebaseId`) REFERENCES `Homebase`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- RedefineIndex
-CREATE INDEX `Event_date_idx` ON `Event`(`date`);
 DROP INDEX `event_date_idx` ON `event`;
+CREATE INDEX `Event_date_idx` ON `Event`(`date`);

@@ -5,6 +5,7 @@ import { Loader2, User, FileText, Activity } from "lucide-react";
 import { useFamily, type FamilyPlayer } from "@/hooks/use-family";
 import { usePlayerStats } from "@/hooks/use-player-stats";
 import type { MetricsJson } from "@/types/dashboard";
+import { dribbleTotal, passingTotal, overallScore } from "@/lib/metrics";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,16 +14,6 @@ import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
   LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line,
 } from "recharts";
-
-// ─── Helpers ─────────────────────────────────────────
-const dribbleTotal = (d: MetricsJson["dribble"]) =>
-  d.inAndOut + d.crossover + d.vLeft + d.vRight + d.betweenLegsLeft + d.betweenLegsRight;
-
-const passingTotal = (p: MetricsJson["passing"]) =>
-  p.chestPass + p.bouncePass + p.overheadPass;
-
-const overallScore = (m: MetricsJson) =>
-  dribbleTotal(m.dribble) + passingTotal(m.passing) + m.layUp + m.shooting;
 
 // ─── Page ─────────────────────────────────────────────
 export default function ParentDashboard() {
@@ -87,7 +78,7 @@ export default function ParentDashboard() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-secondary tracking-wide uppercase">Pantauan Pemain</h1>
-          <p className="text-muted-foreground text-sm font-medium">Laporan evaluasi kinerja individual anak Anda.</p>
+          <p className="text-muted-foreground text-sm font-medium">Laporan evaluasi performa individual anak Anda.</p>
         </div>
 
         {children.length > 1 ? (

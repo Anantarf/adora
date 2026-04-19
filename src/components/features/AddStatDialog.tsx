@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
 
 // ─── Schema ───────────────────────────────────────────
-const score = z.coerce.number().min(0, "Min 0").max(999, "Terlalu besar");
+const score = z.coerce.number().min(0, "Min 0").max(100, "Maks 100");
 
 const statSchema = z.object({
   dribble: z.object({
@@ -37,7 +37,7 @@ const PASSING_DEFAULTS = { chestPass: 0, bouncePass: 0, overheadPass: 0 };
 const DEFAULT_METRICS: StatForm = { dribble: DRIBBLE_DEFAULTS, passing: PASSING_DEFAULTS, layUp: 0, shooting: 0, notes: "" };
 
 // ─── Helper: sum number values of an object ──────────
-const sumValues = (obj: Record<string, number>) => Object.values(obj).reduce((a, b) => a + b, 0);
+const sumValues = (obj: Record<string, any>) => Object.values(obj).reduce((a, b) => a + (Number(b) || 0), 0);
 
 // ─── Sub-section Component ────────────────────────────
 function ScoreSection({ title, total, children }: { title: string; total: number; children: React.ReactNode }) {
@@ -56,7 +56,7 @@ function ScoreField({ label, error, ...props }: { label: string; error?: string 
   return (
     <div className="flex flex-col gap-1">
       <label className="text-[10px] font-medium text-muted-foreground">{label}</label>
-      <Input type="number" min={0} step={1} {...props} className="h-9 text-center font-bold tabular-nums" />
+      <Input type="number" min={0} max={100} step={1} onInput={(e) => { if (e.currentTarget.value.length > 3) e.currentTarget.value = e.currentTarget.value.slice(0, 3); }} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
   );
@@ -68,13 +68,16 @@ type ExistingStat = { id: string; metrics: MetricsJson; status: "Draft" | "Publi
 export function AddStatDialog({
   player,
   periodId,
+  isPeriodActive = true,
   existingStat,
 }: {
   player: Player;
   periodId: string;
+  isPeriodActive?: boolean;
   existingStat?: ExistingStat;
 }) {
   const [open, setOpen] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<"Draft" | "Published" | null>(null);
   const { mutateAsync, isPending } = useSubmitStatistic();
   const isEdit = !!existingStat;
 
@@ -91,14 +94,17 @@ export function AddStatDialog({
   const dribbleTotal = useMemo(() => sumValues(values.dribble ?? {}), [values.dribble]);
   const passingTotal = useMemo(() => sumValues(values.passing ?? {}), [values.passing]);
 
-  const onSubmit = async (data: StatForm) => {
+  const onSubmit = async (data: StatForm, status: "Draft" | "Published") => {
+    setPendingStatus(status);
     try {
-      await mutateAsync({ playerId: player.id, periodId, metrics: data as MetricsJson, status: "Published" });
-      toast.success(`Nilai ${player.name} berhasil ${isEdit ? "diperbarui" : "disimpan"}.`);
+      await mutateAsync({ playerId: player.id, periodId, metrics: data as MetricsJson, status });
+      toast.success(`Nilai ${player.name} berhasil ${status === "Draft" ? "disimpan sementara" : "di-publish"}.`);
       setOpen(false);
       if (!isEdit) reset(DEFAULT_METRICS);
     } catch (e: any) {
       toast.error(e.message || "Gagal menyimpan nilai.");
+    } finally {
+      setPendingStatus(null);
     }
   };
 
@@ -115,18 +121,25 @@ export function AddStatDialog({
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-[92vh] overflow-y-auto bg-card border-border/50">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 bg-primary/10 rounded-lg"><LineChart className="size-5 text-primary" /></div>
-            <div>
-              <DialogTitle className="text-base font-bold uppercase tracking-widest">{isEdit ? "Edit" : "Input"} Nilai — {player.name}</DialogTitle>
-              <p className="text-[10px] text-muted-foreground uppercase tracking-widest">
-                {player.group?.name ?? "Tanpa Kelompok"}
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 bg-primary/10 rounded-xl shrink-0"><LineChart className="size-6 text-primary" /></div>
+            <div className="flex flex-col gap-0.5">
+              <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Revisi" : "Input"} Nilai</DialogTitle>
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                {player.name} <span className="mx-1.5 text-primary/50">•</span> {player.group?.name ?? "Tanpa Kelompok"}
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3 mt-1">
-            {/* Dribble */}
+          {!isPeriodActive && (
+            <div className="p-3 mb-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium text-center tracking-wide">
+              Periode evaluasi ini sudah tidak aktif. Data nilai tidak dapat diubah.
+            </div>
+          )}
+
+          <form className="flex flex-col gap-3 mt-1">
+            <fieldset disabled={!isPeriodActive} className="flex flex-col gap-3">
+              {/* Dribble */}
             <ScoreSection title="Dribble" total={dribbleTotal}>
               <ScoreField label="In & Out" {...register("dribble.inAndOut")} error={errors.dribble?.inAndOut?.message} />
               <ScoreField label="Crossover" {...register("dribble.crossover")} error={errors.dribble?.crossover?.message} />
@@ -145,16 +158,12 @@ export function AddStatDialog({
 
             {/* Lay Up & Shooting */}
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Lay Up</span>
-                <Input type="number" min={0} {...register("layUp")} className="h-9 text-center font-bold tabular-nums" />
-                {errors.layUp && <p className="text-[10px] text-destructive">{errors.layUp.message}</p>}
-              </div>
-              <div className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Shooting</span>
-                <Input type="number" min={0} {...register("shooting")} className="h-9 text-center font-bold tabular-nums" />
-                {errors.shooting && <p className="text-[10px] text-destructive">{errors.shooting.message}</p>}
-              </div>
+              {([["layUp", "Lay Up"], ["shooting", "Shooting"]] as const).map(([name, label]) => (
+                <div key={name} className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
+                  <ScoreField label="" {...register(name)} error={errors[name]?.message} />
+                </div>
+              ))}
             </div>
 
             {/* Notes */}
@@ -162,14 +171,15 @@ export function AddStatDialog({
               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (opsional)</label>
               <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
             </div>
+            </fieldset>
 
             {/* Summary */}
             <div className="grid grid-cols-4 gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
               {[
                 { label: "Dribble", val: dribbleTotal },
                 { label: "Passing", val: passingTotal },
-                { label: "Lay Up", val: values.layUp ?? 0 },
-                { label: "Shooting", val: values.shooting ?? 0 },
+                { label: "Lay Up", val: Number(values.layUp || 0) },
+                { label: "Shooting", val: Number(values.shooting || 0) },
               ].map(({ label, val }) => (
                 <div key={label} className="text-center">
                   <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{label}</p>
@@ -178,9 +188,16 @@ export function AddStatDialog({
               ))}
             </div>
 
-            <Button type="submit" disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 mt-1">
-              {isPending ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : isEdit ? "Simpan Perubahan" : "Simpan & Publish"}
-            </Button>
+            {isPeriodActive && (
+              <div className="flex flex-col gap-2 mt-1">
+                <Button type="button" onClick={handleSubmit((d) => onSubmit(d, "Published"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 bg-primary hover:bg-primary/90 text-primary-foreground">
+                  {pendingStatus === "Published" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan & Publish"}
+                </Button>
+                <Button type="button" variant="outline" onClick={handleSubmit((d) => onSubmit(d, "Draft"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary transition-colors">
+                  {pendingStatus === "Draft" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan Draft...</> : "Simpan sebagai Draft"}
+                </Button>
+              </div>
+            )}
           </form>
         </DialogContent>
       </Dialog>

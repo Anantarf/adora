@@ -119,6 +119,17 @@
   --sidebar-ring: #D4AF37;
 }
 
+/* Prevent number spinners from showing (they look boxy/ugly) */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

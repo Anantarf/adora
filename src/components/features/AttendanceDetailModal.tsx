@@ -50,7 +50,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         onClose();
       })
       .finally(() => setLoading(false));
-  }, [eventId, onClose]);
+  }, [eventId]); // onClose intentionally excluded — inline arrow ref changes every parent render
 
   const handleMarkAllHadir = () => {
     if (!event) return;
@@ -104,7 +104,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
   return (
     <Dialog open={!!eventId} onOpenChange={onClose}>
-      <DialogContent className="w-[98vw] sm:w-[97vw] lg:w-[96vw] xl:max-w-4xl max-w-none sm:max-w-none h-[92vh] p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
+      <DialogContent className="w-[96vw] xl:max-w-4xl max-w-none sm:max-w-none h-[92vh] p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-20 gap-3">
             <Loader2 className="size-8 animate-spin text-primary/50" />
@@ -201,8 +201,8 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                         </div>
 
                         <Select value={currentStatus ?? ""} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
-                          <SelectTrigger className={`w-full sm:w-27.5 h-9 text-[10px] font-bold uppercase tracking-widest ${triggerStyle} transition-colors shrink-0`}>
-                            <SelectValue placeholder="— Pilih Status —" />
+                          <SelectTrigger className={`w-full sm:w-40 h-9 text-[10px] font-bold uppercase tracking-widest ${triggerStyle} transition-colors shrink-0`}>
+                            <SelectValue placeholder="Pilih Status" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-border/50">
                             {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (

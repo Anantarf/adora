@@ -1,6 +1,7 @@
 "use client";
 
-import { FileBadge, Loader2, Trash2, ExternalLink, Users, User } from "lucide-react";
+import { useMemo, useState } from "react";
+import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
 import { toast } from "sonner";
@@ -12,6 +13,19 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 export default function CertificatesPage() {
   const { data: certificates, isLoading } = useCertificates();
   const deleteCert = useDeleteCertificate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredCertificates = useMemo(() => {
+    if (!certificates) return [];
+    if (!searchQuery.trim()) return certificates;
+    const q = searchQuery.toLowerCase();
+    return certificates.filter(
+      (cert) =>
+        cert.title.toLowerCase().includes(q) ||
+        cert.player?.name.toLowerCase().includes(q) ||
+        cert.group?.name.toLowerCase().includes(q)
+    );
+  }, [certificates, searchQuery]);
 
   const handleDelete = async (id: string) => {
     try {
@@ -33,6 +47,18 @@ export default function CertificatesPage() {
         <AddCertificateDialog />
       </div>
 
+      {/* Search Bar */}
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
+        <input
+          type="text"
+          placeholder="Cari Judul, Nama Pemain, atau Kelompok..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/50 bg-background/50 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm font-medium transition-all"
+        />
+      </div>
+
       {/* Table */}
       <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
         <Table className="min-w-150">
@@ -49,24 +75,30 @@ export default function CertificatesPage() {
             {isLoading && (
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
-                  <div className="flex items-center justify-center gap-2 text-primary font-bold">
-                    <Loader2 className="size-5 animate-spin" /> Memuat data sertifikat...
+                  <div className="flex items-center justify-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
+                    <Loader2 className="size-4 animate-spin" /> Memuat data...
                   </div>
                 </TableCell>
               </TableRow>
             )}
-            {!isLoading && (!certificates || certificates.length === 0) && (
+            {!isLoading && filteredCertificates.length === 0 && (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center">
-                  <div className="flex flex-col items-center gap-1.5">
-                    <FileBadge className="size-8 text-muted-foreground/30" />
-                    <p className="text-muted-foreground font-semibold">Belum ada sertifikat.</p>
-                    <p className="text-muted-foreground/60 text-sm">Tambah sertifikat menggunakan tombol di atas.</p>
+                <TableCell colSpan={5} className="h-40 text-center">
+                  <div className="flex flex-col items-center gap-2 py-8">
+                    <FileBadge className="size-10 text-muted-foreground/30 mb-2" />
+                    <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">
+                      {searchQuery ? "Hasil tidak ditemukan" : "Belum ada sertifikat"}
+                    </p>
+                    <p className="text-muted-foreground/60 text-xs">
+                      {searchQuery 
+                        ? "Coba gunakan kata kunci pencarian yang berbeda." 
+                        : "Unggah sertifikat baru untuk memulai manajemen."}
+                    </p>
                   </div>
                 </TableCell>
               </TableRow>
             )}
-            {certificates?.map((cert, idx) => (
+            {filteredCertificates.map((cert, idx) => (
               <TableRow key={cert.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
                 <TableCell className="text-center font-medium text-muted-foreground">{idx + 1}</TableCell>
                 <TableCell>

@@ -33,11 +33,6 @@ const CalendarView = dynamic(() => import("@/components/features/calendar-view")
   ),
 });
 
-/**
- * ADORA Basketball - Schedule Command Center
- * High-performance declarative management of club events.
- */
-
 const eventSchema = z.object({
   eventId: z.string().optional(),
   title: z.string().min(3, "Judul minimal 3 karakter"),
@@ -179,6 +174,7 @@ export default function SchedulePage() {
 
   const onSubmit = async (data: EventFormValues) => {
     if (!date) return toast.error("Pilih tanggal terlebih dahulu!");
+    if (selectedGroupIds.length === 0) return toast.error("Pilih minimal satu kelompok latihan!");
 
     try {
       const isoWithWib = combineDateAndTime(date, data.time);
@@ -218,7 +214,15 @@ export default function SchedulePage() {
 
   return (
     <>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-4 w-full max-w-7xl mx-auto pb-6">
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
+          <div>
+            <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Manajemen Jadwal & Agenda</h1>
+            <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola jadwal latihan, tanding, dan agenda resmi klub.</p>
+          </div>
+        </div>
+
         {/* FORM INPUT — Full width di atas */}
         <Card className="glass-card p-4 rounded-[2rem] border-white/20 relative group overflow-hidden">
           <div className="absolute top-0 right-0 size-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
@@ -278,10 +282,12 @@ export default function SchedulePage() {
                 </div>
               </div>
 
-              {/* Baris 1.5: Kelompok Peserta */}
+              {/* Baris 1.5: Kelompok Latihan */}
               {groups.length > 0 && (
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Kelompok Peserta</label>
+                  <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                    Kelompok Latihan <span className="text-destructive">*</span>
+                  </label>
                   <div className="flex flex-wrap gap-2">
                     {groups.map((g: { id: string; name: string }) => {
                       const checked = selectedGroupIds.includes(g.id);

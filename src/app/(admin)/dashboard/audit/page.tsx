@@ -28,8 +28,41 @@ const ACTION_CONFIG: Record<ActionKey, { color: string; icon: typeof Plus; label
 };
 
 function getActionConfig(action: string) {
-  const key = action.toUpperCase() as ActionKey;
-  return ACTION_CONFIG[key] || ACTION_CONFIG.default;
+  const key = action.toUpperCase();
+  if (key.includes("CREATE") || key.includes("ADD")) return ACTION_CONFIG.CREATE;
+  if (key.includes("UPDATE") || key.includes("EDIT") || key.includes("SET")) return ACTION_CONFIG.UPDATE;
+  if (key.includes("DELETE") || key.includes("REMOVE")) return ACTION_CONFIG.DELETE;
+  return ACTION_CONFIG.default;
+}
+
+const TARGET_TABLE_DICT: Record<string, string> = {
+  user: "Pengguna",
+  parent: "Orang Tua",
+  player: "Pemain",
+  group: "Kelompok",
+  attendance: "Kehadiran",
+  statistic: "Statistik",
+  evaluationperiod: "Periode Evaluasi",
+  auditlog: "Log System",
+};
+
+function getHumanReadableTable(table: string): string {
+  return TARGET_TABLE_DICT[table.toLowerCase()] || table;
+}
+
+function getHumanReadableText(action: string, table: string): string {
+  const a = action.toUpperCase();
+  const t = getHumanReadableTable(table).toLowerCase();
+
+  if (a.includes("CREATE_STATS")) return `Memasukkan draft ${t} baru`;
+  if (a.includes("UPDATE_STATS")) return `Memperbarui & finalisasi ${t}`;
+  if (a.includes("SET_ACTIVE")) return `Membuka dan mengaktifkan ${t}`;
+
+  if (a === "CREATE") return `Mendaftarkan ${t} baru`;
+  if (a === "UPDATE") return `Memperbarui informasi ${t}`;
+  if (a === "DELETE") return `Menghapus ${t} dari sistem`;
+
+  return `Melakukan [${a}] terhadap ${t}`;
 }
 
 // ─── Formatter ──────────────────────────────────────────
@@ -76,31 +109,20 @@ function AuditLogEntry({ log, index }: { log: AuditLogRecord; index: number }) {
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
             <Database className="size-2.5 inline mr-1" />
-            {log.targetTable}
+            {getHumanReadableTable(log.targetTable)}
           </span>
         </div>
 
         {/* Details */}
-        <p className="text-sm font-semibold text-foreground mt-1.5">
-          {log.action.toUpperCase()} pada tabel{" "}
-          <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono border border-border/50">
-            {log.targetTable}
-          </code>
-          {log.recordId && (
-            <>
-              {" "}• ID:{" "}
-              <code className="text-xs bg-muted px-1.5 py-0.5 rounded font-mono border border-border/50">
-                {log.recordId.slice(0, 12)}...
-              </code>
-            </>
-          )}
+        <p className="text-sm font-semibold text-foreground mt-1.5 leading-snug">
+          {getHumanReadableText(log.action, log.targetTable)}
         </p>
 
         {/* Meta */}
         <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground font-medium">
           <span className="flex items-center gap-1">
             <User className="size-2.5" />
-            {log.user?.username || log.user?.name || "System"}
+            {log.user?.username || log.user?.name || "Sistem Otomatis"}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="size-2.5" />
