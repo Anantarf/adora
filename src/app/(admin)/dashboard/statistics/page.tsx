@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { Loader2, LayoutList as SelectIcon, CalendarRange, History } from "lucide-react";
+import { Loader2, LayoutList as SelectIcon, CalendarRange, Trash2 } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
-import { usePeriods, useSetActivePeriod } from "@/hooks/use-evaluation-periods";
+import { usePeriods, useSetActivePeriod, useDeletePeriod } from "@/hooks/use-evaluation-periods";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
@@ -15,7 +15,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { dribbleTotal, passingTotal } from "@/lib/metrics";
+
+const STATUS_BADGE_CONFIG = {
+  Draft:     { label: "Draft",   className: "border-sky-500/50 text-sky-400 bg-sky-500/10" },
+  Published: { label: "Selesai", className: "border-primary/50 text-primary bg-primary/10 font-heading" },
+} satisfies Record<string, { label: string; className: string }>;
+
+const MetricCell = ({ v }: { v?: number }) =>
+  v != null
+    ? <span className="font-bold text-primary">{v}</span>
+    : <span className="text-muted-foreground">—</span>;
 
 const periodDisplayLabel = (period: { name: string; startDate: Date | string; endDate: Date | string }) => {
   const trimmedName = (period.name || "").trim();
@@ -31,13 +42,12 @@ const periodDisplayLabel = (period: { name: string; startDate: Date | string; en
 export default function StatisticsPage() {
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<string>("all");
-  const [historyTarget, setHistoryTarget] = useState<string | null>(null);
-
-  const { data: periods } = usePeriods();
+  const { data: periods} = usePeriods();
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId);
   const { mutateAsync: setActive } = useSetActivePeriod();
+  const { mutateAsync: deletePeriod } = useDeletePeriod();
 
   // Auto-select active period on first load
   useEffect(() => {
@@ -64,7 +74,10 @@ export default function StatisticsPage() {
     draft: stats?.filter((s) => s.status === "Draft").length ?? 0,
   }), [stats]);
 
+  const totalPlayerCount = playersByGroup.reduce((n, g) => n + g.players.length, 0);
+
   const selectedPeriod = periods?.find((p) => p.id === selectedPeriodId);
+  const canDeletePeriod = statsSummary.published === 0 && statsSummary.draft === 0;
 
   const handleSetActive = async (periodId: string) => {
     try {
@@ -75,13 +88,24 @@ export default function StatisticsPage() {
     }
   };
 
+  const handleDeletePeriod = async () => {
+    if (!selectedPeriodId) return;
+    try {
+      await deletePeriod(selectedPeriodId);
+      toast.success("Periode evaluasi berhasil dihapus.");
+      setSelectedPeriodId(null);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Gagal menghapus periode evaluasi.");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Rapor & Statistik Pemain</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola hasil evaluasi dan statistik performa teknis pemain.</p>
+          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Input Penilaian</h1>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Manajemen rapor dan statistik pemain klub</p>
         </div>
         <AddPeriodDialog />
       </div>
@@ -90,32 +114,85 @@ export default function StatisticsPage() {
       <div className="flex flex-col md:flex-row gap-4 items-start bg-card p-4 rounded-xl border border-border/40 shadow-sm">
         {/* Period selector */}
         <div className="flex flex-col gap-1.5 w-full md:min-w-[16rem]">
-          <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Periode Evaluasi</label>
-          <div className="relative group">
+          <div className="flex items-center gap-3 ml-1">
+            <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mr-1">Periode Evaluasi</label>
+            {/* Contextual Actions */}
+            <div className="flex items-center gap-1.5">
+              {selectedPeriod && !selectedPeriod.isActive && (
+                <button onClick={() => handleSetActive(selectedPeriod.id)} className="text-[10px] px-2.5 py-1 rounded flex items-center justify-center font-bold uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                  Aktifkan
+                </button>
+              )}
+              {selectedPeriod && (
+                <AlertDialog>
+                  <AlertDialogTrigger className="p-1.5 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors outline-none">
+                    <Trash2 className="size-3.5" />
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="font-heading uppercase tracking-widest text-secondary">Hapus Periode?</AlertDialogTitle>
+                      <AlertDialogDescription className="flex flex-col gap-2">
+                         <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
+                         {!canDeletePeriod ? (
+                           <span className="text-muted-foreground text-xs leading-relaxed">
+                            Anda tidak bisa menghapus periode ini karena sudah terdapat {statsSummary.published + statsSummary.draft} data statistik pemain di dalamnya. Kosongkan data terlebih dahulu jika ingin menghapus.
+                           </span>
+                         ) : (
+                           <span className="text-muted-foreground text-xs leading-relaxed">
+                            Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus periode yang tepat.
+                           </span>
+                         )}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Batal</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDeletePeriod} disabled={!canDeletePeriod} className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50">
+                        Iya, Hapus Permanen
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              )}
+            </div>
+          </div>
+          <div className="relative group w-full">
             <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
             <Select value={selectedPeriodId ?? ""} onValueChange={setSelectedPeriodId}>
               <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder={periods?.length === 0 ? "Belum ada periode - buat dulu" : "Pilih Periode"}>{selectedPeriod ? periodDisplayLabel(selectedPeriod) : undefined}</SelectValue>
+                <SelectValue placeholder={periods?.length === 0 ? "Belum ada periode - buat dulu" : "Pilih Periode"}>
+                  {selectedPeriod ? (
+                    <div className="flex items-center">
+                      <span>{periodDisplayLabel(selectedPeriod)}</span>
+                      {selectedPeriod.isActive && (
+                        <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
+                          Aktif
+                        </span>
+                      )}
+                    </div>
+                  ) : undefined}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
                 {periods?.map((p) => (
                   <SelectItem key={p.id} value={p.id}>
-                    {periodDisplayLabel(p)} {p.isActive && <span className="text-primary font-bold">(Aktif)</span>}
+                    <div className="flex items-center justify-between w-full">
+                      <span>{periodDisplayLabel(p)}</span>
+                      {p.isActive && (
+                        <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
+                          Aktif
+                        </span>
+                      )}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
-          {selectedPeriod && !selectedPeriod.isActive && (
-            <button onClick={() => handleSetActive(selectedPeriod.id)} className="text-[10px] text-primary underline underline-offset-2 text-left w-fit">
-              Jadikan periode aktif
-            </button>
-          )}
         </div>
 
         {/* Group filter */}
         <div className="flex flex-col gap-1.5 w-full md:min-w-[14rem]">
-          <label className="text-[10px] uppercase font-medium tracking-widest text-muted-foreground">Filter Kelompok</label>
+          <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Filter Kelompok</label>
           <div className="relative group">
             <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
             <Select value={activeGroup} onValueChange={(v) => setActiveGroup(v ?? "all")}>
@@ -153,7 +230,7 @@ export default function StatisticsPage() {
               <div className="size-1 rounded-full bg-border/60" />
               <div className="flex items-center gap-2 whitespace-nowrap">
                 <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Total</span>
-                <span className="text-sm font-bold text-foreground tabular-nums">{players?.length ?? 0}</span>
+                <span className="text-sm font-bold text-foreground tabular-nums">{totalPlayerCount}</span>
               </div>
             </div>
           </div>
@@ -195,6 +272,23 @@ export default function StatisticsPage() {
                   </TableCell>
                 </TableRow>
               )}
+              {!playersLoading && !statsLoading && playersByGroup.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    {(players?.length ?? 0) === 0 ? (
+                      <>
+                        <p className="font-semibold text-foreground text-sm">Belum ada pemain terdaftar</p>
+                        <p className="text-xs text-muted-foreground mt-1">Tambah pemain terlebih dahulu melalui halaman Pemain.</p>
+                      </>
+                    ) : (
+                      <>
+                        <p className="font-semibold text-foreground text-sm">Semua pemain belum memiliki kelompok</p>
+                        <p className="text-xs text-muted-foreground mt-1">Tetapkan kelompok pada pemain melalui halaman Pemain.</p>
+                      </>
+                    )}
+                  </TableCell>
+                </TableRow>
+              )}
               {!playersLoading &&
                 !statsLoading &&
                 playersByGroup.map(({ group, players: gPlayers }) => (
@@ -215,26 +309,14 @@ export default function StatisticsPage() {
                         <TableRow key={player.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
                           <TableCell className="text-center text-muted-foreground font-medium">{idx + 1}</TableCell>
                           <TableCell className="font-semibold">{player.name}</TableCell>
-                          <TableCell className="text-center font-mono text-sm">{m ? <span className="font-bold text-primary">{dribbleTotal(m.dribble)}</span> : <span className="text-muted-foreground">—</span>}</TableCell>
-                          <TableCell className="text-center font-mono text-sm">{m ? <span className="font-bold text-primary">{passingTotal(m.passing)}</span> : <span className="text-muted-foreground">—</span>}</TableCell>
-                          <TableCell className="text-center font-mono text-sm">{m ? <span className="font-bold text-primary">{m.layUp}</span> : <span className="text-muted-foreground">—</span>}</TableCell>
-                          <TableCell className="text-center font-mono text-sm">{m ? <span className="font-bold text-primary">{m.shooting}</span> : <span className="text-muted-foreground">—</span>}</TableCell>
+                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m ? dribbleTotal(m.dribble) : undefined} /></TableCell>
+                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m ? passingTotal(m.passing) : undefined} /></TableCell>
+                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m?.layUp} /></TableCell>
+                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m?.shooting} /></TableCell>
                           <TableCell className="text-center">
-                            {!stat && (
-                              <Badge variant="outline" className="text-muted-foreground border-border/50 text-[10px]">
-                                Belum
-                              </Badge>
-                            )}
-                            {stat?.status === "Draft" && (
-                              <Badge variant="outline" className="border-sky-500/50 text-sky-400 bg-sky-500/10 text-[10px] uppercase tracking-widest font-bold">
-                                Draft
-                              </Badge>
-                            )}
-                            {stat?.status === "Published" && (
-                              <Badge variant="outline" className="border-primary/50 text-primary bg-primary/10 text-[10px] uppercase tracking-widest font-bold font-heading">
-                                Selesai
-                              </Badge>
-                            )}
+                            <Badge variant="outline" className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}>
+                              {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum"}
+                            </Badge>
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">

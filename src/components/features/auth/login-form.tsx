@@ -70,9 +70,9 @@ export function LoginForm() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-120 z-10">
-      <div className="bg-[#171717]/95 border border-white/10 rounded-3xl px-7 py-8 shadow-[0_14px_30px_rgba(0,0,0,0.42)] sm:px-8">
+      <div className="bg-login-card/95 border border-white/10 rounded-3xl px-7 py-8 shadow-login-card sm:px-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center size-15 bg-[#A98E33] rounded-2xl mb-5 shadow-[0_0_10px_rgba(169,142,51,0.14)]">
+          <div className="inline-flex items-center justify-center size-15 bg-login-icon rounded-2xl mb-5 shadow-sm">
             <Cone className="size-9 text-white" strokeWidth={2.1} />
           </div>
           <h1 className="text-white font-heading uppercase tracking-widest leading-none">
@@ -87,13 +87,13 @@ export function LoginForm() {
               <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Username</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <User className="size-5 text-white/30 group-focus-within:text-[#D9B741] transition-colors" />
+                  <User className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
                 </div>
                 <input
                   {...register("username")}
                   type="text"
                   disabled={loading}
-                  className="w-full bg-[#242424] border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-[#D9B741]/25 focus:border-[#D9B741]/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                  className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="Masukkan username"
                 />
               </div>
@@ -104,13 +104,13 @@ export function LoginForm() {
               <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Kata Sandi</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-white/30 group-focus-within:text-[#D9B741] transition-colors" />
+                  <Lock className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
                 </div>
                 <input
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
                   disabled={loading}
-                  className="w-full bg-[#242424] border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-[#D9B741]/25 focus:border-[#D9B741]/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+                  className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="••••••••"
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-5 flex items-center text-white/35 hover:text-white focus:outline-none transition-colors">
@@ -125,7 +125,7 @@ export function LoginForm() {
             whileTap={{ scale: 0.985 }}
             type="submit"
             disabled={loading}
-            className="w-full h-14 rounded-2xl bg-[#CFAC36] hover:bg-[#D7B74D] text-white font-bold tracking-widest text-xl uppercase shadow-[0_8px_18px_rgba(207,172,54,0.26)] transition-all group disabled:opacity-70 flex items-center justify-center"
+            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest text-xl uppercase shadow-login-btn transition-all group disabled:opacity-70 flex items-center justify-center"
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />

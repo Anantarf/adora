@@ -14,7 +14,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {homebases.map((homebase) => (
-            <div key={homebase.id} className="bg-card border-2 border-primary p-6 md:p-8 rounded-[16px] shadow-sm hover:bg-white/20 transition-all duration-300 group">
+            <div key={homebase.id} className="bg-card border-2 border-primary p-6 md:p-8 rounded-block shadow-sm hover:bg-white/20 transition-all duration-base group">
               <h3 className="font-heading text-2xl font-bold text-primary mb-3 group-hover:text-yellow-400 transition wrap-break-word">{homebase.name}</h3>
               <div className="space-y-3 text-foreground/80 mb-6">
                 <p className="wrap-break-word">
@@ -25,7 +25,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                 </p>
               </div>
               {homebase.description && <p className="text-foreground/60 mb-6 italic wrap-break-word">{homebase.description}</p>}
-              <Link href={`/register?homebase=${homebase.id}`} className="inline-block bg-primary text-white px-8 py-3 rounded font-bold hover:bg-primary/80 transition-all duration-300 transform hover:scale-105">
+              <Link href={`/register?homebase=${homebase.id}`} className="inline-block bg-primary text-white px-8 py-3 rounded font-bold hover:bg-primary/80 transition-all duration-base transform hover:scale-105">
                 Daftar di {homebase.name.split("(")[0].trim()}
               </Link>
             </div>

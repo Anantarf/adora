@@ -93,7 +93,7 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 gap-8 relative z-10">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <Card className="glass-card p-8 md:p-10 rounded-[3rem] border-white/20 shadow-2xl relative overflow-hidden group">
+          <Card className="glass-card p-8 md:p-10 rounded-card-xl border-white/20 shadow-2xl relative overflow-hidden group">
             {/* Background Accent */}
             <div className="absolute top-0 right-0 size-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
             
@@ -170,7 +170,7 @@ export default function ProfilePage() {
           </Card>
         </form>
 
-        <footer className="px-8 py-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 flex items-center justify-center gap-4 text-center">
+        <footer className="px-8 py-6 rounded-card bg-amber-500/5 border border-amber-500/10 flex items-center justify-center gap-4 text-center">
            <div className="size-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-500">
              <AlertCircle className="size-4" />
            </div>

@@ -12,11 +12,12 @@ import { PlayerFormFields } from "@/components/features/PlayerFormFields";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader2, FileUp } from "lucide-react";
 
 export function AddPlayerDialog() {
   const [open, setOpen] = useState(false);
   const [isBatchMode, setIsBatchMode] = useState(false);
+  const [step, setStep] = useState(1);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
   const { mutateAsync: addPlayer, isPending } = useAddPlayer();
 
@@ -24,9 +25,9 @@ export function AddPlayerDialog() {
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isValid },
     reset,
-  } = useForm<PlayerFormValues>({ resolver: zodResolver(playerSchema) });
+  } = useForm<PlayerFormValues>({ resolver: zodResolver(playerSchema), mode: "onChange" });
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {
@@ -42,7 +43,10 @@ export function AddPlayerDialog() {
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen);
-    if (!nextOpen) setIsBatchMode(false);
+    if (!nextOpen) {
+      setIsBatchMode(false);
+      setStep(1);
+    }
   };
 
   return (
@@ -69,21 +73,49 @@ export function AddPlayerDialog() {
           <div className="pt-4">
             <BatchPlayerUpload onDone={() => setOpen(false)} />
             <Button variant="ghost" className="w-full mt-4 text-sm font-medium text-muted-foreground" onClick={() => setIsBatchMode(false)}>
-              Kembali ke Input Manual
+              Kembali
             </Button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
-            <PlayerFormFields register={register} control={control} errors={errors} groups={groups} isGroupsLoading={isGroupsLoading} />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4 relative overflow-hidden">
+            <div className="max-h-dialog-sm overflow-y-auto overflow-x-hidden pr-2 pb-2 scrollbar-thin">
+              <PlayerFormFields register={register} control={control} errors={errors} groups={groups} isGroupsLoading={isGroupsLoading} step={step} />
+            </div>
 
-            <div className="pt-6 flex flex-col gap-2">
-              <Button type="submit" disabled={isPending} className="w-full h-10 font-semibold text-sm">
-                {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
-                Simpan Data
-              </Button>
-              <Button type="button" variant="ghost" className="w-full text-sm font-medium text-muted-foreground hover:text-primary" onClick={() => setIsBatchMode(true)}>
-                Unggah Banyak Pemain (File Excel)
-              </Button>
+            <div className="mt-2 pt-4 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-start">
+                {[1, 2].map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setStep(s)}
+                    className={`h-10 w-12 flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-base ${
+                      s === step
+                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                        : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex gap-2 w-full sm:w-auto">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="flex-1 sm:flex-none h-10 px-4 text-xs font-medium text-muted-foreground border-dashed border-muted-foreground/30 hover:border-primary/50 hover:text-primary hover:bg-primary/5 rounded-lg transition-all" 
+                  onClick={() => setIsBatchMode(true)}
+                >
+                  <FileUp className="size-3.5 mr-2 shrink-0" />
+                  Unggah Excel (Banyak Pemain)
+                </Button>
+                
+                <Button type="submit" disabled={!isValid || isPending} className={`flex-1 sm:flex-none h-10 px-6 font-bold tracking-widest uppercase text-xs shadow-lg rounded-lg ${isValid ? "shadow-primary/20" : ""}`}>
+                  {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
+                  Simpan
+                </Button>
+              </div>
             </div>
           </form>
         )}

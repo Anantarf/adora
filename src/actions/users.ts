@@ -28,8 +28,8 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
   });
 }
 
-// 2. Create New Parent Account
-export async function createUserAction(data: { username: string; name: string; email?: string; password?: string }) {
+// 2. Create New User Account
+export async function createUserAction(data: { username: string; name: string; email?: string; password?: string; role?: "PARENT" | "ADMIN" }) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
@@ -55,7 +55,7 @@ export async function createUserAction(data: { username: string; name: string; e
         name: data.name,
         email: data.email || null,
         password: hashedPassword,
-        role: "PARENT",
+        role: data.role || "PARENT",
       },
     });
     await createAuditLog(tx, "CREATE", "user", newUser.id, userId);
@@ -117,6 +117,11 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
 export async function deleteUserAction(id: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
+
+  const targetUser = await prisma.user.findUnique({ where: { id } });
+  if (targetUser?.username === "superadmin") {
+    throw new Error("Akun superadmin adalah sistem bawaan dan tidak dapat dihapus.");
+  }
 
   await prisma.$transaction(async (tx) => {
     const playerCount = await tx.player.count({

@@ -32,7 +32,7 @@ export default function PlayersPage() {
   const [debouncedSearch] = useDebounce(searchQuery, 300);
   const [uiState, setUiState] = useState<UIState>(null);
 
-  const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId || "all", debouncedSearch, !!selectedGroupId);
+  const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId ?? "", debouncedSearch, !!selectedGroupId);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
   // Auto-select first group on load
@@ -58,30 +58,28 @@ export default function PlayersPage() {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Data Pemain & Kelompok</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola roster latihan ADORA Basketball</p>
+          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Kelompok Latihan</h1>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Manajemen data pemain dan kelompok klub</p>
         </div>
       </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <FolderPlus className="size-5" />
+          {([
+            { icon: FolderPlus, label: "Kelompok", value: groups?.length ?? 0 },
+            { icon: Users,      label: "Pemain",   value: totalPlayers },
+          ] as const).map(({ icon: Icon, label, value }) => (
+            <div key={label} className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
+              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                <Icon className="size-5" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+                {isGroupsLoading
+                  ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" />
+                  : <p className="text-2xl font-heading tracking-widest">{value}</p>}
+              </div>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Kelompok</p>
-              {isGroupsLoading ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" /> : <p className="text-2xl font-heading tracking-widest">{groups?.length ?? 0}</p>}
-            </div>
-          </div>
-          <div className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <Users className="size-5" />
-            </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pemain</p>
-              {isGroupsLoading ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" /> : <p className="text-2xl font-heading tracking-widest">{totalPlayers}</p>}
-            </div>
-          </div>
+          ))}
         </div>
 
       {/* Control Bar */}
@@ -91,8 +89,8 @@ export default function PlayersPage() {
           <Input placeholder={selectedGroup?.name ? `Cari pemain di ${selectedGroup.name}...` : "Cari pemain..."} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9 h-10 w-full bg-background/50" />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setUiState({ type: "add-group" })} className="h-10 font-bold uppercase tracking-widest text-xs hidden sm:flex">
-            <FolderPlus className="size-4 mr-2" /> Kelompok Baru
+          <Button variant="outline" size="xl" onClick={() => setUiState({ type: "add-group" })} className="hidden sm:flex">
+            <FolderPlus className="size-4" /> Kelompok Baru
           </Button>
           <AddPlayerDialog />
         </div>
@@ -106,11 +104,14 @@ export default function PlayersPage() {
           ))}
         </div>
       ) : (groups?.length ?? 0) === 0 ? (
-        <div className="bg-card rounded-lg p-8 text-center flex flex-col items-center gap-3 border border-dashed border-border/50">
-          <FolderPlus className="size-8 text-muted-foreground/30" />
-          <p className="text-sm font-bold uppercase text-muted-foreground">Belum ada kelompok</p>
-          <Button variant="outline" onClick={() => setUiState({ type: "add-group" })} size="sm" className="font-bold uppercase text-xs">
-            Tambah Kelompok
+        <div className="bg-card rounded-lg p-12 text-center flex flex-col items-center gap-6 border border-dashed border-border/50">
+          <FolderPlus className="size-12 text-muted-foreground/20" />
+          <div className="space-y-1">
+            <p className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">Belum ada kelompok</p>
+            <p className="text-xs text-muted-foreground/60">Mulai dengan menambahkan kelompok latihan baru.</p>
+          </div>
+          <Button variant="outline" size="xl" onClick={() => setUiState({ type: "add-group" })}>
+            <FolderPlus className="size-4 mr-2" /> Tambah Kelompok
           </Button>
         </div>
       ) : (
@@ -152,7 +153,7 @@ export default function PlayersPage() {
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="h-8 px-3 font-semibold text-xs" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup as Group })}>
-                    <Edit2 className="size-3 mr-1.5" /> Edit
+                    <Edit2 className="size-3 mr-1.5" /> Ubah
                   </Button>
                   <Button
                     size="sm"
@@ -170,6 +171,7 @@ export default function PlayersPage() {
               <div className="bg-card border border-dashed border-border/50 rounded-lg p-10 text-center flex flex-col items-center gap-3">
                 <Users className="size-8 text-muted-foreground/30" />
                 <p className="text-xs font-bold tracking-widest uppercase text-muted-foreground">{searchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}</p>
+              <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Coba kata kunci lain." : "Tambah pemain baru menggunakan tombol di atas."}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

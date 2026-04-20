@@ -112,7 +112,7 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
         valid: preflight.validRows.length,
         invalid: preflight.errors.length,
       },
-      errors: preflight.errors.slice(0, 8),
+      errors: preflight.errors,
     });
 
     if (preflight.validRows.length === 0) {

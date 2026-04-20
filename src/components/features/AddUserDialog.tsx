@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAddUser } from "@/hooks/use-users";
+import { toast } from "sonner";
 import { Loader2, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,9 +28,11 @@ const userSchema = z.object({
 
 type UserForm = z.infer<typeof userSchema>;
 
-export function AddUserDialog() {
+export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }) {
   const [open, setOpen] = useState(false);
   const { mutateAsync: addUser, isPending } = useAddUser();
+
+  const isParent = role === "PARENT";
 
   const {
     register,
@@ -53,7 +56,9 @@ export function AddUserDialog() {
         username: data.username,
         email: data.email || undefined,
         password: data.password,
+        role: role,
       });
+      toast.success(`Akun ${isParent ? "orang tua" : "admin"} berhasil dibuat.`);
       setOpen(false);
       reset();
     } catch {
@@ -65,23 +70,25 @@ export function AddUserDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="lg" className="uppercase font-bold tracking-widest text-[10px] h-11 bg-primary text-primary-foreground hover:bg-primary/90 shadow-xl shadow-primary/20">
-            <Plus className="mr-2 size-4" /> Tambah Orang Tua
+          <Button size="lg" className="uppercase font-bold tracking-widest text-[10px] h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+            <Plus className="mr-2 size-4" /> Tambah {isParent ? "Orang Tua" : "Admin"}
           </Button>
         }
       />
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
-            <UserPlus className="size-5 text-primary" /> Buat Akun Orang Tua
+            <UserPlus className="size-5 text-primary" /> Buat Akun {isParent ? "Orang Tua" : "Admin"}
           </DialogTitle>
-          <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">Username dan kata sandi bawaan ini akan digunakan untuk login orang tua.</DialogDescription>
+          <DialogDescription className="text-xs font-medium tracking-wide uppercase opacity-70">
+            {isParent ? "Username dan kata sandi bawaan ini akan digunakan untuk login orang tua." : "Akun ini akan memiliki hak akses penuh ke panel admin ADORA."}
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Nama Lengkap Orang Tua</label>
-            <Input {...register("name")} placeholder="Contoh: Bapak Kurniawan" className="h-11 bg-background/50" />
+            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Nama Lengkap {isParent ? "Orang Tua" : "Admin"}</label>
+            <Input {...register("name")} placeholder={isParent ? "Contoh: Bapak Kurniawan" : "Nama Admin"} className="h-11 bg-background/50" />
             {errors.name && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.name.message}</p>}
           </div>
 
@@ -95,13 +102,15 @@ export function AddUserDialog() {
             <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">
               Email <span className="opacity-50">(Opsional)</span>
             </label>
-            <Input {...register("email")} placeholder="parent@example.com" className="h-11 bg-background/50" />
+            <Input {...register("email")} placeholder={isParent ? "parent@example.com" : "admin@adora.club"} className="h-11 bg-background/50" />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Kata Sandi Awal</label>
             <Input {...register("password")} type="text" className="h-11 bg-background/50 font-mono" />
-            <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-1">Berikan kata sandi ini kepada orang tua untuk login pertama.</p>
+            <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-1">
+              {isParent ? "Berikan kata sandi ini kepada orang tua untuk login pertama." : "Pastikan admin menyimpan kata sandi ini dengan aman."}
+            </p>
           </div>
 
           <Button type="submit" disabled={isPending} className="w-full h-11 mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs">

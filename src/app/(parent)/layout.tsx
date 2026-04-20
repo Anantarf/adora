@@ -21,7 +21,7 @@ export default async function ParentLayout({ children }: { children: React.React
       {/* Navigation Bar - Glassmorphism Style */}
       <header className="flex h-20 w-full shrink-0 items-center justify-between border-b border-border/40 px-6 md:px-12 sticky top-0 bg-background/60 backdrop-blur-xl z-50 transition-all">
         <div className="flex items-center gap-4 group">
-          <div className="flex aspect-square size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[0_8px_30px_rgba(var(--primary-rgb),0.3)] group-hover:scale-105 transition-transform duration-300">
+          <div className="flex aspect-square size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-primary-glow group-hover:scale-105 transition-transform duration-base">
             <Cone className="size-6 animate-bounce-subtle" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">

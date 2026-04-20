@@ -27,7 +27,7 @@ export async function getGroupsAction() {
 
 export async function addGroupAction(data: { name: string; description?: string; homebaseId?: string | null }) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
     const group = await prisma.$transaction(async (tx) => {
       const g = await tx.group.create({
         data: {
@@ -37,42 +37,42 @@ export async function addGroupAction(data: { name: string; description?: string;
         },
       });
 
-      await createAuditLog(tx, "CREATE", "group", g.id);
+      await createAuditLog(tx, "CREATE", "Group", g.id, session.user.id);
       return g;
     });
 
     revalidatePath("/dashboard/players");
     return group;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error adding group:", error);
-    throw new Error("Gagal menambahkan grup baru");
+    throw new Error(error.message || "Gagal menambahkan grup baru");
   }
 }
 
 export async function updateGroupAction(id: string, data: { name?: string; description?: string; homebaseId?: string | null }) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
     const updated = await prisma.$transaction(async (tx) => {
       const g = await tx.group.update({
         where: { id },
         data: buildUpdateData(data),
       });
 
-      await createAuditLog(tx, "UPDATE", "group", g.id);
+      await createAuditLog(tx, "UPDATE", "Group", g.id, session.user.id);
       return g;
     });
 
     revalidatePath("/dashboard/players");
     return updated;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error updating group:", error);
-    throw new Error("Gagal mengubah grup");
+    throw new Error(error.message || "Gagal mengubah grup");
   }
 }
 
 export async function deleteGroupAction(id: string) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
     await prisma.$transaction(async (tx) => {
       // 1. Lepaskan semua pemain yang terikat ke kelompok ini
       await tx.player.updateMany({
@@ -82,13 +82,13 @@ export async function deleteGroupAction(id: string) {
 
       // 2. Hapus kelompok
       await tx.group.delete({ where: { id } });
-      await createAuditLog(tx, "DELETE", "group", id);
+      await createAuditLog(tx, "DELETE", "Group", id, session.user.id);
     });
 
     revalidatePath("/dashboard/players");
     return { success: true as const };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error deleting group:", error);
-    throw new Error("Gagal menghapus grup");
+    throw new Error(error.message || "Gagal menghapus grup");
   }
 }

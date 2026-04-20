@@ -28,7 +28,7 @@ export function BatchPlayerUpload({ onDone }: { onDone: () => void }) {
         <BatchUploadProgress isProcessing={isProcessing} progress={progress} />
 
         <Button className="w-full h-11 font-semibold text-sm" onClick={startUpload} disabled={!selectedFile || isProcessing || isGroupsLoading}>
-          {isProcessing ? "Sedang Menyimpan..." : "Periksa Lalu Simpan Data"}
+          {isProcessing ? "Sedang Mengunggah..." : "Unggah Data Pemain"}
         </Button>
       </div>
     </div>

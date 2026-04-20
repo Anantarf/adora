@@ -46,6 +46,37 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  /* Semantic border-radius tokens */
+  --radius-icon: 0.8rem;
+  --radius-pill: 1.2rem;
+  --radius-block: 1rem;
+  --radius-card: 2rem;
+  --radius-card-lg: 2.5rem;
+  --radius-card-xl: 3rem;
+
+  /* Dialog/panel height tokens */
+  --spacing-dialog-sm: 55vh;
+  --spacing-dialog-lg: 92vh;
+
+  /* Transition duration scale */
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 700ms;
+
+  /* Semantic shadow tokens */
+  --shadow-login-card: 0 14px 30px rgba(0, 0, 0, 0.42);
+  --shadow-login-btn: 0 8px 18px color-mix(in srgb, var(--primary) 26%, transparent);
+  --shadow-primary-glow: 0 8px 30px color-mix(in srgb, var(--primary) 30%, transparent);
+  --shadow-primary-soft: 0 10px 40px color-mix(in srgb, var(--primary) 10%, transparent);
+
+  /* Login page standalone palette (intentionally always dark) */
+  --color-login-card: #171717;
+  --color-login-input: #242424;
+  --color-login-icon: color-mix(in srgb, var(--primary) 80%, black);
+
+  /* Landing page dark card surface */
+  --color-surface-dark: #111113;
 }
 
 :root {
@@ -147,23 +178,17 @@ input[type=number] {
 @layer utilities {
   .glass-card {
     @apply bg-white/70 backdrop-blur-xl border border-border shadow-xl;
-    /* Dark mode: Lifted Navy surface */
     &:is(.dark *) {
-      background-color: rgba(9, 9, 11, 0.85); /* #09090B */
-      border-color: #27272A;
+      background-color: color-mix(in srgb, var(--background) 85%, transparent);
+      border-color: var(--border);
     }
   }
   .modern-gradient {
     @apply bg-gradient-to-br from-primary/10 via-background to-secondary/5;
   }
   .text-gradient {
-    /* Light Mode: dark to gold to dark */
     @apply bg-clip-text text-transparent font-black;
-    background-image: linear-gradient(to right, #1A1A2E, #D4AF37, #1A1A2E);
-    /* Dark Mode: white to gold to white */
-    &:is(.dark *) {
-      background-image: linear-gradient(to right, #F8F8F8, #D4AF37, #F8F8F8);
-    }
+    background-image: linear-gradient(to right, var(--foreground), var(--primary), var(--foreground));
   }
   .mask-fade {
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
@@ -209,27 +234,27 @@ input:-webkit-autofill:active {
 /* --- FULLCALENDAR PREMIUM OVERRIDES (Onyx & Pure Gold) --- */
 .fc {
   font-family: var(--font-sans) !important;
-  --fc-border-color: #E4E4E7;
+  --fc-border-color: var(--border);
   --fc-daygrid-event-dot-width: 8px;
-  --fc-button-bg-color: #D4AF37;
+  --fc-button-bg-color: var(--primary);
   --fc-button-border-color: transparent;
-  --fc-button-hover-bg-color: #c09b2e;
+  --fc-button-hover-bg-color: color-mix(in srgb, var(--primary) 85%, black);
   --fc-button-hover-border-color: transparent;
-  --fc-button-active-bg-color: #a8861f;
+  --fc-button-active-bg-color: color-mix(in srgb, var(--primary) 70%, black);
   --fc-button-active-border-color: transparent;
   --fc-event-border-color: transparent;
   --fc-list-event-hover-bg-color: transparent;
-  --fc-today-bg-color: rgba(212, 175, 55, 0.08);
+  --fc-today-bg-color: color-mix(in srgb, var(--primary) 8%, transparent);
 }
 
 /* Dark Mode: Full Onyx Palette Override */
 .dark .fc {
-  --fc-page-bg-color: #09090B;
-  --fc-neutral-bg-color: #111113;
-  --fc-today-bg-color: rgba(212, 175, 55, 0.08);
-  --fc-border-color: #27272A;
+  --fc-page-bg-color: var(--background);
+  --fc-neutral-bg-color: var(--card);
+  --fc-today-bg-color: color-mix(in srgb, var(--primary) 8%, transparent);
+  --fc-border-color: var(--border);
   --fc-list-event-dot-width: 8px;
-  color: #FAFAFA;
+  color: var(--foreground);
 }
 
 /* Dark Mode: Column Headers & Day Numbers */
@@ -237,16 +262,16 @@ input:-webkit-autofill:active {
 .dark .fc-daygrid-day-number,
 .dark .fc-toolbar-title,
 .dark .fc .fc-button {
-  color: #FAFAFA;
+  color: var(--foreground);
 }
 
 /* Dark Mode: Highlight warna hari ini yang lebih terlihat */
 .dark .fc .fc-daygrid-day.fc-day-today {
-  background-color: rgba(212, 175, 55, 0.08) !important;
+  background-color: color-mix(in srgb, var(--primary) 8%, transparent) !important;
 }
 
 .dark .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-  color: #D4AF37 !important;
+  color: var(--primary) !important;
   font-weight: 900 !important;
 }
 
@@ -303,7 +328,7 @@ input:-webkit-autofill:active {
 /* Physical Elevasi dan Glow Effect ketika Button Di-Hover */
 .fc .fc-button:not(:disabled):hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4) !important;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 40%, transparent) !important;
   filter: brightness(1.05);
 }
 
@@ -372,7 +397,7 @@ input:-webkit-autofill:active {
   padding: 1px 6px !important;
   border-radius: 999px !important;
   background-color: var(--fc-button-bg-color) !important;
-  color: #09090B !important;
+  color: var(--primary-foreground) !important;
   margin-top: 2px !important;
   display: inline-block;
   letter-spacing: 0.03em;

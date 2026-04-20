@@ -61,8 +61,8 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       setIsKu(false); setTargetKu(""); setIsSchool(false); setSchoolLevel("");
       setOpen(false);
       toast.success("Kelompok baru berhasil ditambahkan!");
-    } catch {
-      toast.error("Gagal menambahkan kelompok. Coba lagi atau hubungi admin.");
+    } catch (error: any) {
+      toast.error(error.message || "Gagal menambahkan kelompok. Coba lagi atau hubungi admin.");
     }
   };
 
@@ -71,8 +71,8 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       {!hideTrigger && (
         <DialogTrigger
           render={
-            <Button size="lg" className="w-full sm:w-auto h-10 font-semibold text-sm">
-              <Plus className="mr-2 size-4" /> Tambah Kelompok
+            <Button size="xl" className="w-full sm:w-auto">
+              <Plus className="size-4" /> Tambah Kelompok
             </Button>
           }
         />

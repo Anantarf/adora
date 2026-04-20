@@ -8,13 +8,13 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Input Jadwal Klub", url: "/schedule", icon: CalendarDays },
+  { title: "Agenda Klub", url: "/schedule", icon: CalendarDays },
   { title: "Kelompok Latihan", url: "/players", icon: Layers },
-  { title: "Input Absensi", url: "/attendances", icon: CheckSquare },
+  { title: "Presensi Pemain", url: "/attendances", icon: CheckSquare },
   { title: "Input Penilaian", url: "/statistics", icon: LineChart },
-  { title: "Sertifikat Digital", url: "/certificates", icon: FileBadge },
+  { title: "Manajemen Sertifikat", url: "/certificates", icon: FileBadge },
   { title: "Manajemen Akun", url: "/users", icon: Users },
-  { title: "Audit Log (Keamanan)", url: "/audit", icon: ShieldAlert },
+  { title: "Audit Log", url: "/audit", icon: ShieldAlert },
 ];
 
 export function AdminSidebar() {
@@ -52,7 +52,7 @@ export function AdminSidebar() {
                   <SidebarMenuButton
                     tooltip={item.title}
                     isActive={isActive(item.url)}
-                    className="h-10 px-3 gap-3 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-300 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-md"
+                    className="h-10 px-3 gap-3 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-base data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-md"
                     render={<Link href={`/dashboard${item.url === "/dashboard" ? "" : item.url}`} />}
                   >
                     <item.icon className="size-4.5" />
@@ -68,7 +68,7 @@ export function AdminSidebar() {
       <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2 border-t border-border/50">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => signOut({ callbackUrl: "/" })} className="h-10 px-3 gap-3 rounded-xl hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-300 font-bold">
+            <SidebarMenuButton onClick={() => signOut({ callbackUrl: "/" })} className="h-10 px-3 gap-3 rounded-xl hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-base font-bold">
               <LogOut className="size-4.5" />
               <span className="tracking-wide flex-1">Keluar</span>
             </SidebarMenuButton>

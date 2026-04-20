@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { AttendanceStatus } from "@/types/dashboard";
 import { toYYYYMMDD } from "@/lib/date-utils";
+import { getEventConfig } from "@/lib/config/events";
 
 type EventDetail = Awaited<ReturnType<typeof getEventAttendanceDetailAction>>;
 
@@ -104,11 +105,11 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
   return (
     <Dialog open={!!eventId} onOpenChange={onClose}>
-      <DialogContent className="w-[96vw] xl:max-w-4xl max-w-none sm:max-w-none h-[92vh] p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
+      <DialogContent className="w-[96vw] xl:max-w-4xl max-w-none sm:max-w-none h-dialog-lg p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
         {loading ? (
           <div className="flex flex-col items-center justify-center p-20 gap-3">
             <Loader2 className="size-8 animate-spin text-primary/50" />
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Memuat data absensi...</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Memuat data presensi...</p>
           </div>
         ) : event ? (
           <>
@@ -118,6 +119,14 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
               <DialogHeader className="relative z-10 space-y-4">
                 <div className="space-y-1.5">
+                  {(() => {
+                    const cfg = getEventConfig(event.type);
+                    return (
+                      <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
+                        {cfg.label}
+                      </span>
+                    );
+                  })()}
                   <DialogTitle className="font-heading text-2xl uppercase tracking-widest text-foreground leading-tight">{event.title}</DialogTitle>
                   <DialogDescription className="sr-only">Detail Manajemen Absensi Pemain</DialogDescription>
                   <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-muted-foreground">
@@ -226,7 +235,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               </Button>
               <Button onClick={handleSave} disabled={isSaving} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest px-8">
                 {isSaving ? <Loader2 className="size-4 mr-2 animate-spin" /> : <CheckCircle2 className="size-4 mr-2" />}
-                Simpan Absensi
+                Simpan Presensi
               </Button>
             </div>
           </>

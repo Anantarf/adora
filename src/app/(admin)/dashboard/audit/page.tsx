@@ -61,8 +61,10 @@ function getHumanReadableText(action: string, table: string): string {
   if (a === "CREATE") return `Mendaftarkan ${t} baru`;
   if (a === "UPDATE") return `Memperbarui informasi ${t}`;
   if (a === "DELETE") return `Menghapus ${t} dari sistem`;
+  if (a === "RESET_PASSWORD") return `Mereset kata sandi ${t}`;
+  if (a === "UPDATE_SELF") return `Memperbarui profil ${t}`;
 
-  return `Melakukan [${a}] terhadap ${t}`;
+  return `Melakukan aksi pada ${t}`;
 }
 
 // ─── Formatter ──────────────────────────────────────────
@@ -84,12 +86,12 @@ function AuditLogEntry({ log, index }: { log: AuditLogRecord; index: number }) {
 
   return (
     <div
-      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/30 hover:bg-muted/20 transition-all duration-300 animate-card-in"
+      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/30 hover:bg-muted/20 transition-all duration-base animate-card-in"
       style={{ animationDelay: `${index * 40}ms`, animationFillMode: "both" }}
     >
       {/* Action Icon */}
       <div
-        className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-300 mt-0.5"
+        className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-base mt-0.5"
         style={{
           backgroundColor: cfg.color,
           boxShadow: `0 4px 14px ${cfg.color}44`,
@@ -131,7 +133,7 @@ function AuditLogEntry({ log, index }: { log: AuditLogRecord; index: number }) {
         </div>
       </div>
 
-      <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-300 flex-shrink-0 mt-3" />
+      <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-base flex-shrink-0 mt-3" />
     </div>
   );
 }
@@ -147,7 +149,7 @@ export default function AuditPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">
-            Audit & Security
+            Audit Log
           </h1>
           <p className="text-muted-foreground text-sm font-medium tracking-wide">
             Rekam jejak aktivitas sistem. Pantau siapa yang mengubah atau menghapus data.

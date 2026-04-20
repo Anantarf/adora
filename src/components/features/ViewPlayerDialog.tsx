@@ -57,7 +57,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
         onOpenChange(val);
       }}
     >
-      <DialogContent className="sm:max-w-3xl bg-card border-border/50 transition-all duration-300">
+      <DialogContent className="sm:max-w-3xl bg-card border-border/50 transition-all duration-base">
         <DialogHeader className="space-y-2.5">
           <DialogTitle className="text-lg font-heading tracking-wide text-foreground text-left">
             {isEditing ? "Ubah Profil Pemain" : "Detail Pemain"}

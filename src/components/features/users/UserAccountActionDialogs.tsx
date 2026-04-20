@@ -16,7 +16,7 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
   return (
     <>
       <AlertDialog open={uiState?.type === "delete"} onOpenChange={onOpenChange}>
-        <AlertDialogContent className="bg-card border-border/50 rounded-[2.5rem]">
+        <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="font-heading uppercase text-foreground">Hapus akun orang tua?</AlertDialogTitle>
             <AlertDialogDescription className="flex flex-col gap-2">
@@ -34,7 +34,7 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
       </AlertDialog>
 
       <AlertDialog open={uiState?.type === "reset"} onOpenChange={onOpenChange}>
-        <AlertDialogContent className="bg-card border-border/50 rounded-[2.5rem]">
+        <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
             <div className="size-16 rounded-full bg-secondary/5 border-2 border-primary/20 flex items-center justify-center mb-4">
               <KeyRound className="size-7 text-primary" />

@@ -28,6 +28,8 @@ const batchPlayerSchema = z.object({
 
 const batchPlayersInputSchema = z.array(batchPlayerSchema).min(1).max(1000);
 
+const BATCH_CHUNK_SIZE = 200;
+
 const OPTIONAL_PLAYER_FIELDS = [
   "placeOfBirth", "gender", "weight", "height", "schoolOrigin",
   "address", "email", "phoneNumber", "medicalHistory",
@@ -176,10 +178,19 @@ export async function addBatchPlayersAction(
     updatedAt: new Date(),
   }));
 
+  const chunks = Array.from(
+    { length: Math.ceil(formattedData.length / BATCH_CHUNK_SIZE) },
+    (_, i) => formattedData.slice(i * BATCH_CHUNK_SIZE, (i + 1) * BATCH_CHUNK_SIZE),
+  );
+
   const result = await prisma.$transaction(async (tx) => {
-    const res = await tx.player.createMany({ data: formattedData, skipDuplicates: true });
-    await createAuditLog(tx, "CREATE", "player_batch", String(res.count), userId);
-    return res;
+    let count = 0;
+    for (const chunk of chunks) {
+      const res = await tx.player.createMany({ data: chunk, skipDuplicates: true });
+      count += res.count;
+    }
+    await createAuditLog(tx, "CREATE", "player_batch", String(count), userId);
+    return { count };
   });
 
   revalidatePath("/dashboard/players");

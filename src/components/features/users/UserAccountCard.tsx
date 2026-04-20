@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { AtSign, Baby, KeyRound, Mail, Trash2, UserCircle2 } from "lucide-react";
+import { AtSign, Users, KeyRound, Mail, Trash2, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { getUsersAction } from "@/actions/users";
 
@@ -17,51 +17,54 @@ export function UserAccountCard({ user, onReset, onDelete }: UserAccountCardProp
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="group glass-card p-6 rounded-[2.5rem] border-white/20 transition-all hover:bg-white/60 dark:hover:bg-white/5 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1"
+      initial={{ opacity: 0, y: 5 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="group flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors gap-4"
     >
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="size-14 rounded-2xl bg-secondary/5 border-2 border-primary/20 flex items-center justify-center group-hover:bg-primary group-hover:border-primary transition-all duration-300">
-            <UserCircle2 className="size-7 text-primary group-hover:text-primary-foreground" />
+      <div className="flex items-center gap-4 min-w-0 flex-1 w-full">
+        <div className="size-11 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+          <UserCircle2 className="size-6 text-primary" />
+        </div>
+        <div className="min-w-0 space-y-1 w-full">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-heading font-bold text-base text-foreground truncate">@{user.username}</h3>
+            <span className="px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-black uppercase tracking-widest leading-none">
+              {user.role}
+            </span>
           </div>
-          <div>
-            <h3 className="font-heading font-bold text-lg text-secondary leading-tight truncate max-w-35">{user.name}</h3>
-            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-black uppercase tracking-widest mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity">
-              <AtSign className="size-3" /> {user.username}
-            </div>
+          <div className="flex items-center gap-3 text-[10px] text-muted-foreground font-semibold tracking-wide truncate">
+            {user.name && (
+              <span className="flex items-center gap-1 shrink-0">
+                <UserCircle2 className="size-3" /> <span className="truncate max-w-[120px] sm:max-w-none">{user.name}</span>
+              </span>
+            )}
+            {user.email && (
+              <span className="flex items-center gap-1 shrink-0 opacity-80">
+                • <Mail className="size-3" /> <span className="truncate max-w-[120px] sm:max-w-none">{user.email}</span>
+              </span>
+            )}
+            <span className="flex items-center gap-1 shrink-0 opacity-80">
+              • <Users className="size-3" /> <strong className="text-secondary/70">{user._count.player} pemain</strong>
+            </span>
           </div>
         </div>
-        <div className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 rounded-full text-[8px] font-black uppercase tracking-widest">{user.role}</div>
       </div>
 
-      <div className="space-y-3 mb-8">
-        <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
-          <Mail className="size-3.5 text-primary/40" />
-          <span className="truncate">{user.email || "- Tidak ada email -"}</span>
+      {user.username !== "superadmin" && (
+        <div className="flex flex-wrap items-center gap-2 shrink-0 self-end sm:self-auto">
+          <Button
+            onClick={() => onReset(user.id)}
+            variant="outline"
+            size="sm"
+            className="h-8 rounded-lg text-[10px] uppercase font-bold tracking-widest gap-1.5 bg-transparent border-border/50 hover:bg-muted transition-all"
+          >
+            <KeyRound className="size-3" /> Reset Sandi
+          </Button>
+          <Button onClick={() => onDelete(user.id)} variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0">
+            <Trash2 className="size-3.5" />
+          </Button>
         </div>
-        <div className="flex items-center gap-3 text-xs font-medium text-muted-foreground">
-          <Baby className="size-3.5 text-primary/40" />
-          <span>
-            Terhubung dengan <strong className="text-secondary">{user._count.player} data pemain</strong>
-          </span>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 pt-4 border-t border-border/40">
-        <Button
-          onClick={() => onReset(user.id)}
-          variant="ghost"
-          size="sm"
-          className="flex-1 h-9 rounded-xl text-[10px] uppercase font-black tracking-widest gap-2 hover:bg-secondary/10 hover:text-secondary group-hover:border-border/50 transition-all border border-transparent"
-        >
-          <KeyRound className="size-3.5" /> Atur Ulang Sandi
-        </Button>
-        <Button onClick={() => onDelete(user.id)} variant="ghost" size="sm" className="shrink-0 size-9 rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive transition-colors">
-          <Trash2 className="size-4" />
-        </Button>
-      </div>
+      )}
     </motion.div>
   );
 }

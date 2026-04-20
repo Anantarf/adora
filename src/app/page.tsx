@@ -193,7 +193,7 @@ export default async function LandingPage() {
             {PROGRAMS.map(({ label, ages, desc, icon }) => (
               <StaggerItem
                 key={label}
-                className="group bg-white/[0.025]/5 border border-white/10 hover:border-primary/40 rounded-2xl p-8 text-center transition-all duration-300 hover:bg-white/[0.025]/[0.08] hover:-translate-y-2 hover:shadow-[0_10px_40px_rgba(212,175,55,0.1)]"
+                className="group bg-white/[0.025]/5 border border-white/10 hover:border-primary/40 rounded-2xl p-8 text-center transition-all duration-base hover:bg-white/[0.025]/[0.08] hover:-translate-y-2 hover:shadow-primary-soft"
               >
                 <div className="text-4xl mb-5" aria-hidden="true">
                   {icon}
@@ -215,7 +215,7 @@ export default async function LandingPage() {
         {/* TODO: Ganti dengan <Image /> dari /public saat foto tersedia */}
         <StaggerContainer className="grid md:grid-cols-3 gap-4 max-w-4xl mx-auto" delay={0.15}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <StaggerItem key={i} className="relative bg-[#111113] border border-primary/20 rounded-2xl h-56 overflow-hidden hover:border-primary/50 transition-all duration-500 hover:scale-[1.02]">
+            <StaggerItem key={i} className="relative bg-surface-dark border border-primary/20 rounded-2xl h-56 overflow-hidden hover:border-primary/50 transition-all duration-500 hover:scale-[1.02]">
               {/* Diagonal gold line pattern */}
               <div
                 className="absolute inset-0"

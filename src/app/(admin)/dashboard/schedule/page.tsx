@@ -78,29 +78,25 @@ export default function SchedulePage() {
     formState: { errors },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
-    defaultValues: isEditMode
-      ? {
-          eventId: (uiState?.type === "edit" ? uiState.event : null)?.id || undefined,
-          title: (uiState?.type === "edit" ? uiState.event : null)?.title || "",
-          description: (uiState?.type === "edit" ? uiState.event : null)?.description || "",
-          location: (uiState?.type === "edit" ? uiState.event : null)?.location || "",
-          type: (uiState?.type === "edit" ? uiState.event : null)?.type || defaultType,
-          time: uiState?.type === "edit" && uiState.event?.date ? new Date(uiState.event.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }) : `${currentHH}:${currentMM}`,
-          homebaseId: (uiState?.type === "edit" ? uiState.event : null)?.homebaseId || undefined,
-        }
-      : {
-          eventId: undefined,
-          title: "",
-          description: "",
-          location: "",
-          type: defaultType,
-          time: `${currentHH}:${currentMM}`,
-          homebaseId: undefined,
-        },
+    defaultValues: {
+      eventId: undefined,
+      title: "",
+      description: "",
+      location: "",
+      type: defaultType,
+      time: `${currentHH}:${currentMM}`,
+      homebaseId: undefined,
+    },
   });
 
   const selectedType = watch("type");
   const homebaseId = watch("homebaseId");
+  const selectedEventCfg = selectedType ? getEventConfig(selectedType) : null;
+  const SelectedEventIcon = selectedEventCfg?.icon ?? CalendarDays;
+
+  const previewEvent = uiState?.type === "preview" ? uiState.event : null;
+  const previewCfg = previewEvent ? getEventConfig(previewEvent.type) : null;
+  const PreviewIcon = previewCfg?.icon ?? CalendarDays;
 
   const { data: events, isLoading } = useSchedule();
   const { mutateAsync: addEvent, isPending } = useAddEvent();
@@ -156,20 +152,18 @@ export default function SchedulePage() {
 
   // Callback: Start editing an event
   const handleEditEvent = (ev: ScheduleEvent) => {
-    setUiState(ev ? { type: "edit", event: ev } : null);
+    setUiState({ type: "edit", event: ev });
     setDate(new Date(ev.date));
     setSelectedGroupIds(ev.groups?.map((g) => g.id) ?? []);
-    if (ev) {
-      reset({
-        eventId: ev.id,
-        title: ev.title,
-        description: ev.description || "",
-        location: ev.location || "",
-        type: ev.type,
-        time: new Date(ev.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }),
-        homebaseId: ev.homebaseId || undefined,
-      });
-    }
+    reset({
+      eventId: ev.id,
+      title: ev.title,
+      description: ev.description || "",
+      location: ev.location || "",
+      type: ev.type,
+      time: new Date(ev.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }),
+      homebaseId: ev.homebaseId || undefined,
+    });
   };
 
   const onSubmit = async (data: EventFormValues) => {
@@ -218,23 +212,20 @@ export default function SchedulePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
           <div>
-            <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Manajemen Jadwal & Agenda</h1>
+            <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Agenda Klub</h1>
             <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola jadwal latihan, tanding, dan agenda resmi klub.</p>
           </div>
         </div>
 
         {/* FORM INPUT — Full width di atas */}
-        <Card className="glass-card p-4 rounded-[2rem] border-white/20 relative group overflow-hidden">
+        <Card className="glass-card p-4 rounded-card border-white/20 relative group overflow-hidden">
           <div className="absolute top-0 right-0 size-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
           <div className="relative z-10">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-[0.8rem] flex items-center justify-center shrink-0 shadow-lg shadow-black/20" style={{ backgroundColor: selectedType ? getEventConfig(selectedType).color : "#D4AF37" }}>
-                  {(() => {
-                    const Icon = selectedType ? getEventConfig(selectedType).icon : CalendarDays;
-                    return <Icon className="size-5 text-white" strokeWidth={2.5} />;
-                  })()}
+                <div className="size-10 rounded-icon flex items-center justify-center shrink-0 shadow-lg shadow-black/20" style={{ backgroundColor: selectedEventCfg?.color ?? "var(--primary)" }}>
+                  <SelectedEventIcon className="size-5 text-white" strokeWidth={2.5} />
                 </div>
                 <span className="text-[17px] font-semibold tracking-wide text-foreground">{isEditMode ? "Ubah Agenda" : "Tambah Agenda"}</span>
               </div>
@@ -394,7 +385,7 @@ export default function SchedulePage() {
         <div className="flex flex-col xl:flex-row gap-6 items-start">
           {/* KIRI — Big Calendar */}
           <div className="flex-1 w-full min-w-0">
-            <div className="glass-card p-5 rounded-[2.5rem] border-border/40 shadow-sm overflow-hidden">
+            <div className="glass-card p-5 rounded-card-lg border-border/40 shadow-sm overflow-hidden">
               <div className="w-full overflow-x-auto">
                 <div className="min-w-160">
                   <CalendarView events={mappedEvents} />
@@ -423,7 +414,7 @@ export default function SchedulePage() {
 
             <div className="flex items-center justify-between px-1 mb-2">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-[0.8rem] flex items-center justify-center shrink-0 shadow-lg shadow-black/20 bg-primary">
+                <div className="size-10 rounded-icon flex items-center justify-center shrink-0 shadow-lg shadow-black/20 bg-primary">
                   <CalendarDays className="size-5 text-primary-foreground" strokeWidth={2.5} />
                 </div>
                 <h2 className="font-heading text-[17px] font-semibold tracking-wide text-foreground">Agenda Mendatang</h2>
@@ -448,11 +439,11 @@ export default function SchedulePage() {
                   return (
                     <div
                       key={ev.id}
-                      onClick={() => setUiState(ev ? { type: "preview", event: ev } : null)}
-                      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-300 cursor-pointer min-w-0 overflow-hidden"
+                      onClick={() => setUiState({ type: "preview", event: ev })}
+                      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-base cursor-pointer min-w-0 overflow-hidden"
                     >
                       <div
-                        className="shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-300"
+                        className="shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-base"
                         style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px ${cfg.color}55` }}
                       >
                         <Icon className="size-5" />
@@ -475,7 +466,7 @@ export default function SchedulePage() {
                         )}
                       </div>
                       <div className="flex flex-col items-center gap-1 shrink-0">
-                        <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-300" />
+                        <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-base" />
                         <Button
                           variant="ghost"
                           size="icon"
@@ -492,7 +483,7 @@ export default function SchedulePage() {
                           size="icon"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setUiState(ev.id ? { type: "delete", targetId: ev.id } : null);
+                            setUiState({ type: "delete", targetId: ev.id });
                           }}
                           className="size-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                         >
@@ -509,80 +500,75 @@ export default function SchedulePage() {
       </motion.div>
 
       {/* Modal Preview Event */}
-      <Dialog open={!!(uiState?.type === "preview" ? uiState.event : null)} onOpenChange={() => setUiState(null)}>
-        {(uiState?.type === "preview" ? uiState.event : null) &&
-          (() => {
-            const cfg = getEventConfig(uiState?.type === "preview" ? uiState.event.type : "");
-            const Icon = cfg.icon;
-            return (
-              <DialogContent className="bg-background border-primary/20 text-white w-[calc(100vw-2rem)] sm:max-w-100 p-0 overflow-hidden">
-                <div className="relative h-28 flex items-center justify-center overflow-hidden" style={{ backgroundColor: cfg.color + "22" }}>
-                  <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 10px)" }} />
-                  <div className="relative z-10 flex flex-col items-center gap-2">
-                    <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: cfg.color }}>
-                      <Icon className="size-6 text-white" strokeWidth={2} />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full border" style={{ color: cfg.color, borderColor: cfg.color + "40", backgroundColor: cfg.color + "15" }}>
-                      {cfg.label}
-                    </span>
-                  </div>
-                  <div className="absolute bottom-0 left-0 w-full h-8 bg-linear-to-t from-[#0f0f11] to-transparent" />
+      <Dialog open={uiState?.type === "preview"} onOpenChange={() => setUiState(null)}>
+        {previewEvent && previewCfg && (
+          <DialogContent className="bg-background border-primary/20 text-white w-[calc(100vw-2rem)] sm:max-w-100 p-0 overflow-hidden">
+            <div className="relative h-28 flex items-center justify-center overflow-hidden" style={{ backgroundColor: previewCfg.color + "22" }}>
+              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "repeating-linear-gradient(45deg, #000 0px, #000 1px, transparent 1px, transparent 10px)" }} />
+              <div className="relative z-10 flex flex-col items-center gap-2">
+                <div className="size-12 rounded-full flex items-center justify-center" style={{ backgroundColor: previewCfg.color }}>
+                  <PreviewIcon className="size-6 text-white" strokeWidth={2} />
                 </div>
-                <div className="p-6 pt-4 space-y-5 overflow-hidden">
-                  <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{uiState?.type === "preview" ? uiState.event.title : undefined}</DialogTitle>
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
-                      <CalendarDays size={14} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Tanggal</div>
-                      <div className="text-sm font-semibold text-white/80 wrap-break-word">
-                        {formatJakarta(uiState?.type === "preview" ? uiState.event.date : new Date(), { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3 min-w-0">
-                    <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
-                      <Clock size={14} />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Waktu</div>
-                      <div className="text-sm font-semibold text-white/80">{formatJakarta(uiState?.type === "preview" ? uiState.event.date : new Date(), { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
-                    </div>
-                  </div>
-                  {(uiState?.type === "preview" ? uiState.event.location : undefined) && (
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
-                        <MapPin size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
-                        <div className="text-sm font-semibold text-white/80 wrap-break-word">{uiState?.type === "preview" ? uiState.event.location : undefined}</div>
-                      </div>
-                    </div>
-                  )}
-                  {(uiState?.type === "preview" ? uiState.event.description : undefined) && (
-                    <div className="flex items-start gap-3 min-w-0">
-                      <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
-                        <AlignLeft size={14} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Keterangan</div>
-                        <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{uiState?.type === "preview" ? uiState.event.description : undefined}</p>
-                      </div>
-                    </div>
-                  )}
-                  <button onClick={() => setUiState(null)} className="w-full py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-white/60">
-                    Tutup
-                  </button>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full border" style={{ color: previewCfg.color, borderColor: previewCfg.color + "40", backgroundColor: previewCfg.color + "15" }}>
+                  {previewCfg.label}
+                </span>
+              </div>
+              <div className="absolute bottom-0 left-0 w-full h-8 bg-linear-to-t from-[#0f0f11] to-transparent" />
+            </div>
+            <div className="p-6 pt-4 space-y-5 overflow-hidden">
+              <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{previewEvent.title}</DialogTitle>
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
+                  <CalendarDays size={14} />
                 </div>
-              </DialogContent>
-            );
-          })()}
+                <div className="min-w-0">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Tanggal</div>
+                  <div className="text-sm font-semibold text-white/80 wrap-break-word">
+                    {formatJakarta(previewEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
+                  <Clock size={14} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Waktu</div>
+                  <div className="text-sm font-semibold text-white/80">{formatJakarta(previewEvent.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
+                </div>
+              </div>
+              {previewEvent.location && (
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
+                    <MapPin size={14} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
+                    <div className="text-sm font-semibold text-white/80 wrap-break-word">{previewEvent.location}</div>
+                  </div>
+                </div>
+              )}
+              {previewEvent.description && (
+                <div className="flex items-start gap-3 min-w-0">
+                  <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0">
+                    <AlignLeft size={14} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Keterangan</div>
+                    <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{previewEvent.description}</p>
+                  </div>
+                </div>
+              )}
+              <button onClick={() => setUiState(null)} className="w-full py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-white/60">
+                Tutup
+              </button>
+            </div>
+          </DialogContent>
+        )}
       </Dialog>
 
       <AlertDialog
-        open={!!(uiState?.type === "delete" ? uiState.targetId : null)}
+        open={uiState?.type === "delete" && !!uiState.targetId}
         onOpenChange={(isOpen: boolean) => {
           if (!isOpen) setUiState(null);
         }}
@@ -608,11 +594,10 @@ export default function SchedulePage() {
             <AlertDialogAction
               className="h-11 font-bold tracking-widest uppercase text-xs"
               onClick={async () => {
-                if (uiState?.type === "delete" ? uiState.targetId : null) {
-                  await deleteEvent(uiState?.type === "delete" && uiState.targetId ? uiState.targetId : "");
-                  setUiState(null);
-                  toast.success("Agenda telah dihapus.");
-                }
+                if (uiState?.type !== "delete" || !uiState.targetId) return;
+                await deleteEvent(uiState.targetId);
+                setUiState(null);
+                toast.success("Agenda telah dihapus.");
               }}
             >
               <Trash2 className="size-4 mr-2" /> Hapus Permanen

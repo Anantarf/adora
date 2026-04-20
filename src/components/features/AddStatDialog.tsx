@@ -55,7 +55,7 @@ function ScoreSection({ title, total, children }: { title: string; total: number
 function ScoreField({ label, error, ...props }: { label: string; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-medium text-muted-foreground">{label}</label>
+      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</label>
       <Input type="number" min={0} max={100} step={1} onInput={(e) => { if (e.currentTarget.value.length > 3) e.currentTarget.value = e.currentTarget.value.slice(0, 3); }} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
@@ -116,17 +116,17 @@ export function AddStatDialog({
         className="h-8 font-bold uppercase tracking-widest text-xs gap-1.5"
         onClick={() => setOpen(true)}
       >
-        {isEdit ? <><Pencil className="size-3" /><span className="hidden sm:inline">Edit</span></> : <><Plus className="size-3" /><span className="hidden sm:inline">Input Nilai</span></>}
+        {isEdit ? <><Pencil className="size-3" /><span className="hidden sm:inline">Ubah</span></> : <><Plus className="size-3" /><span className="hidden sm:inline">Input Nilai</span></>}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[92vh] overflow-y-auto bg-card border-border/50">
+        <DialogContent className="sm:max-w-lg max-h-dialog-lg overflow-y-auto bg-card border-border/50">
           <div className="flex items-center gap-4 mb-2">
             <div className="p-3 bg-primary/10 rounded-xl shrink-0"><LineChart className="size-6 text-primary" /></div>
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Revisi" : "Input"} Nilai</DialogTitle>
               <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                {player.name} <span className="mx-1.5 text-primary/50">•</span> {player.group?.name ?? "Tanpa Kelompok"}
+                {player.name} <span className="mx-1.5 text-primary/50">•</span> {player.group?.name ?? "Tidak Memiliki Kelompok"}
               </p>
             </div>
           </div>
@@ -161,14 +161,15 @@ export function AddStatDialog({
               {([["layUp", "Lay Up"], ["shooting", "Shooting"]] as const).map(([name, label]) => (
                 <div key={name} className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-                  <ScoreField label="" {...register(name)} error={errors[name]?.message} />
+                  <Input type="number" min={0} max={100} step={1} onInput={(e) => { if (e.currentTarget.value.length > 3) e.currentTarget.value = e.currentTarget.value.slice(0, 3); }} {...register(name)} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
+                  {errors[name] && <p className="text-[10px] text-destructive">{errors[name]?.message}</p>}
                 </div>
               ))}
             </div>
 
             {/* Notes */}
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (opsional)</label>
+              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
               <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
             </div>
             </fieldset>
@@ -182,7 +183,7 @@ export function AddStatDialog({
                 { label: "Shooting", val: Number(values.shooting || 0) },
               ].map(({ label, val }) => (
                 <div key={label} className="text-center">
-                  <p className="text-[9px] uppercase tracking-widest text-muted-foreground">{label}</p>
+                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
                   <p className="text-lg font-bold text-primary tabular-nums">{val}</p>
                 </div>
               ))}

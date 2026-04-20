@@ -8,6 +8,7 @@ import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { Button } from "@/components/ui/button";
 import type { getEventsWithAttendanceAction } from "@/actions/schedule";
+import { getEventConfig } from "@/lib/config/events";
 
 type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[number];
 
@@ -86,17 +87,26 @@ export function AttendanceCardView() {
             {groupedByMonth[monthKey].map((event) => {
               const eventDate = new Date(event.date);
               const markedAtDate = event.attendanceMarkedAt ? new Date(event.attendanceMarkedAt) : null;
+              const cfg = getEventConfig(event.type);
+              const Icon = cfg.icon;
 
               return (
-                <Button key={event.id} variant="outline" onClick={() => setSelectedEventId(event.id)} className="w-full h-auto p-3 sm:p-3.5 justify-start hover:bg-muted/50 transition-colors rounded-xl border border-border/50">
+                <Button key={event.id} variant="outline" onClick={() => setSelectedEventId(event.id)} className="w-full h-auto p-3 sm:p-3.5 justify-start hover:bg-muted/50 transition-all rounded-xl border border-border/50 group" style={{ borderLeftColor: cfg.color, borderLeftWidth: "4px" }}>
                   <div className="grid w-full grid-cols-1 sm:grid-cols-[64px_minmax(0,1fr)_auto] gap-3 items-center text-left">
-                    <div className="hidden sm:flex flex-col items-center justify-center rounded-lg border border-border/50 bg-background/50 px-2 py-2">
-                      <span className="text-lg leading-none font-black text-foreground">{format(eventDate, "dd", { locale: idLocale })}</span>
-                      <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">{format(eventDate, "MMM", { locale: idLocale })}</span>
+                    <div className="hidden sm:flex flex-col items-center justify-center rounded-lg px-2 py-2 border transition-colors" style={{ backgroundColor: `${cfg.color}15`, borderColor: `${cfg.color}30` }}>
+                      <span className="text-lg leading-none font-black" style={{ color: cfg.color }}>{format(eventDate, "dd", { locale: idLocale })}</span>
+                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: cfg.color }}>{format(eventDate, "MMM", { locale: idLocale })}</span>
                     </div>
 
                     <div className="min-w-0 space-y-1">
-                      <div className="font-heading text-base sm:text-lg tracking-wide uppercase text-foreground truncate">{event.title}</div>
+                      <div className="flex flex-col gap-0.5">
+                        <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
+                          {cfg.label}
+                        </span>
+                        <div className="font-heading text-base sm:text-lg tracking-wide uppercase text-foreground truncate">
+                          {event.title}
+                        </div>
+                      </div>
                       <div className="text-xs font-semibold text-muted-foreground">{format(eventDate, "dd MMM yyyy • HH:mm", { locale: idLocale })}</div>
                       {event.groups.length > 0 && <div className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground/75 truncate">{event.groups.map((g) => g.name).join(", ")}</div>}
                     </div>

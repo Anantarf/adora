@@ -10,9 +10,10 @@ import { UsersManagementHeader } from "@/components/features/users/UsersManageme
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeRole, setActiveRole] = useState<"PARENT" | "ADMIN">("PARENT");
   const [uiState, setUiState] = useState<UserDialogState>(null);
 
-  const { data: users, isLoading } = useUsers("PARENT");
+  const { data: users, isLoading } = useUsers(activeRole);
   const { mutateAsync: deleteUser } = useDeleteUser();
   const { mutateAsync: resetPassword } = useResetPassword();
 
@@ -27,6 +28,7 @@ export default function UsersManagementPage() {
 
   const hasUsers = (users?.length ?? 0) > 0;
   const isSearchActive = normalizedSearch.length > 0;
+  const isParent = activeRole === "PARENT";
 
   const activeTargetId = uiState?.targetId || null;
 
@@ -47,20 +49,32 @@ export default function UsersManagementPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-20">
-      <UsersManagementHeader searchTerm={searchTerm} onSearchTermChange={setSearchTerm} totalAccounts={filteredUsers.length} />
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
+      <UsersManagementHeader 
+        searchTerm={searchTerm} 
+        onSearchTermChange={setSearchTerm} 
+        totalAccounts={filteredUsers.length} 
+        role={activeRole}
+        onRoleChange={setActiveRole}
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <div className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card rounded-[3rem]">
+          <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card rounded-card-xl">
             <Loader2 className="size-10 animate-spin text-primary" />
             <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground animate-pulse">Memuat Data Akun...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card border-dashed border-2 rounded-[3rem] opacity-60">
+          <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card border-dashed border-2 rounded-card-xl opacity-60">
             <Users className="size-10 text-muted-foreground/40" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{hasUsers && isSearchActive ? "Akun tidak ditemukan" : "Belum ada akun orang tua"}</p>
-            <p className="text-xs text-muted-foreground/80 text-center">{hasUsers && isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : "Tambahkan akun baru menggunakan tombol di bagian atas."}</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              {hasUsers && isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}
+            </p>
+            <p className="text-xs text-muted-foreground/80 text-center">
+              {hasUsers && isSearchActive 
+                ? "Ubah kata kunci pencarian atau kosongkan filter." 
+                : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
+            </p>
           </div>
         ) : (
           filteredUsers.map((user) => <UserAccountCard key={user.id} user={user} onReset={(id) => setUiState({ type: "reset", targetId: id })} onDelete={(id) => setUiState({ type: "delete", targetId: id })} />)

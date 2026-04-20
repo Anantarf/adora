@@ -1,5 +1,4 @@
 import ExcelJS from "exceljs";
-import { SCHOOL_CLASS_TO_GROUP_NAME } from "@/lib/config/player-import";
 
 export type RawCsvRow = Record<string, unknown>;
 
@@ -39,6 +38,8 @@ const SIMPLE_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EXCEL_DATE_EPOCH_UTC = Date.UTC(1899, 11, 30);
 const HEADER_SCAN_ROW_LIMIT = 12;
 const TEMPLATE_FONT = "Poppins";
+// ExcelJS requires ARGB hex strings — CSS variables can't be used here.
+// Sync these values manually if brand colors in globals.css :root change.
 const BRAND_PURPLE_DARK = "FF6B46C1";
 const BRAND_PURPLE = "FF8B5CF6";
 const BRAND_PURPLE_SOFT = "FFF5F0FF";
@@ -75,7 +76,6 @@ const KNOWN_HEADER_KEYS = new Set([
   "groupname",
   "namakelompok",
   "groupid",
-  "kelas",
   "tempatlahir",
   "jeniskelamin",
   "beratbadan",
@@ -271,7 +271,6 @@ export const normalizeAndValidateRows = (rows: RawCsvRow[], groupsById: Set<stri
     const email = normalized.email ?? "";
     const groupIdInput = normalized.groupid ?? normalized.idkelompok ?? normalized.grupid ?? "";
     const groupNameInput = normalized.kelompok ?? normalized.kelompokumur ?? normalized.kelompokumurganjil ?? normalized.namakelompok ?? normalized.groupname ?? "";
-    const schoolClassInput = normalized.kelas ?? "";
     const phoneNumber = normalized.notelf ?? normalized.nohp ?? normalized.telepon ?? normalized.phonenumber ?? normalized.phone ?? normalized.hp ?? "";
     const medicalHistory = normalized.riwayatpenyakitbawaan ?? "";
     const parentName = normalized.namaorangtua ?? "";
@@ -290,10 +289,6 @@ export const normalizeAndValidateRows = (rows: RawCsvRow[], groupsById: Set<stri
     }
 
     const normalizedParentName = normalizeText(parentName);
-    if (!normalizedParentName || normalizedParentName.length < 2) {
-      errors.push({ rowNumber, message: "Nama orang tua wajib diisi minimal 2 karakter." });
-      return;
-    }
 
     const normalizedEmail = normalizeText(email);
     if (normalizedEmail && !SIMPLE_EMAIL_REGEX.test(normalizedEmail)) {
@@ -301,24 +296,17 @@ export const normalizeAndValidateRows = (rows: RawCsvRow[], groupsById: Set<stri
       return;
     }
 
-    const mappedGroupNameFromClass = schoolClassInput ? SCHOOL_CLASS_TO_GROUP_NAME[schoolClassInput.trim()] : undefined;
-
-    if (!schoolClassInput.trim() && !groupIdInput.trim() && !groupNameInput.trim()) {
-      errors.push({ rowNumber, message: "Kelas kosong. Isi kolom Kelas atau isi kolom Kelompok secara manual." });
+    if (!groupIdInput.trim() && !groupNameInput.trim()) {
+      errors.push({ rowNumber, message: "Kelompok wajib diisi. Pilih dari dropdown kolom Kelompok." });
       return;
     }
 
     const resolvedGroupId =
       (groupIdInput && groupsById.has(groupIdInput) ? groupIdInput : undefined) ||
-      (groupNameInput ? groupsByName.get(groupNameInput.toLowerCase()) : undefined) ||
-      (mappedGroupNameFromClass ? groupsByName.get(mappedGroupNameFromClass.trim().toLowerCase()) : undefined);
+      (groupNameInput ? groupsByName.get(groupNameInput.toLowerCase()) : undefined);
 
     if (!resolvedGroupId) {
-      if (schoolClassInput) {
-        errors.push({ rowNumber, message: `Kelas \"${schoolClassInput}\" belum dipetakan ke kelompok sistem.` });
-      } else {
-        errors.push({ rowNumber, message: "Kelompok tidak ditemukan. Cek nama kelompoknya." });
-      }
+      errors.push({ rowNumber, message: "Kelompok tidak ditemukan. Pastikan nama kelompok sama persis dengan dropdown." });
       return;
     }
 
@@ -370,26 +358,25 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   dataSheet.properties.tabColor = { argb: BRAND_PURPLE_DARK };
 
   dataSheet.columns = [
-    { key: "no", width: 7 },
-    { key: "name", width: 32 },
-    { key: "placeOfBirth", width: 22 },
-    { key: "dateOfBirth", width: 24 },
-    { key: "gender", width: 16 },
-    { key: "weight", width: 16 },
-    { key: "height", width: 16 },
-    { key: "schoolClass", width: 16 },
-    { key: "schoolOrigin", width: 24 },
-    { key: "address", width: 34 },
-    { key: "phoneNumber", width: 24 },
-    { key: "email", width: 28 },
-    { key: "medicalHistory", width: 28 },
-    { key: "parentName", width: 24 },
-    { key: "parentAddress", width: 34 },
-    { key: "parentPhoneNumber", width: 26 },
-    { key: "groupName", width: 24 },
+    { key: "no", width: 8 },
+    { key: "name", width: 35 },
+    { key: "dateOfBirth", width: 30 },
+    { key: "groupName", width: 30 },
+    { key: "parentName", width: 30 },
+    { key: "parentPhoneNumber", width: 32 },
+    { key: "placeOfBirth", width: 28 },
+    { key: "gender", width: 22 },
+    { key: "weight", width: 20 },
+    { key: "height", width: 20 },
+    { key: "schoolOrigin", width: 30 },
+    { key: "address", width: 45 },
+    { key: "phoneNumber", width: 30 },
+    { key: "email", width: 35 },
+    { key: "medicalHistory", width: 40 },
+    { key: "parentAddress", width: 45 },
   ];
 
-  dataSheet.mergeCells("A1:Q1");
+  dataSheet.mergeCells("A1:P1");
   const titleRow = dataSheet.getRow(1);
   titleRow.height = 34;
   titleRow.getCell(1).value = "TEMPLATE UPLOAD PEMAIN - ADORA BASKETBALL";
@@ -401,10 +388,10 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   };
   titleRow.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
 
-  dataSheet.mergeCells("A2:Q2");
+  dataSheet.mergeCells("A2:P2");
   const subtitleRow = dataSheet.getRow(2);
   subtitleRow.height = 26;
-  subtitleRow.getCell(1).value = "Isi kolom sesuai contoh. Kolom bertanda (Opsional) boleh dikosongkan.";
+  subtitleRow.getCell(1).value = "Isi kolom sesuai contoh. Kolom wajib: Nama Lengkap, Tanggal Lahir, dan Kelompok.";
   subtitleRow.getCell(1).font = { name: TEMPLATE_FONT, size: 10, color: { argb: BRAND_TEXT_DARK } };
   subtitleRow.getCell(1).fill = {
     type: "pattern",
@@ -419,23 +406,22 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   headerRow.values = [
     "No.",
     "Nama Lengkap",
-    "Tempat Lahir (Opsional)",
     "Tanggal Lahir (YYYY-MM-DD)",
+    "Kelompok",
+    "Nama Orang Tua (Opsional)",
+    "Nomor Telf. Ortu (Opsional)",
+    "Tempat Lahir (Opsional)",
     "Jenis Kelamin (Opsional)",
     "Berat Badan (Opsional)",
     "Tinggi Badan (Opsional)",
-    "Kelas",
     "Asal Sekolah (Opsional)",
     "Alamat Rumah (Opsional)",
-    "Nomor Telf. (Opsional)",
+    "Nomor Telf. Pemain (Opsional)",
     "Email (Opsional)",
-    "Riwayat Penyakit Bawaan (Opsional)",
-    "Nama Orang Tua",
+    "Riwayat Penyakit (Opsional)",
     "Alamat Orang Tua (Opsional)",
-    "Nomor Telf. Orang Tua (Opsional)",
-    "Kelompok (Opsional)",
   ];
-  headerRow.height = 26;
+  headerRow.height = 32;
   headerRow.eachCell((cell) => {
     cell.font = { bold: true, color: { argb: BRAND_TEXT_DARK }, name: TEMPLATE_FONT, size: 11 };
     cell.fill = {
@@ -443,7 +429,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
       pattern: "solid",
       fgColor: { argb: BRAND_ORANGE },
     };
-    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: false };
+    cell.alignment = { vertical: "middle", horizontal: "center", wrapText: true };
     cell.border = {
       top: { style: "thin", color: { argb: BRAND_BORDER } },
       left: { style: "thin", color: { argb: BRAND_BORDER } },
@@ -456,50 +442,63 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
     {
       no: 1,
       name: "Budi Santoso",
-      placeOfBirth: "Depok",
       dateOfBirth: "2012-08-17",
+      groupName: availableGroups[0] ?? "",
+      parentName: "Devi",
+      parentPhoneNumber: "081212300838",
+      placeOfBirth: "Depok",
       gender: "Laki-laki",
       weight: "18 kg",
       height: "118 cm",
-      schoolClass: "1",
       schoolOrigin: "SDN Gandul 2",
       address: "Jl. Melati No. 10",
       phoneNumber: "081234567890",
       email: "",
       medicalHistory: "",
-      parentName: "Devi",
       parentAddress: "Jl. Melati No. 10",
-      parentPhoneNumber: "081212300838",
-      groupName: "",
     },
     {
       no: 2,
       name: "Nadia Putri",
-      placeOfBirth: "Jakarta",
       dateOfBirth: "2011-04-03",
+      groupName: availableGroups[0] ?? "",
+      parentName: "Suhartini",
+      parentPhoneNumber: "085159717735",
+      placeOfBirth: "Jakarta",
       gender: "Perempuan",
       weight: "",
       height: "",
-      schoolClass: "2",
       schoolOrigin: "SDN Gandul 2",
       address: "",
       phoneNumber: "",
       email: "",
       medicalHistory: "Asma ringan",
-      parentName: "Suhartini",
       parentAddress: "Gandul, Cinere",
-      parentPhoneNumber: "085159717735",
-      groupName: "",
     },
   ]);
 
+  // Dropdown untuk kolom Kelompok (D)
+  if (availableGroups.length > 0) {
+    const groupListString = `"${availableGroups.join(",")}"`;
+    for (let i = 5; i <= 1000; i++) {
+      dataSheet.getCell(`D${i}`).dataValidation = {
+        type: "list",
+        allowBlank: true,
+        formulae: [groupListString],
+        showErrorMessage: true,
+        errorTitle: "Kelompok Tidak Valid",
+        error: "Silakan pilih kelompok dari daftar yang tersedia.",
+      };
+    }
+  }
+
   dataSheet.autoFilter = {
     from: "A4",
-    to: "Q4",
+    to: "P4",
   };
 
   dataSheet.getColumn(1).numFmt = "0";
-  dataSheet.getColumn(4).numFmt = "@";
+  dataSheet.getColumn(3).numFmt = "@";
 
   [5, 6].forEach((rowNumber) => {
     const row = dataSheet.getRow(rowNumber);
@@ -521,7 +520,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
     });
 
     row.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
-    row.getCell(4).alignment = { vertical: "middle", horizontal: "center" };
+    row.getCell(3).alignment = { vertical: "middle", horizontal: "center" };
   });
 
   const guideSheet = workbook.addWorksheet("Panduan");
@@ -529,13 +528,12 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   guideSheet.columns = [{ header: "Panduan Upload", key: "guide", width: 100 }];
 
   const guideRows = [
-    "1) Isi data pada sheet 'Template Pemain' mulai baris contoh.",
-    "2) Kolom wajib: Nama Lengkap, Tanggal Lahir (YYYY-MM-DD), Nama Orang Tua.",
-    "3) Isi Kelas untuk memakai mapping Kelas -> Kelompok. Jika Kelas kosong, kolom Kelompok wajib diisi.",
+    "1) Isi data pada sheet 'Template Pemain' mulai baris ke-5.",
+    "2) Kolom wajib: Nama Lengkap, Tanggal Lahir (YYYY-MM-DD), dan Kelompok.",
+    "3) Pilih Kelompok dari dropdown kolom D — nama kelompok harus persis sama.",
     "4) Gunakan format tanggal: YYYY-MM-DD (contoh: 2012-08-17).",
     "5) Nomor telepon gunakan angka saja (boleh diawali +62).",
     "6) Jika email diisi, formatnya harus valid (contoh: nama@email.com).",
-    "7) Jika kelas belum terpetakan, data tidak akan tersimpan sampai mapping diperbarui.",
   ];
 
   guideRows.forEach((text) => {
