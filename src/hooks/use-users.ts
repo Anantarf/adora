@@ -1,6 +1,6 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUsersAction, createUserAction, updateUserAction, resetPasswordAction, deleteUserAction, updateSelfAction } from "@/actions/users";
+import { getUsersAction, createUserAction, updateUserAction, resetPasswordAction, deleteUserAction, updateSelfAction, getParentUsersAction } from "@/actions/users";
 import { QUERY_KEYS } from "@/lib/constants";
 import { toast } from "sonner";
 
@@ -69,6 +69,14 @@ export const useDeleteUser = () => {
     },
   });
 };
+
+export function useParents() {
+  return useQuery({
+    queryKey: QUERY_KEYS.PARENTS,
+    queryFn: getParentUsersAction,
+    staleTime: 1000 * 60 * 5,
+  });
+}
 
 export const useUpdateSelf = () => {
   return useMutation({

@@ -11,13 +11,14 @@ export const playerSchema = z.object({
   height: z.string().optional(),
   schoolOrigin: z.string().optional(),
   address: z.string().optional(),
-  email: z.string().optional(),
+  email: z.string().email("Format email tidak valid").optional().or(z.literal("")),
   phoneNumber: z.string().optional(),
   medicalHistory: z.string().optional(),
   parentName: z.string().optional(),
   parentAddress: z.string().optional(),
   parentPhoneNumber: z.string().optional(),
   groupId: z.string().nonempty("Kelompok wajib dipilih"),
+  parentId: z.string().optional(),
 });
 
 export type PlayerFormValues = z.infer<typeof playerSchema>;
@@ -39,5 +40,6 @@ export function playerToFormValues(player: Player): PlayerFormValues {
     parentAddress: player.parentAddress || "",
     parentPhoneNumber: player.parentPhoneNumber || "",
     groupId: player.groupId || "",
+    parentId: player.parentId || "",
   };
 }

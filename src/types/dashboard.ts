@@ -110,6 +110,10 @@ export interface Player {
     id: string;
     name: string;
   } | null;
+  user?: {
+    id: string;
+    username: string | null;
+  } | null;
 }
 
 export interface UserSession {

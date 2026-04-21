@@ -23,6 +23,7 @@ export const QUERY_KEYS = {
   STATISTIC_HISTORY: (statisticId: string | null) => ["statistic-history", statisticId],
   FAMILY_PLAYERS: ["family-players"],
   PARENTS: ["parents"],
+  LINKED_PLAYERS: (parentId: string) => ["linked-players", parentId],
 } as const;
 
 // ─── Cache & Pagination ───────────────────────────────

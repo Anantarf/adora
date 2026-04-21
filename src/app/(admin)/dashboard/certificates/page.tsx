@@ -19,12 +19,7 @@ export default function CertificatesPage() {
     if (!certificates) return [];
     if (!searchQuery.trim()) return certificates;
     const q = searchQuery.toLowerCase();
-    return certificates.filter(
-      (cert) =>
-        cert.title.toLowerCase().includes(q) ||
-        cert.player?.name.toLowerCase().includes(q) ||
-        cert.group?.name.toLowerCase().includes(q)
-    );
+    return certificates.filter((cert) => cert.title.toLowerCase().includes(q) || cert.player?.name.toLowerCase().includes(q) || cert.group?.name.toLowerCase().includes(q));
   }, [certificates, searchQuery]);
 
   const handleDelete = async (id: string) => {
@@ -86,14 +81,8 @@ export default function CertificatesPage() {
                 <TableCell colSpan={5} className="h-40 text-center">
                   <div className="flex flex-col items-center gap-2 py-8">
                     <FileBadge className="size-10 text-muted-foreground/30 mb-2" />
-                    <p className="text-muted-foreground font-bold uppercase text-[10px] tracking-widest">
-                      {searchQuery ? "Hasil tidak ditemukan" : "Belum ada sertifikat"}
-                    </p>
-                    <p className="text-muted-foreground/60 text-xs">
-                      {searchQuery 
-                        ? "Coba gunakan kata kunci pencarian yang berbeda." 
-                        : "Unggah sertifikat baru untuk memulai manajemen."}
-                    </p>
+                    <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{searchQuery ? "Hasil tidak ditemukan" : "Belum ada sertifikat"}</p>
+                    <p className="text-xs text-muted-foreground/60">{searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Unggah sertifikat baru untuk memulai manajemen."}</p>
                   </div>
                 </TableCell>
               </TableRow>

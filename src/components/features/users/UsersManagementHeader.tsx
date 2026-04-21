@@ -20,9 +20,9 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
         <div>
           <h1 className="text-4xl font-heading uppercase tracking-widest text-foreground">Manajemen Akun</h1>
           <p className="text-muted-foreground text-sm font-medium tracking-wide">
-            {isParent 
-              ? "Manajemen hak akses dan pengaturan akun orang tua pemain." 
-              : "Manajemen tim admin dan staf pengelola klub."}
+          {isParent
+              ? "Manajemen hak akses dan pengaturan akun orang tua pemain."
+              : "Kelola akun admin yang memiliki akses ke sistem manajemen klub."}
           </p>
         </div>
         <AddUserDialog role={role} />
@@ -53,7 +53,7 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
           <Input
             value={searchTerm}
             onChange={(e) => onSearchTermChange(e.target.value)}
-            placeholder="Cari nama, username, atau email..."
+            placeholder="Cari username..."
             className="pl-11 h-12 bg-card/60 border-border/50 rounded-pill shadow-sm font-medium focus:ring-primary/20"
           />
         </div>

@@ -49,7 +49,6 @@ export default function StatisticsPage() {
   const { mutateAsync: setActive } = useSetActivePeriod();
   const { mutateAsync: deletePeriod } = useDeletePeriod();
 
-  // Auto-select active period on first load
   useEffect(() => {
     if (periods && !selectedPeriodId) {
       const active = periods.find((p) => p.isActive);
@@ -58,10 +57,8 @@ export default function StatisticsPage() {
     }
   }, [periods]);
 
-  // Build stats lookup: playerId → stat record
   const statsMap = useMemo(() => Object.fromEntries((stats ?? []).map((s) => [s.player.id, s])), [stats]);
 
-  // Group players by group (preserving group order from groups list)
   const playersByGroup = useMemo(() => {
     if (!players || !groups) return [];
     return groups
@@ -240,9 +237,9 @@ export default function StatisticsPage() {
       {/* Empty state: no period selected */}
       {!selectedPeriodId && (
         <div className="rounded-xl border border-dashed border-border/60 bg-card p-12 text-center">
-          <CalendarRange className="size-10 text-muted-foreground mx-auto mb-3" />
-          <p className="font-semibold text-foreground">Belum ada periode evaluasi</p>
-          <p className="text-sm text-muted-foreground mt-1">Buat periode baru untuk mulai input nilai.</p>
+          <CalendarRange className="size-10 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada periode evaluasi</p>
+          <p className="text-xs text-muted-foreground/60 mt-1">Buat periode baru untuk mulai input nilai.</p>
         </div>
       )}
 

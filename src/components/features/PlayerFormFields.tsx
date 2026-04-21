@@ -1,30 +1,62 @@
 "use client";
 
+import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Controller, type Control, type FieldErrors, type UseFormRegister } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, type UseFormRegister, type UseFormSetValue, type UseFormGetValues } from "react-hook-form";
 import type { PlayerFormValues } from "@/lib/validation/player";
 import type { Group } from "@/hooks/use-groups";
+
+type ParentAccount = { id: string; username: string | null; name: string | null };
+
+const NO_PARENT = "_none_";
 
 interface PlayerFormFieldsProps {
   register: UseFormRegister<PlayerFormValues>;
   control: Control<PlayerFormValues>;
   errors: FieldErrors<PlayerFormValues>;
+  setValue: UseFormSetValue<PlayerFormValues>;
+  getValues: UseFormGetValues<PlayerFormValues>;
   groups: Group[] | undefined;
   isGroupsLoading?: boolean;
   inputClassName?: string;
   step?: number;
+  parentAccounts?: ParentAccount[];
+  isParentAccountsLoading?: boolean;
 }
 
 export function PlayerFormFields({
   register,
   control,
   errors,
+  setValue,
+  getValues,
   groups,
   isGroupsLoading,
   inputClassName = "h-11 rounded-xl bg-background/40",
   step = 1,
+  parentAccounts,
+  isParentAccountsLoading,
 }: PlayerFormFieldsProps) {
+  const lastAutoFilledRef = useRef("");
+
+  const handleParentChange = (newId: string | null) => {
+    const resolved = !newId || newId === NO_PARENT ? "" : newId;
+    setValue("parentId", resolved);
+    if (!resolved) {
+      lastAutoFilledRef.current = "";
+      return;
+    }
+    const selected = parentAccounts?.find((a) => a.id === resolved);
+    if (!selected) return;
+    const autoName = selected.name ?? selected.username ?? "";
+    const currentParentName = getValues("parentName") ?? "";
+    if (!currentParentName || currentParentName === lastAutoFilledRef.current) {
+      setValue("parentName", autoName);
+      lastAutoFilledRef.current = autoName;
+    }
+  };
+
   return (
     <>
       {/* STEP 1: Data Diri Dasar & Fisik */}
@@ -138,6 +170,7 @@ export function PlayerFormFields({
             Email Peserta <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
           <Input type="email" {...register("email")} placeholder="Contoh: nama@email.com" className={`w-full ${inputClassName}`} />
+          {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -145,6 +178,40 @@ export function PlayerFormFields({
             No. Telepon <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
           <Input type="tel" {...register("phoneNumber")} placeholder="Contoh: +6281234567890" className={`w-full ${inputClassName}`} />
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
+          <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+            Akun Orang Tua <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(Opsional)</span>
+          </label>
+          <Controller
+            control={control}
+            name="parentId"
+            render={({ field }) => (
+              <Select
+                onValueChange={handleParentChange}
+                value={field.value || NO_PARENT}
+                disabled={isParentAccountsLoading}
+              >
+                <SelectTrigger className={`w-full ${inputClassName}`}>
+                  <SelectValue>
+                    {field.value
+                      ? (parentAccounts?.find((a) => a.id === field.value)?.username ?? "Akun tidak ditemukan")
+                      : "Tidak Ada / Tidak Terhubung"}
+
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent className="rounded-xl">
+                  <SelectItem value={NO_PARENT}>Tidak Ada / Tidak Terhubung</SelectItem>
+                  {parentAccounts?.map((acc) => (
+                    <SelectItem key={acc.id} value={acc.id} className="font-medium text-sm">
+                      {acc.username ?? acc.id}{acc.name ? ` — ${acc.name}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
 
         <div className="space-y-2">

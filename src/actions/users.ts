@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
   await requireAdmin();
 
-  return await prisma.user.findMany({
+  const users = await prisma.user.findMany({
     where: { role, isDeleted: false },
     select: {
       id: true,
@@ -24,7 +24,14 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
         select: { player: { where: { isDeleted: false } } },
       },
     },
-    orderBy: { name: "asc" },
+    orderBy: { username: "asc" },
+  });
+
+  // Superadmin selalu di posisi paling atas
+  return users.sort((a, b) => {
+    if (a.username === "superadmin") return -1;
+    if (b.username === "superadmin") return 1;
+    return 0;
   });
 }
 
@@ -58,7 +65,10 @@ export async function createUserAction(data: { username: string; name: string; e
         role: data.role || "PARENT",
       },
     });
-    await createAuditLog(tx, "CREATE", "user", newUser.id, userId);
+    await createAuditLog(tx, "CREATE", "user", newUser.id, userId, {
+      username: newUser.username,
+      role: newUser.role,
+    });
     return newUser;
   });
 
@@ -84,8 +94,12 @@ export async function updateUserAction(
       if (emailConflict) throw new Error("Email sudah terdaftar pada akun lain.");
     }
 
+    const before = await tx.user.findUnique({ where: { id }, select: { username: true, name: true, email: true } });
     const res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
-    await createAuditLog(tx, "UPDATE", "user", id, userId);
+    await createAuditLog(tx, "UPDATE", "user", id, userId, {
+      before,
+      after: { username: res.username, name: res.name, email: res.email },
+    });
     return res;
   });
 
@@ -105,9 +119,13 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   }
   const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
+  const target = await prisma.user.findUnique({ where: { id }, select: { username: true } });
   await prisma.$transaction(async (tx) => {
     await tx.user.update({ where: { id }, data: { password: hashedPassword } });
-    await createAuditLog(tx, "RESET_PASSWORD", "user", id, userId);
+    await createAuditLog(tx, "RESET_PASSWORD", "user", id, userId, {
+      username: target?.username,
+      resetTo: newPassword ? "custom" : "default",
+    });
   });
 
   return { message: "Password berhasil direset." };
@@ -130,7 +148,11 @@ export async function deleteUserAction(id: string) {
     if (playerCount > 0) {
       throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
     }
-    await createAuditLog(tx, "DELETE", "user", id, userId);
+    const target = await tx.user.findUnique({ where: { id }, select: { username: true, role: true } });
+    await createAuditLog(tx, "DELETE", "user", id, userId, {
+      username: target?.username,
+      role: target?.role,
+    });
     await tx.user.update({ where: { id }, data: { isDeleted: true } });
   });
 
@@ -138,7 +160,17 @@ export async function deleteUserAction(id: string) {
   return { success: true as const };
 }
 
-// 6. Update SELF (Member/Parent updating their own data)
+// 6. List parent accounts (lightweight, for selectors)
+export async function getParentUsersAction() {
+  await requireAdmin();
+  return prisma.user.findMany({
+    where: { role: "PARENT", isDeleted: false },
+    select: { id: true, username: true, name: true },
+    orderBy: { username: "asc" },
+  });
+}
+
+// 7. Update SELF (Member/Parent updating their own data)
 export async function updateSelfAction(data: { name?: string; email?: string; password?: string }) {
   const session = await requireAuth();
   const userId = session.user.id ?? null;
@@ -156,7 +188,10 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
     if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
 
     const res = await tx.user.update({ where: { id: userId! }, data: updateData });
-    await createAuditLog(tx, "UPDATE_SELF", "user", userId!, userId);
+    await createAuditLog(tx, "UPDATE_SELF", "user", userId!, userId, {
+      changedFields: data.password ? ["password"] : [],
+      message: data.password ? "Pengguna mengubah kata sandi mereka sendiri." : "Pengguna memperbarui profil mereka sendiri."
+    });
     return res;
   });
 

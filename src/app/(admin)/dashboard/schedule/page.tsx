@@ -45,9 +45,22 @@ const eventSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventSchema>;
 
+type UIState =
+  | { type: "edit"; event: ScheduleEvent }
+  | { type: "delete"; targetId: string }
+  | { type: "preview"; event: ScheduleEvent }
+  | null;
+
+function formatJakarta(iso: string | Date, options: Intl.DateTimeFormatOptions): string {
+  try {
+    return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", ...options }).format(new Date(iso));
+  } catch {
+    return "—";
+  }
+}
+
 export default function SchedulePage() {
   const [date, setDate] = useState<Date | undefined>(getJakartaToday());
-  type UIState = { type: "edit"; event: ScheduleEvent } | { type: "delete"; targetId: string } | { type: "preview"; event: ScheduleEvent } | null;
   const [uiState, setUiState] = useState<UIState>(null);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
   const { data: homebases = [] } = useHomebases();
@@ -55,10 +68,8 @@ export default function SchedulePage() {
 
   const isEditMode = uiState?.type === "edit";
 
-  // Memoized homebase lookup map for O(1) access
   const homebaseMap = useMemo(() => Object.fromEntries(homebases.map((h) => [h.id, h])), [homebases]);
 
-  // Time context for default values
   const { currentHH, currentMM } = useMemo(() => {
     const now = new Date();
     return {
@@ -67,7 +78,15 @@ export default function SchedulePage() {
     };
   }, []);
 
-  const defaultType = DEFAULT_EVENT_TYPE;
+  const blankFormValues: EventFormValues = {
+    eventId: undefined,
+    title: "",
+    description: "",
+    location: "",
+    type: DEFAULT_EVENT_TYPE,
+    time: `${currentHH}:${currentMM}`,
+    homebaseId: undefined,
+  };
 
   const {
     register,
@@ -78,15 +97,7 @@ export default function SchedulePage() {
     formState: { errors },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
-    defaultValues: {
-      eventId: undefined,
-      title: "",
-      description: "",
-      location: "",
-      type: defaultType,
-      time: `${currentHH}:${currentMM}`,
-      homebaseId: undefined,
-    },
+    defaultValues: blankFormValues,
   });
 
   const selectedType = watch("type");
@@ -103,9 +114,6 @@ export default function SchedulePage() {
   const { mutateAsync: updateEvent } = useUpdateEvent();
   const { mutateAsync: deleteEvent } = useDeleteEvent();
 
-  // ─── Memoized Calculations ──────────────────────────────
-
-  // Safe filtering: Compare by Jakarta YYYY-MM-DD strings
   const mappedEvents = useMemo(
     () =>
       (events || []).map((ev) => {
@@ -135,22 +143,12 @@ export default function SchedulePage() {
     setSelectedGroupIds((prev) => (prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]));
   };
 
-  // Callback: Cancel edit mode and reset form
   const handleCancelEdit = () => {
     setUiState(null);
     setSelectedGroupIds([]);
-    reset({
-      eventId: undefined,
-      title: "",
-      description: "",
-      location: "",
-      type: defaultType,
-      time: `${currentHH}:${currentMM}`,
-      homebaseId: undefined,
-    });
+    reset(blankFormValues);
   };
 
-  // Callback: Start editing an event
   const handleEditEvent = (ev: ScheduleEvent) => {
     setUiState({ type: "edit", event: ev });
     setDate(new Date(ev.date));
@@ -183,7 +181,6 @@ export default function SchedulePage() {
         groupIds: selectedGroupIds,
       };
 
-      // Single mutation point
       if (data.eventId) {
         await updateEvent({ id: data.eventId, data: eventData });
         toast.success("Jadwal berhasil diperbarui!");
@@ -195,14 +192,6 @@ export default function SchedulePage() {
       handleCancelEdit();
     } catch (error) {
       toast.error(isEditMode ? "Gagal mengubah jadwal" : "Gagal menambahkan jadwal");
-    }
-  };
-
-  const formatJakarta = (iso: string | Date, options: Intl.DateTimeFormatOptions) => {
-    try {
-      return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", ...options }).format(new Date(iso));
-    } catch {
-      return "—";
     }
   };
 
@@ -427,10 +416,10 @@ export default function SchedulePage() {
                   <Loader2 className="size-6 animate-spin text-primary" />
                 </div>
               ) : upcomingEvents.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-14 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
-                  <CalendarDays className="size-8 text-muted-foreground/30" />
-                  <p className="text-xs text-muted-foreground font-medium">Tidak ada agenda mendatang</p>
-                  <p className="text-[10px] text-muted-foreground/50">Buat agenda menggunakan form di atas.</p>
+                <div className="flex flex-col items-center justify-center py-14 gap-2 rounded-2xl border border-dashed border-border/50 text-center">
+                  <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tidak ada agenda mendatang</p>
+                  <p className="text-[10px] text-muted-foreground/60">Buat agenda menggunakan form di atas.</p>
                 </div>
               ) : (
                 upcomingEvents.map((ev) => {

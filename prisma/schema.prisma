@@ -61,6 +61,7 @@ model auditlog {
   action      String
   targetTable String
   recordId    String?
+  details     Json?    // Added to store what actually changed, added, or deleted
   timestamp   DateTime @default(now())
   userId      String?
   user        user?    @relation(fields: [userId], references: [id], map: "AuditLog_userId_fkey")
@@ -168,6 +169,7 @@ model player {
   @@index([groupId], map: "Player_groupId_idx")
   @@index([parentId], map: "Player_parentId_idx")
   @@index([preferred_homebaseId], map: "Player_preferred_homebaseId_idx")
+  @@unique([name, dateOfBirth, groupId], map: "Player_name_dateOfBirth_groupId_key")
   @@map("Player")
 }
 

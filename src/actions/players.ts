@@ -48,7 +48,10 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
         ? { OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }] }
         : {}),
     },
-    include: { group: { select: { id: true, name: true } } },
+    include: {
+      group: { select: { id: true, name: true } },
+      user: { select: { id: true, username: true } },
+    },
     orderBy: { name: "asc" },
   });
 }
@@ -88,7 +91,11 @@ export async function addPlayerAction(data: {
         updatedAt: new Date(),
       },
     });
-    await createAuditLog(tx, "CREATE", "player", p.id, userId);
+    await createAuditLog(tx, "CREATE", "player", p.id, userId, {
+      name: p.name,
+      groupId: p.groupId,
+      dateOfBirth: p.dateOfBirth,
+    });
     return p;
   });
 
@@ -189,7 +196,11 @@ export async function addBatchPlayersAction(
       const res = await tx.player.createMany({ data: chunk, skipDuplicates: true });
       count += res.count;
     }
-    await createAuditLog(tx, "CREATE", "player_batch", String(count), userId);
+    await createAuditLog(tx, "CREATE", "player_batch", String(count), userId, {
+      count,
+      submitted: validPayload.length,
+      deduped: dedupedPayload.length,
+    });
     return { count };
   });
 
@@ -205,6 +216,7 @@ export async function updatePlayerAction(
     weight?: string; height?: string; schoolOrigin?: string; address?: string;
     email?: string; phoneNumber?: string; medicalHistory?: string;
     parentName?: string; parentAddress?: string; parentPhoneNumber?: string; groupId?: string;
+    parentId?: string | null;
   },
 ) {
   const session = await requireAdmin();
@@ -229,10 +241,14 @@ export async function updatePlayerAction(
         parentAddress: data.parentAddress,
         parentPhoneNumber: data.parentPhoneNumber,
         groupId: data.groupId,
+        ...(data.parentId !== undefined ? { parentId: data.parentId } : {}),
         updatedAt: new Date(),
       },
     });
-    await createAuditLog(tx, "UPDATE", "player", res.id, userId);
+    await createAuditLog(tx, "UPDATE", "player", res.id, userId, {
+      before: { name: data.name, groupId: data.groupId, parentId: data.parentId },
+      after: { name: res.name, groupId: res.groupId, parentId: res.parentId },
+    });
     return res;
   });
 
@@ -240,14 +256,28 @@ export async function updatePlayerAction(
   return updated;
 }
 
-// 4. Hapus pemain (Soft Delete)
+// 4. Ambil pemain berdasarkan akun orang tua (untuk modal di Users page)
+export async function getPlayersByParentAction(parentId: string) {
+  await requireAdmin();
+  return prisma.player.findMany({
+    where: { parentId, isDeleted: false },
+    select: { id: true, name: true, group: { select: { name: true } } },
+    orderBy: { name: "asc" },
+  });
+}
+
+// 5. Hapus pemain (Soft Delete)
 export async function deletePlayerAction(id: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
   await prisma.$transaction(async (tx) => {
+    const target = await tx.player.findUnique({ where: { id }, select: { name: true, groupId: true } });
     await tx.player.update({ where: { id }, data: { isDeleted: true } });
-    await createAuditLog(tx, "DELETE", "player", id, userId);
+    await createAuditLog(tx, "DELETE", "player", id, userId, {
+      name: target?.name,
+      groupId: target?.groupId,
+    });
   });
 
   revalidatePath("/dashboard/players");

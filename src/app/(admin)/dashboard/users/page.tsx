@@ -7,11 +7,13 @@ import { useUsers, useDeleteUser, useResetPassword } from "@/hooks/use-users";
 import { UserAccountActionDialogs, type UserDialogState } from "@/components/features/users/UserAccountActionDialogs";
 import { UserAccountCard } from "@/components/features/users/UserAccountCard";
 import { UsersManagementHeader } from "@/components/features/users/UsersManagementHeader";
+import { LinkedPlayersModal } from "@/components/features/users/LinkedPlayersModal";
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeRole, setActiveRole] = useState<"PARENT" | "ADMIN">("PARENT");
   const [uiState, setUiState] = useState<UserDialogState>(null);
+  const [linkedPlayersParentId, setLinkedPlayersParentId] = useState<string | null>(null);
 
   const { data: users, isLoading } = useUsers(activeRole);
   const { mutateAsync: deleteUser } = useDeleteUser();
@@ -60,28 +62,41 @@ export default function UsersManagementPage() {
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card rounded-card-xl">
-            <Loader2 className="size-10 animate-spin text-primary" />
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground animate-pulse">Memuat Data Akun...</p>
+          <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-border/50 bg-card">
+            <Loader2 className="size-8 animate-spin text-primary" />
+            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Memuat Data Akun...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
-          <div className="col-span-full h-64 flex flex-col gap-4 items-center justify-center glass-card border-dashed border-2 rounded-card-xl opacity-60">
-            <Users className="size-10 text-muted-foreground/40" />
+          <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
+            <Users className="size-10 text-muted-foreground/30" />
             <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
               {hasUsers && isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}
             </p>
-            <p className="text-xs text-muted-foreground/80 text-center">
-              {hasUsers && isSearchActive 
-                ? "Ubah kata kunci pencarian atau kosongkan filter." 
+            <p className="text-xs text-muted-foreground/60 text-center">
+              {hasUsers && isSearchActive
+                ? "Ubah kata kunci pencarian atau kosongkan filter."
                 : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
             </p>
           </div>
         ) : (
-          filteredUsers.map((user) => <UserAccountCard key={user.id} user={user} onReset={(id) => setUiState({ type: "reset", targetId: id })} onDelete={(id) => setUiState({ type: "delete", targetId: id })} />)
+          filteredUsers.map((user) => (
+            <UserAccountCard
+              key={user.id}
+              user={user}
+              onReset={(id) => setUiState({ type: "reset", targetId: id })}
+              onDelete={(id) => setUiState({ type: "delete", targetId: id })}
+              onViewPlayers={(id) => setLinkedPlayersParentId(id)}
+            />
+          ))
         )}
       </div>
 
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
+      <LinkedPlayersModal
+        parentId={linkedPlayersParentId}
+        parentUsername={filteredUsers.find((u) => u.id === linkedPlayersParentId)?.username ?? undefined}
+        onOpenChange={(open) => { if (!open) setLinkedPlayersParentId(null); }}
+      />
     </motion.div>
   );
 }

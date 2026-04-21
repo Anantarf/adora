@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, CalendarDays } from "lucide-react";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { Button } from "@/components/ui/button";
@@ -73,18 +73,21 @@ export function AttendanceCardView() {
 
       {months.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
-          <p className="text-sm text-muted-foreground font-medium">
-            {searchQuery ? "Hasil tidak ditemukan untuk pencarian ini." : "Belum ada agenda yang tercatat."}
+          <CalendarDays className="size-10 text-muted-foreground/30 mb-1" />
+          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            {searchQuery ? "Hasil tidak ditemukan" : "Belum ada agenda yang tercatat"}
           </p>
-          {!searchQuery && <p className="text-xs text-muted-foreground">Silakan buat agenda baru di menu Jadwal.</p>}
+          <p className="text-xs text-muted-foreground/60 mt-1">
+            {searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Silakan buat agenda baru di menu Jadwal."}
+          </p>
         </div>
       ) : (
         <div className="space-y-5">
           {months.map((monthKey) => (
-        <div key={monthKey}>
-          <h2 className="font-heading text-lg font-bold uppercase tracking-widest text-foreground mb-2.5 pl-2 border-l-4 border-primary">{monthKey}</h2>
-          <div className="space-y-2">
-            {groupedByMonth[monthKey].map((event) => {
+            <div key={monthKey}>
+              <h2 className="font-heading text-lg font-bold uppercase tracking-widest text-foreground mb-2.5 pl-2 border-l-4 border-primary">{monthKey}</h2>
+              <div className="space-y-2">
+                {groupedByMonth[monthKey].map((event) => {
               const eventDate = new Date(event.date);
               const markedAtDate = event.attendanceMarkedAt ? new Date(event.attendanceMarkedAt) : null;
               const cfg = getEventConfig(event.type);
@@ -100,7 +103,7 @@ export function AttendanceCardView() {
 
                     <div className="min-w-0 space-y-1">
                       <div className="flex flex-col gap-0.5">
-                        <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
+                        <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
                           {cfg.label}
                         </span>
                         <div className="font-heading text-base sm:text-lg tracking-wide uppercase text-foreground truncate">
@@ -125,9 +128,9 @@ export function AttendanceCardView() {
                 </Button>
               );
             })}
-          </div>
-        </div>
-      ))}
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

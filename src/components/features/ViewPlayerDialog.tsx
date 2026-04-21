@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import { type Player } from "@/types/dashboard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2 } from "lucide-react";
+import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2, Link2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdatePlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
+import { useParents } from "@/hooks/use-users";
 import { toast } from "sonner";
 import { playerSchema, playerToFormValues, type PlayerFormValues } from "@/lib/validation/player";
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
@@ -23,9 +24,10 @@ interface ViewPlayerDialogProps {
 export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewPlayerDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const { data: parentAccounts, isLoading: isParentAccountsLoading } = useParents();
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
-  const { register, handleSubmit, control, formState: { errors }, reset } = useForm<PlayerFormValues>({
+  const { register, handleSubmit, control, setValue, getValues, formState: { errors }, reset } = useForm<PlayerFormValues>({
     resolver: zodResolver(playerSchema),
     defaultValues: playerToFormValues(player),
   });
@@ -39,7 +41,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {
-      await updatePlayer({ id: player.id, data });
+      await updatePlayer({ id: player.id, data: { ...data, parentId: data.parentId || null } });
       toast.success(`Profil ${player.name} berhasil diperbarui!`);
       reset(data);
       setIsEditing(false);
@@ -84,8 +86,12 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
               register={register}
               control={control}
               errors={errors}
+              setValue={setValue}
+              getValues={getValues}
               groups={groups}
               isGroupsLoading={isGroupsLoading}
+              parentAccounts={parentAccounts}
+              isParentAccountsLoading={isParentAccountsLoading}
               inputClassName="h-10 bg-background/50"
             />
 
@@ -157,7 +163,15 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
                 )}
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Nama Orang Tua</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.parentName || "-"}</dd>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {player.parentName || "-"}
+                    {player.user && (
+                      <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary text-[10px] font-bold tracking-wide leading-none">
+                        <Link2 className="size-2.5" />
+                        {player.user.username ?? player.user.id}
+                      </span>
+                    )}
+                  </dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">No. Telf. Orang Tua</dt>

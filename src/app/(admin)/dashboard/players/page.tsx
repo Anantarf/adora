@@ -35,12 +35,11 @@ export default function PlayersPage() {
   const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId ?? "", debouncedSearch, !!selectedGroupId);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
-  // Auto-select first group on load
   useEffect(() => {
     if (groups && groups.length > 0 && !selectedGroupId) {
       setSelectedGroupId(groups[0].id);
     }
-  }, [groups]);
+  }, [groups, selectedGroupId]);
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
   const filteredPlayers = players || [];
@@ -73,7 +72,7 @@ export default function PlayersPage() {
                 <Icon className="size-5" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{label}</p>
                 {isGroupsLoading
                   ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" />
                   : <p className="text-2xl font-heading tracking-widest">{value}</p>}

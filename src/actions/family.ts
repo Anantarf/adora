@@ -1,17 +1,11 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
+import { requireAuth } from "@/lib/server-auth";
 
 export async function getFamilyPlayersAction() {
-  const session = await getServerSession(authOptions);
-
-  const userId = (session?.user as { id?: string })?.id;
-
-  if (!userId) {
-    throw new Error("Sesi tidak valid");
-  }
+  const session = await requireAuth();
+  const userId = session.user.id!
 
   return await prisma.player.findMany({
     where: {

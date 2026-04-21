@@ -36,7 +36,12 @@ export async function createPeriodAction(data: { name: string; startDate: string
         isActive: data.setActive ?? false,
       },
     });
-    await createAuditLog(tx, "CREATE", "evaluationPeriod", p.id, userId);
+    await createAuditLog(tx, "CREATE", "evaluationPeriod", p.id, userId, {
+      name: p.name,
+      startDate: p.startDate,
+      endDate: p.endDate,
+      isActive: p.isActive,
+    });
     return p;
   });
 
@@ -52,7 +57,10 @@ export async function setActivePeriodAction(periodId: string) {
   await prisma.$transaction(async (tx) => {
     await tx.evaluationPeriod.updateMany({ where: { isActive: true }, data: { isActive: false } });
     await tx.evaluationPeriod.update({ where: { id: periodId }, data: { isActive: true } });
-    await createAuditLog(tx, "SET_ACTIVE", "evaluationPeriod", periodId, userId);
+    const period = await tx.evaluationPeriod.findUnique({ where: { id: periodId }, select: { name: true } });
+    await createAuditLog(tx, "SET_ACTIVE", "evaluationPeriod", periodId, userId, {
+      name: period?.name,
+    });
   });
 
   revalidatePath("/dashboard/statistics");
@@ -68,8 +76,11 @@ export async function deletePeriodAction(periodId: string) {
     if (statCount > 0) {
       throw new Error(`Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.`);
     }
+    const period = await tx.evaluationPeriod.findUnique({ where: { id: periodId }, select: { name: true } });
     await tx.evaluationPeriod.delete({ where: { id: periodId } });
-    await createAuditLog(tx, "DELETE", "evaluationPeriod", periodId, userId);
+    await createAuditLog(tx, "DELETE", "evaluationPeriod", periodId, userId, {
+      name: period?.name,
+    });
   });
 
   revalidatePath("/dashboard/statistics");

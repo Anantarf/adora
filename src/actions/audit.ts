@@ -12,6 +12,7 @@ export type AuditLogRecord = {
   action: string;
   targetTable: string;
   recordId: string | null;
+  details: any | null; // Added details field for audit view
   timestamp: Date;
   userId: string | null;
   user: { id: string; name: string | null; username: string | null } | null;
@@ -49,6 +50,7 @@ export async function createAuditLog(
   targetTable: string,
   recordId?: string,
   userId?: string | null,
+  details?: any,
 ) {
   // Fallback ke session hanya jika userId tidak diberikan (backward compat sementara migrasi)
   const resolvedUserId =
@@ -62,18 +64,19 @@ export async function createAuditLog(
       action,
       targetTable,
       recordId: recordId ?? null,
+      details: details ?? null,
       userId: resolvedUserId,
     },
   });
 }
 
 // 3. Log an audit action — Public Server Action
-export async function createAuditLogAction(action: string, targetTable: string, recordId?: string) {
+export async function createAuditLogAction(action: string, targetTable: string, recordId?: string, details?: any) {
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
-      await createAuditLog(tx, action, targetTable, recordId, userId);
+      await createAuditLog(tx, action, targetTable, recordId, userId, details);
     });
   } catch (e) {
     console.error("[AUDIT_LOG_ERROR]:", e);

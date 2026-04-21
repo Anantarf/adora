@@ -3,8 +3,9 @@
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
 import { Cone, LayoutDashboard, Users, CheckSquare, FileBadge, LineChart, ShieldAlert, Layers, CalendarDays, LogOut } from "lucide-react";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
+import { UserProfileMenu } from "./UserProfileMenu";
+import { signOut } from "next-auth/react";
 
 const navItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
@@ -65,12 +66,17 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-2 border-t border-border/50">
+      <SidebarFooter className="p-3 group-data-[collapsible=icon]:p-2 border-t border-border/50 flex flex-col gap-1">
+        <UserProfileMenu variant="sidebar" />
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton onClick={() => signOut({ callbackUrl: "/" })} className="h-10 px-3 gap-3 rounded-xl hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-base font-bold">
+            <SidebarMenuButton
+              onClick={() => signOut({ callbackUrl: "/" })}
+              className="h-10 px-3 gap-3 rounded-xl hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-base font-bold"
+              tooltip="Keluar"
+            >
               <LogOut className="size-4.5" />
-              <span className="tracking-wide flex-1">Keluar</span>
+              <span className="tracking-wide flex-1 group-data-[collapsible=icon]:hidden">Keluar</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

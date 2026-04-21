@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAddPlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
+import { useParents } from "@/hooks/use-users";
 import { toast } from "sonner";
 import { BatchPlayerUpload } from "@/components/features/BatchPlayerUpload";
 import { playerSchema, type PlayerFormValues } from "@/lib/validation/player";
@@ -19,19 +20,22 @@ export function AddPlayerDialog() {
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [step, setStep] = useState(1);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const { data: parentAccounts, isLoading: isParentAccountsLoading } = useParents();
   const { mutateAsync: addPlayer, isPending } = useAddPlayer();
 
   const {
     register,
     handleSubmit,
     control,
+    setValue,
+    getValues,
     formState: { errors, isValid },
     reset,
   } = useForm<PlayerFormValues>({ resolver: zodResolver(playerSchema), mode: "onChange" });
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {
-      await addPlayer(data);
+      await addPlayer({ ...data, parentId: data.parentId || undefined });
       reset();
       setOpen(false);
       toast.success("Pemain baru berhasil didaftarkan!");
@@ -79,7 +83,18 @@ export function AddPlayerDialog() {
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4 relative overflow-hidden">
             <div className="max-h-dialog-sm overflow-y-auto overflow-x-hidden pr-2 pb-2 scrollbar-thin">
-              <PlayerFormFields register={register} control={control} errors={errors} groups={groups} isGroupsLoading={isGroupsLoading} step={step} />
+              <PlayerFormFields
+                register={register}
+                control={control}
+                errors={errors}
+                setValue={setValue}
+                getValues={getValues}
+                groups={groups}
+                isGroupsLoading={isGroupsLoading}
+                parentAccounts={parentAccounts}
+                isParentAccountsLoading={isParentAccountsLoading}
+                step={step}
+              />
             </div>
 
             <div className="mt-2 pt-4 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">

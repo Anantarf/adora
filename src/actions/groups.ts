@@ -37,7 +37,10 @@ export async function addGroupAction(data: { name: string; description?: string;
         },
       });
 
-      await createAuditLog(tx, "CREATE", "Group", g.id, session.user.id);
+      await createAuditLog(tx, "CREATE", "Group", g.id, session.user.id, {
+        name: g.name,
+        homebaseId: g.homebaseId,
+      });
       return g;
     });
 
@@ -58,7 +61,11 @@ export async function updateGroupAction(id: string, data: { name?: string; descr
         data: buildUpdateData(data),
       });
 
-      await createAuditLog(tx, "UPDATE", "Group", g.id, session.user.id);
+      await createAuditLog(tx, "UPDATE", "Group", g.id, session.user.id, {
+        name: g.name,
+        description: g.description,
+        homebaseId: g.homebaseId,
+      });
       return g;
     });
 
@@ -80,9 +87,12 @@ export async function deleteGroupAction(id: string) {
         data: { groupId: null },
       });
 
+      const target = await tx.group.findUnique({ where: { id }, select: { name: true } }).catch(() => null);
       // 2. Hapus kelompok
       await tx.group.delete({ where: { id } });
-      await createAuditLog(tx, "DELETE", "Group", id, session.user.id);
+      await createAuditLog(tx, "DELETE", "Group", id, session.user.id, {
+        name: target?.name,
+      });
     });
 
     revalidatePath("/dashboard/players");
