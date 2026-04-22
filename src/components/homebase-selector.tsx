@@ -17,7 +17,9 @@ export function HomebaseSelector({
 }: HomebaseSelectorProps) {
   const [homebases, setHomebases] = useState<Homebase[]>([]);
   const [loading, setLoading] = useState(true);
-  const initialValue = useRef(value); // capture sekali saat mount
+  const initialValue = useRef(value);
+  const onSelectRef = useRef(onSelect);
+  useEffect(() => { onSelectRef.current = onSelect; });
 
   useEffect(() => {
     const fetchHomebases = async () => {
@@ -25,7 +27,7 @@ export function HomebaseSelector({
         const data = await getPublicHomebases();
         setHomebases(data as Homebase[]);
       } catch (error) {
-        console.error("Failed to fetch homebases:", error);
+        console.error("Gagal mengambil data lokasi:", error);
       } finally {
         setLoading(false);
       }
@@ -38,18 +40,14 @@ export function HomebaseSelector({
   useEffect(() => {
     if (!initialValue.current || homebases.length === 0) return;
     const match = homebases.find((h) => h.id === initialValue.current);
-    if (match) onSelect(match.id, match.name);
-  }, [homebases, onSelect]);
+    if (match) onSelectRef.current(match.id, match.name);
+  }, [homebases]);
 
   if (loading)
-    return (
-      <div className="animate-pulse text-gray-400">
-        Loading locations...
-      </div>
-    );
+    return <div className="animate-pulse text-muted-foreground">Memuat lokasi...</div>;
 
   if (homebases.length === 0)
-    return <div className="text-red-400">No locations available</div>;
+    return <div className="text-destructive">Belum ada lokasi latihan tersedia</div>;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -59,7 +57,7 @@ export function HomebaseSelector({
           onClick={() => onSelect(homebase.id, homebase.name)}
           className={`p-6 border-2 rounded-lg transition-all text-left ${
             value === homebase.id
-              ? "border-primary bg-primary/10 shadow-lg shadow-primary/50"
+              ? "border-primary bg-primary/10"
               : "border-white/20 hover:border-primary hover:bg-primary/5"
           }`}
         >
@@ -68,10 +66,10 @@ export function HomebaseSelector({
           </h3>
           {showFull && (
             <>
-              <p className="text-sm text-gray-400 mb-1 break-words">{homebase.address}</p>
-              <p className="text-sm text-gray-400 break-words">{homebase.phone}</p>
+              <p className="text-sm text-muted-foreground mb-1 break-words">{homebase.address}</p>
+              <p className="text-sm text-muted-foreground break-words">{homebase.phone}</p>
               {homebase.description && (
-                <p className="text-sm text-gray-500 mt-2 break-words">
+                <p className="text-sm text-muted-foreground/70 mt-2 break-words">
                   {homebase.description}
                 </p>
               )}

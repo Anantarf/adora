@@ -1,4 +1,4 @@
-import { Cone, UserCircle } from "lucide-react";
+import { UserCircle } from "lucide-react";
 import { SignOutButton } from "@/components/features/auth/SignOutButton";
 import Link from "next/link";
 import { getServerSession } from "next-auth/next";
@@ -7,54 +7,54 @@ import { redirect } from "next/navigation";
 
 /**
  * Layout Khusus Portal Orang Tua (Parent Portal)
- * Terintegrasi dengan MySQL Login (NextAuth) dan Proyeksi Bebas Supabase.
+ * Didesain selaras dengan estetika Admin Portal yang profesional.
  */
 export default async function ParentLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
 
-  if (!session) {
+  if (!session || (session.user.role !== "PARENT" && session.user.role !== "ADMIN")) {
     redirect("/login");
   }
 
   return (
-    <div className="flex relative w-full flex-col min-h-dvh bg-background selection:bg-primary/20 animate-in fade-in duration-700">
-      {/* Navigation Bar - Glassmorphism Style */}
-      <header className="flex h-20 w-full shrink-0 items-center justify-between border-b border-border/40 px-6 md:px-12 sticky top-0 bg-background/60 backdrop-blur-xl z-50 transition-all">
-        <div className="flex items-center gap-4 group">
-          <div className="flex aspect-square size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-primary-glow group-hover:scale-105 transition-transform duration-base">
-            <Cone className="size-6 animate-bounce-subtle" />
-          </div>
-          <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-heading text-2xl md:text-3xl tracking-widest text-secondary uppercase italic">
-              ADORA <span className="text-primary not-italic">FAM</span>
-            </span>
-            <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-[0.35em] ml-0.5">Family Portal</span>
+    <div className="flex relative w-full flex-col min-h-dvh bg-background selection:bg-primary/20">
+      {/* Navigation Bar - Matches Admin Header Style */}
+      <header className="flex h-15 w-full shrink-0 items-center justify-between border-b border-border/60 px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-all relative">
+        <div className="flex items-center gap-2 z-10">
+           {/* Adora Family Brand */}
+           <div className="flex flex-col">
+            <h1 className="font-heading text-lg md:text-xl lg:text-2xl text-gradient uppercase italic leading-tight font-black">
+              Adora <span className="tracking-widest ml-0.5">Family</span>
+            </h1>
+            <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider -mt-0.5 ml-0.5">Portal</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4 md:gap-6 z-10">
           <Link
             href="/parent/profile"
-            className="group flex items-center gap-2 text-xs font-bold tracking-[0.2em] text-muted-foreground hover:text-primary transition-all hover:bg-primary/5 px-4 py-2.5 rounded-xl uppercase border border-transparent hover:border-primary/20"
+            className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-all px-3 py-2 rounded-md hover:bg-secondary/10"
           >
+            <UserCircle className="size-5" />
             <span className="hidden sm:inline">Profil</span>
-            <div className="size-4 group-hover:scale-110 transition-transform">
-              <UserCircle className="size-4" />
-            </div>
           </Link>
 
           <SignOutButton />
         </div>
       </header>
 
-      {/* Dynamic Content Area */}
-      <main className="w-full flex-1 mx-auto max-w-325 p-6 lg:p-10">
-        <div className="w-full animate-in slide-in-from-bottom-4 duration-1000 ease-out fill-mode-both">{children}</div>
+      {/* Dynamic Content Area - Matches Admin Spacing & Animation */}
+      <main className="w-full flex-1 mx-auto max-w-4xl px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
+        <div className="w-full animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">
+          {children}
+        </div>
       </main>
 
-      {/* Simple Footer Decoration */}
-      <footer className="p-8 text-center border-t border-border/20">
-        <p className="text-[10px] font-bold uppercase tracking-[0.5em] text-muted-foreground/30 italic">Adora Basketball Club &copy; 2026</p>
+      {/* Footer */}
+      <footer className="py-6 text-center border-t border-border/60 bg-background/50">
+        <p className="text-xs font-medium text-muted-foreground">
+          &copy; 2026 Adora Basketball Club. All rights reserved.
+        </p>
       </footer>
     </div>
   );

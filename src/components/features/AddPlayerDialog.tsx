@@ -106,7 +106,7 @@ export function AddPlayerDialog() {
                     onClick={() => setStep(s)}
                     className={`h-10 w-12 flex items-center justify-center rounded-lg text-xs font-bold transition-all duration-base ${
                       s === step
-                        ? "bg-primary text-primary-foreground shadow-md shadow-primary/30"
+                        ? "bg-primary text-primary-foreground"
                         : "bg-muted/50 text-muted-foreground hover:bg-muted"
                     }`}
                   >
@@ -126,7 +126,7 @@ export function AddPlayerDialog() {
                   Unggah Excel (Banyak Pemain)
                 </Button>
                 
-                <Button type="submit" disabled={!isValid || isPending} className={`flex-1 sm:flex-none h-10 px-6 font-bold tracking-widest uppercase text-xs shadow-lg rounded-lg ${isValid ? "shadow-primary/20" : ""}`}>
+                <Button type="submit" disabled={!isValid || isPending} className="flex-1 sm:flex-none h-10 px-6 font-bold tracking-widest uppercase text-xs rounded-lg">
                   {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
                   Simpan
                 </Button>

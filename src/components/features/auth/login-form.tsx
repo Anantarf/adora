@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, getSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
@@ -21,6 +21,7 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const { update: updateSession } = useSession();
 
   const {
     register,
@@ -54,8 +55,7 @@ export function LoginForm() {
           description: "Anda akan diarahkan ke portal sesuai akses.",
           icon: <ShieldCheck className="size-4" />,
         });
-        // Fetch fresh session to read role, then navigate to the correct portal
-        const session = await getSession();
+        const session = await updateSession();
         const role = (session?.user as { role?: string })?.role;
         router.push(role === "ADMIN" ? "/dashboard" : "/parent");
       }
@@ -125,7 +125,7 @@ export function LoginForm() {
             whileTap={{ scale: 0.985 }}
             type="submit"
             disabled={loading}
-            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest text-xl uppercase shadow-login-btn transition-all group disabled:opacity-70 flex items-center justify-center"
+            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />

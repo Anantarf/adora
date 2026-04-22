@@ -20,9 +20,8 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
       await deletePlayer(player.id);
       toast.success(`${player.name} berhasil diarsipkan.`);
       onOpenChange(false);
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : "Gagal menghapus.";
-      toast.error("Error: " + msg);
+    } catch {
+      toast.error("Gagal mengarsipkan data pemain. Coba beberapa saat lagi.");
     }
   };
 
@@ -30,8 +29,8 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading tracking-wide flex items-center gap-2 text-destructive">Arsip Data Pemain</AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-muted-foreground">Tindakan ini perlu konfirmasi.</AlertDialogDescription>
+          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Arsip Data Pemain</AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-muted-foreground">Data pemain tidak dihapus permanen — hanya disembunyikan dari daftar aktif.</AlertDialogDescription>
         </AlertDialogHeader>
 
         <div className="py-6 flex flex-col gap-4">
@@ -53,7 +52,7 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
 
         <AlertDialogFooter className="sm:flex-row flex-col gap-2 sm:gap-0">
           <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-10 font-semibold text-sm border-border/50">
-            Batalkan
+            Batal
           </AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {

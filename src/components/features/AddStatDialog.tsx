@@ -15,18 +15,19 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
 
 // ─── Schema ───────────────────────────────────────────
-const score = z.coerce.number().min(0, "Min 0").max(100, "Maks 100");
+const scoreNormal = z.coerce.number().min(0, "Min 0").max(10, "Maks 10");
+const scoreInAndOut = z.coerce.number().min(0, "Min 0").max(99, "Maks 99");
 
 const statSchema = z.object({
   dribble: z.object({
-    inAndOut: score, crossover: score, vLeft: score, vRight: score,
-    betweenLegsLeft: score, betweenLegsRight: score,
+    inAndOut: scoreInAndOut, crossover: scoreNormal, vLeft: scoreNormal, vRight: scoreNormal,
+    betweenLegsLeft: scoreNormal, betweenLegsRight: scoreNormal,
   }),
   passing: z.object({
-    chestPass: score, bouncePass: score, overheadPass: score,
+    chestPass: scoreNormal, bouncePass: scoreNormal, overheadPass: scoreNormal,
   }),
-  layUp: score,
-  shooting: score,
+  layUp: scoreNormal,
+  shooting: scoreNormal,
   notes: z.string().optional(),
 });
 
@@ -52,11 +53,18 @@ function ScoreSection({ title, total, children }: { title: string; total: number
   );
 }
 
-function ScoreField({ label, error, ...props }: { label: string; error?: string } & React.InputHTMLAttributes<HTMLInputElement>) {
+function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...props }: { label: string; error?: string; max?: number | string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "max">) {
+  const max = Number(rawMax);
+  const maxDigits = max.toString().length;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.value.length > maxDigits) e.target.value = e.target.value.slice(0, maxDigits);
+    if (Number(e.target.value) > max) e.target.value = max.toString();
+    rhfOnChange?.(e);
+  };
   return (
     <div className="flex flex-col gap-1">
       <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</label>
-      <Input type="number" min={0} max={100} step={1} onInput={(e) => { if (e.currentTarget.value.length > 3) e.currentTarget.value = e.currentTarget.value.slice(0, 3); }} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
+      <Input type="number" min={0} max={max} step={1} onChange={handleChange} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
   );
@@ -120,7 +128,7 @@ export function AddStatDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg max-h-dialog-lg overflow-y-auto bg-card border-border/50">
+        <DialogContent className="sm:max-w-lg max-h-dialog-lg overflow-y-auto custom-scrollbar bg-card border-border/50">
           <div className="flex items-center gap-4 mb-2">
             <div className="p-3 bg-primary/10 rounded-xl shrink-0"><LineChart className="size-6 text-primary" /></div>
             <div className="flex flex-col gap-0.5">
@@ -141,12 +149,12 @@ export function AddStatDialog({
             <fieldset disabled={!isPeriodActive} className="flex flex-col gap-3">
               {/* Dribble */}
             <ScoreSection title="Dribble" total={dribbleTotal}>
-              <ScoreField label="In & Out" {...register("dribble.inAndOut")} error={errors.dribble?.inAndOut?.message} />
-              <ScoreField label="Crossover" {...register("dribble.crossover")} error={errors.dribble?.crossover?.message} />
-              <ScoreField label="V Dribble Kiri" {...register("dribble.vLeft")} error={errors.dribble?.vLeft?.message} />
-              <ScoreField label="V Dribble Kanan" {...register("dribble.vRight")} error={errors.dribble?.vRight?.message} />
-              <ScoreField label="Between Legs Kiri" {...register("dribble.betweenLegsLeft")} error={errors.dribble?.betweenLegsLeft?.message} />
-              <ScoreField label="Between Legs Kanan" {...register("dribble.betweenLegsRight")} error={errors.dribble?.betweenLegsRight?.message} />
+              <ScoreField label="In & Out" max={99} {...register("dribble.inAndOut")} error={errors.dribble?.inAndOut?.message} />
+              <ScoreField label="Crossover" max={10} {...register("dribble.crossover")} error={errors.dribble?.crossover?.message} />
+              <ScoreField label="V Dribble Kiri" max={10} {...register("dribble.vLeft")} error={errors.dribble?.vLeft?.message} />
+              <ScoreField label="V Dribble Kanan" max={10} {...register("dribble.vRight")} error={errors.dribble?.vRight?.message} />
+              <ScoreField label="Between Legs Kiri" max={10} {...register("dribble.betweenLegsLeft")} error={errors.dribble?.betweenLegsLeft?.message} />
+              <ScoreField label="Between Legs Kanan" max={10} {...register("dribble.betweenLegsRight")} error={errors.dribble?.betweenLegsRight?.message} />
             </ScoreSection>
 
             {/* Passing */}
@@ -159,10 +167,8 @@ export function AddStatDialog({
             {/* Lay Up & Shooting */}
             <div className="grid grid-cols-2 gap-3">
               {([["layUp", "Lay Up"], ["shooting", "Shooting"]] as const).map(([name, label]) => (
-                <div key={name} className="rounded-lg border border-border/40 bg-muted/20 p-3 flex flex-col gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</span>
-                  <Input type="number" min={0} max={100} step={1} onInput={(e) => { if (e.currentTarget.value.length > 3) e.currentTarget.value = e.currentTarget.value.slice(0, 3); }} {...register(name)} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
-                  {errors[name] && <p className="text-[10px] text-destructive">{errors[name]?.message}</p>}
+                <div key={name} className="rounded-lg border border-border/40 bg-muted/20 p-3">
+                  <ScoreField label={label} max={10} {...register(name)} error={errors[name]?.message} />
                 </div>
               ))}
             </div>

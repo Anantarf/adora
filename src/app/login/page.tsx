@@ -16,7 +16,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#0d0d0d] px-4">
+    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-page-dark px-4">
       <Starfield />
       <Link href="/" className="absolute top-5 left-5 z-20 inline-flex items-center gap-1.5 text-sm font-semibold text-white/70 hover:text-white transition-colors">
         <ArrowLeft className="size-4" />

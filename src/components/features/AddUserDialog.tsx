@@ -17,7 +17,7 @@ import { useState } from "react";
  */
 
 const userSchema = z.object({
-  name: z.string().optional(),
+  name: z.string().min(1, "Nama tidak boleh kosong"),
   username: z
     .string()
     .min(4, "Username minimal 4 karakter")
@@ -47,12 +47,13 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
       email: "",
       password: "adora123",
     },
+
   });
 
   const onSubmit = async (data: UserForm) => {
     try {
       await addUser({
-        name: data.username,
+        name: data.name,
         username: data.username,
         email: data.email || undefined,
         password: data.password,
@@ -87,6 +88,12 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
+            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Nama Lengkap</label>
+            <Input {...register("name")} placeholder="Contoh: Budi Santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            {errors.name && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.name.message}</p>}
+          </div>
+
+          <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Username Login</label>
             <Input {...register("username")} placeholder="Contoh: budi_santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.username && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.username.message}</p>}
@@ -110,7 +117,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
           </div>
 
           <Button type="submit" disabled={isPending} className="w-full h-11 mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs rounded-xl shadow-sm">
-            {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : "Buat Akun Sekarang"}
+            {isPending ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan"}
           </Button>
         </form>
       </DialogContent>

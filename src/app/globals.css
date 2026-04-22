@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./_fullcalendar.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -66,8 +67,6 @@
 
   /* Semantic shadow tokens */
   --shadow-login-card: 0 14px 30px rgba(0, 0, 0, 0.42);
-  --shadow-login-btn: 0 8px 18px color-mix(in srgb, var(--primary) 26%, transparent);
-  --shadow-primary-glow: 0 8px 30px color-mix(in srgb, var(--primary) 30%, transparent);
   --shadow-primary-soft: 0 10px 40px color-mix(in srgb, var(--primary) 10%, transparent);
 
   /* Login page standalone palette (intentionally always dark) */
@@ -77,6 +76,9 @@
 
   /* Landing page dark card surface */
   --color-surface-dark: #111113;
+
+  /* Always-dark page background (landing, login, register) */
+  --color-page-dark: #0d0d0d;
 }
 
 :root {
@@ -231,215 +233,24 @@ input:-webkit-autofill:active {
     -webkit-text-fill-color: #fff !important;
 }
 
-/* --- FULLCALENDAR PREMIUM OVERRIDES (Onyx & Pure Gold) --- */
-.fc {
-  font-family: var(--font-sans) !important;
-  --fc-border-color: var(--border);
-  --fc-daygrid-event-dot-width: 8px;
-  --fc-button-bg-color: var(--primary);
-  --fc-button-border-color: transparent;
-  --fc-button-hover-bg-color: color-mix(in srgb, var(--primary) 85%, black);
-  --fc-button-hover-border-color: transparent;
-  --fc-button-active-bg-color: color-mix(in srgb, var(--primary) 70%, black);
-  --fc-button-active-border-color: transparent;
-  --fc-event-border-color: transparent;
-  --fc-list-event-hover-bg-color: transparent;
-  --fc-today-bg-color: color-mix(in srgb, var(--primary) 8%, transparent);
+@layer utilities {
+  .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--muted-foreground);
+  }
 }
 
-/* Dark Mode: Full Onyx Palette Override */
-.dark .fc {
-  --fc-page-bg-color: var(--background);
-  --fc-neutral-bg-color: var(--card);
-  --fc-today-bg-color: color-mix(in srgb, var(--primary) 8%, transparent);
-  --fc-border-color: var(--border);
-  --fc-list-event-dot-width: 8px;
-  color: var(--foreground);
-}
-
-/* Dark Mode: Column Headers & Day Numbers */
-.dark .fc-col-header-cell,
-.dark .fc-daygrid-day-number,
-.dark .fc-toolbar-title,
-.dark .fc .fc-button {
-  color: var(--foreground);
-}
-
-/* Dark Mode: Highlight warna hari ini yang lebih terlihat */
-.dark .fc .fc-daygrid-day.fc-day-today {
-  background-color: color-mix(in srgb, var(--primary) 8%, transparent) !important;
-}
-
-.dark .fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number {
-  color: var(--primary) !important;
-  font-weight: 900 !important;
-}
-
-/* Enforce Google Calendar Spreadsheet Grid Borders */
-.fc-theme-standard td, .fc-theme-standard th {
-  border: 1px solid var(--fc-border-color) !important;
-}
-
-.fc .fc-toolbar.fc-header-toolbar {
-  margin-bottom: 1rem !important;
-  align-items: center;
-}
-
-.fc .fc-toolbar-title {
-  font-family: var(--font-heading);
-  font-size: 1.5rem !important;
-  font-weight: 900 !important;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.fc-event {
-  border-radius: 6px !important;
-  padding: 4px 8px !important;
-  font-weight: 700 !important;
-  font-size: 0.7rem !important;
-  line-height: 1.2 !important;
-  letter-spacing: 0.05em;
-  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
-  border: none !important;
-  cursor: pointer;
-  transition: transform 0.2s;
-  white-space: normal !important;
-  word-break: break-all !important;
-  overflow: hidden !important;
-  display: block !important;
-}
-
-.fc-event:hover {
-  transform: scale(1.02);
-}
-
-.fc .fc-button {
-  text-transform: uppercase !important;
-  font-size: 0.75rem !important;
-  font-weight: 800 !important;
-  letter-spacing: 0.1em !important;
-  padding: 0.5rem 1.25rem !important;
-  border: none !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  border-radius: 0.5rem; /* Standard */
-}
-
-/* Physical Elevasi dan Glow Effect ketika Button Di-Hover */
-.fc .fc-button:not(:disabled):hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 40%, transparent) !important;
-  filter: brightness(1.05);
-}
-
-/* Fix FullCalendar Button Group Radiuses so they blend smoothly */
-.fc-button-group > .fc-button:not(:first-child):not(:last-child) {
-  border-radius: 0 !important;
-  margin-left: 1px !important;
-}
-
-.fc-button-group > .fc-button:first-child {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-}
-
-.fc-button-group > .fc-button:last-child {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-  margin-left: 1px !important;
-}
-
-.fc .fc-button-primary:not(:disabled):active, 
-.fc .fc-button-primary:not(:disabled).fc-button-active {
-  box-shadow: inset 0 3px 5px rgba(0,0,0,0.2) !important;
-}
-
-/* Transisi Murni Fade (Menghilang Halus) saat tombol reset disembunyikan */
-.fc .fc-today-button {
-  transition: opacity 0.5s ease-in-out, visibility 0.5s ease-in-out !important;
-  opacity: 1;
-  visibility: visible;
-  margin-left: 0.5rem !important;
-}
-
-.fc .fc-today-button:disabled {
-  opacity: 0.4 !important;
-  visibility: visible !important;
-  pointer-events: none !important;
-}
-
-.fc-daygrid-day-number {
-  font-weight: 700 !important;
-  padding: 12px 12px !important;
-  opacity: 0.7;
-}
-
-.fc-col-header-cell-cushion {
-  font-weight: 800 !important;
-  text-transform: uppercase;
-  font-size: 0.75rem !important;
-  padding: 12px 0 !important;
-  letter-spacing: 0.1em;
-  opacity: 0.8;
-}
-
-/* ── Kunci tinggi baris kalender agar tidak melar saat event ditambah ── */
-
-/* Minimum tinggi per hari: konsisten di semua baris */
-.fc-daygrid-day-frame {
-  min-height: 90px !important;
-}
-
-/* Event overflow "+X more" — styling agar sesuai tema Onyx & Gold */
-.fc-daygrid-more-link {
-  font-size: 0.65rem !important;
-  font-weight: 800 !important;
-  padding: 1px 6px !important;
-  border-radius: 999px !important;
-  background-color: var(--fc-button-bg-color) !important;
-  color: var(--primary-foreground) !important;
-  margin-top: 2px !important;
-  display: inline-block;
-  letter-spacing: 0.03em;
-  transition: opacity 0.2s ease;
-}
-
-.fc-daygrid-more-link:hover {
-  opacity: 0.85;
-}
-
-/* Popover saat "+X more" diklik — styling dark-aware */
-.fc-popover {
-  border-radius: 1rem !important;
-  border: 1px solid var(--border, #27272A) !important;
-  background: var(--card, #111113) !important;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important;
-  overflow: hidden;
-}
-
-.fc-popover-header {
-  background: var(--muted, #1F1F22) !important;
-  color: var(--foreground, #FAFAFA) !important;
-  font-size: 0.75rem !important;
-  font-weight: 800 !important;
-  padding: 10px 14px !important;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-}
-
-.fc-popover-body {
-  padding: 8px !important;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* ── Animasi stagger untuk UpcomingEventCard ────────────────────────────── */
-@keyframes card-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.animate-card-in {
-  animation: card-in 0.3s ease-out;
-}

@@ -50,7 +50,7 @@ export function AddCertificateDialog() {
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         render={
-          <Button size="xl" className="w-full sm:w-auto shadow-lg shadow-primary/20">
+          <Button size="xl" className="w-full sm:w-auto">
             <Plus className="size-4" /> Tambah Sertifikat
           </Button>
         }
@@ -120,7 +120,7 @@ export function AddCertificateDialog() {
           </div>
 
           {/* Submit */}
-          <Button onClick={handleSubmit} disabled={addCert.isPending} className="h-11 uppercase font-bold tracking-widest text-xs shadow-lg shadow-primary/20 mt-2">
+          <Button onClick={handleSubmit} disabled={addCert.isPending} className="h-11 uppercase font-bold tracking-widest text-xs mt-2">
             {addCert.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <FileBadge className="mr-2 size-4" />}
             {addCert.isPending ? "Menyimpan..." : "Simpan Sertifikat"}
           </Button>

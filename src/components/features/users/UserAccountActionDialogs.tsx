@@ -18,7 +18,7 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
       <AlertDialog open={uiState?.type === "delete"} onOpenChange={onOpenChange}>
         <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-heading uppercase">Hapus Akun Pengguna?</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest text-destructive">Hapus Akun Pengguna?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs font-medium tracking-wide opacity-70 flex flex-col gap-2 mt-2">
               <span className="text-destructive font-bold">Akses akun ini akan dihapus permanen dan tidak dapat dipulihkan.</span>
               <span className="italic">Peringatan: Akun hanya bisa dihapus jika tidak terhubung dengan pemain.</span>
@@ -39,7 +39,7 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
             <div className="size-16 rounded-full bg-primary/10 border-2 border-primary/20 flex items-center justify-center mb-4">
               <KeyRound className="size-7 text-primary" />
             </div>
-            <AlertDialogTitle className="text-xl font-heading uppercase">Atur Ulang Kata Sandi Akun?</AlertDialogTitle>
+            <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest">Atur Ulang Kata Sandi Akun?</AlertDialogTitle>
             <AlertDialogDescription className="text-xs font-medium tracking-wide opacity-70 flex flex-col gap-2 mt-2">
               <span>Sandi akun ini akan dikembalikan seperti saat pertama kali dibuat.</span>
               <span className="flex items-center gap-1.5 pt-1">
@@ -50,7 +50,7 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
           <AlertDialogFooter className="mt-6 border-t border-border/10 pt-4">
             <AlertDialogCancel className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10">Batal</AlertDialogCancel>
             <AlertDialogAction onClick={onConfirmReset} className="h-11 px-8 bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm">
-              Reset Sandi
+              Atur Ulang Sandi
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

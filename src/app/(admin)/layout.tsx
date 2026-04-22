@@ -34,6 +34,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <div className="w-full flex-1 mx-auto max-w-375 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
           <div className="w-full animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">{children}</div>
         </div>
+
+        {/* Footer for consistency */}
+        <footer className="py-6 text-center border-t border-border/60 bg-background/50 mt-auto">
+          <p className="text-xs font-medium text-muted-foreground">
+            &copy; 2026 Adora Basketball Club. All rights reserved.
+          </p>
+        </footer>
       </SidebarInset>
     </SidebarProvider>
   );

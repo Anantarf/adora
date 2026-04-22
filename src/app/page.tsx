@@ -102,11 +102,11 @@ export default async function LandingPage() {
   const homebases = await getPublicHomebases();
 
   return (
-    <main className="min-h-screen bg-[#0d0d0d] text-white relative overflow-hidden">
+    <main className="min-h-screen bg-page-dark text-white relative overflow-hidden">
       <Starfield />
 
       {/* ── Sticky Navbar ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0d0d0d]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo — clickable, scrolls to top */}
           <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman">
@@ -286,7 +286,7 @@ export default async function LandingPage() {
             </div>
             <div className="md:border-l border-white/10 md:pl-8 space-y-4">
               <h3 className="font-heading text-xl text-primary tracking-widest uppercase">Pembayaran</h3>
-              <div className="bg-[#111113] border border-primary/20 rounded-xl p-4">
+              <div className="bg-surface-dark border border-primary/20 rounded-xl p-4">
                 <p className="text-xs text-white/60 uppercase tracking-wider mb-1">Transfer Bank</p>
                 <p className="font-bold text-white text-lg">BNI 1227456425</p>
                 <p className="text-sm text-white/80">a.n. Dodi Aminullah</p>
@@ -299,10 +299,10 @@ export default async function LandingPage() {
         {/* CTA Button */}
         <FadeIn delay={0.6} direction="up" className="text-center">
           <a
-            href={`https://wa.me/${CONTACT_INFO.whatsapp.replace(/\D/g, "")}`}
+            href={`https://wa.me/${CONTACT_INFO.whatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-4 rounded-full transition-all text-sm uppercase tracking-widest shadow-lg shadow-green-600/30 hover:shadow-green-600/50 hover:scale-105"
+            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-10 py-4 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-105"
           >
             <span>💬</span>
             Daftar Sekarang via WhatsApp
@@ -311,7 +311,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-white/10 bg-[#0d0d0d]">
+      <footer className="relative z-10 border-t border-white/10 bg-page-dark">
         <div className="container mx-auto px-4 py-12">
           <div className="flex flex-col md:flex-row justify-between gap-10 mb-10">
             {/* Brand */}
@@ -341,7 +341,7 @@ export default async function LandingPage() {
               <div className="text-[9px] font-bold uppercase tracking-[0.3em] text-white/25 mb-4">Kontak</div>
               <ul className="space-y-2.5 text-xs text-white/60 font-medium">
                 <li>
-                  <a href={`https://wa.me/${CONTACT_INFO.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
+                  <a href={`https://wa.me/${CONTACT_INFO.whatsapp}`} target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">
                     💬 {CONTACT_INFO.whatsapp}
                   </a>
                 </li>

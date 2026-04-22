@@ -1,45 +1,59 @@
 "use client";
 
+import React from "react";
 import { Users, Layers, TrendingUp, FileCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 import type { DashboardMetrics } from "@/actions/dashboard";
 
-const METRIC_CARDS = [
+type MetricCard = {
+  key: keyof DashboardMetrics;
+  label: string;
+  subtitle: string;
+  icon: React.ElementType;
+  getDisplay: (metrics: DashboardMetrics) => string;
+  getColorClass: (metrics: DashboardMetrics) => string;
+};
+
+const METRIC_CARDS: MetricCard[] = [
   {
-    key: "playerCount" as const,
+    key: "playerCount",
     label: "Pemain Aktif",
     subtitle: "Terdaftar di klub",
     icon: Users,
+    getDisplay: (m) => String(m.playerCount),
+    getColorClass: () => "text-foreground",
   },
   {
-    key: "groupCount" as const,
+    key: "groupCount",
     label: "Kelompok Latihan",
     subtitle: "Kelompok berjalan",
     icon: Layers,
+    getDisplay: (m) => String(m.groupCount),
+    getColorClass: () => "text-foreground",
   },
   {
-    key: "attendanceRate" as const,
+    key: "attendanceRate",
     label: "Kehadiran Latihan",
     subtitle: "Rata-rata 30 hari terakhir",
     icon: TrendingUp,
-    suffix: "%",
+    getDisplay: (m) => `${m.attendanceRate}%`,
+    getColorClass: (m) => {
+      if (m.attendanceRate >= 80) return "text-primary";
+      if (m.attendanceRate >= 50) return "text-yellow-500";
+      return "text-destructive";
+    },
   },
   {
-    key: "publishedStatsCount" as const,
-    label: "Rapor Diterbitkan",
-    subtitle: "Nilai yang sudah final",
+    key: "publishedStatsCount",
+    label: "Progress Evaluasi",
+    subtitle: "Selesai / Draft",
     icon: FileCheck,
+    getDisplay: (m) => `${m.publishedStatsCount} / ${m.draftStatsCount}`,
+    getColorClass: (m) => (m.draftStatsCount > 0 ? "text-yellow-500" : "text-foreground"),
   },
-] as const;
-
-function attendanceColor(rate: number, hasData: boolean): string {
-  if (!hasData) return "text-foreground";
-  if (rate >= 80) return "text-primary";
-  if (rate >= 50) return "text-yellow-500";
-  return "text-destructive";
-}
+];
 
 interface MetricCardsProps {
   metrics: DashboardMetrics | undefined;
@@ -67,12 +81,8 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
     <StaggerContainer className="grid grid-cols-2 xl:grid-cols-4 gap-4">
       {METRIC_CARDS.map((c) => {
         const Icon = c.icon;
-        const raw = metrics?.[c.key] ?? 0;
-        const display = "suffix" in c ? `${raw}${c.suffix}` : String(raw);
-        const valueClass =
-          c.key === "attendanceRate"
-            ? attendanceColor(raw as number, !!metrics)
-            : "text-foreground";
+        const display = metrics ? c.getDisplay(metrics) : "—";
+        const valueClass = metrics ? c.getColorClass(metrics) : "text-foreground";
 
         return (
           <StaggerItem key={c.key}>

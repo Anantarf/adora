@@ -16,7 +16,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { dribbleTotal, passingTotal } from "@/lib/metrics";
+import { dribbleTotal, passingTotal, averageScore } from "@/lib/metrics";
+import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 
 const STATUS_BADGE_CONFIG = {
   Draft:     { label: "Draft",   className: "border-sky-500/50 text-sky-400 bg-sky-500/10" },
@@ -49,11 +50,13 @@ export default function StatisticsPage() {
   const { mutateAsync: setActive } = useSetActivePeriod();
   const { mutateAsync: deletePeriod } = useDeletePeriod();
 
+  const initialized = React.useRef(false);
   useEffect(() => {
-    if (periods && !selectedPeriodId) {
-      const active = periods.find((p) => p.isActive);
-      if (active) setSelectedPeriodId(active.id);
-      else if (periods.length > 0) setSelectedPeriodId(periods[0].id);
+    if (initialized.current || !periods) return;
+    const first = periods.find((p) => p.isActive) ?? periods[0];
+    if (first) {
+      setSelectedPeriodId(first.id);
+      initialized.current = true;
     }
   }, [periods]);
 
@@ -66,10 +69,18 @@ export default function StatisticsPage() {
       .filter((g) => g.players.length > 0);
   }, [players, groups]);
 
-  const statsSummary = useMemo(() => ({
-    published: stats?.filter((s) => s.status === "Published").length ?? 0,
-    draft: stats?.filter((s) => s.status === "Draft").length ?? 0,
-  }), [stats]);
+  const statsSummary = useMemo(
+    () =>
+      (stats ?? []).reduce(
+        (acc, s) => {
+          if (s.status === "Published") acc.published++;
+          else if (s.status === "Draft") acc.draft++;
+          return acc;
+        },
+        { published: 0, draft: 0 },
+      ),
+    [stats],
+  );
 
   const totalPlayerCount = playersByGroup.reduce((n, g) => n + g.players.length, 0);
 
@@ -125,9 +136,9 @@ export default function StatisticsPage() {
                   <AlertDialogTrigger className="p-1.5 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors outline-none">
                     <Trash2 className="size-3.5" />
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
                     <AlertDialogHeader>
-                      <AlertDialogTitle className="font-heading uppercase tracking-widest text-secondary">Hapus Periode?</AlertDialogTitle>
+                      <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Periode?</AlertDialogTitle>
                       <AlertDialogDescription className="flex flex-col gap-2">
                          <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
                          {!canDeletePeriod ? (
@@ -144,7 +155,7 @@ export default function StatisticsPage() {
                     <AlertDialogFooter>
                       <AlertDialogCancel>Batal</AlertDialogCancel>
                       <AlertDialogAction onClick={handleDeletePeriod} disabled={!canDeletePeriod} className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50">
-                        Iya, Hapus Permanen
+                        Hapus Periode
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
@@ -255,6 +266,7 @@ export default function StatisticsPage() {
                 <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Passing</TableHead>
                 <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Lay Up</TableHead>
                 <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Shooting</TableHead>
+                <TableHead className="w-28 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nilai Akhir</TableHead>
                 <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Status</TableHead>
                 <TableHead className="w-36 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
               </TableRow>
@@ -262,7 +274,7 @@ export default function StatisticsPage() {
             <TableBody>
               {(playersLoading || statsLoading) && (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     <div className="flex items-center justify-center gap-2 text-primary font-bold">
                       <Loader2 className="size-5 animate-spin" /> Mengambil data...
                     </div>
@@ -271,7 +283,7 @@ export default function StatisticsPage() {
               )}
               {!playersLoading && !statsLoading && playersByGroup.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
+                  <TableCell colSpan={9} className="h-24 text-center">
                     {(players?.length ?? 0) === 0 ? (
                       <>
                         <p className="font-semibold text-foreground text-sm">Belum ada pemain terdaftar</p>
@@ -292,7 +304,7 @@ export default function StatisticsPage() {
                   <React.Fragment key={group.id}>
                     {/* Group header row */}
                     <TableRow className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={8} className="font-bold text-primary uppercase tracking-widest text-sm py-2.5 pl-3 border-l-4 border-primary">
+                      <TableCell colSpan={9} className="font-bold text-primary uppercase tracking-widest text-sm py-2.5 pl-3 border-l-4 border-primary">
                         {group.name}
                       </TableCell>
                     </TableRow>
@@ -310,6 +322,9 @@ export default function StatisticsPage() {
                           <TableCell className="text-center font-mono text-sm"><MetricCell v={m ? passingTotal(m.passing) : undefined} /></TableCell>
                           <TableCell className="text-center font-mono text-sm"><MetricCell v={m?.layUp} /></TableCell>
                           <TableCell className="text-center font-mono text-sm"><MetricCell v={m?.shooting} /></TableCell>
+                          <TableCell className="text-center">
+                            {m ? <GradeBadge score={averageScore(m)} /> : <span className="text-muted-foreground">—</span>}
+                          </TableCell>
                           <TableCell className="text-center">
                             <Badge variant="outline" className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}>
                               {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum"}

@@ -42,7 +42,7 @@ const BANK = {
 
 const CONTACT = {
   whatsapp:  "6281213043753",
-  instagram: "@adorabbc",
+  instagram: "adorabbc",
 };
 
 const INPUT_CLASS =
@@ -71,11 +71,11 @@ function RegisterContent() {
   const waUrl = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(waMessage)}`;
 
   return (
-    <main className="min-h-screen bg-[#0d0d0d] text-foreground relative overflow-hidden">
+    <main className="min-h-screen bg-page-dark text-foreground relative overflow-hidden">
       <Starfield />
 
       {/* ── Navbar ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0d0d0d]/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" aria-label="Kembali ke beranda">
             <span className="font-heading text-2xl tracking-widest uppercase text-white hover:text-primary transition-colors">
@@ -165,9 +165,9 @@ function RegisterContent() {
                       onChange={(e) => setForm((f) => ({ ...f, ageGroup: e.target.value }))}
                       className={`${INPUT_CLASS} appearance-none cursor-pointer`}
                     >
-                      <option value="" className="bg-[#0d0d0d]">-- Pilih Program --</option>
+                      <option value="" className="bg-page-dark">-- Pilih Program --</option>
                       {AGE_GROUPS.map(({ label, ages }) => (
-                        <option key={label} value={label} className="bg-[#0d0d0d]">
+                        <option key={label} value={label} className="bg-page-dark">
                           {label} ({ages})
                         </option>
                       ))}
@@ -178,7 +178,7 @@ function RegisterContent() {
                     href={waUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-2 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest shadow-lg shadow-green-600/20 hover:scale-[1.02]"
+                    className="mt-2 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02]"
                   >
                     <span>💬</span>
                     Kirim via WhatsApp
@@ -276,12 +276,12 @@ function RegisterContent() {
             &copy; {new Date().getFullYear()} ADORA Basketball Club
           </p>
           <a
-            href={`https://instagram.com/${CONTACT.instagram.replace("@", "")}`}
+            href={`https://instagram.com/${CONTACT.instagram}`}
             target="_blank"
             rel="noopener noreferrer"
             className="text-white/30 text-xs hover:text-primary transition-colors"
           >
-            {CONTACT.instagram}
+            @{CONTACT.instagram}
           </a>
         </div>
       </footer>

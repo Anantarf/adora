@@ -5,7 +5,8 @@ import { Loader2, User, FileText, Activity } from "lucide-react";
 import { useFamily, type FamilyPlayer } from "@/hooks/use-family";
 import { usePlayerStats } from "@/hooks/use-player-stats";
 import type { MetricsJson } from "@/types/dashboard";
-import { dribbleTotal, passingTotal, overallScore } from "@/lib/metrics";
+import { dribbleTotal, passingTotal, overallScore, averageScore } from "@/lib/metrics";
+import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -60,11 +61,16 @@ export default function ParentDashboard() {
 
   if (!children || children.length === 0) {
     return (
-      <Card className="border-border/50 bg-card p-10 text-center max-w-lg mx-auto mt-20">
-        <div className="flex justify-center mb-4 text-muted-foreground opacity-50"><User className="size-12" /></div>
-        <CardTitle className="mb-2 text-secondary">Akses Terkunci</CardTitle>
-        <CardDescription>Akun ini belum terhubung dengan profil siswa. Hubungi Administrator untuk menghubungkan akun dengan putra/putri Anda.</CardDescription>
-      </Card>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center animate-in fade-in zoom-in-95 duration-500">
+        <div className="size-20 rounded-full bg-secondary/5 flex items-center justify-center mb-8 text-primary/60 border border-primary/20 shadow-sm">
+          <User className="size-10" />
+        </div>
+        <h2 className="text-3xl font-heading text-foreground uppercase mb-4">Akses Terbatas</h2>
+        <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">
+          Akun ini belum terhubung dengan profil siswa. <br className="hidden md:block" />
+          Hubungi <span className="text-primary font-bold uppercase tracking-wider">Admin</span> untuk menghubungkan akun dengan putra/putri Anda.
+        </p>
+      </div>
     );
   }
 
@@ -73,19 +79,19 @@ export default function ParentDashboard() {
   const latestMetrics = latestStat?.metricsJson as MetricsJson | undefined;
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-8 w-full animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-border/50 pb-6">
-        <div>
-          <h1 className="font-heading text-4xl text-secondary tracking-wide uppercase">Pantauan Pemain</h1>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border pb-8">
+        <div className="space-y-1">
+          <h1 className="font-heading text-3xl md:text-4xl text-foreground uppercase tracking-tight">Pantauan Pemain</h1>
           <p className="text-muted-foreground text-sm font-medium">Laporan evaluasi performa individual anak Anda.</p>
         </div>
 
         {children.length > 1 ? (
-          <div className="flex flex-col gap-1 w-full md:w-auto">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground ml-1">Pilih Profil Anak</span>
+          <div className="flex flex-col gap-2 w-full md:w-auto">
+            <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground ml-1">Pilih Profil Anak</span>
             <Select value={effectiveChildId || undefined} onValueChange={setSelectedChildId}>
-              <SelectTrigger className="w-full md:w-65 h-12 border-primary/20 bg-primary/5 font-semibold text-secondary">
+              <SelectTrigger className="w-full md:w-72 h-11 border-border bg-card font-semibold text-foreground">
                 <SelectValue placeholder="Pilih Profil..." />
               </SelectTrigger>
               <SelectContent>
@@ -96,11 +102,11 @@ export default function ParentDashboard() {
             </Select>
           </div>
         ) : (
-          <div className="flex flex-col gap-1 items-start md:items-end">
-            <span className="text-[10px] uppercase tracking-widest font-bold text-muted-foreground">Profil Aktif</span>
-            <div className="h-auto min-h-12 flex items-center px-5 rounded-md border border-primary/20 bg-primary/5 gap-2">
-              <span className="font-bold text-secondary">{activeChild.name}</span>
-              <span className="text-xs font-medium px-2 py-0.5 rounded bg-primary/20 text-primary uppercase tracking-widest">{activeChild.group?.name || "Tanpa Kelas"}</span>
+          <div className="flex flex-col gap-2 items-start md:items-end">
+            <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Profil Aktif</span>
+            <div className="h-11 flex items-center px-6 rounded-lg border border-primary/20 bg-primary/5 gap-3">
+              <span className="font-bold text-foreground">{activeChild.name}</span>
+              <span className="text-[10px] font-bold px-2.5 py-1 rounded bg-primary/20 text-primary uppercase tracking-widest">{activeChild.group?.name || "Tanpa Kelas"}</span>
             </div>
           </div>
         )}
@@ -111,10 +117,16 @@ export default function ParentDashboard() {
           <Loader2 className="animate-spin size-6" /> Memuat Data Rapor {activeChild.name}...
         </div>
       ) : !stats?.length ? (
-        <div className="p-8 border border-border/50 rounded-xl bg-card text-center flex flex-col items-center gap-2">
-          <Activity className="size-8 text-muted-foreground opacity-50" />
-          <h3 className="font-heading font-bold text-secondary">Belum Ada Evaluasi</h3>
-          <p className="text-sm text-muted-foreground">Pelatih belum mengunggah nilai rapor untuk {activeChild.name}.</p>
+        <div className="p-12 border border-dashed border-border rounded-2xl bg-card/50 text-center flex flex-col items-center gap-4">
+          <div className="size-16 rounded-full bg-muted flex items-center justify-center text-muted-foreground/50">
+            <Activity className="size-8" />
+          </div>
+          <div className="space-y-1">
+            <h3 className="text-xl font-heading font-bold text-foreground uppercase">Belum Ada Evaluasi</h3>
+            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+              Pelatih belum mengunggah nilai rapor terbaru untuk <span className="text-foreground font-semibold">{activeChild.name}</span>.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
@@ -122,8 +134,13 @@ export default function ParentDashboard() {
           {latestMetrics && (
             <Card className="border-border/50 bg-card overflow-hidden shadow-sm">
               <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-                <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Nilai Terkini</CardTitle>
-                <CardDescription className="text-xs">{latestStat?.period?.name ?? (latestStat ? new Date(latestStat.date).toLocaleDateString("id-ID", { month: "long", year: "numeric" }) : "")}</CardDescription>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Nilai Terkini</CardTitle>
+                    <CardDescription className="text-xs">{latestStat?.period?.name ?? (latestStat ? new Date(latestStat.date).toLocaleDateString("id-ID", { month: "long", year: "numeric" }) : "")}</CardDescription>
+                  </div>
+                  <GradeBadge score={averageScore(latestMetrics)} variant="full" />
+                </div>
               </CardHeader>
               <CardContent className="p-4 grid grid-cols-2 gap-3">
                 {/* Dribble breakdown */}
@@ -232,7 +249,7 @@ export default function ParentDashboard() {
                   <CardTitle className="text-lg font-heading uppercase tracking-wide text-secondary">Catatan Pelatih</CardTitle>
                   <CardDescription className="text-xs">Evaluasi tekstual dari rapor terakhir.</CardDescription>
                 </div>
-                <Button size="sm" className="h-9 px-4 uppercase font-bold tracking-widest text-[10px] shadow-lg shadow-primary/20" onClick={handleDownloadPDF}>
+                <Button size="sm" className="h-9 px-4 uppercase font-bold tracking-widest text-[10px]" onClick={handleDownloadPDF}>
                   <FileText className="mr-2 size-3" /> Unduh Rapor PDF
                 </Button>
               </div>

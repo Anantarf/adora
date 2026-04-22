@@ -19,7 +19,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
       await deleteGroup(group.id);
       toast.success(`Kelompok ${group.name} berhasil dihapus.`);
       onOpenChange(false);
-    } catch (error) {
+    } catch {
       toast.error("Gagal menghapus kelompok. Coba lagi.");
     }
   };
@@ -28,7 +28,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading tracking-wide flex items-center gap-2 text-destructive">
+          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">
             <AlertTriangle className="size-5" />
             Hapus Kelompok
           </AlertDialogTitle>

@@ -55,8 +55,8 @@ export function HeroCarousel() {
       </AnimatePresence>
 
       {/* Modern Gradient Overlays for Readability */}
-      <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-[#0d0d0d] to-transparent z-10" />
-      <div className="absolute inset-x-0 bottom-0 h-64 bg-linear-to-t from-[#0d0d0d] via-[#0d0d0d]/80 to-transparent z-10" />
+      <div className="absolute inset-x-0 top-0 h-40 bg-linear-to-b from-page-dark to-transparent z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-64 bg-linear-to-t from-page-dark via-page-dark/80 to-transparent z-10" />
 
       {/* Navigation Dots */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-3 z-20">

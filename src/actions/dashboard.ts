@@ -5,21 +5,18 @@ import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
 import { AttendanceStatus } from "@/types/dashboard";
 import { MS_PER_DAY, ATTENDANCE_LOOKBACK_DAYS, TREND_STATS_SAMPLE_SIZE } from "@/lib/constants";
+import { parseMetricsJson } from "@/lib/metrics";
 
-// ─── Constants ──────────────────────────────────────────────────────────────
-const ATTENDANCE_STATUSES = ["HADIR", "IZIN", "SAKIT", "ALPA"] as const;
-
-// Initialize default attendance counts
-const DEFAULT_ATTENDANCE_COUNTS = Object.fromEntries(
-  ATTENDANCE_STATUSES.map(status => [status, 0])
-);
+const DEFAULT_ATTENDANCE_COUNTS = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
 
 export type DashboardMetrics = {
   playerCount: number;
   groupCount: number;
   publishedStatsCount: number;
+  draftStatsCount: number;
   attendanceRate: number;
   performanceTrend: { name: string; val: number }[];
+  atRiskPlayers: { id: string; name: string; groupName: string; alpaCount: number }[];
 };
 
 export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
@@ -27,12 +24,18 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
     await requireAdmin();
     
     // Grouping core counts 
-    const [playerCount, groupCount, publishedStatsCount] = await Promise.all([
+    const [playerCount, groupCount, publishedStatsCount, draftStatsCount] = await Promise.all([
       prisma.player.count({ where: { isDeleted: false } }),
       prisma.group.count(),
       prisma.statistic.count({ 
         where: { 
           status: "Published",
+          player: { isDeleted: false }
+        } 
+      }),
+      prisma.statistic.count({ 
+        where: { 
+          status: "Draft",
           player: { isDeleted: false }
         } 
       }),
@@ -71,26 +74,13 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       select: { date: true, metricsJson: true }
     });
 
-    // Format month label with explicit locale
-    const formatMonth = (date: Date): string => {
-      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-      return monthNames[date.getMonth()];
-    };
-
-    // Parse metrics safely and extract numeric values
-    const parseMetrics = (metricsJson: string): number[] => {
-      try {
-        const metrics = JSON.parse(metricsJson);
-        return Object.values(metrics).filter((v): v is number => typeof v === "number");
-      } catch {
-        return [];
-      }
-    };
+    const formatMonth = (date: Date): string =>
+      date.toLocaleString("en-US", { month: "short", timeZone: "Asia/Jakarta" });
 
     // Build trend map using reduce
-    const trendMap = stats.reverse().reduce((acc, s) => {
+    const trendMap = [...stats].reverse().reduce((acc, s) => {
       const month = formatMonth(s.date);
-      const values = parseMetrics(s.metricsJson as string);
+      const values = parseMetricsJson(s.metricsJson as string);
 
       if (values.length > 0) {
         const avg = values.reduce((a, b) => a + b, 0) / values.length;
@@ -106,12 +96,42 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       val: data.count > 0 ? Math.round(data.sum / data.count) : 0
     }));
 
+    // Find At-Risk Players (>= 3 ALPA in the last 30 days) — filter done at DB level via groupBy+having
+    const alpaGroups = await prisma.attendance.groupBy({
+      by: ["playerId"],
+      where: {
+        status: "ALPA",
+        date: { gte: thirtyDaysAgo },
+        player: { isDeleted: false },
+      },
+      _count: { playerId: true },
+      having: { playerId: { _count: { gte: 3 } } },
+    });
+
+    const atRiskPlayerIds = alpaGroups.map((g) => g.playerId);
+
+    const atRiskPlayerDetails = await prisma.player.findMany({
+      where: { id: { in: atRiskPlayerIds } },
+      select: { id: true, name: true, group: { select: { name: true } } },
+    });
+
+    const playerDetailMap = Object.fromEntries(atRiskPlayerDetails.map((p) => [p.id, p]));
+
+    const atRiskPlayers = alpaGroups
+      .map((g) => {
+        const p = playerDetailMap[g.playerId];
+        return { id: g.playerId, name: p?.name ?? "-", groupName: p?.group?.name ?? "-", alpaCount: g._count.playerId };
+      })
+      .sort((a, b) => b.alpaCount - a.alpaCount);
+
     return {
       playerCount,
       groupCount,
       publishedStatsCount,
+      draftStatsCount,
       attendanceRate,
       performanceTrend,
+      atRiskPlayers,
     };
   } catch (error) {
     console.error("[DASHBOARD_METRICS_ERROR]:", error);

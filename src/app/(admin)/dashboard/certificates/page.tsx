@@ -133,9 +133,9 @@ export default function CertificatesPage() {
                           </Button>
                         }
                       />
-                      <AlertDialogContent>
+                      <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
                         <AlertDialogHeader>
-                          <AlertDialogTitle className="font-heading uppercase tracking-wider text-secondary">Hapus Sertifikat?</AlertDialogTitle>
+                          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Sertifikat?</AlertDialogTitle>
                           <AlertDialogDescription className="flex flex-col gap-2">
                             <span className="text-destructive font-semibold">Sertifikat &quot;{cert.title}&quot; akan dihapus permanen.</span>
                             <span className="text-muted-foreground text-sm">Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi.</span>

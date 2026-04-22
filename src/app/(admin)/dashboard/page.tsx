@@ -6,6 +6,7 @@ import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
 import { MetricCards } from "@/components/features/dashboard/MetricCards";
 import { PerformanceTrendChart } from "@/components/features/dashboard/PerformanceTrendChart";
 import { UpcomingAgenda } from "@/components/features/dashboard/UpcomingAgenda";
+import { AtRiskPlayers } from "@/components/features/dashboard/AtRiskPlayers";
 import { formatFullDate, getJakartaToday } from "@/lib/date-utils";
 
 export default function AdminDashboardPage() {
@@ -40,6 +41,13 @@ export default function AdminDashboardPage() {
       <FadeIn direction="none" delay={0.05}>
         <MetricCards metrics={metrics} isLoading={isLoading} />
       </FadeIn>
+
+      {/* At-Risk Players Alert */}
+      {(isLoading || (metrics?.atRiskPlayers && metrics.atRiskPlayers.length > 0)) && (
+        <FadeIn direction="up" delay={0.07}>
+          <AtRiskPlayers metrics={metrics} isLoading={isLoading} />
+        </FadeIn>
+      )}
 
       {/* Chart + Agenda */}
       <FadeIn direction="up" delay={0.1}>
