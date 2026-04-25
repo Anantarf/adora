@@ -21,7 +21,7 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
       toast.success(`${player.name} berhasil diarsipkan.`);
       onOpenChange(false);
     } catch {
-      toast.error("Gagal mengarsipkan data pemain. Coba beberapa saat lagi.");
+      toast.error("Gagal mengarsipkan data pemain. Silakan coba kembali.");
     }
   };
 

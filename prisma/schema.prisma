@@ -14,13 +14,15 @@ model homebase {
   description String?   @db.Text
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  
+
   groups             group[]
   events             event[]
   preferredByPlayers player[] @relation("PreferredHomebase")
+  registrations      registration[]
 
   @@map("Homebase")
 }
+
 model account {
   id                String  @id @default(cuid())
   userId            String
@@ -48,6 +50,7 @@ model attendance {
   playerId  String
   eventId   String?
   createdAt DateTime          @default(now())
+  updatedAt DateTime          @default(now()) @updatedAt
 
   player    player            @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Attendance_playerId_fkey")
   event     event?            @relation(fields: [eventId], references: [id], onDelete: SetNull, map: "Attendance_eventId_fkey")
@@ -61,7 +64,7 @@ model auditlog {
   action      String
   targetTable String
   recordId    String?
-  details     Json?    // Added to store what actually changed, added, or deleted
+  details     Json?
   timestamp   DateTime @default(now())
   userId      String?
   user        user?    @relation(fields: [userId], references: [id], map: "AuditLog_userId_fkey")
@@ -85,18 +88,18 @@ model certificate {
 }
 
 model event {
-  id          String    @id @default(cuid())
+  id          String     @id @default(cuid())
   title       String
-  description String?   @db.Text
+  description String?    @db.Text
   date        DateTime
-  type        String    @default("LATIHAN")
+  type        event_type @default(LATIHAN)
   location    String?
   homebaseId  String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   eventGroups eventGroup[]
-  homebase    homebase? @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Event_homebaseId_fkey")
+  homebase    homebase?    @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Event_homebaseId_fkey")
   attendances attendance[]
 
   @@index([homebaseId], map: "Event_homebaseId_idx")
@@ -155,20 +158,21 @@ model player {
   isDeleted           Boolean       @default(false)
   groupId             String?
   parentId            String?
-  preferred_homebaseId String?
+  preferredHomebaseId String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-  
-  attendance          attendance[]
-  certificate         certificate[]
-  group               group?        @relation(fields: [groupId], references: [id], onDelete: SetNull, map: "Player_groupId_fkey")
-  user                user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
-  preferred_homebase  homebase?     @relation("PreferredHomebase", fields: [preferred_homebaseId], references: [id], onDelete: SetNull, map: "Player_preferred_homebaseId_fkey")
-  statistic           statistic[]
+
+  attendance        attendance[]
+  certificate       certificate[]
+  group             group?        @relation(fields: [groupId], references: [id], onDelete: SetNull, map: "Player_groupId_fkey")
+  user              user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
+  preferredHomebase homebase?     @relation("PreferredHomebase", fields: [preferredHomebaseId], references: [id], onDelete: SetNull, map: "Player_preferred_homebaseId_fkey")
+  statistic         statistic[]
 
   @@index([groupId], map: "Player_groupId_idx")
   @@index([parentId], map: "Player_parentId_idx")
-  @@index([preferred_homebaseId], map: "Player_preferred_homebaseId_idx")
+  @@index([preferredHomebaseId], map: "Player_preferred_homebaseId_idx")
+  @@index([isDeleted], map: "Player_isDeleted_idx")
   @@unique([name, dateOfBirth, groupId], map: "Player_name_dateOfBirth_groupId_key")
   @@map("Player")
 }
@@ -185,7 +189,7 @@ model session {
 
 model evaluationPeriod {
   id        String      @id @default(cuid())
-  name      String      // e.g. "Semester 1 2025"
+  name      String
   startDate DateTime
   endDate   DateTime
   isActive  Boolean     @default(false)
@@ -197,18 +201,18 @@ model evaluationPeriod {
 }
 
 model statistic {
-  id          String    @id @default(cuid())
+  id          String           @id @default(cuid())
   date        DateTime
-  metricsJson String    @db.LongText
-  status      String    @default("Draft")
+  metricsJson Json
+  status      statistic_status @default(Draft)
   playerId    String
   periodId    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now()) @updatedAt
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @default(now()) @updatedAt
 
-  player      player             @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
-  period      evaluationPeriod?  @relation(fields: [periodId], references: [id], onDelete: SetNull, map: "Statistic_periodId_fkey")
-  history     statisticHistory[]
+  player  player            @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Statistic_playerId_fkey")
+  period  evaluationPeriod? @relation(fields: [periodId], references: [id], onDelete: SetNull, map: "Statistic_periodId_fkey")
+  history statisticHistory[]
 
   @@unique([playerId, periodId], map: "Statistic_playerId_periodId_key")
   @@index([status])
@@ -216,35 +220,39 @@ model statistic {
 }
 
 model statisticHistory {
-  id          String    @id @default(cuid())
+  id          String           @id @default(cuid())
   statisticId String
-  metricsJson String    @db.LongText
-  status      String
-  editedAt    DateTime  @default(now())
+  metricsJson Json
+  status      statistic_status
+  editedAt    DateTime         @default(now())
   editedBy    String?
 
-  statistic   statistic @relation(fields: [statisticId], references: [id], onDelete: Cascade, map: "StatisticHistory_statisticId_fkey")
-  user        user?     @relation(fields: [editedBy], references: [id], onDelete: SetNull, map: "StatisticHistory_editedBy_fkey")
+  statistic statistic @relation(fields: [statisticId], references: [id], onDelete: Cascade, map: "StatisticHistory_statisticId_fkey")
+  user      user?     @relation(fields: [editedBy], references: [id], onDelete: SetNull, map: "StatisticHistory_editedBy_fkey")
 
   @@index([statisticId], map: "StatisticHistory_statisticId_idx")
   @@map("StatisticHistory")
 }
 
 model user {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String?    @unique(map: "User_email_key")
-  emailVerified DateTime?
-  image         String?
-  username      String?    @unique(map: "User_username_key")
-  password      String?
-  role          user_role  @default(PARENT)
-  isDeleted     Boolean    @default(false)
+  id                 String     @id @default(cuid())
+  name               String?
+  email              String?    @unique(map: "User_email_key")
+  emailVerified      DateTime?
+  image              String?
+  username           String?    @unique(map: "User_username_key")
+  password           String?
+  role               user_role  @default(PARENT)
+  isDeleted          Boolean    @default(false)
+  mustChangePassword Boolean    @default(false)
+
   account          account[]
   auditlog         auditlog[]
   player           player[]
   session          session[]
   statisticHistory statisticHistory[]
+
+  @@index([isDeleted], map: "User_isDeleted_idx")
 }
 
 model verificationtoken {
@@ -253,6 +261,33 @@ model verificationtoken {
   expires    DateTime
 
   @@unique([identifier, token], map: "VerificationToken_identifier_token_key")
+}
+
+model registration {
+  id          String              @id @default(cuid())
+  playerName  String
+  phone       String
+  email       String?
+  ageGroup    String
+  homebaseId  String
+  status      registration_status @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  homebase homebase @relation(fields: [homebaseId], references: [id], map: "Registration_homebaseId_fkey")
+
+  @@index([homebaseId], map: "Registration_homebaseId_idx")
+  @@index([status], map: "Registration_status_idx")
+  @@map("Registration")
+}
+
+model clubSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("ClubSetting")
 }
 
 enum attendance_status {
@@ -265,4 +300,23 @@ enum attendance_status {
 enum user_role {
   ADMIN
   PARENT
+}
+
+enum event_type {
+  LATIHAN
+  PERTANDINGAN
+  SPARING
+  EVALUASI
+  KHUSUS
+}
+
+enum statistic_status {
+  Draft
+  Published
+}
+
+enum registration_status {
+  PENDING
+  REVIEWED
+  COMPLETED
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Loader2 } from "lucide-react";
 import { useUsers, useDeleteUser, useResetPassword } from "@/hooks/use-users";
@@ -8,14 +8,23 @@ import { UserAccountActionDialogs, type UserDialogState } from "@/components/fea
 import { UserAccountCard } from "@/components/features/users/UserAccountCard";
 import { UsersManagementHeader } from "@/components/features/users/UsersManagementHeader";
 import { LinkedPlayersModal } from "@/components/features/users/LinkedPlayersModal";
+import { Pagination } from "@/components/ui/pagination";
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeRole, setActiveRole] = useState<"PARENT" | "ADMIN">("PARENT");
   const [uiState, setUiState] = useState<UserDialogState>(null);
   const [linkedPlayersParentId, setLinkedPlayersParentId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
   const { data: users, isLoading } = useUsers(activeRole);
+
+  // Reset pagination when data changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [users]);
+
   const { mutateAsync: deleteUser } = useDeleteUser();
   const { mutateAsync: resetPassword } = useResetPassword();
 
@@ -27,6 +36,21 @@ export default function UsersManagementPage() {
 
     return users.filter((user) => user.name?.toLowerCase().includes(normalizedSearch) || (user.username || "").toLowerCase().includes(normalizedSearch) || user.email?.toLowerCase().includes(normalizedSearch));
   }, [users, normalizedSearch]);
+
+  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const paginatedUsers = useMemo(() => {
+    return filteredUsers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [filteredUsers, currentPage]);
+
+  const handleSearchTermChange = (term: string) => {
+    setSearchTerm(term);
+    setCurrentPage(1);
+  };
+
+  const handleRoleChange = (role: "PARENT" | "ADMIN") => {
+    setActiveRole(role);
+    setCurrentPage(1);
+  };
 
   const hasUsers = (users?.length ?? 0) > 0;
   const isSearchActive = normalizedSearch.length > 0;
@@ -51,13 +75,13 @@ export default function UsersManagementPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
       <UsersManagementHeader 
         searchTerm={searchTerm} 
-        onSearchTermChange={setSearchTerm} 
+        onSearchTermChange={handleSearchTermChange} 
         totalAccounts={filteredUsers.length} 
         role={activeRole}
-        onRoleChange={setActiveRole}
+        onRoleChange={handleRoleChange}
       />
 
       <div className="flex flex-col gap-2">
@@ -79,7 +103,7 @@ export default function UsersManagementPage() {
             </p>
           </div>
         ) : (
-          filteredUsers.map((user) => (
+          paginatedUsers.map((user) => (
             <UserAccountCard
               key={user.id}
               user={user}
@@ -90,6 +114,14 @@ export default function UsersManagementPage() {
           ))
         )}
       </div>
+
+      {!isLoading && totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
       <LinkedPlayersModal

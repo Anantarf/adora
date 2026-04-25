@@ -1,13 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import Image from "next/image";
 import { Lock, User, ArrowRight, Loader2, ShieldCheck, AlertCircle, Cone, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
@@ -21,7 +22,6 @@ export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
-  const { update: updateSession } = useSession();
 
   const {
     register,
@@ -46,21 +46,23 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error("Gagal masuk", {
+        toast.error("Autentikasi Gagal", {
           description: result.error || "Username atau kata sandi tidak sesuai.",
           icon: <AlertCircle className="size-4" />,
         });
       } else {
-        toast.success("Masuk berhasil", {
+        toast.success("Autentikasi Berhasil", {
           description: "Anda akan diarahkan ke portal sesuai akses.",
           icon: <ShieldCheck className="size-4" />,
         });
-        const session = await updateSession();
+        // updateSession() has a race condition — fetch directly to get the committed JWT
+        const res = await fetch("/api/auth/session");
+        const session = await res.json();
         const role = (session?.user as { role?: string })?.role;
         router.push(role === "ADMIN" ? "/dashboard" : "/parent");
       }
     } catch (err) {
-      toast.error("Terjadi gangguan sistem", {
+      toast.error("Kesalahan Sistem", {
         description: "Silakan coba kembali beberapa saat lagi.",
       });
     } finally {
@@ -72,8 +74,15 @@ export function LoginForm() {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-120 z-10">
       <div className="bg-login-card/95 border border-white/10 rounded-3xl px-7 py-8 shadow-login-card sm:px-8">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center size-15 bg-login-icon rounded-2xl mb-5 shadow-sm">
-            <Cone className="size-9 text-white" strokeWidth={2.1} />
+          <div className="inline-flex items-center justify-center size-28 mb-4 relative">
+            <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full" />
+            <Image
+              src="/logo-adora.png"
+              alt="Adora BC"
+              width={112}
+              height={112}
+              className="object-contain relative z-10"
+            />
           </div>
           <h1 className="text-white font-heading uppercase tracking-widest leading-none">
             <span className="block text-[34px]">Adora</span>

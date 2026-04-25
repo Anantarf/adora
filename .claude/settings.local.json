@@ -38,7 +38,18 @@
       "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --script)",
       "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --stdin)",
       "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --file prisma/migrations/20260419121320_sync_schema_history/migration.sql)",
-      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --file prisma/migrations/20260419121829_statistic_updatedAt_drop_db_default/migration.sql)"
+      "Bash(DATABASE_URL=\"mysql://root:@127.0.0.1:3308/adora_shadow\" npx prisma db execute --file prisma/migrations/20260419121829_statistic_updatedAt_drop_db_default/migration.sql)",
+      "WebSearch",
+      "WebFetch(domain:www.instagram.com)",
+      "WebFetch(domain:www.facebook.com)",
+      "WebFetch(domain:www.gelora.id)",
+      "WebFetch(domain:saraga.id)",
+      "mcp__Claude_in_Chrome__browser_batch",
+      "mcp__Claude_in_Chrome__navigate",
+      "mcp__Claude_in_Chrome__computer",
+      "mcp__Claude_in_Chrome__get_page_text",
+      "Bash(node -e ' *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }

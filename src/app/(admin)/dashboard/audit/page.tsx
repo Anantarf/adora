@@ -16,24 +16,7 @@ import {
 } from "lucide-react";
 import { useAuditLogs, type AuditLogRecord } from "@/hooks/use-audit-log";
 import { Button } from "@/components/ui/button";
-
-// ─── Action Config ──────────────────────────────────────
-type ActionKey = "CREATE" | "UPDATE" | "DELETE" | "default";
-
-const ACTION_CONFIG: Record<ActionKey, { color: string; icon: typeof Plus; label: string }> = {
-  CREATE: { color: "#22C55E", icon: Plus, label: "Tambah" },
-  UPDATE: { color: "#3B82F6", icon: Pencil, label: "Ubah" },
-  DELETE: { color: "#E11D48", icon: Trash2, label: "Hapus" },
-  default: { color: "#8B5CF6", icon: FileText, label: "Aksi" },
-};
-
-function getActionConfig(action: string) {
-  const key = action.toUpperCase();
-  if (key.includes("CREATE") || key.includes("ADD")) return ACTION_CONFIG.CREATE;
-  if (key.includes("UPDATE") || key.includes("EDIT") || key.includes("SET")) return ACTION_CONFIG.UPDATE;
-  if (key.includes("DELETE") || key.includes("REMOVE")) return ACTION_CONFIG.DELETE;
-  return ACTION_CONFIG.default;
-}
+import { AUDIT_ACTION_CONFIG as ACTION_CONFIG, getAuditActionConfig as getActionConfig, type AuditActionKey as ActionKey } from "@/lib/constants/badge-configs";
 
 const TARGET_TABLE_DICT: Record<string, string> = {
   user: "Pengguna",
@@ -154,7 +137,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">Sebelum</p>
             {keys.map((k) => (
               <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">{FIELD_LABELS[k] ?? k}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
                 <span className="text-xs font-semibold text-muted-foreground">{formatValue(k, details.before[k])}</span>
               </div>
             ))}
@@ -163,7 +146,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-2">Sesudah</p>
             {keys.map((k) => (
               <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/40">{FIELD_LABELS[k] ?? k}</span>
+                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
                 <span className={`text-xs font-semibold ${String(details.before[k]) !== String(details.after[k]) ? "text-primary" : "text-foreground"}`}>
                   {formatValue(k, details.after[k])}
                 </span>

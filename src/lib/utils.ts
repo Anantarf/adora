@@ -25,3 +25,11 @@ export function unwrapAction<T>(result: T): Exclude<T, { success: false; error: 
   }
   return result as Exclude<T, { success: false; error: string }>;
 }
+
+/**
+ * Strips non-digit characters from a phone number string.
+ * Useful for constructing WhatsApp links (wa.me).
+ */
+export function sanitizePhone(phone: string): string {
+  return phone.replace(/\D/g, "");
+}

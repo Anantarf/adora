@@ -4,7 +4,7 @@
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
-import { KeyRound, LogOut, User, ChevronUp, ChevronsUpDown } from "lucide-react";
+import { KeyRound, LogOut, User, ChevronUp } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,11 +48,11 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
     startTransition(async () => {
       try {
         await updateSelfAction({ password: data.newPassword });
-        toast.success("Sandi berhasil diperbarui.");
+        toast.success("Kata sandi berhasil diperbarui.");
         reset();
         onClose();
       } catch (e: any) {
-        toast.error(e.message || "Gagal memperbarui sandi.");
+        toast.error(e.message || "Gagal memperbarui kata sandi.");
       }
     });
   };
@@ -129,16 +129,16 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
               {initials}
             </div>
             <div className="flex flex-col flex-1 min-w-0 leading-none group-data-[collapsible=icon]:hidden">
-              <span className="text-sm font-heading font-bold text-foreground truncate">{username}</span>
+              <span className="text-sm font-bold text-foreground truncate">{username}</span>
               <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 mt-0.5">Pengaturan Akun</span>
             </div>
-            <ChevronsUpDown className="size-4 text-muted-foreground/50 group-hover:text-primary group-data-[collapsible=icon]:hidden shrink-0" />
+            <ChevronUp className="size-4 text-muted-foreground/50 group-hover:text-primary group-data-[collapsible=icon]:hidden shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="right" className="w-56 bg-card border-border/50 rounded-xl shadow-xl ml-2">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
                 <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Masuk sebagai</span>
-                <span className="text-sm font-heading font-bold text-foreground">{username}</span>
+                <span className="text-sm font-bold text-foreground">{username}</span>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
             <DropdownMenuSeparator className="bg-border/50" />
@@ -166,7 +166,7 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Masuk sebagai</span>
-              <span className="text-sm font-heading font-bold text-foreground">{username}</span>
+              <span className="text-sm font-bold text-foreground">{username}</span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>
           <DropdownMenuSeparator className="bg-border/50" />

@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import { ScheduleEvent } from "@/types/dashboard";
 import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
+import type { event_type } from "@prisma/client";
 
 function parseEventDate(input: string): Date {
   // Preserve explicit time payloads; fallback to Jakarta midnight for date-only strings.
@@ -60,7 +61,7 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
   }
 }
 
-export async function createEventAction(data: { title: string; description?: string; date: string; type: string; location?: string; groupIds?: string[]; homebaseId?: string }) {
+export async function createEventAction(data: { title: string; description?: string; date: string; type: event_type; location?: string; groupIds?: string[]; homebaseId?: string }) {
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
@@ -97,7 +98,7 @@ export async function createEventAction(data: { title: string; description?: str
   }
 }
 
-export async function updateEventAction(id: string, data: { title: string; description?: string; date: string; type: string; location?: string; groupIds?: string[]; homebaseId?: string }) {
+export async function updateEventAction(id: string, data: { title: string; description?: string; date: string; type: event_type; location?: string; groupIds?: string[]; homebaseId?: string }) {
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
@@ -170,10 +171,10 @@ export async function getEventsWithAttendanceAction() {
     });
 
     return events.map((e) => {
-      const stats = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
-      e.attendances.forEach((a) => {
-        stats[a.status as keyof typeof stats]++;
-      });
+      const stats = e.attendances.reduce(
+        (acc, { status }) => ({ ...acc, [status]: (acc[status as keyof typeof acc] ?? 0) + 1 }),
+        { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<string, number>
+      );
 
       const attendanceMarkedAt = e.attendances.length > 0 ? e.attendances.reduce((latest, current) => (current.createdAt > latest ? current.createdAt : latest), e.attendances[0].createdAt) : null;
 
@@ -232,6 +233,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         playerId: p.id,
         eventId: event.id,
         createdAt: new Date(),
+        updatedAt: new Date(),
         player: { id: p.id, name: p.name, schoolOrigin: p.schoolOrigin },
       }));
     }

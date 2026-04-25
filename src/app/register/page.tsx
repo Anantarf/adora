@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, Suspense, useTransition } from "react";
+import { useState, useMemo, Suspense, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
+import { CheckCircle2, MessageCircle } from "lucide-react";
 import { HomebaseSelector } from "@/components/homebase-selector";
 import { Starfield } from "@/components/ui/starfield";
 import { submitRegistration } from "@/actions/register";
@@ -12,8 +14,6 @@ import { CONTACT } from "@/lib/constants/contact";
 import React from "react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-
-
 
 type FormState = { name: string; phone: string; email: string; ageGroup: string };
 
@@ -44,15 +44,14 @@ const FORM_FIELDS: Array<{
   {
     key: "email",
     type: "email",
-    label: "Email",
+    label: "Email (Opsional)",
     required: false,
     placeholder: "Contoh: orang.tua@email.com",
   },
 ];
 
-
 const INPUT_CLASS =
-  "w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-primary transition-colors";
+  "w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-primary transition-colors";
 
 // ─── Inner (uses useSearchParams — harus di dalam Suspense) ──────────────────
 
@@ -69,20 +68,20 @@ function RegisterContent() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Pindahkan logika WA ke dalam fungsi agar tidak dihitung ulang setiap kali ngetik
-  const getWaUrl = () => {
-    const waMessage = [
+  const waUrl = useMemo(() => {
+    const message = [
       "Halo Adora Basketball Club, saya telah mengisi form pendaftaran anggota baru di website. Mohon info untuk kelanjutan proses pendaftaran dan pembayarannya.",
-      form.name      ? `Nama      : ${form.name}`             : "",
-      form.phone     ? `No HP     : ${form.phone}`            : "",
-      form.email     ? `Email     : ${form.email}`            : "",
-      form.ageGroup  ? `Program   : ${form.ageGroup}`         : "",
+      form.name             ? `Nama      : ${form.name}`             : "",
+      form.phone            ? `No HP     : ${form.phone}`            : "",
+      form.email            ? `Email     : ${form.email}`            : "",
+      form.ageGroup         ? `Program   : ${form.ageGroup}`         : "",
       selectedHomebase?.name ? `Homebase  : ${selectedHomebase.name}` : "",
     ].filter(Boolean).join("\n");
-    return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(waMessage)}`;
-  };
+    return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
+  }, [form, selectedHomebase]);
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
     setError(null);
     if (!form.name || !form.phone || !form.ageGroup || !selectedHomebase?.id) {
       setError("Mohon lengkapi semua data wajib yang bertanda *");
@@ -106,6 +105,13 @@ function RegisterContent() {
     });
   };
 
+  const handleReset = () => {
+    setForm({ name: "", phone: "", email: "", ageGroup: "" });
+    setSelectedHomebase(null);
+    setIsSubmitted(false);
+    setError(null);
+  };
+
   return (
     <main className="min-h-screen bg-page-dark text-foreground relative overflow-hidden">
       <Starfield />
@@ -113,14 +119,17 @@ function RegisterContent() {
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/80 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" aria-label="Kembali ke beranda">
-            <span className="font-heading text-2xl tracking-widest uppercase text-white hover:text-primary transition-colors">
+          <Link href="/" aria-label="Kembali ke beranda" className="flex items-center gap-3 group">
+            <div className="w-8 h-8 flex items-center justify-center transition-all">
+              <Image src="/logo-adora.png" alt="Adora BC" width={32} height={32} className="object-contain" />
+            </div>
+            <span className="font-heading text-xl tracking-widest uppercase text-white group-hover:text-primary transition-colors hidden sm:block">
               ADORA <span className="text-primary">BC</span>
             </span>
           </Link>
           <Link
             href="/login"
-            className="text-[10px] font-bold uppercase tracking-widest border border-primary/50 text-primary px-5 py-2 rounded-full hover:bg-primary hover:text-black transition-all"
+            className="text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white px-5 py-2 rounded-full hover:bg-white hover:text-black transition-all"
           >
             Login
           </Link>
@@ -142,7 +151,7 @@ function RegisterContent() {
 
       {/* ── Main Form ── */}
       <div className="container mx-auto px-4 pb-12 relative z-10">
-        <div className="max-w-3xl mx-auto items-start">
+        <div className="max-w-3xl mx-auto">
 
           <div className="space-y-10">
 
@@ -174,111 +183,112 @@ function RegisterContent() {
                   </div>
                 </div>
 
-                <div className="space-y-4 bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
-                  {/* Text inputs dari config */}
-                  {FORM_FIELDS.map(({ key, type, label, required, placeholder, sanitize }) => (
-                    <div key={key}>
-                      <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-2">
-                        {label} {required && <span className="text-primary">*</span>}
+                <form onSubmit={handleSubmit} noValidate>
+                  <div className="space-y-4 bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
+                    {/* Text inputs dari config */}
+                    {FORM_FIELDS.map(({ key, type, label, required, placeholder, sanitize }) => (
+                      <div key={key}>
+                        <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-2">
+                          {label} {required && <span className="text-primary">*</span>}
+                        </label>
+                        <input
+                          type={type}
+                          value={form[key]}
+                          disabled={isSubmitted}
+                          onChange={(e) => {
+                            const val = sanitize ? sanitize(e.target.value) : e.target.value;
+                            setForm((f) => ({ ...f, [key]: val }));
+                          }}
+                          placeholder={placeholder}
+                          className={`${INPUT_CLASS} ${isSubmitted ? "opacity-50 cursor-not-allowed" : ""}`}
+                        />
+                      </div>
+                    ))}
+
+                    {/* Program (Cards) */}
+                    <div>
+                      <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-3">
+                        Program / Kelompok Usia <span className="text-primary">*</span>
                       </label>
-                      <input
-                        type={type}
-                        value={form[key]}
-                        disabled={isSubmitted}
-                        onChange={(e) => {
-                          const val = sanitize ? sanitize(e.target.value) : e.target.value;
-                          setForm((f) => ({ ...f, [key]: val }));
-                        }}
-                        placeholder={placeholder}
-                        className={`${INPUT_CLASS} ${isSubmitted ? "opacity-50 cursor-not-allowed" : ""}`}
-                      />
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {PROGRAMS.map(({ label, ages, iconName, desc }) => {
+                          const isSelected = form.ageGroup === label;
+                          const Icon = PROGRAM_ICONS[iconName];
+                          return (
+                            <button
+                              key={label}
+                              type="button"
+                              disabled={isSubmitted}
+                              onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
+                              className={`text-center px-4 py-4 rounded-xl border transition-all duration-300 flex flex-col items-center ${
+                                isSelected
+                                  ? "bg-primary/10 border-primary ring-2 ring-primary/50"
+                                  : "bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10"
+                              } ${isSubmitted ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
+                            >
+                              <div className={`mb-1 transition-colors ${isSelected ? "text-primary" : "text-white/50"}`} aria-hidden="true">
+                                <Icon className="w-8 h-8" />
+                              </div>
+                              <h4 className={`font-heading text-xl tracking-widest mb-0.5 ${isSelected ? "text-primary" : "text-white"}`}>
+                                {label}
+                              </h4>
+                              <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">
+                                {ages}
+                              </span>
+                              <p className="text-white/60 text-[11px] leading-relaxed">
+                                {desc}
+                              </p>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                  ))}
 
-                  {/* Program (Cards) */}
-                  <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-3">
-                      Program / Kelompok Usia <span className="text-primary">*</span>
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {PROGRAMS.map(({ label, ages, iconName, desc }) => {
-                        const isSelected = form.ageGroup === label;
-                        const Icon = PROGRAM_ICONS[iconName];
-                        return (
-                          <button
-                            key={label}
-                            type="button"
-                            disabled={isSubmitted}
-                            onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
-                            className={`text-center p-4 pt-3 rounded-xl border transition-all duration-300 flex flex-col items-center ${
-                              isSelected 
-                                ? "bg-primary/10 border-primary shadow-primary-soft scale-[1.02]" 
-                                : "bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10 shadow-xl"
-                            } ${isSubmitted ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
-                          >
-                            <div className={`mb-1 transition-colors ${isSelected ? "text-primary" : "text-white/50"}`} aria-hidden="true">
-                              <Icon className="w-8 h-8" />
-                            </div>
-                            <h4 className={`font-heading text-xl tracking-widest mb-0.5 ${isSelected ? "text-primary" : "text-white"}`}>
-                              {label}
-                            </h4>
-                            <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80 mb-2">
-                              {ages}
-                            </span>
-                            <p className="text-white/60 text-[11px] leading-relaxed">
-                              {desc}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
+                    {isSubmitted ? (
+                      <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center space-y-4 mt-6">
+                        <CheckCircle2 className="size-12 text-green-400 mx-auto" />
+                        <h3 className="font-heading text-xl text-green-400 uppercase tracking-widest">Pendaftaran Terkirim!</h3>
+                        <p className="text-white/60 text-sm">
+                          Data Anda sudah kami simpan. Langkah terakhir, silakan klik tombol WhatsApp di bawah untuk konfirmasi pendaftaran ke Admin.
+                        </p>
+                        <a
+                          href={waUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="cursor-pointer mt-4 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02]"
+                        >
+                          <MessageCircle className="size-4" />
+                          Hubungi Admin (WA)
+                        </a>
+                        <button
+                          type="button"
+                          onClick={handleReset}
+                          className="cursor-pointer w-full mt-2 border border-white/20 hover:border-white/40 text-white/50 hover:text-white/80 text-xs uppercase tracking-widest transition-all py-2.5 rounded-full"
+                        >
+                          Daftar Anggota Lain
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        {error && (
+                          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-xs font-medium">
+                            ⚠️ {error}
+                          </div>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={isPending}
+                          className="cursor-pointer mt-2 w-full flex items-center justify-center gap-3 bg-primary hover:bg-primary/80 text-black font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isPending ? "Menyimpan Data..." : "Kirim Pendaftaran"}
+                        </button>
+                      </>
+                    )}
                   </div>
-
-                  {isSubmitted ? (
-                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center space-y-4 mt-6">
-                      <div className="text-4xl">✅</div>
-                      <h3 className="font-heading text-xl text-green-400 uppercase tracking-widest">Pendaftaran Terkirim!</h3>
-                      <p className="text-white/60 text-sm">
-                        Data Anda sudah kami simpan. Langkah terakhir, silakan klik tombol WhatsApp di bawah untuk konfirmasi pendaftaran ke Admin.
-                      </p>
-                      <a
-                        href={getWaUrl()}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="cursor-pointer mt-4 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02]"
-                      >
-                        <span>💬</span>
-                        Hubungi Admin (WA)
-                      </a>
-                      <button
-                        onClick={() => setIsSubmitted(false)}
-                        className="cursor-pointer w-full mt-2 border border-white/20 hover:border-white/40 text-white/50 hover:text-white/80 text-xs uppercase tracking-widest transition-all py-2.5 rounded-full"
-                      >
-                        ← Edit Data Pendaftaran
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      {/* Inline error message */}
-                      {error && (
-                        <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-xs font-medium">
-                          ⚠️ {error}
-                        </div>
-                      )}
-
-                      <button
-                        onClick={handleSubmit}
-                        disabled={isPending}
-                        className="cursor-pointer mt-2 w-full flex items-center justify-center gap-3 bg-primary hover:bg-primary/80 text-black font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {isPending ? "Menyimpan Data..." : "Kirim Pendaftaran"}
-                      </button>
-                    </>
-                  )}
-                </div>
+                </form>
               </div>
             )}
-
 
             {!selectedHomebase?.name && (
               <p className="text-white/20 text-xs text-center tracking-widest uppercase">

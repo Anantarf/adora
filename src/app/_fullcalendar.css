@@ -207,3 +207,65 @@
 .animate-card-in {
   animation: card-in 0.3s ease-out;
 }
+
+/* ─── CalendarView: Custom Pill Event Rendering ──────
+   Override default FC event chrome agar custom eventContent
+   (pill bubbles) bisa render tanpa konflik styling bawaan FC.
+   Harus di-cascade setelah semua rule di atas.
+   ─────────────────────────────────────────────────── */
+.fc-event {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  transform: none;
+}
+.fc-event:hover {
+  transform: none;
+}
+.fc-event-main {
+  padding: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+.fc-v-event,
+.fc-h-event {
+  background-color: transparent !important;
+  border: none !important;
+}
+.fc-daygrid-day-frame {
+  min-height: 44px !important;
+}
+.fc-daygrid-day-top {
+  padding: 2px 4px !important;
+}
+.fc-col-header-cell {
+  padding: 4px 0 !important;
+}
+.fc-daygrid-day-events {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 2px !important;
+  padding: 2px 3px !important;
+}
+.fc-daygrid-event-harness {
+  margin: 0 !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  max-width: 100% !important;
+}
+.fc-daygrid-event-harness-abs {
+  position: static !important;
+}
+.fc-day-other .fc-daygrid-event-harness {
+  opacity: 0.35 !important;
+}
+.fc-daygrid-more-link {
+  display: none !important;
+}
+.fc-toolbar-title {
+  font-weight: 600 !important;
+  letter-spacing: 0.025em !important;
+  color: hsl(var(--foreground)) !important;
+}

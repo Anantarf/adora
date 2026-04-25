@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
-const HOMEBASE_NONE = "__none__";
 
 const SCHOOL_LEVELS = ["TK/RA", "SD/MI", "SMP/MTS", "SMA/MA"] as const;
 
@@ -129,18 +128,28 @@ export function GroupFormFields({
       {homebases.length > 0 && (
         <div className="space-y-2">
           <label className="text-xs font-semibold text-muted-foreground">
-            Lokasi Latihan <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+            Homebase <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
           </label>
           <Select
-            value={watch("homebaseId") ?? HOMEBASE_NONE}
-            onValueChange={(val) => setValue("homebaseId", !val || val === HOMEBASE_NONE ? undefined : val)}
+            value={watch("homebaseId") === "__none__" ? "none" : (watch("homebaseId") || "none")}
+            onValueChange={(val) => {
+              if (val === "none") {
+                setValue("homebaseId", undefined, { shouldDirty: true });
+              } else {
+                setValue("homebaseId", val || undefined, { shouldDirty: true });
+              }
+            }}
           >
             <SelectTrigger className="h-11 font-semibold">
-              <SelectValue />
+              <SelectValue placeholder="None">
+                {watch("homebaseId") && watch("homebaseId") !== "none" && watch("homebaseId") !== "__none__"
+                  ? homebases.find((hb) => hb.id === watch("homebaseId"))?.name || "None"
+                  : "None"}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={HOMEBASE_NONE} className="text-muted-foreground">
-                — Tanpa Lokasi Latihan —
+              <SelectItem value="none" className="text-muted-foreground">
+                None
               </SelectItem>
               {homebases.map((hb) => (
                 <SelectItem key={hb.id} value={hb.id}>{hb.name}</SelectItem>

@@ -54,8 +54,8 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
   }, [group, open, reset]);
 
   const onSubmit = async (data: GroupForm) => {
-    if (isKu && !targetKu) { toast.error("Umur tidak boleh kosong untuk Kelompok Umur!"); return; }
-    if (isSchool && !schoolLevel) { toast.error("Silakan pilih tingkat sekolah yang sesuai!"); return; }
+    if (isKu && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
+    if (isSchool && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
 
     try {
       const descPayload = buildGroupDescriptionPayload({
@@ -66,7 +66,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
       toast.success(`${group.name} berhasil diperbarui!`);
       onOpenChange(false);
     } catch {
-      toast.error("Gagal memperbarui kelompok. Coba lagi.");
+      toast.error("Gagal memperbarui kelompok. Silakan coba kembali.");
     }
   };
 
@@ -78,7 +78,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             <Edit2 className="size-5 text-primary" /> Ubah Kelompok
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Perbarui nama, kategori usia, sekolah, atau lokasi latihan.
+            Perbarui nama, kategori usia, sekolah, atau homebase.
           </DialogDescription>
         </DialogHeader>
 

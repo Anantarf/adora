@@ -20,7 +20,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
       toast.success(`Kelompok ${group.name} berhasil dihapus.`);
       onOpenChange(false);
     } catch {
-      toast.error("Gagal menghapus kelompok. Coba lagi.");
+      toast.error("Gagal menghapus kelompok. Silakan coba kembali.");
     }
   };
 

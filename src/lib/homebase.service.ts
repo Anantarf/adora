@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_EVENT_TYPE } from "@/lib/config/events";
+import type { event_type } from "@prisma/client";
 
 export async function getHomebases() {
   return prisma.homebase.findMany({
@@ -63,7 +64,7 @@ export async function updateGroupHomebase(
 export async function createHomebaseEvent(data: {
   title: string;
   date: Date;
-  type?: string;
+  type?: event_type;
   homebaseId: string;
   groupId?: string;
   description?: string;
@@ -71,7 +72,7 @@ export async function createHomebaseEvent(data: {
   return prisma.event.create({
     data: {
       ...data,
-      type: data.type || DEFAULT_EVENT_TYPE,
+      type: data.type ?? DEFAULT_EVENT_TYPE,
     },
   });
 }

@@ -47,7 +47,7 @@ const METRIC_CARDS: MetricCard[] = [
   },
   {
     key: "publishedStatsCount",
-    label: "Progress Evaluasi",
+    label: "Progress Penilaian",
     subtitle: "Selesai / Draft",
     icon: FileCheck,
     getDisplay: (m) => `${m.publishedStatsCount} / ${m.draftStatsCount}`,

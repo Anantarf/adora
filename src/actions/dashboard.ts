@@ -4,8 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
 import { AttendanceStatus } from "@/types/dashboard";
-import { MS_PER_DAY, ATTENDANCE_LOOKBACK_DAYS, TREND_STATS_SAMPLE_SIZE } from "@/lib/constants";
-import { parseMetricsJson } from "@/lib/metrics";
+import { MS_PER_DAY, ATTENDANCE_LOOKBACK_DAYS } from "@/lib/constants";
 
 const DEFAULT_ATTENDANCE_COUNTS = { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 };
 
@@ -15,7 +14,7 @@ export type DashboardMetrics = {
   publishedStatsCount: number;
   draftStatsCount: number;
   attendanceRate: number;
-  performanceTrend: { name: string; val: number }[];
+  recentRegistrations: { id: string; playerName: string; ageGroup: string; createdAt: Date; status: string }[];
   atRiskPlayers: { id: string; name: string; groupName: string; alpaCount: number }[];
 };
 
@@ -64,37 +63,20 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       ? Math.round((hadirCount / totalAttendances) * 100)
       : 0;
 
-    const stats = await prisma.statistic.findMany({
+    const recentRegistrations = await prisma.registration.findMany({
       where: {
-        status: "Published",
-        player: { isDeleted: false }
+        status: "PENDING"
       },
-      orderBy: { date: "desc" },
-      take: TREND_STATS_SAMPLE_SIZE,
-      select: { date: true, metricsJson: true }
-    });
-
-    const formatMonth = (date: Date): string =>
-      date.toLocaleString("en-US", { month: "short", timeZone: "Asia/Jakarta" });
-
-    // Build trend map using reduce
-    const trendMap = [...stats].reverse().reduce((acc, s) => {
-      const month = formatMonth(s.date);
-      const values = parseMetricsJson(s.metricsJson as string);
-
-      if (values.length > 0) {
-        const avg = values.reduce((a, b) => a + b, 0) / values.length;
-        const existing = acc.get(month) || { sum: 0, count: 0 };
-        acc.set(month, { sum: existing.sum + avg, count: existing.count + 1 });
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: {
+        id: true,
+        playerName: true,
+        ageGroup: true,
+        createdAt: true,
+        status: true,
       }
-
-      return acc;
-    }, new Map<string, { sum: number; count: number }>());
-
-    const performanceTrend = Array.from(trendMap.entries()).map(([name, data]) => ({
-      name,
-      val: data.count > 0 ? Math.round(data.sum / data.count) : 0
-    }));
+    });
 
     // Find At-Risk Players (>= 3 ALPA in the last 30 days) — filter done at DB level via groupBy+having
     const alpaGroups = await prisma.attendance.groupBy({
@@ -130,7 +112,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       publishedStatsCount,
       draftStatsCount,
       attendanceRate,
-      performanceTrend,
+      recentRegistrations,
       atRiskPlayers,
     };
   } catch (error) {

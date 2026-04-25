@@ -25,7 +25,7 @@ export const useAddUser = () => {
       toast.success("Akun orang tua berhasil dibuat!");
     },
     onError: () => {
-      toast.error("Gagal membuat akun. Periksa data lalu coba lagi.");
+      toast.error("Gagal membuat akun. Periksa kembali data yang dimasukkan.");
     },
   });
 };
@@ -39,7 +39,7 @@ export const useUpdateUser = () => {
       toast.success("Data akun diperbarui!");
     },
     onError: () => {
-      toast.error("Gagal memperbarui akun. Coba lagi sebentar.");
+      toast.error("Gagal memperbarui akun. Silakan coba kembali.");
     },
   });
 };
@@ -51,7 +51,7 @@ export const useResetPassword = () => {
       toast.success(res.message);
     },
     onError: () => {
-      toast.error("Reset kata sandi gagal. Coba lagi.");
+      toast.error("Gagal me-reset kata sandi. Silakan coba kembali.");
     },
   });
 };
@@ -65,7 +65,7 @@ export const useDeleteUser = () => {
       toast.success("Akun berhasil dihapus.");
     },
     onError: () => {
-      toast.error("Penghapusan akun gagal. Periksa keterkaitan data pemain.");
+      toast.error("Gagal menghapus akun. Pastikan tidak ada data pemain yang tertaut.");
     },
   });
 };
@@ -85,7 +85,7 @@ export const useUpdateSelf = () => {
       toast.success("Profil Anda berhasil diperbarui!");
     },
     onError: () => {
-      toast.error("Gagal memperbarui profil. Periksa data lalu coba lagi.");
+      toast.error("Gagal memperbarui profil. Periksa kembali data yang dimasukkan.");
     },
   });
 };

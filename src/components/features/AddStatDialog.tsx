@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSubmitStatistic } from "@/hooks/use-statistics";
 import type { Player, MetricsJson } from "@/types/dashboard";
+import { FLAT_METRIC_DEFS } from "@/lib/metrics";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -37,22 +38,7 @@ const DRIBBLE_DEFAULTS = { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betwe
 const PASSING_DEFAULTS = { chestPass: 0, bouncePass: 0, overheadPass: 0 };
 const DEFAULT_METRICS: StatForm = { dribble: DRIBBLE_DEFAULTS, passing: PASSING_DEFAULTS, layUp: 0, shooting: 0, notes: "" };
 
-// ─── Helper: sum number values of an object ──────────
-const sumValues = (obj: Record<string, any>) => Object.values(obj).reduce((a, b) => a + (Number(b) || 0), 0);
-
-// ─── Sub-section Component ────────────────────────────
-function ScoreSection({ title, total, children }: { title: string; total: number; children: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border border-border/40 bg-muted/20 overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/30">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{title}</span>
-        <span className="text-sm font-bold text-primary tabular-nums">Total: {total}</span>
-      </div>
-      <div className="p-3 grid grid-cols-2 gap-2">{children}</div>
-    </div>
-  );
-}
-
+// ─── ScoreField Component ─────────────────────────────
 function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...props }: { label: string; error?: string; max?: number | string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "max">) {
   const max = Number(rawMax);
   const maxDigits = max.toString().length;
@@ -68,6 +54,17 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
   );
+}
+
+// ─── Helper: get nested error ─────────────────────────
+function getNestedError(errors: Record<string, any>, path: string): string | undefined {
+  const parts = path.split(".");
+  let current: any = errors;
+  for (const part of parts) {
+    if (!current) return undefined;
+    current = current[part];
+  }
+  return current?.message;
 }
 
 // ─── Dialog ───────────────────────────────────────────
@@ -99,8 +96,15 @@ export function AddStatDialog({
 
   const values = watch();
 
-  const dribbleTotal = useMemo(() => sumValues(values.dribble ?? {}), [values.dribble]);
-  const passingTotal = useMemo(() => sumValues(values.passing ?? {}), [values.passing]);
+  // Calculate total from all 11 flat metrics
+  const grandTotal = useMemo(() => {
+    return FLAT_METRIC_DEFS.reduce((sum, def) => {
+      const parts = def.path.split(".");
+      let val: any = values;
+      for (const p of parts) val = val?.[p];
+      return sum + (Number(val) || 0);
+    }, 0);
+  }, [values]);
 
   const onSubmit = async (data: StatForm, status: "Draft" | "Published") => {
     setPendingStatus(status);
@@ -147,52 +151,43 @@ export function AddStatDialog({
 
           <form className="flex flex-col gap-3 mt-1">
             <fieldset disabled={!isPeriodActive} className="flex flex-col gap-3">
-              {/* Dribble */}
-            <ScoreSection title="Dribble" total={dribbleTotal}>
-              <ScoreField label="In & Out" max={99} {...register("dribble.inAndOut")} error={errors.dribble?.inAndOut?.message} />
-              <ScoreField label="Crossover" max={10} {...register("dribble.crossover")} error={errors.dribble?.crossover?.message} />
-              <ScoreField label="V Dribble Kiri" max={10} {...register("dribble.vLeft")} error={errors.dribble?.vLeft?.message} />
-              <ScoreField label="V Dribble Kanan" max={10} {...register("dribble.vRight")} error={errors.dribble?.vRight?.message} />
-              <ScoreField label="Between Legs Kiri" max={10} {...register("dribble.betweenLegsLeft")} error={errors.dribble?.betweenLegsLeft?.message} />
-              <ScoreField label="Between Legs Kanan" max={10} {...register("dribble.betweenLegsRight")} error={errors.dribble?.betweenLegsRight?.message} />
-            </ScoreSection>
-
-            {/* Passing */}
-            <ScoreSection title="Passing" total={passingTotal}>
-              <ScoreField label="Chest Pass" {...register("passing.chestPass")} error={errors.passing?.chestPass?.message} />
-              <ScoreField label="Bounce Pass" {...register("passing.bouncePass")} error={errors.passing?.bouncePass?.message} />
-              <ScoreField label="Overhead Pass" {...register("passing.overheadPass")} error={errors.passing?.overheadPass?.message} />
-            </ScoreSection>
-
-            {/* Lay Up & Shooting */}
-            <div className="grid grid-cols-2 gap-3">
-              {([["layUp", "Lay Up"], ["shooting", "Shooting"]] as const).map(([name, label]) => (
-                <div key={name} className="rounded-lg border border-border/40 bg-muted/20 p-3">
-                  <ScoreField label={label} max={10} {...register(name)} error={errors[name]?.message} />
+              {/* All 11 metrics in a flat grid — no section grouping */}
+              <div className="rounded-lg border border-border/40 bg-muted/20 overflow-hidden">
+                <div className="flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/30">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Aspek Penilaian</span>
+                  <span className="text-sm font-bold text-primary tabular-nums">Total: {grandTotal}</span>
                 </div>
-              ))}
-            </div>
+                <div className="p-3 grid grid-cols-2 gap-2">
+                  {FLAT_METRIC_DEFS.map((def) => (
+                    <ScoreField
+                      key={def.key}
+                      label={def.label}
+                      max={def.max}
+                      {...register(def.path as any)}
+                      error={getNestedError(errors as any, def.path)}
+                    />
+                  ))}
+                </div>
+              </div>
 
-            {/* Notes */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
-              <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
-            </div>
+              {/* Notes */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
+                <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
+              </div>
             </fieldset>
 
-            {/* Summary */}
-            <div className="grid grid-cols-4 gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20">
-              {[
-                { label: "Dribble", val: dribbleTotal },
-                { label: "Passing", val: passingTotal },
-                { label: "Lay Up", val: Number(values.layUp || 0) },
-                { label: "Shooting", val: Number(values.shooting || 0) },
-              ].map(({ label, val }) => (
-                <div key={label} className="text-center">
-                  <p className="text-[10px] uppercase tracking-widest text-muted-foreground">{label}</p>
-                  <p className="text-lg font-bold text-primary tabular-nums">{val}</p>
-                </div>
-              ))}
+            {/* Summary — single grand total */}
+            <div className="flex items-center justify-center gap-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total Skor</p>
+                <p className="text-2xl font-bold text-primary tabular-nums">{grandTotal}</p>
+              </div>
+              <div className="w-px h-8 bg-border/50" />
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Aspek Dinilai</p>
+                <p className="text-2xl font-bold text-foreground tabular-nums">{FLAT_METRIC_DEFS.length}</p>
+              </div>
             </div>
 
             {isPeriodActive && (

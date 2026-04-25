@@ -63,6 +63,7 @@ export async function createUserAction(data: { username: string; name: string; e
         email: data.email || null,
         password: hashedPassword,
         role: data.role || "PARENT",
+        mustChangePassword: true, // Force password change on first login
       },
     });
     await createAuditLog(tx, "CREATE", "user", newUser.id, userId, {
@@ -121,13 +122,17 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
 
   const target = await prisma.user.findUnique({ where: { id }, select: { username: true } });
   await prisma.$transaction(async (tx) => {
-    await tx.user.update({ where: { id }, data: { password: hashedPassword } });
+    await tx.user.update({
+      where: { id },
+      data: { password: hashedPassword, mustChangePassword: true }, // Flag to force password change
+    });
     await createAuditLog(tx, "RESET_PASSWORD", "user", id, userId, {
       username: target?.username,
       resetTo: newPassword ? "custom" : "default",
     });
   });
 
+  revalidatePath("/dashboard/users");
   return { message: "Password berhasil direset." };
 }
 
@@ -197,4 +202,29 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
 
   revalidatePath("/parent");
   return result;
+}
+
+// 8. Complete Forced Password Change (self — after admin reset)
+export async function changeForcedPasswordAction(newPassword: string) {
+  const session = await requireAuth();
+  const userId = session.user.id;
+  if (!userId) throw new Error("Tidak terautentikasi.");
+
+  if (!newPassword || newPassword.length < 8) {
+    throw new Error("Password baru minimal 8 karakter.");
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword, mustChangePassword: false },
+    });
+    await createAuditLog(tx, "CHANGE_FORCED_PASSWORD", "user", userId, userId, {
+      message: "Pengguna menyelesaikan pergantian password wajib.",
+    });
+  });
+
+  return { success: true as const };
 }

@@ -67,7 +67,7 @@
 
   /* Semantic shadow tokens */
   --shadow-login-card: 0 14px 30px rgba(0, 0, 0, 0.42);
-  --shadow-primary-soft: 0 10px 40px color-mix(in srgb, var(--primary) 10%, transparent);
+  --shadow-primary-soft: 0 0 20px color-mix(in srgb, var(--primary) 15%, transparent);
 
   /* Login page standalone palette (intentionally always dark) */
   --color-login-card: #171717;

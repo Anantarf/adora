@@ -78,6 +78,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             role: user.role,
             username: user.username,
+            mustChangePassword: user.mustChangePassword,
           };
         } catch (error) {
           const msg = error instanceof Error ? error.message : "Terjadi kesalahan saat verifikasi.";
@@ -87,12 +88,21 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
         token.username = user.username;
+        token.mustChangePassword = user.mustChangePassword;
       }
+
+      // Handle client-side session updates
+      if (trigger === "update" && session) {
+        if (typeof session.mustChangePassword === "boolean") {
+          token.mustChangePassword = session.mustChangePassword;
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -100,6 +110,7 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role;
         session.user.id = token.id;
         session.user.username = token.username;
+        session.user.mustChangePassword = token.mustChangePassword as boolean | undefined;
       }
       return session;
     },

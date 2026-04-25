@@ -8,9 +8,9 @@ import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
 
 // ─── Helper ──────────────────────────────────────────
-const safeParseMetrics = (json: string): MetricsJson => {
+const safeParseMetrics = (json: unknown): MetricsJson => {
   try {
-    return JSON.parse(json) as MetricsJson;
+    return json as MetricsJson;
   } catch {
     return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 };
   }
@@ -65,13 +65,15 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
       throw new Error("Sebagian pemain sudah punya absensi dari agenda lain pada tanggal yang sama.");
     }
 
-    for (const ps of dedupedStatuses) {
-      await tx.attendance.upsert({
-        where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
-        update: { status: ps.status, note: data.note, eventId: data.eventId },
-        create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
-      });
-    }
+    await Promise.all(
+      dedupedStatuses.map((ps) =>
+        tx.attendance.upsert({
+          where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
+          update: { status: ps.status, note: data.note, eventId: data.eventId },
+          create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
+        })
+      )
+    );
 
     await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${dedupedStatuses.length}`, userId);
   });
@@ -98,7 +100,7 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
       const updated = await tx.statistic.update({
         where: { id: existing.id },
         data: {
-          metricsJson: JSON.stringify(data.metrics),
+          metricsJson: data.metrics,
           status: data.status,
         },
       });
@@ -112,7 +114,7 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
         playerId: data.playerId,
         periodId: data.periodId,
         date: period.startDate,
-        metricsJson: JSON.stringify(data.metrics),
+        metricsJson: data.metrics,
         status: data.status,
       },
     });
@@ -145,7 +147,7 @@ export async function getStatsByPeriodAction(periodId: string) {
     orderBy: [{ player: { group: { name: "asc" } } }, { player: { name: "asc" } }],
   });
 
-  return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
+  return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson) }));
 }
 
 // 4. Get history revisi untuk satu statistic
@@ -158,7 +160,7 @@ export async function getStatHistoryAction(statisticId: string) {
     orderBy: { editedAt: "desc" },
   });
 
-  return history.map((h) => ({ ...h, metricsJson: safeParseMetrics(h.metricsJson as string) }));
+  return history.map((h) => ({ ...h, metricsJson: safeParseMetrics(h.metricsJson) }));
 }
 
 // 5. Get Player Stats (Parent-safe — untuk portal pemain)
@@ -181,5 +183,5 @@ export async function getPlayerStatsAction(playerId: string) {
     orderBy: { date: "desc" },
   });
 
-  return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson as string) }));
+  return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson) }));
 }

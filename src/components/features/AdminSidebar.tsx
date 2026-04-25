@@ -1,8 +1,9 @@
 "use client";
 
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
-import { Cone, LayoutDashboard, Users, CheckSquare, FileBadge, LineChart, ShieldAlert, Layers, CalendarDays, LogOut } from "lucide-react";
+import { Cone, LayoutDashboard, Users, CheckSquare, FileBadge, LineChart, ShieldAlert, Layers, CalendarDays, LogOut, UserPlus, Settings } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { UserProfileMenu } from "./UserProfileMenu";
 import { signOut } from "next-auth/react";
@@ -15,6 +16,8 @@ const navItems = [
   { title: "Input Penilaian", url: "/statistics", icon: LineChart },
   { title: "Manajemen Sertifikat", url: "/certificates", icon: FileBadge },
   { title: "Manajemen Akun", url: "/users", icon: Users },
+  { title: "Pendaftar Baru", url: "/registrations", icon: UserPlus },
+  { title: "Pengaturan", url: "/settings", icon: Settings },
   { title: "Audit Log", url: "/audit", icon: ShieldAlert },
 ];
 
@@ -32,8 +35,8 @@ export function AdminSidebar() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default">
-              <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-sm group-data-[collapsible=icon]:size-8">
-                <Cone className="size-5 group-data-[collapsible=icon]:size-4" />
+              <div className="flex aspect-square size-10 items-center justify-center group-data-[collapsible=icon]:size-8">
+                <Image src="/logo-adora.png" alt="Adora BC" width={40} height={40} className="object-contain" />
               </div>
               <div className="flex flex-col gap-0.5 leading-none overflow-hidden group-data-[collapsible=icon]:hidden">
                 <span className="font-heading text-xl tracking-wider text-foreground">ADORA</span>

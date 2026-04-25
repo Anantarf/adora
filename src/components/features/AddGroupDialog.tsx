@@ -46,8 +46,8 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
   });
 
   const onSubmit = async (data: GroupForm) => {
-    if (isKu && !targetKu) { toast.error("Umur tidak boleh kosong untuk Kelompok Umur!"); return; }
-    if (isSchool && !schoolLevel) { toast.error("Silakan pilih tingkat sekolah yang sesuai!"); return; }
+    if (isKu && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
+    if (isSchool && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
 
     try {
       const descPayload = buildGroupDescriptionPayload({
@@ -62,7 +62,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       setOpen(false);
       toast.success("Kelompok baru berhasil ditambahkan!");
     } catch (error: any) {
-      toast.error(error.message || "Gagal menambahkan kelompok. Coba lagi atau hubungi admin.");
+      toast.error(error.message || "Gagal menambahkan kelompok. Silakan coba kembali.");
     }
   };
 

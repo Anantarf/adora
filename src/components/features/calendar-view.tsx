@@ -1,4 +1,3 @@
-﻿/* eslint-disable tailwindcss/no-custom-classname */
 "use client";
 
 import { useState } from "react";
@@ -36,63 +35,6 @@ export function CalendarView({ events }: CalendarViewProps) {
 
   return (
     <>
-      <style jsx global>{`
-        .fc-event {
-          background-color: transparent !important;
-          border: none !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          box-shadow: none !important;
-        }
-        .fc-event-main {
-          padding: 0 !important;
-        }
-        .fc-v-event,
-        .fc-h-event {
-          background-color: transparent !important;
-          border: none !important;
-        }
-        .fc-daygrid-day-frame {
-          min-height: 44px !important;
-        }
-        .fc-daygrid-day-top {
-          padding: 2px 4px !important;
-        }
-        .fc-col-header-cell {
-          padding: 4px 0 !important;
-        }
-        .fc-daygrid-day-events {
-          display: flex !important;
-          flex-wrap: wrap !important;
-          gap: 2px !important;
-          padding: 2px 3px !important;
-        }
-        .fc-daygrid-event-harness {
-          margin: 0 !important;
-          min-width: 0 !important;
-          overflow: hidden !important;
-          max-width: 100% !important;
-        }
-        .fc-event-main {
-          min-width: 0 !important;
-          overflow: hidden !important;
-        }
-        .fc-daygrid-event-harness-abs {
-          position: static !important;
-        }
-        .fc-day-other .fc-daygrid-event-harness {
-          opacity: 0.35 !important;
-        }
-        .fc-daygrid-more-link {
-          display: none !important;
-        }
-        .fc-toolbar-title {
-          font-weight: 600 !important;
-          letter-spacing: 0.025em !important;
-          color: hsl(var(--foreground)) !important;
-        }
-      `}</style>
-
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
@@ -185,7 +127,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <CalendarDays size={14} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Hari & Tanggal</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Hari & Tanggal</div>
                   <div className="text-sm font-semibold text-white/80 wrap-break-word">{formatJakarta(selectedEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
                 </div>
               </div>
@@ -196,7 +138,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <Clock size={14} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Waktu</div>
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Waktu</div>
                   <div className="text-sm font-semibold text-white/80">{formatJakarta(selectedEvent.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
                 </div>
               </div>
@@ -208,7 +150,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     <MapPin size={14} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Lokasi</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Lokasi</div>
                     <div className="text-sm font-semibold text-white/80 wrap-break-word">{selectedEvent.location}</div>
                   </div>
                 </div>
@@ -221,7 +163,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     <AlignLeft size={14} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-0.5">Keterangan</div>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Keterangan</div>
                     <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{selectedEvent.description}</p>
                   </div>
                 </div>

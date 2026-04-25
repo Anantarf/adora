@@ -65,7 +65,17 @@ export function PlayerFormFields({
           <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
             Nama Lengkap <span className="text-destructive">*</span>
           </label>
-          <Input {...register("name")} placeholder="Contoh: Dimas Anggara" className={inputClassName} />
+          <Input 
+            {...register("name", {
+              onChange: (e) => {
+                const val = e.target.value.replace(/[^a-zA-Z\s.'-]/g, "");
+                e.target.value = val;
+                setValue("name", val, { shouldValidate: true, shouldDirty: true });
+              }
+            })} 
+            placeholder="Contoh: Dimas Anggara" 
+            className={inputClassName} 
+          />
           {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
         </div>
 
@@ -177,7 +187,18 @@ export function PlayerFormFields({
           <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
             No. Telepon <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input type="tel" {...register("phoneNumber")} placeholder="Contoh: +6281234567890" className={`w-full ${inputClassName}`} />
+          <Input 
+            type="tel" 
+            {...register("phoneNumber", {
+              onChange: (e) => {
+                const val = e.target.value.replace(/[^0-9+]/g, "");
+                e.target.value = val;
+                setValue("phoneNumber", val, { shouldValidate: true, shouldDirty: true });
+              }
+            })} 
+            placeholder="Contoh: +6281234567890" 
+            className={`w-full ${inputClassName}`} 
+          />
         </div>
 
         <div className="space-y-2 md:col-span-2">
@@ -225,7 +246,18 @@ export function PlayerFormFields({
           <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
             No. Telp. Orang Tua <span className="text-muted-foreground/50 font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input type="tel" {...register("parentPhoneNumber")} placeholder="Contoh: +628129999999" className={`w-full ${inputClassName}`} />
+          <Input 
+            type="tel" 
+            {...register("parentPhoneNumber", {
+              onChange: (e) => {
+                const val = e.target.value.replace(/[^0-9+]/g, "");
+                e.target.value = val;
+                setValue("parentPhoneNumber", val, { shouldValidate: true, shouldDirty: true });
+              }
+            })} 
+            placeholder="Contoh: +628129999999" 
+            className={`w-full ${inputClassName}`} 
+          />
         </div>
 
         <div className="space-y-2">

@@ -13,15 +13,10 @@ import { toast } from "sonner";
 import { AttendanceStatus } from "@/types/dashboard";
 import { toYYYYMMDD } from "@/lib/date-utils";
 import { getEventConfig } from "@/lib/config/events";
+import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-configs";
+import { useQueryClient } from "@tanstack/react-query";
 
 type EventDetail = Awaited<ReturnType<typeof getEventAttendanceDetailAction>>;
-
-const STATUS_STYLE: Record<AttendanceStatus, { label: string; color: string; badge: string }> = {
-  HADIR: { label: "HADIR", color: "text-emerald-500", badge: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
-  IZIN: { label: "IZIN", color: "text-amber-500", badge: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-  SAKIT: { label: "SAKIT", color: "text-orange-500", badge: "bg-orange-500/10 text-orange-500 border-orange-500/20" },
-  ALPA: { label: "ALPA", color: "text-destructive", badge: "bg-destructive/10 text-destructive border-destructive/20" },
-};
 
 interface AttendanceDetailModalProps {
   eventId: string;
@@ -29,6 +24,7 @@ interface AttendanceDetailModalProps {
 }
 
 export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModalProps) {
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState<EventDetail | null>(null);
   const [statuses, setStatuses] = useState<Record<string, AttendanceStatus>>({});
@@ -84,6 +80,9 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
       }
 
       toast.success(`Presensi berhasil disimpan (${result.savedCount} pemain)`);
+      queryClient.invalidateQueries({ queryKey: ["events-attendance"] });
+      queryClient.invalidateQueries({ queryKey: ["public-events"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       onClose();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Gagal menyimpan");
@@ -93,6 +92,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
   };
 
   const unsetCount = event?.attendances.filter((a) => !statuses[a.playerId]).length ?? 0;
+  const isFutureEvent = event ? new Date(event.date) > new Date() : false;
 
   const stats = event?.attendances.reduce(
     (acc, attendance) => {
@@ -170,22 +170,29 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
             {/* Main Content */}
             <div className="p-6 flex-1 min-h-0 flex flex-col gap-6 overflow-hidden">
               {/* Quick Actions */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/20 border border-muted/50">
-                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                  <CheckCircle2 className="size-4" />
-                  <span>Tandai Semua</span>
+              {isFutureEvent ? (
+                <div className="flex items-center gap-2 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-widest">
+                  <CalendarDays className="size-4 shrink-0" />
+                  <span>Presensi belum dapat diisi sebelum waktu kegiatan dimulai.</span>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={handleMarkAllHadir}
-                    className={`h-8 px-3 text-[10px] font-bold uppercase tracking-widest border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE.HADIR.color}`}
-                  >
-                    Semua Hadir
-                  </Button>
+              ) : (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/20 border border-muted/50">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    <CheckCircle2 className="size-4" />
+                    <span>Tandai Semua</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleMarkAllHadir}
+                      className={`h-8 px-3 text-[10px] font-bold uppercase tracking-widest border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE.HADIR.color}`}
+                    >
+                      Semua Hadir
+                    </Button>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Player List */}
               <div className="space-y-3 flex-1 min-h-0 flex flex-col">
@@ -209,7 +216,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                           </div>
                         </div>
 
-                        <Select value={currentStatus ?? ""} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
+                        <Select disabled={isFutureEvent} value={currentStatus ?? ""} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
                           <SelectTrigger className={`w-full sm:w-40 h-9 text-[10px] font-bold uppercase tracking-widest ${triggerStyle} transition-colors shrink-0`}>
                             <SelectValue placeholder="Pilih Status" />
                           </SelectTrigger>
@@ -233,7 +240,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               <Button variant="outline" onClick={onClose} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest">
                 Batal
               </Button>
-              <Button onClick={handleSave} disabled={isSaving} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest px-8">
+              <Button onClick={handleSave} disabled={isSaving || isFutureEvent} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest px-8">
                 {isSaving ? <Loader2 className="size-4 mr-2 animate-spin" /> : <CheckCircle2 className="size-4 mr-2" />}
                 Simpan Presensi
               </Button>

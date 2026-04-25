@@ -5,6 +5,7 @@ import { getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib
 import { prisma } from "@/lib/prisma";
 import { HOMEBASE_CACHE_TTL } from "@/lib/constants";
 import { requireAdmin } from "@/lib/server-auth";
+import type { event_type } from "@prisma/client";
 
 export const getPublicHomebases = unstable_cache(
   () => prisma.homebase.findMany({ orderBy: { name: "asc" } }).catch((err) => {
@@ -37,7 +38,7 @@ export async function updateGroupToHomebase(groupId: string, homebaseId: string)
   }
 }
 
-export async function createEventWithHomebase(title: string, date: Date, homebaseId: string, groupId?: string, type?: string, description?: string) {
+export async function createEventWithHomebase(title: string, date: Date, homebaseId: string, groupId?: string, type?: event_type, description?: string) {
   try {
     await requireAdmin();
     const result = await createHomebaseEvent({

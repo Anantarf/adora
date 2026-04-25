@@ -41,7 +41,7 @@ export function AddPlayerDialog() {
       toast.success("Pemain baru berhasil didaftarkan!");
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
-      toast.error("Gagal menambahkan pemain: " + msg);
+      toast.error("Gagal mendaftarkan pemain: " + msg);
     }
   };
 

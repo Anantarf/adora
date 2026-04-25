@@ -6,6 +6,7 @@ declare module "next-auth" {
     id: string;
     role: "ADMIN" | "PARENT";
     username: string | null;
+    mustChangePassword?: boolean;
   }
 
   interface Session {
@@ -16,6 +17,7 @@ declare module "next-auth" {
       image?: string | null;
       role: "ADMIN" | "PARENT";
       username: string | null;
+      mustChangePassword?: boolean;
     };
   }
 }
@@ -25,5 +27,6 @@ declare module "next-auth/jwt" {
     id: string;
     role: "ADMIN" | "PARENT";
     username: string | null;
+    mustChangePassword?: boolean;
   }
 }

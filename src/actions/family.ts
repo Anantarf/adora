@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAuth } from "@/lib/server-auth";
+import { requireAuth, requireAdmin } from "@/lib/server-auth";
 
 export async function getFamilyPlayersAction() {
   const session = await requireAuth();
@@ -21,10 +21,9 @@ export async function getFamilyPlayersAction() {
   });
 }
 export async function getParentsAction() {
-  const { requireAdmin } = await import("@/lib/server-auth");
   await requireAdmin();
   return await prisma.user.findMany({
-    where: { role: "PARENT" },
+    where: { role: "PARENT", isDeleted: false },
     select: { id: true, name: true, username: true },
     orderBy: { name: "asc" },
   });

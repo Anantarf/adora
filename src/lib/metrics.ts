@@ -1,5 +1,36 @@
 import type { MetricsJson } from "@/types/dashboard";
 
+// ─── Flat metric definitions (display order) ──────────
+export type FlatMetricDef = {
+  key: string;
+  label: string;
+  /** Short label for compact table headers */
+  shortLabel: string;
+  /** Dot-path into MetricsJson for react-hook-form register() */
+  path: string;
+  max: number;
+  /** Accessor function to read value from MetricsJson */
+  getValue: (m: MetricsJson) => number;
+};
+
+export const FLAT_METRIC_DEFS: FlatMetricDef[] = [
+  { key: "inAndOut",        label: "In & Out Dribble",     shortLabel: "I&O",     path: "dribble.inAndOut",        max: 99, getValue: (m) => m.dribble.inAndOut },
+  { key: "crossover",       label: "Crossover",            shortLabel: "Cross",   path: "dribble.crossover",       max: 10, getValue: (m) => m.dribble.crossover },
+  { key: "vLeft",           label: "V Dribble (Kiri)",     shortLabel: "V-L",     path: "dribble.vLeft",           max: 10, getValue: (m) => m.dribble.vLeft },
+  { key: "vRight",          label: "V Dribble (Kanan)",    shortLabel: "V-R",     path: "dribble.vRight",          max: 10, getValue: (m) => m.dribble.vRight },
+  { key: "betweenLegsLeft", label: "Between Legs (Kiri)",  shortLabel: "BTL-L",   path: "dribble.betweenLegsLeft", max: 10, getValue: (m) => m.dribble.betweenLegsLeft },
+  { key: "betweenLegsRight",label: "Between Legs (Kanan)", shortLabel: "BTL-R",   path: "dribble.betweenLegsRight",max: 10, getValue: (m) => m.dribble.betweenLegsRight },
+  { key: "chestPass",       label: "Chest Pass",           shortLabel: "Chest",   path: "passing.chestPass",       max: 10, getValue: (m) => m.passing.chestPass },
+  { key: "bouncePass",      label: "Bounce Pass",          shortLabel: "Bounce",  path: "passing.bouncePass",      max: 10, getValue: (m) => m.passing.bouncePass },
+  { key: "overheadPass",    label: "Overhead Pass",        shortLabel: "Over",    path: "passing.overheadPass",    max: 10, getValue: (m) => m.passing.overheadPass },
+  { key: "layUp",           label: "Lay Up",               shortLabel: "Lay Up",  path: "layUp",                   max: 10, getValue: (m) => m.layUp },
+  { key: "shooting",        label: "Shooting",             shortLabel: "Shoot",   path: "shooting",                max: 10, getValue: (m) => m.shooting },
+];
+
+/** Flatten MetricsJson into an ordered list of { label, value, max } */
+export const flattenMetrics = (m: MetricsJson) =>
+  FLAT_METRIC_DEFS.map((d) => ({ key: d.key, label: d.label, value: d.getValue(m), max: d.max }));
+
 export const dribbleTotal = (d: MetricsJson["dribble"]) =>
   d.inAndOut + d.crossover + d.vLeft + d.vRight + d.betweenLegsLeft + d.betweenLegsRight;
 
@@ -30,14 +61,18 @@ export const averageScore = (m: MetricsJson): number => {
 
 export const SCORE_MAX = 100;
 
-export const parseMetricsJson = (metricsJson: string): number[] => {
+export const parseMetricsJson = (metricsJson: unknown): number[] => {
   try {
-    const m = JSON.parse(metricsJson);
+    let m = metricsJson;
+    if (typeof m === "string") {
+      m = JSON.parse(m);
+    }
+    const obj = m as Record<string, any>;
     return [
-      ...Object.values(m.dribble ?? {}),
-      ...Object.values(m.passing ?? {}),
-      m.layUp,
-      m.shooting,
+      ...Object.values((obj.dribble as Record<string, any>) ?? {}),
+      ...Object.values((obj.passing as Record<string, any>) ?? {}),
+      obj.layUp,
+      obj.shooting,
     ].filter((v): v is number => typeof v === "number");
   } catch {
     return [];

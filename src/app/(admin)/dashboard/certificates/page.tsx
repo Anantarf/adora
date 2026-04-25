@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
@@ -9,11 +9,19 @@ import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Pagination } from "@/components/ui/pagination";
 
 export default function CertificatesPage() {
   const { data: certificates, isLoading } = useCertificates();
   const deleteCert = useDeleteCertificate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+
+  // Reset pagination when data changes (e.g. after deletion)
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [certificates]);
 
   const filteredCertificates = useMemo(() => {
     if (!certificates) return [];
@@ -21,6 +29,16 @@ export default function CertificatesPage() {
     const q = searchQuery.toLowerCase();
     return certificates.filter((cert) => cert.title.toLowerCase().includes(q) || cert.player?.name.toLowerCase().includes(q) || cert.group?.name.toLowerCase().includes(q));
   }, [certificates, searchQuery]);
+
+  const totalPages = Math.ceil(filteredCertificates.length / ITEMS_PER_PAGE);
+  const paginatedCertificates = useMemo(() => {
+    return filteredCertificates.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [filteredCertificates, currentPage]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
 
   const handleDelete = async (id: string) => {
     try {
@@ -49,7 +67,7 @@ export default function CertificatesPage() {
           type="text"
           placeholder="Cari Judul, Nama Pemain, atau Kelompok..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={handleSearchChange}
           className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/50 bg-background/50 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm font-medium transition-all"
         />
       </div>
@@ -87,23 +105,23 @@ export default function CertificatesPage() {
                 </TableCell>
               </TableRow>
             )}
-            {filteredCertificates.map((cert, idx) => (
+            {paginatedCertificates.map((cert, idx) => (
               <TableRow key={cert.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
-                <TableCell className="text-center font-medium text-muted-foreground">{idx + 1}</TableCell>
+                <TableCell className="text-center font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <FileBadge className="size-4 text-primary shrink-0" />
-                    <span className="font-semibold text-secondary">{cert.title}</span>
+                    <FileBadge className="size-4 text-indigo-400 shrink-0" />
+                    <span className="font-semibold text-foreground">{cert.title}</span>
                   </div>
                 </TableCell>
                 <TableCell>
                   {cert.player ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-500/10 px-2 py-1 text-xs font-semibold text-blue-400 border border-blue-500/20">
                       <User className="size-3" />
                       {cert.player.name}
                     </span>
                   ) : cert.group ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md bg-primary/10 px-2 py-1 text-xs font-semibold text-primary border border-primary/20">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
                       <Users className="size-3" />
                       {cert.group.name}
                     </span>
@@ -156,6 +174,14 @@ export default function CertificatesPage() {
           </TableBody>
         </Table>
       </div>
+
+      {!isLoading && totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
+      )}
     </div>
   );
 }

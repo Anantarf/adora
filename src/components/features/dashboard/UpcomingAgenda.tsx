@@ -9,7 +9,6 @@ import { getPublicEventsAction } from "@/actions/schedule";
 import { getEventConfig } from "@/lib/config/events";
 import { getCountdownLabel } from "@/lib/date-utils";
 import { QUERY_KEYS } from "@/lib/constants";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function UpcomingAgenda() {
@@ -22,16 +21,29 @@ export function UpcomingAgenda() {
   const upcoming = (events ?? []).slice(0, 5);
 
   return (
-    <Card className="border-border/50 bg-card shadow-sm h-full flex flex-col">
-      <CardHeader className="pb-2">
-        <CardTitle className="font-heading text-base uppercase tracking-widest text-foreground">
-          Agenda Mendatang
-        </CardTitle>
-        <CardDescription className="text-xs text-muted-foreground">
-          Jadwal latihan dan kegiatan klub berikutnya
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
+    // Sama persis strukturnya dengan RecentRegistrations: flex flex-col h-full
+    <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
+
+      {/* Header */}
+      <div className="p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
+        <div>
+          <h2 className="font-heading text-base tracking-wider text-foreground flex items-center gap-2">
+            <CalendarDays className="w-4 h-4 text-primary shrink-0" />
+            AGENDA MENDATANG
+          </h2>
+          <p className="text-xs text-muted-foreground mt-1 tracking-wide">
+            Jadwal latihan dan kegiatan klub berikutnya
+          </p>
+        </div>
+        {upcoming.length > 0 && (
+          <div className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-md shrink-0 ml-2">
+            {upcoming.length} EVENT
+          </div>
+        )}
+      </div>
+
+      {/* Content — flex-1 sama seperti RecentRegistrations */}
+      <div className="flex-1 p-6 flex flex-col min-h-[380px]">
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -39,7 +51,7 @@ export function UpcomingAgenda() {
             ))}
           </div>
         ) : upcoming.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 min-h-[180px] gap-2 rounded-xl border border-dashed border-border/50 text-center py-8">
+          <div className="flex flex-col items-center justify-center flex-1 gap-2 rounded-xl border border-dashed border-border/50 text-center py-8">
             <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
             <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
               Tidak Ada Agenda Mendatang
@@ -49,7 +61,7 @@ export function UpcomingAgenda() {
             </p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2 flex-1">
+          <div className="flex flex-col gap-2">
             {upcoming.map((ev) => {
               if (!ev.id || !ev.date || !ev.type || !ev.title) return null;
               const cfg = getEventConfig(ev.type);
@@ -95,17 +107,22 @@ export function UpcomingAgenda() {
                 </Link>
               );
             })}
-
-            <Link
-              href="/dashboard/schedule"
-              className="mt-auto pt-3 flex items-center justify-center gap-1 text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 hover:text-primary transition-colors"
-            >
-              Lihat Semua Agenda
-              <ArrowRight className="size-3" />
-            </Link>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+
+      {/* Button — identik dengan RecentRegistrations */}
+      {upcoming.length > 0 && (
+        <div className="px-6 pb-6 pt-2">
+          <Link
+            href="/dashboard/schedule"
+            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground rounded-lg transition-all"
+          >
+            Lihat Semua Agenda
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      )}
+    </div>
   );
 }

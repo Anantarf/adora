@@ -4,32 +4,31 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { MetricsJson } from "@/types/dashboard";
 
-type ReportMetrics = {
-  dribble: number;
-  passing: number;
-  layUp: number;
-  shooting: number;
-};
+type ReportMetricItem = { label: string; value: number; max: number };
 
 function toNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-function extractReportMetrics(raw: unknown): { metrics: ReportMetrics; notes: string } {
+function extractReportMetrics(raw: unknown): { metrics: ReportMetricItem[]; notes: string } {
   const parsed = raw as Partial<MetricsJson> & { notes?: unknown };
 
-  const dribble =
-    toNumber(parsed.dribble?.inAndOut) + toNumber(parsed.dribble?.crossover) + toNumber(parsed.dribble?.vLeft) + toNumber(parsed.dribble?.vRight) + toNumber(parsed.dribble?.betweenLegsLeft) + toNumber(parsed.dribble?.betweenLegsRight);
-
-  const passing = toNumber(parsed.passing?.chestPass) + toNumber(parsed.passing?.bouncePass) + toNumber(parsed.passing?.overheadPass);
+  const metrics: ReportMetricItem[] = [
+    { label: "In & Out Dribble", value: toNumber(parsed.dribble?.inAndOut), max: 99 },
+    { label: "Crossover", value: toNumber(parsed.dribble?.crossover), max: 10 },
+    { label: "V Dribble (Kiri)", value: toNumber(parsed.dribble?.vLeft), max: 10 },
+    { label: "V Dribble (Kanan)", value: toNumber(parsed.dribble?.vRight), max: 10 },
+    { label: "Between Legs (Kiri)", value: toNumber(parsed.dribble?.betweenLegsLeft), max: 10 },
+    { label: "Between Legs (Kanan)", value: toNumber(parsed.dribble?.betweenLegsRight), max: 10 },
+    { label: "Chest Pass", value: toNumber(parsed.passing?.chestPass), max: 10 },
+    { label: "Bounce Pass", value: toNumber(parsed.passing?.bouncePass), max: 10 },
+    { label: "Overhead Pass", value: toNumber(parsed.passing?.overheadPass), max: 10 },
+    { label: "Lay Up", value: toNumber(parsed.layUp), max: 10 },
+    { label: "Shooting", value: toNumber(parsed.shooting), max: 10 },
+  ];
 
   return {
-    metrics: {
-      dribble,
-      passing,
-      layUp: toNumber(parsed.layUp),
-      shooting: toNumber(parsed.shooting),
-    },
+    metrics,
     notes: typeof parsed.notes === "string" ? parsed.notes : "",
   };
 }
@@ -64,7 +63,7 @@ export async function GET(req: NextRequest) {
     // 3. IDOR Protection: Parent can only access their own child's data
     if (userRole === "PARENT") {
       const ownsChild = await prisma.player.findFirst({
-        where: { id: playerId, parentId: userId },
+        where: { id: playerId, parentId: userId, isDeleted: false },
       });
       if (!ownsChild) {
         return NextResponse.json({ error: "Akses Terlarang: Anda tidak memiliki izin untuk data ini." }, { status: 403 });
@@ -73,7 +72,7 @@ export async function GET(req: NextRequest) {
 
     // 4. Fetch player data with statistics
     const player = await prisma.player.findUnique({
-      where: { id: playerId },
+      where: { id: playerId, isDeleted: false },
       include: {
         group: { select: { name: true } },
         statistic: {
@@ -97,21 +96,20 @@ export async function GET(req: NextRequest) {
 
     // 5. Calculate embedded metrics
     const latestStat = player.statistic[0];
-    let latestMetrics: ReportMetrics | null = null;
+    let latestMetrics: ReportMetricItem[] | null = null;
     let coachNotes = "";
 
     if (latestStat) {
       try {
-        const parsed = JSON.parse(latestStat.metricsJson as string);
-        const extracted = extractReportMetrics(parsed);
+        const extracted = extractReportMetrics(latestStat.metricsJson);
         latestMetrics = extracted.metrics;
         coachNotes = extracted.notes;
       } catch {
-        // malformed JSON
+        // malformed metrics
       }
     }
 
-    const overallScore = latestMetrics ? (Object.values(latestMetrics).reduce((a, b) => a + b, 0) / Object.values(latestMetrics).length).toFixed(1) : "N/A";
+    const overallScore = latestMetrics ? (latestMetrics.reduce((a, b) => a + b.value, 0) / latestMetrics.length).toFixed(1) : "N/A";
 
     const totalAttendance = player.attendance.length;
     const hadirCount = player.attendance.filter((a: { status: string }) => a.status === "HADIR").length;
@@ -219,7 +217,7 @@ export async function GET(req: NextRequest) {
 
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin-bottom: 28px;
     }
@@ -396,17 +394,16 @@ export async function GET(req: NextRequest) {
   </div>
 
   <!-- Skill Metrics -->
-  ${
-    latestMetrics
+  ${latestMetrics
       ? `
   <div class="section-title">Komposisi Kemampuan Terakhir</div>
   <div class="metrics-grid">
-    ${Object.entries(latestMetrics)
+    ${latestMetrics
       .map(
-        ([key, val]) => `
+        (item) => `
     <div class="metric-card">
-      <div class="metric-label">${key}</div>
-      <div class="metric-value">${val}</div>
+      <div class="metric-label">${item.label}</div>
+      <div class="metric-value">${item.value}</div>
     </div>`,
       )
       .join("")}

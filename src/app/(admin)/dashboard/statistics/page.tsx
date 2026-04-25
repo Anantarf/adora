@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
-import { Loader2, LayoutList as SelectIcon, CalendarRange, Trash2 } from "lucide-react";
+import { Loader2, LayoutList as SelectIcon, CalendarRange, Trash2, FileDown } from "lucide-react";
 import { usePlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 import { usePeriods, useSetActivePeriod, useDeletePeriod } from "@/hooks/use-evaluation-periods";
+import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
@@ -16,18 +17,39 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { dribbleTotal, passingTotal, averageScore } from "@/lib/metrics";
+import { FLAT_METRIC_DEFS, averageScore } from "@/lib/metrics";
+import { generateRaporPDF } from "@/lib/generate-rapor-pdf";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
-
-const STATUS_BADGE_CONFIG = {
-  Draft:     { label: "Draft",   className: "border-sky-500/50 text-sky-400 bg-sky-500/10" },
-  Published: { label: "Selesai", className: "border-primary/50 text-primary bg-primary/10 font-heading" },
-} satisfies Record<string, { label: string; className: string }>;
+import { PERIOD_STATUS_BADGE as STATUS_BADGE_CONFIG } from "@/lib/constants/badge-configs";
 
 const MetricCell = ({ v }: { v?: number }) =>
   v != null
     ? <span className="font-bold text-primary">{v}</span>
     : <span className="text-muted-foreground">—</span>;
+
+/** Guard against malformed metricsJson from old/corrupted data */
+const getValidMetrics = (m: unknown): MetricsJson | null => {
+  let obj = m;
+  if (typeof m === "string") {
+    try {
+      obj = JSON.parse(m);
+    } catch {
+      return null;
+    }
+  }
+
+  if (!obj || typeof obj !== "object") return null;
+  const o = obj as Record<string, any>;
+  
+  const isValid = (
+    o.dribble != null &&
+    typeof o.dribble === "object" &&
+    o.passing != null &&
+    typeof o.passing === "object"
+  );
+
+  return isValid ? (o as MetricsJson) : null;
+};
 
 const periodDisplayLabel = (period: { name: string; startDate: Date | string; endDate: Date | string }) => {
   const trimmedName = (period.name || "").trim();
@@ -49,6 +71,7 @@ export default function StatisticsPage() {
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId);
   const { mutateAsync: setActive } = useSetActivePeriod();
   const { mutateAsync: deletePeriod } = useDeletePeriod();
+  const { data: settings } = useClubSettings();
 
   const initialized = React.useRef(false);
   useEffect(() => {
@@ -59,6 +82,10 @@ export default function StatisticsPage() {
       initialized.current = true;
     }
   }, [periods]);
+
+  useEffect(() => {
+    setActiveGroup("all");
+  }, [selectedPeriodId]);
 
   const statsMap = useMemo(() => Object.fromEntries((stats ?? []).map((s) => [s.player.id, s])), [stats]);
 
@@ -257,24 +284,25 @@ export default function StatisticsPage() {
       {/* Table */}
       {selectedPeriodId && (
         <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
-          <Table className="min-w-175">
+          <Table className="min-w-[900px]">
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
-                <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
-                <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nama Pemain</TableHead>
-                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Dribble</TableHead>
-                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Passing</TableHead>
-                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Lay Up</TableHead>
-                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Shooting</TableHead>
-                <TableHead className="w-28 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nilai Akhir</TableHead>
-                <TableHead className="w-24 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Status</TableHead>
-                <TableHead className="w-36 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
+                <TableHead className="w-8 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground sticky left-0 bg-muted/30 z-10">No</TableHead>
+                <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground min-w-[120px] sticky left-8 bg-muted/30 z-10">Nama Pemain</TableHead>
+                {FLAT_METRIC_DEFS.map((def) => (
+                  <TableHead key={def.key} className="w-12 text-center text-[9px] uppercase font-bold tracking-wider text-muted-foreground px-1" title={def.label}>
+                    {def.shortLabel}
+                  </TableHead>
+                ))}
+                <TableHead className="w-20 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Nilai</TableHead>
+                <TableHead className="w-20 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Status</TableHead>
+                <TableHead className="w-24 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {(playersLoading || statsLoading) && (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
+                  <TableCell colSpan={FLAT_METRIC_DEFS.length + 5} className="h-24 text-center">
                     <div className="flex items-center justify-center gap-2 text-primary font-bold">
                       <Loader2 className="size-5 animate-spin" /> Mengambil data...
                     </div>
@@ -283,7 +311,7 @@ export default function StatisticsPage() {
               )}
               {!playersLoading && !statsLoading && playersByGroup.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
+                  <TableCell colSpan={FLAT_METRIC_DEFS.length + 5} className="h-24 text-center">
                     {(players?.length ?? 0) === 0 ? (
                       <>
                         <p className="font-semibold text-foreground text-sm">Belum ada pemain terdaftar</p>
@@ -304,7 +332,7 @@ export default function StatisticsPage() {
                   <React.Fragment key={group.id}>
                     {/* Group header row */}
                     <TableRow className="bg-muted/20 hover:bg-muted/20">
-                      <TableCell colSpan={9} className="font-bold text-primary uppercase tracking-widest text-sm py-2.5 pl-3 border-l-4 border-primary">
+                      <TableCell colSpan={FLAT_METRIC_DEFS.length + 5} className="font-bold text-primary uppercase tracking-widest text-sm py-2.5 pl-3 border-l-4 border-primary">
                         {group.name}
                       </TableCell>
                     </TableRow>
@@ -312,16 +340,18 @@ export default function StatisticsPage() {
                     {/* Player rows */}
                     {gPlayers.map((player, idx) => {
                       const stat = statsMap[player.id];
-                      const m = stat?.metricsJson as MetricsJson | undefined;
+                      const rawM = stat?.metricsJson;
+                      const m = getValidMetrics(rawM);
 
                       return (
                         <TableRow key={player.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
-                          <TableCell className="text-center text-muted-foreground font-medium">{idx + 1}</TableCell>
-                          <TableCell className="font-semibold">{player.name}</TableCell>
-                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m ? dribbleTotal(m.dribble) : undefined} /></TableCell>
-                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m ? passingTotal(m.passing) : undefined} /></TableCell>
-                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m?.layUp} /></TableCell>
-                          <TableCell className="text-center font-mono text-sm"><MetricCell v={m?.shooting} /></TableCell>
+                          <TableCell className="text-center text-muted-foreground font-medium sticky left-0 bg-inherit z-10">{idx + 1}</TableCell>
+                          <TableCell className="font-semibold sticky left-8 bg-inherit z-10">{player.name}</TableCell>
+                          {FLAT_METRIC_DEFS.map((def) => (
+                            <TableCell key={def.key} className="text-center font-mono text-sm">
+                              <MetricCell v={m ? def.getValue(m) : undefined} />
+                            </TableCell>
+                          ))}
                           <TableCell className="text-center">
                             {m ? <GradeBadge score={averageScore(m)} /> : <span className="text-muted-foreground">—</span>}
                           </TableCell>
@@ -332,7 +362,29 @@ export default function StatisticsPage() {
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-2">
-
+                              {m && (
+                                <button
+                                  title="Download Rapor PDF"
+                                  onClick={() =>
+                                    generateRaporPDF({
+                                      playerName: player.name,
+                                      groupName: group.name,
+                                      schoolOrigin: player.schoolOrigin,
+                                      periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
+                                      metrics: m,
+                                      assets: {
+                                        headerUrl: settings?.rapor_header_url,
+                                        ceoSignUrl: settings?.rapor_ceo_sign_url,
+                                        coachSignUrl: settings?.rapor_coach_sign_url,
+                                        stampUrl: settings?.rapor_stamp_url,
+                                      },
+                                    })
+                                  }
+                                  className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors"
+                                >
+                                  <FileDown className="size-4" />
+                                </button>
+                              )}
                               <AddStatDialog player={player} periodId={selectedPeriodId} isPeriodActive={selectedPeriod?.isActive} existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined} />
                             </div>
                           </TableCell>

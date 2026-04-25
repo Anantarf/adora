@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getPublicHomebases } from "@/actions/homebase";
 import { Metadata } from "next";
 import { MapPin, MessageCircle, AtSign, Music2, Trophy, ClipboardList } from "lucide-react";
@@ -8,6 +9,7 @@ import { HomebaseSection } from "@/components/features/homebase-section";
 import { AutoFadeCarousel } from "@/components/ui/auto-fade-carousel";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
+import { NAV_LINKS } from "@/lib/constants/navigation";
 import React from "react";
 
 export const metadata: Metadata = {
@@ -25,13 +27,6 @@ export const metadata: Metadata = {
 
 // ─── Data Constants ───────────────────────────────────────────────────────────
 
-const NAV_LINKS = [
-  { label: "Program", href: "#program" },
-  { label: "Homebase", href: "#homebase" },
-  { label: "ASBC", href: "#asbc" },
-  { label: "Daftar", href: "#daftar" },
-];
-
 const REGISTRATION_STEPS = [
   {
     step: "1",
@@ -45,8 +40,8 @@ const REGISTRATION_STEPS = [
   },
   {
     step: "3",
-    title: "Konfirmasi Pendaftaran",
-    desc: "Admin kami akan menghubungi Anda via WhatsApp untuk verifikasi dan informasi pembayaran.",
+    title: "Konfirmasi via WhatsApp",
+    desc: "Hubungi admin kami via WhatsApp untuk konfirmasi pendaftaran dan informasi pembayaran.",
   },
 ];
 
@@ -62,8 +57,8 @@ export default async function LandingPage() {
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/90 backdrop-blur-xl">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center overflow-hidden border border-white/20 group-hover:border-primary transition-colors">
-              <span className="text-[10px] font-bold text-white/50 group-hover:text-primary">LOGO</span>
+            <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-110">
+              <Image src="/logo-adora.png" alt="Adora BC Logo" width={48} height={48} className="object-contain" />
             </div>
             <span className="font-heading text-xl tracking-widest uppercase text-white group-hover:text-primary transition-colors hidden sm:block">
               ADORA <span className="text-primary">BC</span>
@@ -243,8 +238,8 @@ export default async function LandingPage() {
 
             <div className="md:col-span-5">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center border border-white/20">
-                  <span className="text-[10px] font-bold text-white/50">LOGO</span>
+                <div className="w-20 h-20 flex items-center justify-center">
+                  <Image src="/logo-adora.png" alt="Adora BC Logo" width={80} height={80} className="object-contain" />
                 </div>
                 <span className="font-heading text-2xl tracking-widest uppercase text-white">
                   ADORA <span className="text-primary">BC</span>

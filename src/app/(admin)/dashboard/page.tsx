@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { FadeIn } from "@/components/animations/fade-in";
 import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
 import { MetricCards } from "@/components/features/dashboard/MetricCards";
-import { PerformanceTrendChart } from "@/components/features/dashboard/PerformanceTrendChart";
+import { RecentRegistrations } from "@/components/features/dashboard/RecentRegistrations";
 import { UpcomingAgenda } from "@/components/features/dashboard/UpcomingAgenda";
 import { AtRiskPlayers } from "@/components/features/dashboard/AtRiskPlayers";
 import { formatFullDate, getJakartaToday } from "@/lib/date-utils";
@@ -49,16 +49,16 @@ export default function AdminDashboardPage() {
         </FadeIn>
       )}
 
-      {/* Chart + Agenda */}
+      {/* Registrations + Agenda */}
       <FadeIn direction="up" delay={0.1}>
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-          <div className="xl:col-span-2">
-            <PerformanceTrendChart
-              trend={metrics?.performanceTrend ?? []}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
+          <div className="xl:col-span-2 h-full">
+            <RecentRegistrations
+              registrations={metrics?.recentRegistrations ?? []}
               isLoading={isLoading}
             />
           </div>
-          <div className="xl:col-span-1">
+          <div className="xl:col-span-1 h-full">
             <UpcomingAgenda />
           </div>
         </div>
