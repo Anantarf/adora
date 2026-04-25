@@ -1,19 +1,19 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { HomebaseSelector } from "@/components/homebase-selector";
 import { Starfield } from "@/components/ui/starfield";
+import { submitRegistration } from "@/actions/register";
+import { PROGRAMS } from "@/lib/constants/programs";
+import { PROGRAM_ICONS } from "@/lib/constants/program-icons";
+import { CONTACT } from "@/lib/constants/contact";
+import React from "react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const AGE_GROUPS = [
-  { label: "KU‑7",  ages: "7 – 9 Tahun",   icon: "⭐", desc: "Program Kids perdana — mengenalkan basket melalui permainan & gerak dasar." },
-  { label: "KU‑10", ages: "10 – 12 Tahun",  icon: "🌱", desc: "Fondasi teknik dan ball-handling. Latihan terstruktur mulai di level ini." },
-  { label: "KU‑15", ages: "13 – 15 Tahun",  icon: "⚡", desc: "Pengembangan taktik, fisik & mental kompetisi. Aktif mengikuti ASBC & Liga." },
-  { label: "KU‑18", ages: "16 – 18 Tahun",  icon: "🏆", desc: "Persiapan KEJURKOT & turnamen nasional dengan standar pelatihan profesional." },
-];
+
 
 type FormState = { name: string; phone: string; email: string; ageGroup: string };
 
@@ -23,27 +23,33 @@ const FORM_FIELDS: Array<{
   label: string;
   required: boolean;
   placeholder: string;
+  sanitize?: (val: string) => string;
 }> = [
-  { key: "name",  type: "text",  label: "Nama Lengkap Pemain",     required: true,  placeholder: "Contoh: Muhammad Arya Putra" },
-  { key: "phone", type: "tel",   label: "No. WhatsApp Orang Tua", required: true,  placeholder: "Contoh: 08123456789" },
-  { key: "email", type: "email", label: "Email",                  required: false, placeholder: "Contoh: orang.tua@email.com" },
+  {
+    key: "name",
+    type: "text",
+    label: "Nama Lengkap Pemain",
+    required: true,
+    placeholder: "Contoh: Muhammad Arya Putra",
+    sanitize: (v) => v.replace(/[^a-zA-Z\s.'\-]/g, ""),
+  },
+  {
+    key: "phone",
+    type: "tel",
+    label: "No. WhatsApp Orang Tua",
+    required: true,
+    placeholder: "Contoh: 08123456789",
+    sanitize: (v) => v.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, ""),
+  },
+  {
+    key: "email",
+    type: "email",
+    label: "Email",
+    required: false,
+    placeholder: "Contoh: orang.tua@email.com",
+  },
 ];
 
-const PRICING = {
-  registration: "Rp 470.000",
-  monthly:      "Rp 350.000",
-};
-
-const BANK = {
-  name:    "BNI",
-  account: "1227456425",
-  holder:  "Dodi Aminullah",
-};
-
-const CONTACT = {
-  whatsapp:  "6281213043753",
-  instagram: "adorabbc",
-};
 
 const INPUT_CLASS =
   "w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-primary transition-colors";
@@ -59,16 +65,46 @@ function RegisterContent() {
   );
   const [form, setForm] = useState<FormState>({ name: "", phone: "", email: "", ageGroup: "" });
 
-  const waMessage = [
-    "Halo Adora Basketball Club, saya ingin mendaftar sebagai anggota baru.",
-    form.name      ? `Nama      : ${form.name}`             : "",
-    form.phone     ? `No HP     : ${form.phone}`            : "",
-    form.email     ? `Email     : ${form.email}`            : "",
-    form.ageGroup  ? `Program   : ${form.ageGroup}`         : "",
-    selectedHomebase?.name ? `Lokasi    : ${selectedHomebase.name}` : "",
-  ].filter(Boolean).join("\n");
+  const [isPending, startTransition] = useTransition();
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const waUrl = `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(waMessage)}`;
+  // Pindahkan logika WA ke dalam fungsi agar tidak dihitung ulang setiap kali ngetik
+  const getWaUrl = () => {
+    const waMessage = [
+      "Halo Adora Basketball Club, saya telah mengisi form pendaftaran anggota baru di website. Mohon info untuk kelanjutan proses pendaftaran dan pembayarannya.",
+      form.name      ? `Nama      : ${form.name}`             : "",
+      form.phone     ? `No HP     : ${form.phone}`            : "",
+      form.email     ? `Email     : ${form.email}`            : "",
+      form.ageGroup  ? `Program   : ${form.ageGroup}`         : "",
+      selectedHomebase?.name ? `Homebase  : ${selectedHomebase.name}` : "",
+    ].filter(Boolean).join("\n");
+    return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(waMessage)}`;
+  };
+
+  const handleSubmit = () => {
+    setError(null);
+    if (!form.name || !form.phone || !form.ageGroup || !selectedHomebase?.id) {
+      setError("Mohon lengkapi semua data wajib yang bertanda *");
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await submitRegistration({
+        playerName: form.name,
+        phone: form.phone,
+        email: form.email,
+        ageGroup: form.ageGroup,
+        homebaseId: selectedHomebase.id,
+      });
+
+      if (result.success) {
+        setIsSubmitted(true);
+      } else {
+        setError(result.error ?? "Gagal mengirim pendaftaran. Silakan coba lagi.");
+      }
+    });
+  };
 
   return (
     <main className="min-h-screen bg-page-dark text-foreground relative overflow-hidden">
@@ -100,23 +136,22 @@ function RegisterContent() {
           Bergabung dengan <span className="text-primary">ADORA</span>
         </h1>
         <p className="text-white/60 text-sm max-w-xl mx-auto leading-relaxed">
-          Jadilah bagian dari komunitas basket terbaik. Pilih lokasi, isi data, lalu hubungi kami via WhatsApp.
+          Jadilah bagian dari komunitas basket terbaik. Pilih homebase, isi data, lalu hubungi kami via WhatsApp.
         </p>
       </section>
 
-      {/* ── Main 2-Column ── */}
+      {/* ── Main Form ── */}
       <div className="container mx-auto px-4 pb-12 relative z-10">
-        <div className="grid lg:grid-cols-[1fr_360px] gap-8 items-start">
+        <div className="max-w-3xl mx-auto items-start">
 
-          {/* LEFT: Selector + Conditional Form */}
           <div className="space-y-10">
 
-            {/* Step 1: Pilih Lokasi */}
+            {/* Step 1: Pilih Homebase */}
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <div className="size-9 rounded-full bg-primary flex items-center justify-center font-heading text-black font-bold text-sm shrink-0">1</div>
                 <div>
-                  <h2 className="font-heading text-xl uppercase tracking-widest text-white">Pilih Lokasi</h2>
+                  <h2 className="font-heading text-xl uppercase tracking-widest text-white">Pilih Homebase</h2>
                   <p className="text-white/40 text-xs">Pilih homebase yang paling dekat dengan Anda</p>
                 </div>
               </div>
@@ -124,6 +159,7 @@ function RegisterContent() {
                 value={selectedHomebase?.id}
                 onSelect={(id, name) => setSelectedHomebase({ id, name })}
                 showFull
+                disabled={isSubmitted}
               />
             </div>
 
@@ -140,7 +176,7 @@ function RegisterContent() {
 
                 <div className="space-y-4 bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
                   {/* Text inputs dari config */}
-                  {FORM_FIELDS.map(({ key, type, label, required, placeholder }) => (
+                  {FORM_FIELDS.map(({ key, type, label, required, placeholder, sanitize }) => (
                     <div key={key}>
                       <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-2">
                         {label} {required && <span className="text-primary">*</span>}
@@ -148,122 +184,109 @@ function RegisterContent() {
                       <input
                         type={type}
                         value={form[key]}
-                        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+                        disabled={isSubmitted}
+                        onChange={(e) => {
+                          const val = sanitize ? sanitize(e.target.value) : e.target.value;
+                          setForm((f) => ({ ...f, [key]: val }));
+                        }}
                         placeholder={placeholder}
-                        className={INPUT_CLASS}
+                        className={`${INPUT_CLASS} ${isSubmitted ? "opacity-50 cursor-not-allowed" : ""}`}
                       />
                     </div>
                   ))}
 
-                  {/* Program (select — berbeda struktur dari inputs) */}
+                  {/* Program (Cards) */}
                   <div>
-                    <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-2">
-                      Program / Kelompok Usia
+                    <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-3">
+                      Program / Kelompok Usia <span className="text-primary">*</span>
                     </label>
-                    <select
-                      value={form.ageGroup}
-                      onChange={(e) => setForm((f) => ({ ...f, ageGroup: e.target.value }))}
-                      className={`${INPUT_CLASS} appearance-none cursor-pointer`}
-                    >
-                      <option value="" className="bg-page-dark">-- Pilih Program --</option>
-                      {AGE_GROUPS.map(({ label, ages }) => (
-                        <option key={label} value={label} className="bg-page-dark">
-                          {label} ({ages})
-                        </option>
-                      ))}
-                    </select>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {PROGRAMS.map(({ label, ages, iconName, desc }) => {
+                        const isSelected = form.ageGroup === label;
+                        const Icon = PROGRAM_ICONS[iconName];
+                        return (
+                          <button
+                            key={label}
+                            type="button"
+                            disabled={isSubmitted}
+                            onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
+                            className={`text-center p-4 pt-3 rounded-xl border transition-all duration-300 flex flex-col items-center ${
+                              isSelected 
+                                ? "bg-primary/10 border-primary shadow-primary-soft scale-[1.02]" 
+                                : "bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10 shadow-xl"
+                            } ${isSubmitted ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
+                          >
+                            <div className={`mb-1 transition-colors ${isSelected ? "text-primary" : "text-white/50"}`} aria-hidden="true">
+                              <Icon className="w-8 h-8" />
+                            </div>
+                            <h4 className={`font-heading text-xl tracking-widest mb-0.5 ${isSelected ? "text-primary" : "text-white"}`}>
+                              {label}
+                            </h4>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-primary/80 mb-2">
+                              {ages}
+                            </span>
+                            <p className="text-white/60 text-[11px] leading-relaxed">
+                              {desc}
+                            </p>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
-                  <a
-                    href={waUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-2 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02]"
-                  >
-                    <span>💬</span>
-                    Kirim via WhatsApp
-                  </a>
+                  {isSubmitted ? (
+                    <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center space-y-4 mt-6">
+                      <div className="text-4xl">✅</div>
+                      <h3 className="font-heading text-xl text-green-400 uppercase tracking-widest">Pendaftaran Terkirim!</h3>
+                      <p className="text-white/60 text-sm">
+                        Data Anda sudah kami simpan. Langkah terakhir, silakan klik tombol WhatsApp di bawah untuk konfirmasi pendaftaran ke Admin.
+                      </p>
+                      <a
+                        href={getWaUrl()}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="cursor-pointer mt-4 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02]"
+                      >
+                        <span>💬</span>
+                        Hubungi Admin (WA)
+                      </a>
+                      <button
+                        onClick={() => setIsSubmitted(false)}
+                        className="cursor-pointer w-full mt-2 border border-white/20 hover:border-white/40 text-white/50 hover:text-white/80 text-xs uppercase tracking-widest transition-all py-2.5 rounded-full"
+                      >
+                        ← Edit Data Pendaftaran
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Inline error message */}
+                      {error && (
+                        <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-xs font-medium">
+                          ⚠️ {error}
+                        </div>
+                      )}
+
+                      <button
+                        onClick={handleSubmit}
+                        disabled={isPending}
+                        className="cursor-pointer mt-2 w-full flex items-center justify-center gap-3 bg-primary hover:bg-primary/80 text-black font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isPending ? "Menyimpan Data..." : "Kirim Pendaftaran"}
+                      </button>
+                    </>
+                  )}
                 </div>
               </div>
             )}
+
 
             {!selectedHomebase?.name && (
               <p className="text-white/20 text-xs text-center tracking-widest uppercase">
-                ↑ Pilih lokasi di atas untuk melanjutkan
+                ↑ Pilih homebase di atas untuk melanjutkan
               </p>
             )}
           </div>
-
-          {/* RIGHT: Sticky pricing + bank info */}
-          <aside className="lg:sticky lg:top-20 space-y-4">
-
-            {/* Biaya */}
-            <div className="border-l-4 border-l-primary bg-white/5 border border-white/10 rounded-lg p-6">
-              <div className="text-primary text-[10px] font-bold uppercase tracking-[0.3em] mb-5">💰 Biaya Pendaftaran</div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-start">
-                  <span className="text-white/60 text-sm leading-relaxed">
-                    Pendaftaran<br />
-                    <span className="text-white/30 text-[10px]">termasuk bulan pertama</span>
-                  </span>
-                  <span className="font-heading text-lg text-primary shrink-0 ml-4">{PRICING.registration}</span>
-                </div>
-                <div className="border-t border-white/10 pt-4 flex justify-between items-center">
-                  <span className="text-white/60 text-sm">Iuran Bulanan</span>
-                  <div className="text-right">
-                    <span className="font-heading text-lg text-primary">{PRICING.monthly}</span>
-                    <span className="text-white/30 text-[10px] block">/bulan</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bank transfer */}
-            <div className="border-l-4 border-l-primary bg-white/5 border border-white/10 rounded-lg p-6">
-              <div className="text-primary text-[10px] font-bold uppercase tracking-[0.3em] mb-5">🏦 Cara Pembayaran</div>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-bold mb-1">Bank</div>
-                  <div className="font-heading text-xl text-white tracking-widest">{BANK.name}</div>
-                </div>
-                <div>
-                  <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-bold mb-1">No. Rekening</div>
-                  <div className="font-heading text-2xl text-primary tracking-[0.15em]">{BANK.account}</div>
-                </div>
-                <div>
-                  <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-bold mb-1">Atas Nama</div>
-                  <div className="text-white font-semibold text-sm">{BANK.holder}</div>
-                </div>
-                <div className="border-t border-white/10 pt-3">
-                  <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-bold mb-1">Tunai</div>
-                  <div className="text-white/60 text-xs">Bisa dibayar langsung saat latihan</div>
-                </div>
-              </div>
-            </div>
-
-          </aside>
         </div>
-      </div>
-
-      {/* ── Program Kami (Info Grid) ── */}
-      <div className="relative z-10 w-full border-y border-white/8 bg-white/[0.025]">
-        <section className="container mx-auto px-4 py-20">
-          <h2 className="font-heading text-3xl md:text-4xl text-primary uppercase tracking-widest mb-3 text-center">Program Kami</h2>
-          <p className="text-white/40 text-sm text-center mb-12">Pilih kelompok usia yang sesuai dengan pemain Anda</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
-            {AGE_GROUPS.map(({ label, ages, icon, desc }) => (
-              <div
-                key={label}
-                className="bg-white/5 border border-white/10 hover:border-primary/40 rounded-2xl p-6 text-center transition-all hover:bg-white/[0.08] hover:-translate-y-1"
-              >
-                <div className="text-3xl mb-3" aria-hidden="true">{icon}</div>
-                <div className="font-heading text-2xl text-white tracking-widest mb-1">{label}</div>
-                <div className="text-primary/60 text-[9px] font-bold uppercase tracking-widest mb-4">{ages}</div>
-                <p className="text-white/40 text-xs leading-relaxed">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
       </div>
 
       {/* ── Footer ── */}
@@ -275,14 +298,24 @@ function RegisterContent() {
           <p className="text-white/20 text-[10px]">
             &copy; {new Date().getFullYear()} ADORA Basketball Club
           </p>
-          <a
-            href={`https://instagram.com/${CONTACT.instagram}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-white/30 text-xs hover:text-primary transition-colors"
-          >
-            @{CONTACT.instagram}
-          </a>
+          <div className="flex items-center gap-4">
+            <a
+              href={`https://instagram.com/${CONTACT.instagram}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/30 text-xs hover:text-primary transition-colors"
+            >
+              IG @{CONTACT.instagram}
+            </a>
+            <a
+              href={`https://www.tiktok.com/@${CONTACT.tiktok}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white/30 text-xs hover:text-primary transition-colors"
+            >
+              TikTok @{CONTACT.tiktok}
+            </a>
+          </div>
         </div>
       </footer>
     </main>
