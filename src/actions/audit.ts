@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -12,7 +12,7 @@ export type AuditLogRecord = {
   action: string;
   targetTable: string;
   recordId: string | null;
-  details: any | null; // Added details field for audit view
+  details: Prisma.JsonValue | null;
   timestamp: Date;
   userId: string | null;
   user: { id: string; name: string | null; username: string | null } | null;
@@ -50,7 +50,7 @@ export async function createAuditLog(
   targetTable: string,
   recordId?: string,
   userId?: string | null,
-  details?: any,
+  details?: Prisma.InputJsonValue,
 ) {
   // Fallback ke session hanya jika userId tidak diberikan (backward compat sementara migrasi)
   const resolvedUserId =
@@ -64,14 +64,14 @@ export async function createAuditLog(
       action,
       targetTable,
       recordId: recordId ?? null,
-      details: details ?? null,
+      details: details ?? Prisma.JsonNull,
       userId: resolvedUserId,
     },
   });
 }
 
 // 3. Log an audit action — Public Server Action
-export async function createAuditLogAction(action: string, targetTable: string, recordId?: string, details?: any) {
+export async function createAuditLogAction(action: string, targetTable: string, recordId?: string, details?: Prisma.InputJsonValue) {
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;

@@ -4,9 +4,7 @@ import { getGroupsAction, addGroupAction, updateGroupAction, deleteGroupAction }
 import { QUERY_KEYS } from "@/lib/constants";
 
 type GroupsList = Awaited<ReturnType<typeof getGroupsAction>>;
-type AddGroupInput = Parameters<typeof addGroupAction>[0];
 type UpdateGroupInput = Parameters<typeof updateGroupAction>[1];
-type DeleteGroupInput = Parameters<typeof deleteGroupAction>[0];
 
 export type Group = {
   id: string;

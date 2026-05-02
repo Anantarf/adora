@@ -322,7 +322,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
       });
 
       const mergedPdfBytes = await templatePdf.save();
-      const blob = new Blob([mergedPdfBytes], { type: "application/pdf" });
+      const blob = new Blob([mergedPdfBytes as BlobPart], { type: "application/pdf" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = fileName;

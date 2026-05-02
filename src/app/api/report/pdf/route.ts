@@ -123,7 +123,7 @@ export async function GET(req: NextRequest) {
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Rapor ${player.name} - ADORA Basketball Club</title>
+  <title>Rapor ${escHtml(player.name)} - ADORA Basketball Club</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
     
@@ -364,12 +364,12 @@ export async function GET(req: NextRequest) {
 
   <!-- Player Info -->
   <div class="player-info">
-    <div class="player-name">${player.name}</div>
+    <div class="player-name">${escHtml(player.name)}</div>
     <div class="player-meta">
-      <span>🏀 ${player.group?.name || "Tanpa Kelas"}</span>
+      <span>🏀 ${escHtml(player.group?.name || "Tanpa Kelompok")}</span>
       <span>🎂 ${age} Tahun</span>
-      <span>🏫 ${player.schoolOrigin || "—"}</span>
-      <span>📅 Evaluasi: ${evalDate}</span>
+      <span>🏫 ${escHtml(player.schoolOrigin || "—")}</span>
+      <span>📅 Evaluasi: ${escHtml(evalDate)}</span>
     </div>
   </div>
 
@@ -402,7 +402,7 @@ export async function GET(req: NextRequest) {
       .map(
         (item) => `
     <div class="metric-card">
-      <div class="metric-label">${item.label}</div>
+      <div class="metric-label">${escHtml(item.label)}</div>
       <div class="metric-value">${item.value}</div>
     </div>`,
       )
@@ -416,7 +416,7 @@ export async function GET(req: NextRequest) {
     coachNotes
       ? `
   <div class="section-title">Catatan Pelatih</div>
-  <div class="notes-box">"${coachNotes}"</div>`
+  <div class="notes-box">"${escHtml(coachNotes)}"</div>`
       : ""
   }
 
@@ -431,7 +431,7 @@ export async function GET(req: NextRequest) {
         (c: { title: string; uploadedAt: Date }) => `
     <div class="cert-item">
       <span class="cert-badge">🏆 Prestasi</span>
-      ${c.title}
+      ${escHtml(c.title)}
       <span style="margin-left:auto; color:#999; font-size:10px;">
         ${new Date(c.uploadedAt).toLocaleDateString("id-ID", { month: "short", year: "numeric" })}
       </span>
@@ -459,6 +459,14 @@ export async function GET(req: NextRequest) {
     console.error("[PDF_REPORT_ERROR]:", error);
     return NextResponse.json({ error: "Gagal generate laporan." }, { status: 500 });
   }
+}
+
+function escHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 // Helper

@@ -17,7 +17,7 @@ export function useUpdateClubSetting() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["club-settings"] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || "Gagal memperbarui pengaturan.");
     },
   });

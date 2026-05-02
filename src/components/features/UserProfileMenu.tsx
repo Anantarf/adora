@@ -3,8 +3,7 @@
 
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
-import { signOut } from "next-auth/react";
-import { KeyRound, LogOut, User, ChevronUp } from "lucide-react";
+import { KeyRound, ChevronUp } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -51,8 +50,9 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
         toast.success("Kata sandi berhasil diperbarui.");
         reset();
         onClose();
-      } catch (e: any) {
-        toast.error(e.message || "Gagal memperbarui kata sandi.");
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Gagal memperbarui kata sandi.";
+        toast.error(msg);
       }
     });
   };

@@ -5,9 +5,7 @@ import { QUERY_KEYS } from "@/lib/constants";
 
 type PeriodsList = Awaited<ReturnType<typeof getPeriodsAction>>;
 type ActivePeriod = Awaited<ReturnType<typeof getActivePeriodAction>>;
-type CreatePeriodInput = Parameters<typeof createPeriodAction>[0];
-type SetActivePeriodInput = Parameters<typeof setActivePeriodAction>[0];
-type DeletePeriodInput = Parameters<typeof deletePeriodAction>[0];
+
 
 export const usePeriods = () =>
   useQuery<PeriodsList>({

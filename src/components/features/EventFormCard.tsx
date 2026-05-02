@@ -65,6 +65,7 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
     defaultValues: getBlankFormValues(),
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const selectedType    = watch("type");
   const homebaseId      = watch("homebaseId");
   const selectedEventCfg = selectedType ? getEventConfig(selectedType) : null;

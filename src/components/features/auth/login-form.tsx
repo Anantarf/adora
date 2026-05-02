@@ -9,7 +9,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Lock, User, ArrowRight, Loader2, ShieldCheck, AlertCircle, Cone, Eye, EyeOff } from "lucide-react";
+import { Lock, User, ArrowRight, Loader2, ShieldCheck, AlertCircle, Eye, EyeOff } from "lucide-react";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
@@ -61,7 +61,7 @@ export function LoginForm() {
         const role = (session?.user as { role?: string })?.role;
         router.push(role === "ADMIN" ? "/dashboard" : "/parent");
       }
-    } catch (err) {
+    } catch {
       toast.error("Kesalahan Sistem", {
         description: "Silakan coba kembali beberapa saat lagi.",
       });

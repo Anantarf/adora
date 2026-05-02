@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Loader2, CalendarDays, MapPin, Users, CheckCircle2 } from "lucide-react";
+import { Loader2, CalendarDays, MapPin, CheckCircle2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { getEventAttendanceDetailAction } from "@/actions/schedule";
@@ -47,6 +47,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         onClose();
       })
       .finally(() => setLoading(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId]); // onClose intentionally excluded — inline arrow ref changes every parent render
 
   const handleMarkAllHadir = () => {

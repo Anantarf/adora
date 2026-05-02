@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Path, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSubmitStatistic } from "@/hooks/use-statistics";
@@ -57,14 +57,14 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...
 }
 
 // ─── Helper: get nested error ─────────────────────────
-function getNestedError(errors: Record<string, any>, path: string): string | undefined {
+function getNestedError(errors: Record<string, unknown>, path: string): string | undefined {
   const parts = path.split(".");
-  let current: any = errors;
+  let current: unknown = errors;
   for (const part of parts) {
-    if (!current) return undefined;
-    current = current[part];
+    if (!current || typeof current !== "object") return undefined;
+    current = (current as Record<string, unknown>)[part];
   }
-  return current?.message;
+  return (current as { message?: string } | undefined)?.message;
 }
 
 // ─── Dialog ───────────────────────────────────────────
@@ -88,9 +88,8 @@ export function AddStatDialog({
 
   const defaultValues: StatForm = existingStat?.metrics ?? DEFAULT_METRICS;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<StatForm>({
-    resolver: zodResolver(statSchema) as any,
+    resolver: zodResolver(statSchema) as Resolver<StatForm>,
     defaultValues,
   });
 
@@ -100,8 +99,8 @@ export function AddStatDialog({
   const grandTotal = useMemo(() => {
     return FLAT_METRIC_DEFS.reduce((sum, def) => {
       const parts = def.path.split(".");
-      let val: any = values;
-      for (const p of parts) val = val?.[p];
+      let val: unknown = values;
+      for (const p of parts) val = (val as Record<string, unknown>)?.[p];
       return sum + (Number(val) || 0);
     }, 0);
   }, [values]);
@@ -113,8 +112,8 @@ export function AddStatDialog({
       toast.success(`Nilai ${player.name} berhasil ${status === "Draft" ? "disimpan sementara" : "di-publish"}.`);
       setOpen(false);
       if (!isEdit) reset(DEFAULT_METRICS);
-    } catch (e: any) {
-      toast.error(e.message || "Gagal menyimpan nilai.");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "Gagal menyimpan nilai.");
     } finally {
       setPendingStatus(null);
     }
@@ -163,8 +162,8 @@ export function AddStatDialog({
                       key={def.key}
                       label={def.label}
                       max={def.max}
-                      {...register(def.path as any)}
-                      error={getNestedError(errors as any, def.path)}
+                      {...register(def.path as Path<StatForm>)}
+                      error={getNestedError(errors as Record<string, unknown>, def.path)}
                     />
                   ))}
                 </div>

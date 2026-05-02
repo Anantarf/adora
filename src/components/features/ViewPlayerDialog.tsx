@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { type Player } from "@/types/dashboard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -32,12 +32,17 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
     defaultValues: playerToFormValues(player),
   });
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  const [prevPlayerId, setPrevPlayerId] = useState(player.id);
+
+  if (open !== prevOpen || player.id !== prevPlayerId) {
+    setPrevOpen(open);
+    setPrevPlayerId(player.id);
     if (open) {
       setIsEditing(false);
       reset(playerToFormValues(player));
     }
-  }, [open, player, reset]);
+  }
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {

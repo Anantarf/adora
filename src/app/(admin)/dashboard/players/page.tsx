@@ -6,7 +6,7 @@ import { Loader2, Search, Edit2, Trash2, Users, FolderPlus } from "lucide-react"
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useDebounce } from "use-debounce";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
@@ -35,11 +35,9 @@ export default function PlayersPage() {
   const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId ?? "", debouncedSearch, !!selectedGroupId);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
-  useEffect(() => {
-    if (groups && groups.length > 0 && !selectedGroupId) {
-      setSelectedGroupId(groups[0].id);
-    }
-  }, [groups, selectedGroupId]);
+  if (groups && groups.length > 0 && !selectedGroupId) {
+    setSelectedGroupId(groups[0].id);
+  }
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
   const filteredPlayers = players || [];

@@ -23,7 +23,7 @@ const userSchema = z.object({
     .min(4, "Username minimal 4 karakter")
     .regex(/^[a-z0-9_]+$/, "Hanya huruf kecil, angka, dan underscore"),
   email: z.string().email("Email tidak valid").optional().or(z.literal("")),
-  password: z.string().min(6, "Password minimal 6 karakter"),
+  password: z.string().optional(),
 });
 
 type UserForm = z.infer<typeof userSchema>;
@@ -45,18 +45,23 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
       name: "",
       username: "",
       email: "",
-      password: "adora123",
+      password: "",
     },
 
   });
 
   const onSubmit = async (data: UserForm) => {
+    if (!isParent && (!data.password || data.password.length < 6)) {
+      toast.error("Password admin minimal 6 karakter.");
+      return;
+    }
+
     try {
       await addUser({
         name: data.name,
         username: data.username,
         email: data.email || undefined,
-        password: data.password,
+        password: isParent ? undefined : data.password,
         role: role,
       });
       toast.success(`Akun ${isParent ? "orang tua" : "admin"} berhasil dibuat.`);
@@ -104,14 +109,14 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
           <div className="space-y-1.5">
             <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
             {isParent ? (
-              <div onClick={() => toast.info("Kata sandi tidak bisa diubah (mengikuti format akun awal).")} className="cursor-not-allowed">
-                <Input {...register("password")} type="text" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50" />
+              <div onClick={() => toast.info("Kata sandi awal orang tua mengikuti pengaturan default sistem.")} className="cursor-not-allowed">
+                <Input value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />
               </div>
             ) : (
               <Input {...register("password")} type="text" className="h-11 bg-background/50 font-mono rounded-xl border-border/50 focus-visible:ring-primary/50" />
             )}
             <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-1">
-              {isParent ? "*Bagikan sandi ini ke orang tua agar mereka bisa login pertama kali." : "*Admin dapat membuat password mereka sendiri di sini."}
+              {isParent ? "*Sandi default diatur secara aman oleh sistem. Beritahu orang tua untuk segera menggantinya setelah login." : "*Admin dapat membuat password mereka sendiri di sini."}
             </p>
             {errors.password && !isParent && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.password.message}</p>}
           </div>

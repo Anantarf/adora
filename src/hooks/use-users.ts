@@ -5,9 +5,7 @@ import { QUERY_KEYS } from "@/lib/constants";
 import { toast } from "sonner";
 
 type UsersList = Awaited<ReturnType<typeof getUsersAction>>;
-type CreateUserInput = Parameters<typeof createUserAction>[0];
-type DeleteUserInput = Parameters<typeof deleteUserAction>[0];
-type UpdateSelfInput = Parameters<typeof updateSelfAction>[0];
+
 
 export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
   return useQuery<UsersList>({

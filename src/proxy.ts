@@ -29,6 +29,10 @@ function getClientIp(request: NextRequest) {
  */
 export async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  if (pathname.startsWith("/api/auth")) {
+    return NextResponse.next();
+  }
+
   const ip = getClientIp(request);
   const isApiRoute = pathname.startsWith("/api/");
 
@@ -85,19 +89,30 @@ export async function proxy(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET,
     });
 
+    // Helper to handle unauthorized requests based on type
+    const handleUnauthorized = (redirectUrl: string) => {
+      if (isApiRoute) {
+        return new NextResponse(JSON.stringify({ error: "Unauthorized" }), { 
+          status: 401, 
+          headers: { "Content-Type": "application/json" } 
+        });
+      }
+      return NextResponse.redirect(new URL(redirectUrl, request.url));
+    };
+
     // A. Tidak Login -> Redirect ke Login
     if (!token) {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return handleUnauthorized("/login");
     }
 
     // B. Proteksi Admin (/dashboard) — non-admin dikembalikan ke portal orang tua
     if (pathname.startsWith("/dashboard") && token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/parent", request.url));
+      return handleUnauthorized("/parent");
     }
 
     // C. Proteksi Parent (/parent) — hanya PARENT dan ADMIN yang boleh
     if (pathname.startsWith("/parent") && token.role !== "PARENT" && token.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/login", request.url));
+      return handleUnauthorized("/login");
     }
 
     // Anti-bfcache: paksa hit server agar logout benar-benar bekerja

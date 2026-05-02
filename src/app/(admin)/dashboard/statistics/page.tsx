@@ -9,13 +9,12 @@ import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
-import type { Player, MetricsJson } from "@/types/dashboard";
+import type { MetricsJson } from "@/types/dashboard";
 import { toast } from "sonner";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { FLAT_METRIC_DEFS, averageScore } from "@/lib/metrics";
 import { generateRaporPDF } from "@/lib/generate-rapor-pdf";
@@ -39,7 +38,7 @@ const getValidMetrics = (m: unknown): MetricsJson | null => {
   }
 
   if (!obj || typeof obj !== "object") return null;
-  const o = obj as Record<string, any>;
+  const o = obj as Record<string, unknown>;
   
   const isValid = (
     o.dribble != null &&
@@ -78,12 +77,14 @@ export default function StatisticsPage() {
     if (initialized.current || !periods) return;
     const first = periods.find((p) => p.isActive) ?? periods[0];
     if (first) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedPeriodId(first.id);
       initialized.current = true;
     }
   }, [periods]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setActiveGroup("all");
   }, [selectedPeriodId]);
 

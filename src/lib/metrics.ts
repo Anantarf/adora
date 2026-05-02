@@ -67,10 +67,10 @@ export const parseMetricsJson = (metricsJson: unknown): number[] => {
     if (typeof m === "string") {
       m = JSON.parse(m);
     }
-    const obj = m as Record<string, any>;
+    const obj = m as Record<string, unknown>;
     return [
-      ...Object.values((obj.dribble as Record<string, any>) ?? {}),
-      ...Object.values((obj.passing as Record<string, any>) ?? {}),
+      ...Object.values((obj.dribble as Record<string, unknown>) ?? {}),
+      ...Object.values((obj.passing as Record<string, unknown>) ?? {}),
       obj.layUp,
       obj.shooting,
     ].filter((v): v is number => typeof v === "number");

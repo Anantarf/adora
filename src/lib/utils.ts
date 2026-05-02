@@ -10,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
  * Useful for conditional updates where only provided fields should be updated.
  */
 export function buildUpdateData<T extends Record<string, unknown>>(data: T): Partial<T> {
-  return Object.fromEntries(Object.entries(data).filter(([_, v]) => v !== undefined)) as Partial<T>;
+  return Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined)) as Partial<T>;
 }
 
 /**

@@ -16,9 +16,8 @@ export function AttendanceCardView() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: events, isLoading } = useEventsWithAttendance();
-  const eventList = events ?? [];
-
   const filteredEvents = useMemo(() => {
+    const eventList = events ?? [];
     if (!searchQuery.trim()) return eventList;
     const q = searchQuery.toLowerCase();
     return eventList.filter(
@@ -26,7 +25,7 @@ export function AttendanceCardView() {
         e.title.toLowerCase().includes(q) ||
         e.groups.some((g) => g.name.toLowerCase().includes(q))
     );
-  }, [eventList, searchQuery]);
+  }, [events, searchQuery]);
 
   const groupedByMonth = useMemo(
     () =>
@@ -91,7 +90,6 @@ export function AttendanceCardView() {
               const eventDate = new Date(event.date);
               const markedAtDate = event.attendanceMarkedAt ? new Date(event.attendanceMarkedAt) : null;
               const cfg = getEventConfig(event.type);
-              const Icon = cfg.icon;
 
               return (
                 <Button key={event.id} variant="outline" onClick={() => setSelectedEventId(event.id)} className="w-full h-auto p-3 sm:p-3.5 justify-start hover:bg-muted/50 transition-all rounded-xl border border-border/50 group" style={{ borderLeftColor: cfg.color, borderLeftWidth: "4px" }}>

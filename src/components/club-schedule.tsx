@@ -1,5 +1,4 @@
-﻿/* eslint-disable tailwindcss/no-custom-classname */
-"use client";
+﻿"use client";
 
 import { useState, useMemo } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";

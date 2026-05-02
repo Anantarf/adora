@@ -1,6 +1,4 @@
-import { UserCircle } from "lucide-react";
 import { SignOutButton } from "@/components/features/auth/SignOutButton";
-import Link from "next/link";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";

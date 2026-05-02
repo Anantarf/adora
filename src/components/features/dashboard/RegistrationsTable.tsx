@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Users, Info, MessageCircle } from "lucide-react";
@@ -30,12 +30,14 @@ interface RegistrationsTableProps {
 
 export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const [prevRegistrations, setPrevRegistrations] = useState(registrations);
   const ITEMS_PER_PAGE = 10;
 
-  // Reset pagination when period or group changes (if needed)
-  useEffect(() => {
+  // Reset pagination when period or group changes
+  if (registrations !== prevRegistrations) {
+    setPrevRegistrations(registrations);
     setCurrentPage(1);
-  }, [registrations]);
+  }
 
   const totalPages = Math.ceil(registrations.length / ITEMS_PER_PAGE);
   const paginatedRegistrations = useMemo(() => {

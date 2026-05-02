@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Settings, FileImage, Save, Loader2, Info, Upload, CheckCircle2, XCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2 } from "lucide-react";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { toast } from "sonner";
+import Image from "next/image";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -17,7 +17,7 @@ const ASSET_KEYS = [
 ];
 
 export default function SettingsPage() {
-  const { data: settings, isLoading } = useClubSettings();
+  const { data: settings } = useClubSettings();
   const updateSetting = useUpdateClubSetting();
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
@@ -28,7 +28,7 @@ export default function SettingsPage() {
     }
   }, [settings]);
 
-  const handleFileUpload = async (key: string, file: File) => {
+  const handleFileUpload = async (key: string, file: File, label: string) => {
     setUploading((prev) => ({ ...prev, [key]: true }));
     const formData = new FormData();
     formData.append("file", file);
@@ -44,7 +44,7 @@ export default function SettingsPage() {
       const data = await res.json();
       setLocalValues((prev) => ({ ...prev, [key]: data.url }));
       await updateSetting.mutateAsync({ key, value: data.url });
-      toast.success(`${key.replace(/_/g, " ")} berhasil diunggah!`);
+      toast.success(`${label} berhasil diunggah.`);
     } catch (error) {
       toast.error("Gagal mengunggah file.");
       console.error(error);
@@ -93,7 +93,7 @@ export default function SettingsPage() {
                         accept={asset.accept}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
-                          if (file) handleFileUpload(asset.key, file);
+                          if (file) handleFileUpload(asset.key, file, asset.label);
                         }}
                         className="hidden"
                         id={`file-${asset.key}`}
@@ -128,13 +128,13 @@ export default function SettingsPage() {
                           <span className="text-[10px] font-bold text-red-500">PDF</span>
                         </div>
                       ) : (
-                        <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5">
-                          <img src={localValues[asset.key]} alt="Preview" className="w-full h-full object-contain" />
+                        <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative">
+                          <Image src={localValues[asset.key]} alt="Preview" fill unoptimized className="object-contain" />
                         </div>
                       )}
                       <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-foreground truncate max-w-[120px]">File Aktif</span>
-                        <a href={localValues[asset.key]} target="_blank" className="text-[9px] text-primary hover:underline">Lihat Full</a>
+                        <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">Lihat Full</a>
                       </div>
                     </div>
                   )}

@@ -9,9 +9,6 @@ import {
   Clock,
   Database,
   FileText,
-  Trash2,
-  Plus,
-  Pencil,
   RefreshCw,
 } from "lucide-react";
 import { useAuditLogs, type AuditLogRecord } from "@/hooks/use-audit-log";
@@ -89,9 +86,9 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
 };
 
-function formatValue(key: string, value: any): string {
+function formatValue(key: string, value: unknown): string {
   if (value === null || value === undefined) return "—";
-  if (key === "role") return ROLE_LABELS[value] ?? value;
+  if (key === "role") return ROLE_LABELS[value as string] ?? String(value);
   if (key === "resetTo") return value === "default" ? "Sandi awal (adora123)" : "Sandi kustom";
   if (key === "isActive") return value ? "Aktif" : "Tidak aktif";
   if (key.toLowerCase().includes("date") && typeof value === "string") {
@@ -100,7 +97,7 @@ function formatValue(key: string, value: any): string {
   return String(value);
 }
 
-function DetailRows({ data }: { data: Record<string, any> }) {
+function DetailRows({ data }: { data: Record<string, unknown> }) {
   const rows = Object.entries(data).filter(([k]) => !k.startsWith("_"));
   return (
     <div className="flex flex-col gap-2">
@@ -125,11 +122,13 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
     );
   }
 
-  const details = log.details as Record<string, any>;
+  const details = log.details as Record<string, unknown>;
 
   // before/after comparison (UPDATE actions)
   if (details.before && details.after) {
-    const keys = Array.from(new Set([...Object.keys(details.before), ...Object.keys(details.after)]));
+    const before = details.before as Record<string, unknown>;
+    const after = details.after as Record<string, unknown>;
+    const keys = Array.from(new Set([...Object.keys(before), ...Object.keys(after)]));
     return (
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
@@ -137,8 +136,8 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 mb-2">Sebelum</p>
             {keys.map((k) => (
               <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
-                <span className="text-xs font-semibold text-muted-foreground">{formatValue(k, details.before[k])}</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
+                <span className="text-xs font-semibold text-muted-foreground">{formatValue(k, before[k])}</span>
               </div>
             ))}
           </div>
@@ -146,9 +145,9 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
             <p className="text-[10px] font-bold uppercase tracking-widest text-primary/70 mb-2">Sesudah</p>
             {keys.map((k) => (
               <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
-                <span className={`text-xs font-semibold ${String(details.before[k]) !== String(details.after[k]) ? "text-primary" : "text-foreground"}`}>
-                  {formatValue(k, details.after[k])}
+                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
+                <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>
+                  {formatValue(k, after[k])}
                 </span>
               </div>
             ))}

@@ -8,20 +8,21 @@ import { createAuditLog } from "./audit";
 export async function getClubSettingsAction() {
   await requireAdmin();
   const settings = await prisma.clubSetting.findMany();
-  return Object.fromEntries(settings.map(s => [s.key, s.value]));
+  return Object.fromEntries(settings.map((s) => [s.key, s.value]));
 }
 
 export async function updateClubSettingAction(key: string, value: string) {
-  await requireAdmin();
-  
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
+
   const setting = await prisma.$transaction(async (tx) => {
     const s = await tx.clubSetting.upsert({
       where: { key },
       create: { key, value },
       update: { value },
     });
-    
-    await createAuditLog(tx, "UPDATE", "clubSetting", s.id, { key, value: "Updated value" });
+
+    await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key });
     return s;
   });
 

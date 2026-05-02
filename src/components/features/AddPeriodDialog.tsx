@@ -35,6 +35,8 @@ export function AddPeriodDialog() {
     resolver: zodResolver(schema),
     defaultValues: { name: "", startDate: today, endDate: today, setActive: true },
   });
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const setActiveChecked = watch("setActive");
 
   const onSubmit = async (values: FormValues) => {
     try {
@@ -42,8 +44,8 @@ export function AddPeriodDialog() {
       toast.success(`Periode "${values.name}" berhasil dibuat.`);
       setOpen(false);
       reset();
-    } catch (e: any) {
-      toast.error(e.message || "Gagal membuat periode.");
+    } catch (e: unknown) {
+      toast.error((e instanceof Error ? e.message : null) || "Gagal membuat periode.");
     }
   };
 
@@ -83,7 +85,7 @@ export function AddPeriodDialog() {
             <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/40 border border-border/40">
               <Switch
                 id="setActive"
-                checked={watch("setActive")}
+                checked={setActiveChecked}
                 onCheckedChange={v => setValue("setActive", v)}
               />
               <Label htmlFor="setActive" className="text-sm cursor-pointer">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -32,26 +32,18 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
   const { mutateAsync: updateGroup, isPending } = useUpdateGroup();
   const { data: homebases = [] } = useHomebases();
 
-  const [isKu, setIsKu] = useState(false);
-  const [targetKu, setTargetKu] = useState("");
-  const [isSchool, setIsSchool] = useState(false);
-  const [schoolLevel, setSchoolLevel] = useState("");
+  const initialParsed = parseGroupMetaDescription(group.description);
+  const [isKu, setIsKu] = useState(typeof initialParsed.targetKu === "number");
+  const [targetKu, setTargetKu] = useState(initialParsed.targetKu ? String(initialParsed.targetKu) : "");
+  const [isSchool, setIsSchool] = useState(typeof initialParsed.schoolLevel === "string");
+  const [schoolLevel, setSchoolLevel] = useState(initialParsed.schoolLevel || "");
 
-  const { register, handleSubmit, setValue, watch, formState: { errors }, reset } = useForm<GroupForm>({
+  const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<GroupForm>({
     resolver: zodResolver(groupSchema),
     defaultValues: { name: group.name, description: group.description || "", homebaseId: group.homebase?.id },
   });
 
-  useEffect(() => {
-    if (open) {
-      const parsed = parseGroupMetaDescription(group.description);
-      setIsKu(typeof parsed.targetKu === "number");
-      setTargetKu(parsed.targetKu ? String(parsed.targetKu) : "");
-      setIsSchool(typeof parsed.schoolLevel === "string");
-      setSchoolLevel(parsed.schoolLevel || "");
-      reset({ name: group.name, description: group.description || "", homebaseId: group.homebase?.id });
-    }
-  }, [group, open, reset]);
+
 
   const onSubmit = async (data: GroupForm) => {
     if (isKu && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }

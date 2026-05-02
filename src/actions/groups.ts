@@ -46,9 +46,9 @@ export async function addGroupAction(data: { name: string; description?: string;
 
     revalidatePath("/dashboard/players");
     return group;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error adding group:", error);
-    throw new Error(error.message || "Gagal menambahkan grup baru");
+    throw new Error((error instanceof Error ? error.message : null) || "Gagal menambahkan grup baru");
   }
 }
 
@@ -71,9 +71,9 @@ export async function updateGroupAction(id: string, data: { name?: string; descr
 
     revalidatePath("/dashboard/players");
     return updated;
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error updating group:", error);
-    throw new Error(error.message || "Gagal mengubah grup");
+    throw new Error((error instanceof Error ? error.message : null) || "Gagal mengubah grup");
   }
 }
 
@@ -97,8 +97,8 @@ export async function deleteGroupAction(id: string) {
 
     revalidatePath("/dashboard/players");
     return { success: true as const };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error deleting group:", error);
-    throw new Error(error.message || "Gagal menghapus grup");
+    throw new Error((error instanceof Error ? error.message : null) || "Gagal menghapus grup");
   }
 }

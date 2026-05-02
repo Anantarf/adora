@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
@@ -19,9 +19,11 @@ export default function CertificatesPage() {
   const ITEMS_PER_PAGE = 10;
 
   // Reset pagination when data changes (e.g. after deletion)
-  useEffect(() => {
+  const [prevDataLength, setPrevDataLength] = useState(certificates?.length);
+  if (certificates?.length !== prevDataLength) {
+    setPrevDataLength(certificates?.length);
     setCurrentPage(1);
-  }, [certificates]);
+  }
 
   const filteredCertificates = useMemo(() => {
     if (!certificates) return [];
