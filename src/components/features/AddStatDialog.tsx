@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
 
 // ─── Schema ───────────────────────────────────────────
@@ -49,7 +49,7 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...
   };
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</label>
+      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{label}</label>
       <Input type="number" min={0} max={max} step={1} onChange={handleChange} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
@@ -109,7 +109,7 @@ export function AddStatDialog({
     setPendingStatus(status);
     try {
       await mutateAsync({ playerId: player.id, periodId, metrics: data as MetricsJson, status });
-      toast.success(`Nilai ${player.name} berhasil ${status === "Draft" ? "disimpan sementara" : "di-publish"}.`);
+      toast.success(`Nilai ${player.name} berhasil ${status === "Draft" ? "disimpan sebagai draft" : "diterbitkan"}.`);
       setOpen(false);
       if (!isEdit) reset(DEFAULT_METRICS);
     } catch (e: unknown) {
@@ -135,10 +135,10 @@ export function AddStatDialog({
           <div className="flex items-center gap-4 mb-2">
             <div className="p-3 bg-primary/10 rounded-xl shrink-0"><LineChart className="size-6 text-primary" /></div>
             <div className="flex flex-col gap-0.5">
-              <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Revisi" : "Input"} Nilai</DialogTitle>
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+              <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Perbarui" : "Input"} Nilai</DialogTitle>
+              <DialogDescription className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                 {player.name} <span className="mx-1.5 text-primary/50">•</span> {player.group?.name ?? "Tidak Memiliki Kelompok"}
-              </p>
+              </DialogDescription>
             </div>
           </div>
 
@@ -192,7 +192,7 @@ export function AddStatDialog({
             {isPeriodActive && (
               <div className="flex flex-col gap-2 mt-1">
                 <Button type="button" onClick={handleSubmit((d) => onSubmit(d, "Published"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 bg-primary hover:bg-primary/90 text-primary-foreground">
-                  {pendingStatus === "Published" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan & Publish"}
+                  {pendingStatus === "Published" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan & Terbitkan"}
                 </Button>
                 <Button type="button" variant="outline" onClick={handleSubmit((d) => onSubmit(d, "Draft"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary transition-colors">
                   {pendingStatus === "Draft" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan Draft...</> : "Simpan sebagai Draft"}

@@ -43,7 +43,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         }
       })
       .catch((err) => {
-        toast.error(err instanceof Error ? err.message : "Terjadi kesalahan");
+        toast.error("Gagal memuat data presensi. Coba lagi.");
         onClose();
       })
       .finally(() => setLoading(false));
@@ -53,7 +53,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
   const handleMarkAllHadir = () => {
     if (!event) return;
     setStatuses(Object.fromEntries(event.attendances.map((a) => [a.playerId, "HADIR"] as const)));
-    toast.success("Semua ditandai HADIR");
+    toast.success("Semua pemain ditandai Hadir.");
   };
 
   const handleSave = async () => {
@@ -80,13 +80,13 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         throw new Error("Gagal menyimpan presensi.");
       }
 
-      toast.success(`Presensi berhasil disimpan (${result.savedCount} pemain)`);
+      toast.success(`Presensi berhasil disimpan untuk ${result.savedCount} pemain.`);
       queryClient.invalidateQueries({ queryKey: ["events-attendance"] });
       queryClient.invalidateQueries({ queryKey: ["public-events"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       onClose();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Gagal menyimpan");
+      toast.error("Gagal menyimpan presensi. Coba lagi.");
     } finally {
       setIsSaving(false);
     }
@@ -123,13 +123,13 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                   {(() => {
                     const cfg = getEventConfig(event.type);
                     return (
-                      <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
+                      <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
                         {cfg.label}
                       </span>
                     );
                   })()}
                   <DialogTitle className="font-heading text-2xl uppercase tracking-widest text-foreground leading-tight">{event.title}</DialogTitle>
-                  <DialogDescription className="sr-only">Detail Manajemen Absensi Pemain</DialogDescription>
+                  <DialogDescription className="sr-only">Detail presensi pemain untuk agenda ini.</DialogDescription>
                   <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <CalendarDays className="size-3.5" />

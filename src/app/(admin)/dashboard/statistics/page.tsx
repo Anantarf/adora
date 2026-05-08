@@ -141,7 +141,7 @@ export default function StatisticsPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Input Penilaian</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Manajemen rapor dan statistik pemain klub</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola nilai dan pantau perkembangan pemain per periode evaluasi.</p>
         </div>
         <AddPeriodDialog />
       </div>
@@ -170,8 +170,8 @@ export default function StatisticsPage() {
                       <AlertDialogDescription className="flex flex-col gap-2">
                          <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
                          {!canDeletePeriod ? (
-                           <span className="text-muted-foreground text-xs leading-relaxed">
-                            Anda tidak bisa menghapus periode ini karena sudah terdapat {statsSummary.published + statsSummary.draft} data statistik pemain di dalamnya. Kosongkan data terlebih dahulu jika ingin menghapus.
+                           <span className="text-amber-500/80 text-xs leading-relaxed">
+                            Periode ini memiliki {statsSummary.published + statsSummary.draft} data nilai pemain. Kosongkan semua data nilai terlebih dahulu sebelum menghapus periode.
                            </span>
                          ) : (
                            <span className="text-muted-foreground text-xs leading-relaxed">
@@ -260,7 +260,7 @@ export default function StatisticsPage() {
               </div>
               <div className="size-1 rounded-full bg-border/60" />
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Draft</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Sementara</span>
                 <span className="text-sm font-bold text-foreground tabular-nums">{statsSummary.draft}</span>
               </div>
               <div className="size-1 rounded-full bg-border/60" />
@@ -305,7 +305,7 @@ export default function StatisticsPage() {
                 <TableRow>
                   <TableCell colSpan={FLAT_METRIC_DEFS.length + 5} className="h-24 text-center">
                     <div className="flex items-center justify-center gap-2 text-primary font-bold">
-                      <Loader2 className="size-5 animate-spin" /> Mengambil data...
+                      <Loader2 className="size-5 animate-spin" /> Memuat data penilaian...
                     </div>
                   </TableCell>
                 </TableRow>
@@ -358,7 +358,7 @@ export default function StatisticsPage() {
                           </TableCell>
                           <TableCell className="text-center">
                             <Badge variant="outline" className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}>
-                              {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum"}
+                              {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum Diisi"}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
@@ -378,6 +378,10 @@ export default function StatisticsPage() {
                                         ceoSignUrl: settings?.rapor_ceo_sign_url,
                                         coachSignUrl: settings?.rapor_coach_sign_url,
                                         stampUrl: settings?.rapor_stamp_url,
+                                      },
+                                      signers: {
+                                        coachName: settings?.rapor_coach_name,
+                                        ceoName: settings?.rapor_ceo_name,
                                       },
                                     })
                                   }

@@ -21,11 +21,11 @@ export const PERIOD_STATUS_BADGE = {
 
 export type AuditActionKey = "CREATE" | "UPDATE" | "DELETE" | "default";
 
-export const AUDIT_ACTION_CONFIG: Record<AuditActionKey, { color: string; icon: typeof Plus; label: string }> = {
-  CREATE:  { color: "#22C55E", icon: Plus,     label: "Tambah" },
-  UPDATE:  { color: "#3B82F6", icon: Pencil,   label: "Ubah"   },
-  DELETE:  { color: "#E11D48", icon: Trash2,   label: "Hapus"  },
-  default: { color: "#8B5CF6", icon: FileText, label: "Aksi"   },
+export const AUDIT_ACTION_CONFIG: Record<AuditActionKey, { color: string; icon: typeof Plus; label: string; description: string }> = {
+  CREATE:  { color: "#22C55E", icon: Plus,     label: "Tambah", description: "Data baru ditambahkan"      },
+  UPDATE:  { color: "#3B82F6", icon: Pencil,   label: "Ubah",   description: "Informasi diperbarui"       },
+  DELETE:  { color: "#E11D48", icon: Trash2,   label: "Hapus",  description: "Data dihapus dari sistem"   },
+  default: { color: "#8B5CF6", icon: FileText, label: "Aksi",   description: "Aksi sistem lainnya"        },
 };
 
 export function getAuditActionConfig(action: string) {

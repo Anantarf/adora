@@ -1,46 +1,87 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
+import { Camera } from "lucide-react";
 
-const PLACEHOLDER_IMAGES = [
-  "Slot Foto ASBC 1 (Turnamen)",
-  "Slot Foto ASBC 2 (Pemain)",
-  "Slot Foto ASBC 3 (Penonton/Atmosfer)",
+const PLACEHOLDER_SLOTS = [
+  { label: "Momen Turnamen" },
+  { label: "Aksi Para Pemain" },
+  { label: "Atmosfer Pertandingan" },
 ];
+
+function CourtPattern() {
+  return (
+    <svg
+      viewBox="0 0 200 150"
+      className="absolute inset-0 w-full h-full text-primary/10 pointer-events-none"
+      aria-hidden="true"
+    >
+      <rect x="1" y="1" width="198" height="148" rx="4" stroke="currentColor" strokeWidth="1.5" fill="none" />
+      <line x1="100" y1="1" x2="100" y2="149" stroke="currentColor" strokeWidth="1" />
+      <circle cx="100" cy="75" r="20" stroke="currentColor" strokeWidth="1" fill="none" />
+      <ellipse cx="15" cy="75" rx="10" ry="25" stroke="currentColor" strokeWidth="1" fill="none" />
+      <ellipse cx="185" cy="75" rx="10" ry="25" stroke="currentColor" strokeWidth="1" fill="none" />
+    </svg>
+  );
+}
 
 interface AutoFadeCarouselProps {
   images?: string[];
 }
 
-export function AutoFadeCarousel({ images = PLACEHOLDER_IMAGES }: AutoFadeCarouselProps) {
+export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
+  const isPlaceholder = !images || images.length === 0;
+  const slots = isPlaceholder ? PLACEHOLDER_SLOTS : images;
+
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % images.length);
+      setCurrentIndex((prev) => (prev + 1) % slots.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [images.length]);
+  }, [slots.length]);
 
   return (
-    <div className="relative w-full aspect-[16/7] rounded-3xl overflow-hidden bg-page-dark/50 border border-white/10 shadow-2xl">
-      {images.map((img, idx) => (
+    <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-page-dark border border-white/10 shadow-2xl">
+      {slots.map((slot, idx) => (
         <div
-          key={img}
-          className={`absolute inset-0 flex items-center justify-center transition-opacity duration-1000 ease-in-out ${
+          key={idx}
+          className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
             idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"
           }`}
         >
-          <span className="text-white/30 text-sm font-bold uppercase tracking-[0.2em] border border-white/10 px-6 py-3 rounded-xl backdrop-blur-sm">
-            {img}
-          </span>
+          {isPlaceholder ? (
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 flex flex-col items-center justify-center gap-4">
+              <CourtPattern />
+              <div className="relative z-10 flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                  <Camera className="w-6 h-6 text-primary/50" />
+                </div>
+                <span className="text-white/50 text-sm font-medium text-center px-4">
+                  {(slot as { label: string }).label}
+                </span>
+                <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-primary/50 border border-primary/20 px-3 py-1 rounded-full">
+                  Foto Segera Hadir
+                </span>
+              </div>
+            </div>
+          ) : (
+            <Image
+              src={slot as string}
+              alt={`ASBC foto ${idx + 1}`}
+              fill
+              className="object-cover"
+            />
+          )}
         </div>
       ))}
 
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-20">
-        {images.map((img, idx) => (
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+        {slots.map((_, idx) => (
           <button
-            key={img}
+            key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`h-1.5 rounded-full transition-all duration-500 ${
               idx === currentIndex ? "bg-primary w-6" : "bg-white/30 w-1.5 hover:bg-white/50"

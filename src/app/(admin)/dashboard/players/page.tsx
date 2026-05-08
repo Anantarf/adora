@@ -56,7 +56,7 @@ export default function PlayersPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Kelompok Latihan</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Manajemen data pemain dan kelompok klub</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola data pemain dan kelompok latihan.</p>
         </div>
       </div>
 
@@ -87,7 +87,7 @@ export default function PlayersPage() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="xl" onClick={() => setUiState({ type: "add-group" })} className="hidden sm:flex">
-            <FolderPlus className="size-4" /> Kelompok Baru
+            <FolderPlus className="size-4" /> Tambah Kelompok
           </Button>
           <AddPlayerDialog />
         </div>
@@ -137,8 +137,8 @@ export default function PlayersPage() {
       {/* Content */}
       <AnimatePresence mode="wait">
         {!selectedGroupId ? null : isPlayersLoading ? (
-          <div key="loading" className="flex justify-center p-10">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          <div key="loading" className="flex items-center justify-center gap-2 p-10 text-primary font-bold text-xs uppercase tracking-widest">
+            <Loader2 className="size-5 animate-spin" /> Memuat pemain...
           </div>
         ) : (
           <motion.div key={selectedGroupId} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
@@ -146,7 +146,7 @@ export default function PlayersPage() {
               <div className="flex items-center justify-between gap-4 flex-wrap bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <div className="flex flex-col">
                   <h2 className="font-heading text-xl uppercase tracking-widest text-foreground">{selectedGroup?.name}</h2>
-                  <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup?.description ?? null) || "Grup Latihan"}</p>
+                  <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup?.description ?? null) || "Kelompok Latihan"}</p>
                 </div>
                 <div className="flex gap-2">
                   <Button size="sm" variant="outline" className="h-8 px-3 font-semibold text-xs" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup as Group })}>

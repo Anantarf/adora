@@ -1,15 +1,20 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Loader2, User, FileText, Activity } from "lucide-react";
-import { useFamily, type FamilyPlayer } from "@/hooks/use-family";
+import { Loader2, User, FileText, Activity, ClipboardCheck } from "lucide-react";
+import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { usePlayerStats } from "@/hooks/use-player-stats";
 import type { MetricsJson } from "@/types/dashboard";
+import type { AttendanceStatus } from "@/types/dashboard";
 import { FLAT_METRIC_DEFS, flattenMetrics, overallScore, averageScore } from "@/lib/metrics";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-configs";
+import { format } from "date-fns";
+import { id as idLocale } from "date-fns/locale";
+import { getEventConfig } from "@/lib/config/events";
 import {
   ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
   LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line,
@@ -26,6 +31,7 @@ export default function ParentDashboard() {
   }, [children, selectedChildId]);
 
   const { data: stats, isLoading: statsLoading } = usePlayerStats(effectiveChildId);
+  const { data: attendances, isLoading: attendanceLoading } = usePlayerAttendance(effectiveChildId);
 
   // Radar dari latest stat — 11 aspek individual
   const radarData = useMemo(() => {
@@ -46,6 +52,17 @@ export default function ParentDashboard() {
       Overall: overallScore(s.metricsJson as MetricsJson),
     }));
   }, [stats]);
+
+  const attendanceSummary = useMemo(() => {
+    if (!attendances?.length) return null;
+    const counts = attendances.reduce(
+      (acc, a) => { acc[a.status as AttendanceStatus] += 1; return acc; },
+      { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<AttendanceStatus, number>,
+    );
+    const total = attendances.length;
+    const rate = Math.round((counts.HADIR / total) * 100);
+    return { counts, total, rate };
+  }, [attendances]);
 
   const handleDownloadPDF = () => {
     if (!effectiveChildId) return;
@@ -68,7 +85,9 @@ export default function ParentDashboard() {
         </div>
         <h2 className="text-xl font-heading text-foreground uppercase mb-4">Belum Ada Profil Terhubung</h2>
         <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">
-          Akun ini belum terhubung dengan profil pemain manapun. <br className="hidden md:block" />
+          Akun ini belum terhubung dengan profil pemain manapun.
+        </p>
+        <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">
           Hubungi <span className="text-primary font-bold uppercase tracking-wider">Admin</span> untuk menghubungkan akun dengan putra/putri Anda.
         </p>
       </div>
@@ -197,6 +216,72 @@ export default function ParentDashboard() {
               </CardContent>
             </Card>
           )}
+
+          {/* Rekap Kehadiran */}
+          <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
+            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+              <div className="flex items-center gap-2">
+                <ClipboardCheck className="size-5 text-primary" />
+                <div>
+                  <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Rekap Kehadiran</CardTitle>
+                  <CardDescription className="text-xs">Riwayat kehadiran {activeChild.name} dalam 50 agenda terakhir.</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6">
+              {attendanceLoading ? (
+                <div className="flex items-center justify-center gap-2 py-8 text-primary font-bold text-xs uppercase tracking-widest">
+                  <Loader2 className="size-4 animate-spin" /> Memuat data kehadiran...
+                </div>
+              ) : !attendances?.length ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
+                  <ClipboardCheck className="size-8 text-muted-foreground/30 mb-1" />
+                  <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada data kehadiran</p>
+                  <p className="text-xs text-muted-foreground/60">Data kehadiran akan muncul setelah pelatih mengisi presensi agenda.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-5">
+                  {/* Summary strip */}
+                  <div className="flex flex-wrap gap-3 items-center">
+                    {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
+                      <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
+                        <span className="text-[10px] font-bold uppercase tracking-widest">{STATUS_STYLE[s].label}</span>
+                        <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
+                      </div>
+                    ))}
+                    <div className="ml-auto flex items-center gap-2 px-4 py-1.5 rounded-lg border border-primary/20 bg-primary/5">
+                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tingkat Kehadiran</span>
+                      <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
+                        {attendanceSummary?.rate ?? 0}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Record list */}
+                  <div className="flex flex-col gap-1.5">
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-1 mb-1">10 Agenda Terakhir</p>
+                    {attendances.slice(0, 10).map((a) => {
+                      const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
+                      const eventTitle = a.event?.title ?? eventLabel;
+                      return (
+                        <div key={a.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
+                          <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
+                              {format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}
+                            </span>
+                          </div>
+                          <span className={`shrink-0 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>
+                            {STATUS_STYLE[a.status as AttendanceStatus].label}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Catatan Pelatih + PDF */}
           <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">

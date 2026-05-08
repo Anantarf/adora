@@ -8,7 +8,7 @@ import { Plus, CalendarRange, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useCreatePeriod } from "@/hooks/use-evaluation-periods";
@@ -52,14 +52,17 @@ export function AddPeriodDialog() {
   return (
     <>
       <Button size="sm" onClick={() => setOpen(true)} className="gap-2 h-9">
-        <Plus className="size-4" /> Periode Baru
+        <Plus className="size-4" /> Buat Periode
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md bg-card border-border/50">
           <div className="flex items-center gap-3 mb-1">
             <div className="p-2 bg-primary/10 rounded-lg"><CalendarRange className="size-5 text-primary" /></div>
-            <DialogTitle className="text-xl font-heading uppercase tracking-widest">Buat Periode Evaluasi</DialogTitle>
+            <div>
+              <DialogTitle className="text-xl font-heading uppercase tracking-widest">Buat Periode Evaluasi</DialogTitle>
+              <DialogDescription className="text-xs text-muted-foreground mt-0.5">Tentukan nama dan rentang waktu periode penilaian pemain.</DialogDescription>
+            </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">

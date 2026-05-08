@@ -78,7 +78,7 @@ export function LoginForm() {
             <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full" />
             <Image
               src="/logo-adora.png"
-              alt="Adora BC"
+              alt="Adora BBC"
               width={112}
               height={112}
               className="object-contain relative z-10"

@@ -19,10 +19,12 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
         <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest text-destructive">Hapus Akun Pengguna?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs font-medium tracking-wide opacity-70 flex flex-col gap-2 mt-2">
-              <span className="text-destructive font-bold">Akses akun ini akan dihapus permanen dan tidak dapat dipulihkan.</span>
-              <span className="italic">Peringatan: Akun hanya bisa dihapus jika tidak terhubung dengan pemain.</span>
+            <AlertDialogDescription className="text-destructive font-bold text-xs mt-2">
+              Akses akun ini akan dihapus permanen dan tidak dapat dipulihkan.
             </AlertDialogDescription>
+            <p className="text-amber-500/80 text-xs mt-1">
+              Akun hanya dapat dihapus jika tidak ada pemain yang terhubung. Pastikan pemain sudah dipindahkan terlebih dahulu.
+            </p>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6">
             <AlertDialogCancel className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10">Batal</AlertDialogCancel>

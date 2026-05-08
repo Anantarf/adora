@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2 } from "lucide-react";
+import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2, UserCheck } from "lucide-react";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { toast } from "sonner";
 import Image from "next/image";
@@ -13,7 +13,12 @@ const ASSET_KEYS = [
   { key: "rapor_header_url", label: "Header Rapor (Kop Surat)", description: "Upload Kop Surat Klub (Format: PNG, JPG, atau PDF).", accept: ".png,.jpg,.jpeg,.pdf" },
   { key: "rapor_ceo_sign_url", label: "Tanda Tangan CEO", description: "Upload Tanda Tangan CEO (Format: PNG Transparan).", accept: ".png" },
   { key: "rapor_coach_sign_url", label: "Tanda Tangan Head Coach", description: "Upload Tanda Tangan Head Coach (Format: PNG Transparan).", accept: ".png" },
-  { key: "rapor_stamp_url", label: "Stempel Digital", description: "Upload Stempel Resmi Adora Basketball Club (Format: PNG Transparan).", accept: ".png" },
+  { key: "rapor_stamp_url", label: "Stempel Digital", description: "Upload Stempel Resmi ADORA BBC (Format: PNG Transparan).", accept: ".png" },
+];
+
+const SIGNER_KEYS = [
+  { key: "rapor_coach_name", label: "Nama Head Coach", placeholder: "Contoh: Danuri Akbar" },
+  { key: "rapor_ceo_name",   label: "Nama CEO",        placeholder: "Contoh: M. Arief, S.Ak" },
 ];
 
 export default function SettingsPage() {
@@ -21,12 +26,25 @@ export default function SettingsPage() {
   const updateSetting = useUpdateClubSetting();
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (settings) {
       setLocalValues(settings);
     }
   }, [settings]);
+
+  const handleTextSave = async (key: string, label: string) => {
+    setSaving((prev) => ({ ...prev, [key]: true }));
+    try {
+      await updateSetting.mutateAsync({ key, value: localValues[key] ?? "" });
+      toast.success(`${label} berhasil disimpan.`);
+    } catch {
+      toast.error("Gagal menyimpan. Coba lagi.");
+    } finally {
+      setSaving((prev) => ({ ...prev, [key]: false }));
+    }
+  };
 
   const handleFileUpload = async (key: string, file: File, label: string) => {
     setUploading((prev) => ({ ...prev, [key]: true }));
@@ -61,7 +79,7 @@ export default function SettingsPage() {
           <Settings className="size-8 text-primary" />
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Pengaturan Klub</h1>
         </div>
-        <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola aset dan template dokumen resmi ADORA Basketball Club.</p>
+        <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola aset dan template dokumen resmi ADORA BBC.</p>
       </div>
 
       <div className="grid gap-6">
@@ -111,11 +129,11 @@ export default function SettingsPage() {
                             <Upload className="size-4 text-muted-foreground" />
                           )}
                           <span className="text-xs font-medium text-muted-foreground truncate max-w-[200px]">
-                            {uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? localValues[asset.key].split("-").pop() : "Pilih file..."}
+                            {uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? "File sudah diunggah" : "Belum ada file dipilih"}
                           </span>
                         </div>
                         <span className="text-[10px] font-bold uppercase tracking-widest text-primary px-3 py-1 rounded-lg bg-primary/10">
-                          Browse
+                          Pilih File
                         </span>
                       </label>
                     </div>
@@ -133,11 +151,46 @@ export default function SettingsPage() {
                         </div>
                       )}
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-foreground truncate max-w-[120px]">File Aktif</span>
-                        <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">Lihat Full</a>
+                        <span className="text-[10px] font-bold text-foreground truncate max-w-[120px]">Digunakan di Rapor</span>
+                        <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">Lihat File</a>
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+          <CardHeader>
+            <div className="flex items-center gap-2 text-primary mb-1">
+              <UserCheck className="size-5" />
+              <CardTitle className="font-heading text-xl uppercase tracking-wider">Nama Penandatangan Rapor</CardTitle>
+            </div>
+            <CardDescription className="text-xs">
+              Nama yang tercantum di bawah tanda tangan pada Rapor PDF.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-6">
+            {SIGNER_KEYS.map(({ key, label, placeholder }) => (
+              <div key={key} className="flex flex-col gap-2">
+                <label className="text-xs font-bold uppercase tracking-widest text-foreground">{label}</label>
+                <div className="flex gap-3">
+                  <Input
+                    value={localValues[key] ?? ""}
+                    onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="flex-1"
+                  />
+                  <button
+                    onClick={() => handleTextSave(key, label)}
+                    disabled={saving[key]}
+                    className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-primary text-black text-xs font-bold uppercase tracking-widest hover:bg-primary/80 disabled:opacity-50 transition-colors whitespace-nowrap"
+                  >
+                    {saving[key] ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCircle2 className="size-3.5" />}
+                    Simpan
+                  </button>
                 </div>
               </div>
             ))}
@@ -149,8 +202,8 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-1">
             <p className="text-xs font-bold text-primary uppercase tracking-widest">Informasi Penting</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Jika URL dikosongkan, Rapor PDF akan menggunakan template default (teks biasa) tanpa gambar aset. 
-              Pastikan URL gambar dapat diakses secara publik dan menggunakan format yang didukung (PNG/JPG).
+              Aset yang belum diunggah tidak akan muncul di Rapor PDF — bagian tersebut akan dikosongkan secara otomatis.
+              Pastikan semua aset sudah terunggah sebelum mencetak rapor pemain.
             </p>
           </div>
         </div>

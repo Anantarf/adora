@@ -70,7 +70,7 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             <Edit2 className="size-5 text-primary" /> Ubah Kelompok
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Perbarui nama, kategori usia, sekolah, atau homebase.
+            Perbarui nama, kategori usia, sekolah, atau lokasi latihan.
           </DialogDescription>
         </DialogHeader>
 

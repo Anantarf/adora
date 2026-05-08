@@ -5,6 +5,11 @@ import { Users, KeyRound, Trash2, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { getUsersAction } from "@/actions/users";
 
+const ROLE_LABELS: Record<string, string> = {
+  PARENT: "Orang Tua",
+  ADMIN: "Admin",
+};
+
 type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
 
 type UserAccountCardProps = {
@@ -29,9 +34,12 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
           <UserCircle2 className="size-4 text-primary" />
         </div>
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
-          <span className="font-heading font-bold text-sm text-foreground truncate">{user.username}</span>
+          <span className="font-heading font-bold text-sm text-foreground truncate">{user.name ?? user.username}</span>
+          {user.name && (
+            <span className="text-[10px] text-muted-foreground/50 font-mono truncate hidden sm:inline">@{user.username}</span>
+          )}
           <span className="px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-black uppercase tracking-widest leading-none shrink-0">
-            {user.role}
+            {ROLE_LABELS[user.role] ?? user.role}
           </span>
           {isParent && (
             user._count.player > 0 ? (
@@ -60,7 +68,7 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
             size="sm"
             className="h-7 px-2.5 rounded-lg text-[9px] uppercase font-bold tracking-widest gap-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
           >
-            <KeyRound className="size-3" /> Reset
+            <KeyRound className="size-3" /> Atur Sandi
           </Button>
           <Button onClick={() => onDelete(user.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0">
             <Trash2 className="size-3" />

@@ -1,29 +1,41 @@
 /** Data murni programs — tanpa JSX, bisa dipakai di Server/Client/API */
-export const PROGRAMS = [
+export type Program = {
+  label: string;
+  ages: string;
+  /** Path ke foto kegiatan/pemain di /public. null = tampilkan placeholder. */
+  image: string | null;
+  desc: string;
+};
+
+export const PROGRAMS: readonly Program[] = [
   {
-    label: "KU‑7",
-    ages: "7 – 9 Tahun",
-    iconName: "Sprout" as const,
-    desc: "Program Kids perdana ADORA: mengenalkan dunia basket melalui permainan, gerak dasar, dan kecintaan terhadap olahraga sejak usia belia.",
+    label: "KU‑8",
+    ages: "UNDER 8",
+    image: null,
+    desc: "Tahap perkenalan dunia basket — gerak dasar, koordinasi, dan kesenangan bermain jadi prioritas utama.",
   },
   {
     label: "KU‑10",
-    ages: "10 – 12 Tahun",
-    iconName: "Target" as const,
-    desc: "Fondasi teknik dan ball-handling yang kuat. Pemain mulai dikenalkan pada sistem latihan terstruktur khas ADORA.",
+    ages: "UNDER 10",
+    image: null,
+    desc: "Membangun fondasi teknik dasar: dribbling, passing, dan shooting sederhana dalam suasana latihan yang menyenangkan.",
   },
   {
-    label: "KU‑15",
-    ages: "13 – 15 Tahun",
-    iconName: "Flame" as const,
-    desc: "Pengembangan taktik, fisik, dan mental kompetisi. Pemain aktif mengikuti sparing day, ASBC, dan Liga Basket.",
+    label: "KU‑12",
+    ages: "UNDER 12",
+    image: null,
+    desc: "Pengembangan kemampuan individu dan pengenalan konsep permainan tim. Pemain mulai dilatih disiplin dan konsistensi.",
   },
   {
-    label: "KU‑18",
-    ages: "16 – 18 Tahun",
-    iconName: "Trophy" as const,
-    desc: "Persiapan menuju KEJURKOT dan turnamen nasional dengan standar pelatihan profesional dan program Camp ADORA.",
+    label: "KU‑14",
+    ages: "UNDER 14",
+    image: null,
+    desc: "Peningkatan taktik, fisik, dan mental bertanding. Aktif mengikuti pertandingan uji coba dan kompetisi lokal.",
   },
-] as const;
-
-export type ProgramIconName = typeof PROGRAMS[number]["iconName"];
+  {
+    label: "KU‑16",
+    ages: "UNDER 16",
+    image: null,
+    desc: "Persiapan kompetisi serius — KEJURKOT, Liga Basket, dan turnamen regional dengan standar pelatihan terstruktur.",
+  },
+];

@@ -7,7 +7,6 @@ import {
   ChevronRight,
   User,
   Clock,
-  Database,
   FileText,
   RefreshCw,
 } from "lucide-react";
@@ -30,21 +29,36 @@ function getHumanReadableTable(table: string): string {
   return TARGET_TABLE_DICT[table.toLowerCase()] || table;
 }
 
+function extractTargetName(details: unknown): string | null {
+  if (!details || typeof details !== "object" || Array.isArray(details)) return null;
+  const d = details as Record<string, unknown>;
+  if (typeof d.name === "string") return d.name;
+  if (d.after && typeof d.after === "object" && !Array.isArray(d.after)) {
+    const after = d.after as Record<string, unknown>;
+    if (typeof after.name === "string") return after.name;
+  }
+  if (d.before && typeof d.before === "object" && !Array.isArray(d.before)) {
+    const before = d.before as Record<string, unknown>;
+    if (typeof before.name === "string") return before.name;
+  }
+  return null;
+}
+
 function getHumanReadableText(action: string, table: string): string {
   const a = action.toUpperCase();
   const t = getHumanReadableTable(table).toLowerCase();
 
-  if (a.includes("CREATE_STATS")) return `Memasukkan draft ${t} baru`;
-  if (a.includes("UPDATE_STATS")) return `Memperbarui & finalisasi ${t}`;
-  if (a.includes("SET_ACTIVE")) return `Membuka dan mengaktifkan ${t}`;
+  if (a.includes("CREATE_STATS")) return `Memasukkan data ${t} baru`;
+  if (a.includes("UPDATE_STATS")) return `Memperbarui dan menyelesaikan ${t}`;
+  if (a.includes("SET_ACTIVE")) return `Mengaktifkan ${t}`;
 
   if (a === "CREATE") return `Mendaftarkan ${t} baru`;
   if (a === "UPDATE") return `Memperbarui informasi ${t}`;
   if (a === "DELETE") return `Menghapus ${t} dari sistem`;
-  if (a === "RESET_PASSWORD") return `Mereset kata sandi ${t}`;
+  if (a === "RESET_PASSWORD") return `Mengatur ulang sandi ${t}`;
   if (a === "UPDATE_SELF") return `Memperbarui profil ${t}`;
 
-  return `Melakukan aksi pada ${t}`;
+  return `Perubahan pada data ${t}`;
 }
 
 // ─── Formatter ──────────────────────────────────────────
@@ -70,15 +84,15 @@ const FIELD_LABELS: Record<string, string> = {
   groupId: "Kelompok",
   parentId: "Orang Tua",
   dateOfBirth: "Tanggal Lahir",
-  homebaseId: "Homebase",
+  homebaseId: "Lokasi Latihan",
   description: "Keterangan",
   startDate: "Tanggal Mulai",
   endDate: "Tanggal Selesai",
   isActive: "Status Aktif",
   count: "Jumlah Ditambahkan",
   submitted: "Data Dikirim",
-  deduped: "Setelah Deduplikasi",
-  resetTo: "Sandi Direset Ke",
+  deduped: "Data Tidak Duplikat",
+  resetTo: "Sandi Diatur Ulang Ke",
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -193,7 +207,6 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
             {cfg.label}
           </span>
           <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
-            <Database className="size-2.5 inline mr-1" />
             {getHumanReadableTable(log.targetTable)}
           </span>
         </div>
@@ -201,13 +214,16 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
         {/* Details */}
         <p className="text-sm font-semibold text-foreground mt-1.5 leading-snug">
           {getHumanReadableText(log.action, log.targetTable)}
+          {extractTargetName(log.details) && (
+            <span className="text-primary font-bold"> — {extractTargetName(log.details)}</span>
+          )}
         </p>
 
         {/* Meta */}
         <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground font-medium">
           <span className="flex items-center gap-1">
             <User className="size-2.5" />
-            {log.user?.username || log.user?.name || "Sistem Otomatis"}
+            {log.user?.name || log.user?.username || "Sistem Otomatis"}
           </span>
           <span className="flex items-center gap-1">
             <Clock className="size-2.5" />
@@ -233,10 +249,10 @@ export default function AuditPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">
-            Audit Log
+            Riwayat Aktivitas
           </h1>
           <p className="text-muted-foreground text-sm font-medium tracking-wide">
-            Rekam jejak aktivitas sistem. Pantau siapa yang mengubah atau menghapus data.
+            Rekam jejak semua perubahan data. Pantau siapa yang menambah, mengubah, atau menghapus data.
           </p>
         </div>
         <Button
@@ -254,11 +270,10 @@ export default function AuditPage() {
       {/* Legend */}
       <div className="flex flex-wrap gap-2 items-center px-1">
         {(Object.entries(ACTION_CONFIG) as [ActionKey, typeof ACTION_CONFIG[ActionKey]][])
-          .filter(([k]) => k !== "default")
           .map(([, cfg]) => (
             <div
               key={cfg.label}
-              className="flex items-center gap-1.5 bg-muted/60 px-2.5 py-1 rounded-full border border-border shadow-sm"
+              className="flex items-center gap-2 bg-muted/60 pl-2 pr-3 py-1.5 rounded-full border border-border shadow-sm"
             >
               <div
                 className="p-1 rounded-full text-white shadow-sm"
@@ -266,9 +281,14 @@ export default function AuditPage() {
               >
                 <cfg.icon className="size-2.5" />
               </div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                {cfg.label}
-              </span>
+              <div className="flex flex-col leading-none">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">
+                  {cfg.label}
+                </span>
+                <span className="text-[9px] text-muted-foreground mt-0.5">
+                  {cfg.description}
+                </span>
+              </div>
             </div>
           ))}
       </div>
@@ -289,7 +309,7 @@ export default function AuditPage() {
               Belum ada rekam jejak aktivitas
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              Log akan muncul otomatis setelah admin melakukan aksi pada data.
+              Riwayat akan muncul otomatis setiap kali ada perubahan data.
             </p>
           </div>
         ) : (

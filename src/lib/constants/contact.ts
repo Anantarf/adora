@@ -1,4 +1,4 @@
-/** Single source of truth untuk semua info kontak ADORA BC */
+/** Single source of truth untuk semua info kontak ADORA BBC */
 export const CONTACT = {
   whatsapp:          "6281296701301",     // Hanifa (utama)
   whatsapp_name:     "Hanifa",

@@ -1,8 +1,8 @@
 "use client";
 
 import { type ScheduleEvent } from "@/types/dashboard";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { CalendarDays, Clock, MapPin, AlignLeft, Pencil } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
+import { CalendarDays, Clock, MapPin, AlignLeft, Pencil, Users } from "lucide-react";
 import { getEventConfig } from "@/lib/config/events";
 
 interface EventPreviewDialogProps {
@@ -42,6 +42,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
 
           <div className="p-6 pt-4 space-y-5 overflow-hidden">
             <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{event.title}</DialogTitle>
+            <DialogDescription className="sr-only">Detail agenda {event.title} — {cfg.label}</DialogDescription>
 
             <div className="flex items-start gap-3 min-w-0">
               <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><CalendarDays size={14} /></div>
@@ -71,6 +72,16 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
               </div>
             )}
 
+            {event.groups && event.groups.length > 0 && (
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><Users size={14} /></div>
+                <div className="min-w-0">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Kelompok Latihan</div>
+                  <div className="text-sm font-semibold text-white/80 wrap-break-word">{event.groups.map((g) => g.name).join(", ")}</div>
+                </div>
+              </div>
+            )}
+
             {event.description && (
               <div className="flex items-start gap-3 min-w-0">
                 <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><AlignLeft size={14} /></div>
@@ -86,7 +97,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
                 onClick={() => { onEdit(event); onClose(); }}
                 className="flex-1 py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-primary/10 border border-primary/30 rounded-xl hover:bg-primary/20 transition-colors text-primary flex items-center justify-center gap-2"
               >
-                <Pencil className="size-3" /> Edit
+                <Pencil className="size-3" /> Ubah
               </button>
               <button
                 onClick={onClose}

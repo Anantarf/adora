@@ -57,7 +57,7 @@ export function AddCertificateDialog() {
       />
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
-          <DialogTitle className="font-heading text-xl uppercase tracking-wider text-secondary flex items-center gap-2">
+          <DialogTitle className="font-heading text-xl uppercase tracking-wider flex items-center gap-2">
             <FileBadge className="size-5 text-primary" /> Unggah Sertifikat
           </DialogTitle>
           <DialogDescription className="text-xs">Tambah sertifikat prestasi untuk pemain atau seluruh kelompok.</DialogDescription>
@@ -65,20 +65,20 @@ export function AddCertificateDialog() {
         <div className="flex flex-col gap-4 mt-2">
           {/* Certificate Title */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Judul Sertifikat</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Judul Sertifikat</label>
             <Input placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026" value={title} onChange={(e) => setTitle(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
           </div>
 
           {/* File URL */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">URL File Sertifikat</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">URL File Sertifikat</label>
             <Input placeholder="https://drive.google.com/... atau /uploads/cert-001.pdf" value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
-            <p className="text-[10px] text-muted-foreground/70">Gunakan tautan Google Drive, Dropbox, atau URL publik lainnya.</p>
+            <p className="text-[10px] text-muted-foreground/70">Gunakan tautan publik — di Google Drive: klik kanan file → Bagikan → &quot;Siapa saja yang memiliki tautan&quot; → Salin tautan.</p>
           </div>
 
           {/* Assignment Mode */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Peruntukan</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Diberikan Kepada</label>
             <Select
               value={mode}
               onValueChange={(v: string | null) => {
@@ -98,7 +98,7 @@ export function AddCertificateDialog() {
 
           {/* Dynamic Target Selection */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">{mode === "player" ? "Pilih Pemain" : "Pilih Kelompok"}</label>
+            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{mode === "player" ? "Pilih Pemain" : "Pilih Kelompok"}</label>
             <Select value={selectedId} onValueChange={(v: string | null) => setSelectedId(v || "")}>
               <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
                 <SelectValue placeholder={mode === "player" ? "Cari nama pemain..." : "Pilih kelompok..."} />

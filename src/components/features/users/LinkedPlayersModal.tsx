@@ -44,7 +44,7 @@ export function LinkedPlayersModal({ parentId, parentUsername, onOpenChange }: L
             <div className="flex flex-col items-center justify-center gap-2 py-10 rounded-xl border border-dashed border-border/50">
               <Users className="size-8 text-muted-foreground/30" />
               <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum Ada Pemain Terhubung</p>
-              <p className="text-xs text-muted-foreground/60">Hubungkan pemain melalui form edit atau tambah pemain.</p>
+              <p className="text-xs text-muted-foreground/60">Hubungkan pemain melalui menu edit pemain.</p>
             </div>
           ) : (
             <ul className="space-y-2">
@@ -52,7 +52,7 @@ export function LinkedPlayersModal({ parentId, parentUsername, onOpenChange }: L
                 <li key={p.id} className="flex items-center justify-between px-4 py-3 rounded-xl border border-border/50 bg-background/40">
                   <span className="text-sm font-semibold text-foreground">{p.name}</span>
                   <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 px-2 py-0.5 rounded bg-muted/50">
-                    {p.group?.name ?? "Tanpa Kelompok"}
+                    {p.group?.name ?? "Tidak memiliki kelompok"}
                   </span>
                 </li>
               ))}

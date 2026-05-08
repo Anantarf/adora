@@ -49,10 +49,10 @@ export function GroupFormFields({
   return (
     <>
       <div className="space-y-2">
-        <label htmlFor={`group_name${checkboxIdSuffix}`} className="text-xs font-semibold text-muted-foreground cursor-pointer">
+        <label htmlFor={`group_name${checkboxIdSuffix}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
           Nama Kelompok
         </label>
-        <p className="text-[10px] text-muted-foreground/60">Bisa berdasarkan usia atau asal sekolah</p>
+        <p className="text-[10px] text-muted-foreground/60">Contoh: KU-16 Putra, Tim SD Gandul</p>
         <Input id={`group_name${checkboxIdSuffix}`} {...register("name")} placeholder="Contoh: KU-16 Putra" className="h-11" />
         {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
       </div>
@@ -70,7 +70,7 @@ export function GroupFormFields({
               }}
               className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
             />
-            <label htmlFor={`isUsia${checkboxIdSuffix}`} className="text-xs font-semibold text-muted-foreground cursor-pointer whitespace-nowrap">
+            <label htmlFor={`isUsia${checkboxIdSuffix}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 cursor-pointer whitespace-nowrap">
               Kelompok Umur
             </label>
           </div>
@@ -103,7 +103,7 @@ export function GroupFormFields({
               }}
               className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
             />
-            <label htmlFor={`isSekolah${checkboxIdSuffix}`} className="text-xs font-semibold text-muted-foreground cursor-pointer whitespace-nowrap">
+            <label htmlFor={`isSekolah${checkboxIdSuffix}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 cursor-pointer whitespace-nowrap">
               Sekolah
             </label>
           </div>
@@ -127,8 +127,8 @@ export function GroupFormFields({
 
       {homebases.length > 0 && (
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-muted-foreground">
-            Homebase <span className="text-muted-foreground/50 font-normal">(Opsional)</span>
+          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            Lokasi Latihan <span className="normal-case font-normal">(Opsional)</span>
           </label>
           <Select
             value={watch("homebaseId") === "__none__" ? "none" : (watch("homebaseId") || "none")}
@@ -141,15 +141,15 @@ export function GroupFormFields({
             }}
           >
             <SelectTrigger className="h-11 font-semibold">
-              <SelectValue placeholder="None">
+              <SelectValue placeholder="Tanpa Lokasi">
                 {watch("homebaseId") && watch("homebaseId") !== "none" && watch("homebaseId") !== "__none__"
-                  ? homebases.find((hb) => hb.id === watch("homebaseId"))?.name || "None"
-                  : "None"}
+                  ? homebases.find((hb) => hb.id === watch("homebaseId"))?.name || "Tanpa Lokasi"
+                  : "Tanpa Lokasi"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="none" className="text-muted-foreground">
-                None
+                Tanpa Lokasi
               </SelectItem>
               {homebases.map((hb) => (
                 <SelectItem key={hb.id} value={hb.id}>{hb.name}</SelectItem>

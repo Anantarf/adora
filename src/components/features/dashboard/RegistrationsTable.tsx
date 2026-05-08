@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Users, Info, MessageCircle } from "lucide-react";
@@ -30,14 +30,11 @@ interface RegistrationsTableProps {
 
 export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
-  const [prevRegistrations, setPrevRegistrations] = useState(registrations);
   const ITEMS_PER_PAGE = 10;
 
-  // Reset pagination when period or group changes
-  if (registrations !== prevRegistrations) {
-    setPrevRegistrations(registrations);
+  useEffect(() => {
     setCurrentPage(1);
-  }
+  }, [registrations]);
 
   const totalPages = Math.ceil(registrations.length / ITEMS_PER_PAGE);
   const paginatedRegistrations = useMemo(() => {
@@ -51,15 +48,17 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
           <h3 className="font-heading text-lg tracking-widest uppercase text-foreground">
             Antrean Pendaftaran
           </h3>
-          <span className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full">
-            {registrations.length} Menunggu
-          </span>
+          {registrations.length > 0 && (
+            <span className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full">
+              {registrations.length} Menunggu
+            </span>
+          )}
         </div>
 
         <div className="flex gap-3 bg-secondary/5 border border-secondary/10 p-4 rounded-xl mb-6">
           <Info className="size-5 text-secondary shrink-0 mt-0.5" />
           <p className="text-sm text-muted-foreground leading-relaxed">
-            Ini adalah daftar calon member yang mengisi form pendaftaran di web. Hubungi mereka via WhatsApp untuk mengonfirmasi pembayaran, lalu input data pemain secara manual di menu{" "}
+            Ini adalah daftar calon anggota yang mengisi formulir pendaftaran di web. Hubungi mereka via WhatsApp untuk mengonfirmasi pembayaran, lalu input data pemain secara manual di menu{" "}
             <strong className="text-foreground font-semibold">Kelompok Latihan</strong>.
             Tandai status pembayaran menggunakan tombol <strong className="text-amber-500 font-semibold">Belum Bayar</strong> atau <strong className="text-emerald-500 font-semibold">Sudah Bayar</strong>.
           </p>
@@ -72,9 +71,9 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                 <th className="px-4 py-3 rounded-l-lg w-10 text-center">No</th>
                 <th className="px-4 py-3">Tanggal</th>
                 <th className="px-4 py-3">Nama Pemain</th>
-                <th className="px-4 py-3">No. HP (WA)</th>
-                <th className="px-4 py-3">Program / KU</th>
-                <th className="px-4 py-3">Lokasi</th>
+                <th className="px-4 py-3">WhatsApp</th>
+                <th className="px-4 py-3">Kelompok Usia</th>
+                <th className="px-4 py-3">Lokasi Latihan</th>
                 <th className="px-4 py-3 rounded-r-lg text-right min-w-[280px]">Aksi</th>
               </tr>
             </thead>
@@ -85,14 +84,14 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                     <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground/60">
                       <Users className="size-10" />
                       <p className="text-sm font-medium uppercase tracking-widest">Belum Ada Pendaftar Baru</p>
-                      <p className="text-xs text-muted-foreground/40">Pendaftar dari form web akan muncul di sini.</p>
+                      <p className="text-xs text-muted-foreground/40">Pendaftar dari formulir web akan muncul di sini.</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 paginatedRegistrations.map((reg, idx) => {
                   const sanitized = sanitizePhone(reg.phone);
-                  const waContactUrl = `https://wa.me/${sanitized}?text=Halo%20Bapak/Ibu,%20ini%20admin%20Adora%20Basketball%20Club.%20Terkait%20pendaftaran%20ananda%20${encodeURIComponent(reg.playerName)}%20di%20${encodeURIComponent(reg.homebase.name)},%20apakah%20sudah%20melakukan%20pembayaran?`;
+                  const waContactUrl = `https://wa.me/${sanitized}?text=Halo%20Bapak/Ibu,%20ini%20admin%20ADORA%20BBC.%20Terkait%20pendaftaran%20ananda%20${encodeURIComponent(reg.playerName)}%20di%20${encodeURIComponent(reg.homebase.name)},%20apakah%20sudah%20melakukan%20pembayaran?`;
 
                   return (
                     <tr key={reg.id} className="hover:bg-muted/30 transition-colors">

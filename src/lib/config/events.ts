@@ -15,35 +15,35 @@ export const EVENT_TYPES: Record<string, EventConfig> = {
     id: "LATIHAN",
     label: "Latihan",
     accent: "TRAINING",
-    color: "#D4AF37", // Gold
+    color: "var(--event-latihan)",
     icon: Cone,
   },
   SPARING: {
     id: "SPARING",
     label: "Sparing",
     accent: "SCRIMMAGE",
-    color: "#F97316", // Orange
+    color: "var(--event-sparing)",
     icon: Swords,
   },
   PERTANDINGAN: {
     id: "PERTANDINGAN",
     label: "Kejuaraan",
     accent: "GAMEDAY",
-    color: "#E11D48", // Red
+    color: "var(--event-pertandingan)",
     icon: Trophy,
   },
   EVALUASI: {
     id: "EVALUASI",
     label: "Test Day!",
     accent: "EVALUATION",
-    color: "#3B82F6", // Blue
-    icon: CheckSquare, // using calendar or check
+    color: "var(--event-evaluasi)",
+    icon: CheckSquare,
   },
   KHUSUS: {
     id: "KHUSUS",
     label: "Agenda Lainnya",
     accent: "SPECIAL",
-    color: "#8B5CF6", // Purple
+    color: "var(--event-khusus)",
     icon: CalendarDays,
   },
 };

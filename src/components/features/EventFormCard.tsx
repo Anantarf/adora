@@ -228,10 +228,10 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
             </div>
             {homebases.length > 0 && (
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Homebase</label>
+                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi Latihan</label>
                 <Select value={homebaseId ?? ""} onValueChange={(val: string | null) => setValue("homebaseId", val || undefined)}>
                   <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
-                    <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua Homebase"}</SelectValue>
+                    <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua Lokasi"}</SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {homebases.map((hb) => (

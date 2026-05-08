@@ -81,6 +81,16 @@
   --color-page-dark: #0d0d0d;
 }
 
+/* Event type color tokens — konsisten di light & dark mode */
+:root,
+.dark {
+  --event-latihan: #D4AF37;
+  --event-sparing: #F97316;
+  --event-pertandingan: #E11D48;
+  --event-evaluasi: #3B82F6;
+  --event-khusus: #8B5CF6;
+}
+
 :root {
   /* Ultra Clean Light Mode (Sebagai Pendamping) */
   --background: #F8F8F8; /* Light Gray */

@@ -41,7 +41,7 @@ export default async function ParentLayout({ children }: { children: React.React
         {/* Footer */}
         <footer className="py-6 text-center border-t border-border/60 bg-background/50 mt-auto">
           <p className="text-xs font-medium text-muted-foreground">
-            &copy; {new Date().getFullYear()} Adora Basketball Club. All rights reserved.
+            &copy; {new Date().getFullYear()} ADORA BBC. All rights reserved.
           </p>
         </footer>
       </div>

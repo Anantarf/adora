@@ -62,7 +62,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       setOpen(false);
       toast.success("Kelompok baru berhasil ditambahkan!");
     } catch (error: unknown) {
-      toast.error((error instanceof Error ? error.message : null) || "Gagal menambahkan kelompok. Silakan coba kembali.");
+      toast.error("Gagal menambahkan kelompok. Silakan coba kembali.");
     }
   };
 

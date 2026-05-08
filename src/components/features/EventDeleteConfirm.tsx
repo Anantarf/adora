@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trash2, AlertTriangle } from "lucide-react";
+import { Trash2, AlertTriangle, CalendarOff } from "lucide-react";
 import { useDeleteEvent } from "@/hooks/use-schedule";
 import { toast } from "sonner";
 
@@ -39,11 +39,17 @@ export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProp
 
         <div className="py-6 flex flex-col gap-4">
           <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
-            <p className="text-sm font-medium text-foreground leading-relaxed">Apakah Anda yakin ingin menghapus agenda ini secara permanen?</p>
+            <p className="text-sm font-medium text-foreground leading-relaxed">Agenda ini akan dihapus secara permanen dari sistem.</p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
               <span className="text-xs font-semibold uppercase tracking-widest text-destructive">Tidak dapat dipulihkan</span>
             </div>
+          </div>
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex gap-3 items-start">
+            <CalendarOff className="size-4 text-amber-600 shrink-0 mt-0.5" />
+            <p className="text-xs font-medium text-amber-600/80">
+              Semua data presensi pemain yang tercatat untuk agenda ini juga akan ikut terhapus dan tidak dapat dikembalikan.
+            </p>
           </div>
         </div>
 

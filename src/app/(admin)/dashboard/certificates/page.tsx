@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
@@ -18,12 +18,9 @@ export default function CertificatesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  // Reset pagination when data changes (e.g. after deletion)
-  const [prevDataLength, setPrevDataLength] = useState(certificates?.length);
-  if (certificates?.length !== prevDataLength) {
-    setPrevDataLength(certificates?.length);
+  useEffect(() => {
     setCurrentPage(1);
-  }
+  }, [certificates?.length]);
 
   const filteredCertificates = useMemo(() => {
     if (!certificates) return [];
@@ -91,7 +88,7 @@ export default function CertificatesPage() {
               <TableRow>
                 <TableCell colSpan={5} className="h-24 text-center">
                   <div className="flex items-center justify-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
-                    <Loader2 className="size-4 animate-spin" /> Memuat data...
+                    <Loader2 className="size-4 animate-spin" /> Memuat sertifikat...
                   </div>
                 </TableCell>
               </TableRow>
@@ -102,7 +99,7 @@ export default function CertificatesPage() {
                   <div className="flex flex-col items-center gap-2 py-8">
                     <FileBadge className="size-10 text-muted-foreground/30 mb-2" />
                     <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">{searchQuery ? "Hasil tidak ditemukan" : "Belum ada sertifikat"}</p>
-                    <p className="text-xs text-muted-foreground/60">{searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Unggah sertifikat baru untuk memulai manajemen."}</p>
+                    <p className="text-xs text-muted-foreground/60">{searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Tambahkan sertifikat pertama menggunakan tombol di atas."}</p>
                   </div>
                 </TableCell>
               </TableRow>
@@ -128,7 +125,7 @@ export default function CertificatesPage() {
                       {cert.group.name}
                     </span>
                   ) : (
-                    <span className="text-xs text-muted-foreground italic">Umum</span>
+                    <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>
                   )}
                 </TableCell>
                 <TableCell className="text-sm text-muted-foreground">
@@ -156,10 +153,12 @@ export default function CertificatesPage() {
                       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
                         <AlertDialogHeader>
                           <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Sertifikat?</AlertDialogTitle>
-                          <AlertDialogDescription className="flex flex-col gap-2">
-                            <span className="text-destructive font-semibold">Sertifikat &quot;{cert.title}&quot; akan dihapus permanen.</span>
-                            <span className="text-muted-foreground text-sm">Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi.</span>
+                          <AlertDialogDescription className="text-destructive font-semibold">
+                            Sertifikat &quot;{cert.title}&quot; akan dihapus permanen dan tidak dapat dikembalikan.
                           </AlertDialogDescription>
+                          <p className="text-amber-500/80 text-xs mt-1">
+                            Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi dari portal.
+                          </p>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Batal</AlertDialogCancel>

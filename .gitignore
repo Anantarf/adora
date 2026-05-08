@@ -45,3 +45,9 @@ next-env.d.ts
 # data files
 *.xlsx
 
+# local development & uploads
+/public/uploads/
+*.pdf
+/scratch/
+/adora-bc.code-workspace
+

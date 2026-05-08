@@ -9,7 +9,6 @@ import { HomebaseSelector } from "@/components/homebase-selector";
 import { Starfield } from "@/components/ui/starfield";
 import { submitRegistration } from "@/actions/register";
 import { PROGRAMS } from "@/lib/constants/programs";
-import { PROGRAM_ICONS } from "@/lib/constants/program-icons";
 import { CONTACT } from "@/lib/constants/contact";
 import React from "react";
 
@@ -118,10 +117,10 @@ function RegisterContent() {
 
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/80 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-[72px] flex items-center justify-between">
           <Link href="/" aria-label="Kembali ke beranda" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 flex items-center justify-center transition-all">
-              <Image src="/logo-adora.png" alt="Adora BC" width={32} height={32} className="object-contain" />
+            <div className="w-14 h-14 flex items-center justify-center transition-all group-hover:scale-105">
+              <Image src="/logo-adora.png" alt="Adora BBC" width={56} height={56} className="object-contain" />
             </div>
             <span className="font-heading text-xl tracking-widest uppercase text-white group-hover:text-primary transition-colors hidden sm:block">
               ADORA <span className="text-primary">BC</span>
@@ -211,24 +210,25 @@ function RegisterContent() {
                         Program / Kelompok Usia <span className="text-primary">*</span>
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {PROGRAMS.map(({ label, ages, iconName, desc }) => {
+                        {PROGRAMS.map(({ label, ages, image, desc }) => {
                           const isSelected = form.ageGroup === label;
-                          const Icon = PROGRAM_ICONS[iconName];
                           return (
                             <button
                               key={label}
                               type="button"
                               disabled={isSubmitted}
                               onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
-                              className={`text-center px-4 py-4 rounded-xl border transition-all duration-300 flex flex-col items-center ${
+                              className={`text-center px-4 py-4 rounded-xl border transition-all duration-300 flex flex-col items-center overflow-hidden ${
                                 isSelected
                                   ? "bg-primary/10 border-primary ring-2 ring-primary/50"
                                   : "bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10"
                               } ${isSubmitted ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
                             >
-                              <div className={`mb-1 transition-colors ${isSelected ? "text-primary" : "text-white/50"}`} aria-hidden="true">
-                                <Icon className="w-8 h-8" />
-                              </div>
+                              {image ? (
+                                <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden">
+                                  <Image src={image} alt={`Program ${label}`} fill className="object-cover" />
+                                </div>
+                              ) : null}
                               <h4 className={`font-heading text-xl tracking-widest mb-0.5 ${isSelected ? "text-primary" : "text-white"}`}>
                                 {label}
                               </h4>

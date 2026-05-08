@@ -1,6 +1,6 @@
 "use client";
 import { useQuery } from "@tanstack/react-query";
-import { getFamilyPlayersAction, getParentsAction } from "@/actions/family";
+import { getFamilyPlayersAction, getParentsAction, getPlayerAttendanceAction } from "@/actions/family";
 import { QUERY_KEYS } from "@/lib/constants";
 
 export type FamilyPlayer = {
@@ -22,6 +22,15 @@ export const useFamily = () => {
     queryKey: QUERY_KEYS.FAMILY_PLAYERS,
     queryFn: () => getFamilyPlayersAction(),
     staleTime: 1000 * 60 * 30, // 30 menit cache karena data anak jarang berubah
+  });
+};
+
+export const usePlayerAttendance = (playerId: string | null) => {
+  return useQuery({
+    queryKey: ["player-attendance", playerId],
+    queryFn: () => getPlayerAttendanceAction(playerId!),
+    enabled: !!playerId,
+    staleTime: 1000 * 60 * 5,
   });
 };
 

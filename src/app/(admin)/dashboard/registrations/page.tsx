@@ -2,7 +2,7 @@ import { getPendingRegistrations } from "@/actions/register";
 import { RegistrationsTable } from "@/components/features/dashboard/RegistrationsTable";
 
 export const metadata = {
-  title: "Pendaftar Baru - Adora Basketball Club",
+  title: "Pendaftar Baru - ADORA BBC",
 };
 
 export default async function RegistrationsPage() {
@@ -10,10 +10,13 @@ export default async function RegistrationsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="font-heading text-2xl font-bold tracking-widest text-foreground uppercase">
+      <div className="flex flex-col gap-1 border-b border-border/50 pb-6">
+        <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">
           Pendaftar Baru
-        </h2>
+        </h1>
+        <p className="text-muted-foreground text-sm font-medium tracking-wide">
+          Calon anggota yang mengisi formulir pendaftaran online. Hubungi mereka untuk konfirmasi pembayaran.
+        </p>
       </div>
 
       <RegistrationsTable registrations={registrations} />

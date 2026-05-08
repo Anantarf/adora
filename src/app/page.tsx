@@ -2,11 +2,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { getPublicHomebases } from "@/actions/homebase";
 import { Metadata } from "next";
-import { MapPin, MessageCircle, AtSign, Music2, Trophy, ClipboardList } from "lucide-react";
-import { PROGRAM_ICONS } from "@/lib/constants/program-icons";
+import { MapPin, MessageCircle, Music2, Trophy, ClipboardList } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 import { HomebaseSection } from "@/components/features/homebase-section";
 import { AutoFadeCarousel } from "@/components/ui/auto-fade-carousel";
+import { LandingHeader, InstagramIcon } from "@/components/features/landing-header";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
 import { NAV_LINKS } from "@/lib/constants/navigation";
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
 const REGISTRATION_STEPS = [
   {
     step: "1",
-    title: "Pilih Homebase",
-    desc: "Tentukan homebase terdekat dengan Anda untuk mulai berlatih.",
+    title: "Pilih Lokasi Latihan",
+    desc: "Tentukan lokasi latihan terdekat dengan Anda untuk mulai berlatih.",
   },
   {
     step: "2",
@@ -54,40 +54,19 @@ export default async function LandingPage() {
     <main className="min-h-screen bg-page-dark text-white relative">
 
       {/* ── Sticky Navbar ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/90 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-110">
-              <Image src="/logo-adora.png" alt="Adora BC Logo" width={48} height={48} className="object-contain" />
-            </div>
-            <span className="font-heading text-xl tracking-widest uppercase text-white group-hover:text-primary transition-colors hidden sm:block">
-              ADORA <span className="text-primary">BC</span>
-            </span>
-          </Link>
-
-          <nav aria-label="Navigasi utama" className="hidden md:flex items-center gap-8">
-            {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} className="text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-primary transition-colors">
-                {label}
-              </a>
-            ))}
-          </nav>
-
-          <Link href="/login" className="text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white px-5 py-2 rounded-full hover:bg-white hover:text-black transition-all">
-            Login
-          </Link>
-        </div>
-      </header>
+      <LandingHeader />
 
       {/* ── Hero Section ── */}
       <section id="home" className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 bg-surface-dark z-0">
+          <Image
+            src="/images/hero/adora-team-1.png"
+            alt="ADORA Basketball Team"
+            fill
+            className="object-cover object-center opacity-40"
+            priority
+          />
           <div className="absolute inset-0 bg-gradient-to-b from-page-dark/40 via-page-dark/60 to-page-dark z-10" />
-          <div className="absolute inset-0 flex items-center justify-center opacity-20">
-            <span className="text-white text-2xl font-bold tracking-widest uppercase border border-white/20 p-8 rounded-xl backdrop-blur-sm">
-              Slot Foto Hero Layar Penuh
-            </span>
-          </div>
         </div>
 
         <div className="relative z-20 container mx-auto px-4 flex flex-col items-center text-center">
@@ -100,7 +79,7 @@ export default async function LandingPage() {
 
           <FadeIn delay={0.3} direction="up">
             <p className="max-w-2xl text-lg text-white/80 mb-10 leading-relaxed font-medium drop-shadow-md">
-              Bergabung bersama klub basket terdepan di Depok. Kami melatih talenta muda (usia 7-18 tahun) dengan standar profesional, menuju KEJURKOT dan kompetisi nasional.
+              Bergabung bersama klub basket terdepan di Depok. Kami membina talenta muda usia 7–16 tahun dengan pendekatan menyenangkan, membangun karakter, dan menyiapkan mereka menuju Kejuaraan Kota (KEJURKOT) hingga kompetisi nasional.
             </p>
           </FadeIn>
 
@@ -113,53 +92,68 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Program & Kelas ── */}
-      <section id="program" className="py-12 bg-page-dark scroll-mt-16">
+      <section id="program" className="py-20 bg-page-dark scroll-mt-20">
         <div className="container mx-auto px-4">
           <FadeIn direction="up">
             <div className="text-center mb-16">
               <h2 className="font-heading text-4xl text-primary uppercase tracking-widest mb-4">Program Kelas</h2>
               <p className="text-white/60 max-w-2xl mx-auto">
-                Kami mengelompokkan pelatihan berdasarkan Kelompok Umur (KU) untuk memastikan materi sesuai dengan perkembangan fisik dan mental anak.
+                Kami mengelompokkan pelatihan berdasarkan kelompok usia untuk memastikan materi sesuai dengan perkembangan fisik dan mental anak.
               </p>
             </div>
           </FadeIn>
 
-          <StaggerContainer className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto" delay={0.2}>
-            {PROGRAMS.map(({ label, ages, desc, iconName }) => {
-              const Icon = PROGRAM_ICONS[iconName];
-              return (
-                <StaggerItem
-                  key={label}
-                  className="bg-surface-dark border border-white/10 hover:border-primary/40 p-7 rounded-[2rem] transition-all hover:-translate-y-2 hover:shadow-primary-soft group flex flex-col items-center text-center shadow-xl"
-                >
-                  <div className="mb-6 text-white/50 group-hover:text-primary transition-colors duration-500">
-                    <Icon className="w-14 h-14" />
-                  </div>
-                  <h3 className="font-heading text-3xl text-white tracking-widest mb-2 group-hover:text-primary transition-colors">{label}</h3>
-                  <div className="bg-primary/10 text-primary text-[10px] px-3 py-1 rounded font-bold tracking-widest uppercase mb-4">
+          <StaggerContainer className="flex flex-wrap justify-center gap-6 md:gap-8 max-w-7xl mx-auto" delay={0.2}>
+            {PROGRAMS.map(({ label, ages, desc, image }) => (
+              <StaggerItem
+                key={label}
+                className="w-full sm:w-[calc(50%-1.5rem)] lg:w-[calc(33.333%-2rem)] max-w-md bg-surface-dark border border-white/10 hover:border-primary/40 rounded-[2rem] transition-all hover:-translate-y-2 hover:shadow-primary-soft group flex flex-col overflow-hidden shadow-xl"
+              >
+                <div className="relative w-full aspect-video overflow-hidden bg-white/5">
+                  {image ? (
+                    <Image
+                      src={image}
+                      alt={`Program ${label}`}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-br from-primary/25 via-primary/8 to-transparent flex flex-col items-center justify-center gap-3">
+                      <svg viewBox="0 0 48 48" fill="none" className="w-14 h-14 text-primary/25" aria-hidden="true">
+                        <circle cx="24" cy="24" r="20" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M4 24h40M24 4v40" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M9.6 9.6c5.3 5.3 5.3 23.5 0 28.8M38.4 9.6c-5.3 5.3-5.3 23.5 0 28.8" stroke="currentColor" strokeWidth="1.2"/>
+                      </svg>
+                      <span className="font-heading text-3xl text-primary/40 tracking-widest">{label}</span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-5 flex flex-col items-center text-center">
+                  <h3 className="font-heading text-2xl text-white tracking-widest mb-1 group-hover:text-primary transition-colors">{label}</h3>
+                  <div className="bg-primary/10 text-primary text-[10px] px-3 py-1 rounded font-bold tracking-widest uppercase mb-3">
                     {ages}
                   </div>
-                  <p className="text-white/60 text-sm leading-relaxed max-w-sm">{desc}</p>
-                </StaggerItem>
-              );
-            })}
+                  <p className="text-white/60 text-xs leading-relaxed">{desc}</p>
+                </div>
+              </StaggerItem>
+            ))}
           </StaggerContainer>
         </div>
       </section>
 
       {/* ── Homebase ── */}
-      <div id="homebase" className="relative z-10 bg-surface-dark border-y border-white/10 scroll-mt-16">
+      <div id="homebase" className="relative z-10 bg-surface-dark border-y border-white/10 scroll-mt-20">
         <HomebaseSection homebases={homebases} />
       </div>
 
-      {/* ── Adora Sports Entertainment & ASBC ── */}
-      <section id="asbc" className="py-16 bg-primary/5 border-y border-primary/10 scroll-mt-16">
+      {/* ── Adora Sports Entertainment & Turnamen ── */}
+      <section id="turnamen" className="py-20 bg-primary/5 border-y border-primary/10 scroll-mt-20">
         <div className="container mx-auto px-4">
           <FadeIn direction="up">
             <div className="text-center mb-10">
-              <h2 className="font-heading text-4xl text-primary uppercase tracking-widest mb-4">ASBC</h2>
+              <h2 className="font-heading text-4xl text-primary uppercase tracking-widest mb-4">Turnamen</h2>
               <p className="text-white/60 max-w-2xl mx-auto">
-                Adora Student Basketball Championship — kompetisi pelajar bergengsi yang kami selenggarakan setiap tahun.
+                Kami menyelenggarakan dua turnamen basket tahunan — terbuka untuk pelajar dan klub dari seluruh Indonesia.
               </p>
             </div>
           </FadeIn>
@@ -168,13 +162,27 @@ export default async function LandingPage() {
             <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center bg-surface-dark border border-white/10 p-6 md:p-8 rounded-[2rem]">
 
               <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-8">
-                <div>
-                  <h3 className="font-heading text-2xl md:text-3xl text-white uppercase tracking-widest mb-3">Adora Sports Entertainment</h3>
-                  <p className="text-white/60 text-sm md:text-base max-w-xl leading-relaxed">
-                    Lebih dari sekadar akademi, kami adalah penyelenggara resmi{" "}
-                    <strong className="text-primary font-bold">ASBC (Adora Student Basketball Championship)</strong>.
-                    Wadah kompetisi pelajar bergengsi dengan standar penyelenggaraan profesional.
+                <div className="w-full">
+                  <h3 className="font-heading text-2xl md:text-3xl text-white uppercase tracking-widest mb-4">Adora Sports Entertainment</h3>
+                  <p className="text-white/60 text-sm md:text-base leading-relaxed mb-6">
+                    Dua turnamen resmi yang kami selenggarakan setiap tahun:
                   </p>
+                  <ul className="text-left space-y-4 text-sm md:text-base text-white/80">
+                    <li className="flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/10">
+                      <Trophy className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-primary font-bold block mb-1">ASBC</strong>
+                        <span>Adora Student Basketball Championship — turnamen antar pelajar, terbuka untuk tim sekolah seluruh Indonesia.</span>
+                      </div>
+                    </li>
+                    <li className="flex items-start gap-3 bg-white/5 p-4 rounded-xl border border-white/10">
+                      <Trophy className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="text-primary font-bold block mb-1">ABCC</strong>
+                        <span>Adora Basketball Club Championship — turnamen antar klub basket dengan format kompetisi penuh.</span>
+                      </div>
+                    </li>
+                  </ul>
                 </div>
 
                 <a
@@ -198,12 +206,12 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Cara Mendaftar ── */}
-      <section id="daftar" className="py-24 bg-surface-dark border-t border-white/10 scroll-mt-16">
+      <section id="daftar" className="py-20 bg-surface-dark border-t border-white/10 scroll-mt-20">
         <div className="container mx-auto px-4">
           <FadeIn direction="up">
             <div className="text-center mb-16">
-              <h2 className="font-heading text-4xl text-white uppercase tracking-widest mb-4">Cara Bergabung</h2>
-              <p className="text-primary max-w-2xl mx-auto font-medium">Proses pendaftaran mudah, 100% online.</p>
+              <h2 className="font-heading text-4xl text-primary uppercase tracking-widest mb-4">Cara Bergabung</h2>
+              <p className="text-white/60 max-w-2xl mx-auto font-medium">Proses pendaftaran mudah, 100% online.</p>
             </div>
           </FadeIn>
 
@@ -225,7 +233,7 @@ export default async function LandingPage() {
               className="inline-flex items-center gap-3 bg-primary hover:bg-primary/90 text-black font-bold px-10 py-4 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-105 shadow-xl shadow-primary/20"
             >
               <ClipboardList className="w-4 h-4" />
-              Menuju Form Pendaftaran
+              Isi Formulir Pendaftaran
             </Link>
           </FadeIn>
         </div>
@@ -239,14 +247,14 @@ export default async function LandingPage() {
             <div className="md:col-span-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-20 h-20 flex items-center justify-center">
-                  <Image src="/logo-adora.png" alt="Adora BC Logo" width={80} height={80} className="object-contain" />
+                  <Image src="/logo-adora.png" alt="Adora BBC Logo" width={80} height={80} className="object-contain" />
                 </div>
                 <span className="font-heading text-2xl tracking-widest uppercase text-white">
-                  ADORA <span className="text-primary">BC</span>
+                  ADORA <span className="text-primary">BBC</span>
                 </span>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-6">
-                Berdiri sejak 2020, Adora Basketball Club (ADORA BC) berdedikasi menjadi pusat pembinaan basket terdepan di Depok.
+                Berdiri sejak 2020, Adora Basketball Club (ADORA BBC) berdedikasi menjadi pusat pembinaan basket terdepan di Depok.
                 Misi kami tidak hanya mencetak atlet berprestasi, tetapi juga membangun karakter anak bangsa yang sportif, disiplin, dan tangguh melalui olahraga.
               </p>
               <div className="flex gap-4">
@@ -255,16 +263,16 @@ export default async function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary hover:border-primary transition-colors"
-                  aria-label="Instagram ADORA BC"
+                  aria-label="Instagram ADORA BBC"
                 >
-                  <AtSign className="w-4 h-4" />
+                  <InstagramIcon className="w-4 h-4" />
                 </a>
                 <a
                   href={`https://www.tiktok.com/@${CONTACT.tiktok}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary hover:border-primary transition-colors"
-                  aria-label="TikTok ADORA BC"
+                  aria-label="TikTok ADORA BBC"
                 >
                   <Music2 className="w-4 h-4" />
                 </a>
@@ -273,7 +281,7 @@ export default async function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary hover:border-primary transition-colors"
-                  aria-label="WhatsApp ADORA BC"
+                  aria-label="WhatsApp ADORA BBC"
                 >
                   <MessageCircle className="w-4 h-4" />
                 </a>
