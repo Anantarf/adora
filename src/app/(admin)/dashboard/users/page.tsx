@@ -90,12 +90,12 @@ export default function UsersManagementPage() {
         {isLoading ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-border/50 bg-card">
             <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground animate-pulse">Memuat Data Akun...</p>
+            <p className="text-micro text-muted-foreground animate-pulse">Memuat Data Akun...</p>
           </div>
         ) : filteredUsers.length === 0 ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
             <Users className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-sm font-medium text-muted-foreground">
               {hasUsers && isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}
             </p>
             <p className="text-xs text-muted-foreground/60 text-center">
@@ -128,7 +128,11 @@ export default function UsersManagementPage() {
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
       <LinkedPlayersModal
         parentId={linkedPlayersParentId}
-        parentUsername={filteredUsers.find((u) => u.id === linkedPlayersParentId)?.username ?? undefined}
+        parentName={
+          (linkedPlayersParentId 
+            ? (filteredUsers.find((u) => u.id === linkedPlayersParentId)?.name || filteredUsers.find((u) => u.id === linkedPlayersParentId)?.username) 
+            : undefined) ?? undefined
+        }
         onOpenChange={(open) => { if (!open) setLinkedPlayersParentId(null); }}
       />
     </motion.div>

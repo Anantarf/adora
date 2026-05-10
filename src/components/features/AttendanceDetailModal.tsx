@@ -150,7 +150,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                 <div className="flex flex-wrap gap-2">
                   {unsetCount > 0 && (
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-destructive/30 bg-destructive/5 text-destructive">
-                      <span className="text-[10px] font-bold uppercase tracking-widest">Belum Dipilih</span>
+                      <span className="text-micro">Belum Dipilih</span>
                       <span className="text-sm font-black">{unsetCount}</span>
                     </div>
                   )}
@@ -159,7 +159,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                     if (count === 0) return null;
                     return (
                       <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
-                        <span className="text-[10px] font-bold uppercase tracking-widest">{STATUS_STYLE[s].label}</span>
+                        <span className="text-micro">{STATUS_STYLE[s].label}</span>
                         <span className="text-sm font-black">{count}</span>
                       </div>
                     );
@@ -172,7 +172,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
             <div className="p-6 flex-1 min-h-0 flex flex-col gap-6 overflow-hidden">
               {/* Quick Actions */}
               {isFutureEvent ? (
-                <div className="flex items-center gap-2 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase tracking-widest">
+                <div className="flex items-center gap-2 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 text-micro">
                   <CalendarDays className="size-4 shrink-0" />
                   <span>Presensi belum dapat diisi sebelum waktu kegiatan dimulai.</span>
                 </div>
@@ -187,7 +187,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                       size="sm"
                       variant="outline"
                       onClick={handleMarkAllHadir}
-                      className={`h-8 px-3 text-[10px] font-bold uppercase tracking-widest border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE.HADIR.color}`}
+                      className={`h-8 px-3 text-micro border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE.HADIR.color}`}
                     >
                       Semua Hadir
                     </Button>
@@ -198,7 +198,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               {/* Player List */}
               <div className="space-y-3 flex-1 min-h-0 flex flex-col">
                 <div className="flex items-center justify-between px-1 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Pemain ({event.attendances.length})</span>
+                  <span className="text-micro text-muted-foreground">Pemain ({event.attendances.length})</span>
                 </div>
 
                 <div className="grid gap-2 overflow-y-auto overflow-x-hidden pr-1">
@@ -210,7 +210,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                     return (
                       <div key={a.playerId} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors gap-3 sm:gap-4 min-w-0">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center font-heading text-sm shrink-0">{a.player.name.charAt(0).toUpperCase()}</div>
+                          <div className="size-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-heading text-sm shrink-0">{a.player.name.charAt(0).toUpperCase()}</div>
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm font-bold truncate text-foreground">{a.player.name}</span>
                             {a.player.schoolOrigin && <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">{a.player.schoolOrigin}</span>}
@@ -218,7 +218,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                         </div>
 
                         <Select disabled={isFutureEvent} value={currentStatus ?? ""} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
-                          <SelectTrigger className={`w-full sm:w-40 h-9 text-[10px] font-bold uppercase tracking-widest ${triggerStyle} transition-colors shrink-0`}>
+                          <SelectTrigger className={`w-full sm:w-40 h-9 text-micro ${triggerStyle} transition-colors shrink-0`}>
                             <SelectValue placeholder="Pilih Status" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-border/50">

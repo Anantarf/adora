@@ -6,7 +6,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { HomebaseSelector } from "@/components/homebase-selector";
-import { Starfield } from "@/components/ui/starfield";
 import { submitRegistration } from "@/actions/register";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
@@ -50,7 +49,7 @@ const FORM_FIELDS: Array<{
 ];
 
 const INPUT_CLASS =
-  "w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder:text-white/20 text-sm focus:outline-none focus:border-primary transition-colors";
+  "w-full px-4 py-3 bg-black/40 border-2 border-white/10 rounded-xl text-white placeholder:text-white/30 text-sm font-medium focus:outline-none focus:border-brand-yellow focus:bg-black/60 transition-colors";
 
 // ─── Inner (uses useSearchParams — harus di dalam Suspense) ──────────────────
 
@@ -82,8 +81,12 @@ function RegisterContent() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!form.name || !form.phone || !form.ageGroup || !selectedHomebase?.id) {
-      setError("Mohon lengkapi semua data wajib yang bertanda *");
+    if (!selectedHomebase?.id) {
+      setError("Mohon pilih homebase terlebih dahulu.");
+      return;
+    }
+    if (!form.ageGroup) {
+      setError("Mohon pilih Program / Kelompok Usia terlebih dahulu.");
       return;
     }
 
@@ -112,56 +115,68 @@ function RegisterContent() {
   };
 
   return (
-    <main className="min-h-screen bg-page-dark text-foreground relative overflow-hidden">
-      <Starfield />
+    <main className="min-h-screen bg-page-dark text-foreground relative overflow-x-hidden">
+      
+      {/* Background Textures */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-orange rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
+        <div className="absolute inset-0 pattern-halftone opacity-20"></div>
+      </div>
 
       {/* ── Navbar ── */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/80 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-[72px] flex items-center justify-between">
+      <header className="sticky top-0 z-50 w-full border-b-[4px] border-brand-purple bg-page-dark/90 backdrop-blur-xl">
+        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
           <Link href="/" aria-label="Kembali ke beranda" className="flex items-center gap-3 group">
-            <div className="w-14 h-14 flex items-center justify-center transition-all group-hover:scale-105">
-              <Image src="/logo-adora.png" alt="Adora BBC" width={56} height={56} className="object-contain" />
+            <div className="w-16 h-16 flex items-center justify-center transition-all group-hover:scale-105">
+              <Image src="/logo-new.png" alt="Adora BBC" width={64} height={64} className="w-auto h-auto max-h-[64px] object-contain" />
             </div>
-            <span className="font-heading text-xl tracking-widest uppercase text-white group-hover:text-primary transition-colors hidden sm:block">
-              ADORA <span className="text-primary">BC</span>
+            <span className="font-heading font-black text-2xl tracking-widest uppercase text-white transition-colors hidden sm:block italic group-hover:text-brand-yellow">
+              ADORA <span className="text-brand-orange">BBC</span>
             </span>
           </Link>
           <Link
             href="/login"
-            className="text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white px-5 py-2 rounded-full hover:bg-white hover:text-black transition-all"
+            className="skew-box bg-white/10 border-2 border-white/20 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
           >
-            Login
+            <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">
+              PORTAL LOGIN
+            </span>
           </Link>
         </div>
       </header>
 
       {/* ── Hero ── */}
-      <section className="relative py-20 text-center px-4 z-10">
-        <div className="inline-flex items-center gap-2 border border-primary/30 bg-primary/5 text-primary text-[10px] font-bold uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-8">
-          Pendaftaran Anggota Baru
+      <section className="relative pt-16 pb-12 text-center px-4 z-10">
+        <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-8 border-2 border-black shadow-[4px_4px_0px_#000]">
+          <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">
+            // JOIN THE SQUAD //
+          </span>
         </div>
-        <h1 className="font-heading text-5xl md:text-7xl tracking-widest uppercase text-white mb-4 leading-none">
-          Bergabung dengan <span className="text-primary">ADORA</span>
+        <h1 className="font-heading font-black text-4xl md:text-6xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
+          FORM <span className="inline-block text-transparent bg-clip-text bg-gradient-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>
         </h1>
-        <p className="text-white/60 text-sm max-w-xl mx-auto leading-relaxed">
-          Jadilah bagian dari komunitas basket terbaik. Pilih homebase, isi data, lalu hubungi kami via WhatsApp.
+        <p className="text-white/70 text-base md:text-lg max-w-xl mx-auto font-medium">
+          Isi data dengan lengkap. Langkah awal menuju Kejurkot dimulai dari sini.
         </p>
       </section>
 
       {/* ── Main Form ── */}
-      <div className="container mx-auto px-4 pb-12 relative z-10">
+      <div className="container mx-auto px-4 pb-20 relative z-10">
         <div className="max-w-3xl mx-auto">
 
           <div className="space-y-10">
 
             {/* Step 1: Pilih Homebase */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <div className="size-9 rounded-full bg-primary flex items-center justify-center font-heading text-black font-bold text-sm shrink-0">1</div>
-                <div>
-                  <h2 className="font-heading text-xl uppercase tracking-widest text-white">Pilih Homebase</h2>
-                  <p className="text-white/40 text-xs">Pilih homebase yang paling dekat dengan Anda</p>
+            <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative">
+              <div className="absolute -top-5 -left-3 md:-left-5">
+                <div className="skew-box w-12 h-12 bg-brand-purple text-white border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
+                  <span className="unskew-content font-heading font-black text-2xl italic">1</span>
                 </div>
+              </div>
+              <div className="mb-8 pl-10 md:pl-12">
+                <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">PILIH LOKASI LATIHAN</h2>
+                <p className="text-white/60 font-medium text-xs md:text-sm">Pilih homebase yang paling dekat dengan Anda</p>
               </div>
               <HomebaseSelector
                 value={selectedHomebase?.id}
@@ -173,22 +188,24 @@ function RegisterContent() {
 
             {/* Step 2: Form (muncul setelah homebase ter-resolve namanya) */}
             {selectedHomebase?.name && (
-              <div>
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="size-9 rounded-full bg-primary flex items-center justify-center font-heading text-black font-bold text-sm shrink-0">2</div>
-                  <div>
-                    <h2 className="font-heading text-xl uppercase tracking-widest text-white">Data Pendaftar</h2>
-                    <p className="text-white/40 text-xs">Isi data di bawah untuk mempercepat proses pendaftaran</p>
+              <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative mt-12 animate-in slide-in-from-bottom-10 fade-in duration-500">
+                <div className="absolute -top-5 -left-3 md:-left-5">
+                  <div className="skew-box w-12 h-12 bg-brand-orange text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
+                    <span className="unskew-content font-heading font-black text-2xl italic">2</span>
                   </div>
                 </div>
+                <div className="mb-8 pl-10 md:pl-12">
+                  <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">DATA CALON PEMAIN</h2>
+                  <p className="text-white/60 font-medium text-xs md:text-sm">Pastikan nomor WhatsApp aktif untuk konfirmasi admin.</p>
+                </div>
 
-                <form onSubmit={handleSubmit} noValidate>
-                  <div className="space-y-4 bg-white/5 border border-white/10 rounded-2xl p-6 md:p-8">
+                <form onSubmit={handleSubmit}>
+                  <div className="space-y-6">
                     {/* Text inputs dari config */}
                     {FORM_FIELDS.map(({ key, type, label, required, placeholder, sanitize }) => (
                       <div key={key}>
-                        <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-2">
-                          {label} {required && <span className="text-primary">*</span>}
+                        <label className="block font-bold text-white/80 uppercase tracking-widest text-xs mb-2">
+                          {label} {required && <span className="text-brand-orange">*</span>}
                         </label>
                         <input
                           type={type}
@@ -205,9 +222,9 @@ function RegisterContent() {
                     ))}
 
                     {/* Program (Cards) */}
-                    <div>
-                      <label className="block text-[10px] uppercase font-bold tracking-widest text-white/50 mb-3">
-                        Program / Kelompok Usia <span className="text-primary">*</span>
+                    <div className="pt-3">
+                      <label className="block font-bold text-white/80 uppercase tracking-widest text-[10px] mb-3">
+                        PILIH KELOMPOK USIA <span className="text-brand-orange">*</span>
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {PROGRAMS.map(({ label, ages, image, desc }) => {
@@ -218,24 +235,25 @@ function RegisterContent() {
                               type="button"
                               disabled={isSubmitted}
                               onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
-                              className={`text-center px-4 py-4 rounded-xl border transition-all duration-300 flex flex-col items-center overflow-hidden ${
+                              className={`text-left px-4 py-4 rounded-2xl border-2 transition-all duration-300 flex flex-col relative overflow-hidden ${
                                 isSelected
-                                  ? "bg-primary/10 border-primary ring-2 ring-primary/50"
-                                  : "bg-white/5 border-white/10 hover:border-white/30 hover:bg-white/10"
+                                  ? "bg-brand-purple/20 border-brand-purple ring-4 ring-brand-purple/20 shadow-[0_0_30px_rgba(138,43,226,0.3)]"
+                                  : "bg-black/40 border-white/10 hover:border-white/30 hover:bg-black/60"
                               } ${isSubmitted ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
                             >
-                              {image ? (
-                                <div className="relative w-full h-24 mb-3 rounded-lg overflow-hidden">
-                                  <Image src={image} alt={`Program ${label}`} fill className="object-cover" />
+
+                              
+                              <div className="flex items-start justify-between w-full relative z-10">
+                                <div>
+                                  <h4 className={`font-heading font-black text-lg md:text-xl tracking-widest mb-1 italic uppercase ${isSelected ? "text-brand-yellow" : "text-white"}`}>
+                                    {label}
+                                  </h4>
+                                  <div className={`inline-block px-2 py-0.5 rounded bg-white/10 font-bold tracking-widest text-[9px] mb-2 ${isSelected ? "text-white" : "text-white/60"}`}>
+                                    {ages}
+                                  </div>
                                 </div>
-                              ) : null}
-                              <h4 className={`font-heading text-xl tracking-widest mb-0.5 ${isSelected ? "text-primary" : "text-white"}`}>
-                                {label}
-                              </h4>
-                              <span className="text-[10px] font-bold uppercase tracking-widest text-primary/80 mb-2">
-                                {ages}
-                              </span>
-                              <p className="text-white/60 text-[11px] leading-relaxed">
+                              </div>
+                              <p className={`text-sm font-medium leading-relaxed mt-2 ${isSelected ? "text-white/90" : "text-white/50"}`}>
                                 {desc}
                               </p>
                             </button>
@@ -245,45 +263,54 @@ function RegisterContent() {
                     </div>
 
                     {isSubmitted ? (
-                      <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-6 text-center space-y-4 mt-6">
-                        <CheckCircle2 className="size-12 text-green-400 mx-auto" />
-                        <h3 className="font-heading text-xl text-green-400 uppercase tracking-widest">Pendaftaran Terkirim!</h3>
-                        <p className="text-white/60 text-sm">
-                          Data Anda sudah kami simpan. Langkah terakhir, silakan klik tombol WhatsApp di bawah untuk konfirmasi pendaftaran ke Admin.
-                        </p>
+                      <div className="bg-green-500/10 border-2 border-green-500/50 rounded-2xl p-8 text-center space-y-6 mt-10 animate-in zoom-in-95 duration-500">
+                        <CheckCircle2 className="size-16 text-green-400 mx-auto" />
+                        <div>
+                          <h3 className="font-heading font-black text-2xl md:text-3xl text-green-400 uppercase tracking-widest italic mb-2">PENDAFTARAN SUKSES!</h3>
+                          <p className="text-white/70 text-sm md:text-base font-medium">
+                            Data Anda sudah masuk ke sistem kami. Langkah terakhir, klik tombol di bawah untuk konfirmasi via WhatsApp.
+                          </p>
+                        </div>
                         <a
                           href={waUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="cursor-pointer mt-4 flex items-center justify-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02]"
+                          className="inline-flex skew-box items-center justify-center gap-3 bg-green-500 hover:bg-green-400 text-black font-black px-8 py-4 transition-all text-base uppercase tracking-widest hover:scale-[1.05] shadow-[4px_4px_0px_#000] border-2 border-black w-full sm:w-auto"
                         >
-                          <MessageCircle className="size-4" />
-                          Hubungi Admin (WA)
+                          <span className="unskew-content flex items-center gap-2 italic">
+                            <MessageCircle className="size-5" />
+                            KONFIRMASI ADMIN
+                          </span>
                         </a>
-                        <button
-                          type="button"
-                          onClick={handleReset}
-                          className="cursor-pointer w-full mt-2 border border-white/20 hover:border-white/40 text-white/50 hover:text-white/80 text-xs uppercase tracking-widest transition-all py-2.5 rounded-full"
-                        >
-                          Daftar Anggota Lain
-                        </button>
+                        <div className="pt-4">
+                          <button
+                            type="button"
+                            onClick={handleReset}
+                            className="cursor-pointer text-white/50 hover:text-white font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4"
+                          >
+                            Daftar Anggota Lain
+                          </button>
+                        </div>
                       </div>
                     ) : (
-                      <>
+                      <div className="pt-8">
                         {error && (
-                          <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-xs font-medium">
-                            ⚠️ {error}
+                          <div className="bg-red-500/20 border-l-4 border-red-500 px-5 py-4 mb-6 text-red-100 text-sm font-bold flex items-center gap-3">
+                            <span className="text-red-500 text-xl">⚠️</span> {error}
                           </div>
                         )}
 
                         <button
                           type="submit"
                           disabled={isPending}
-                          className="cursor-pointer mt-2 w-full flex items-center justify-center gap-3 bg-primary hover:bg-primary/80 text-black font-bold px-8 py-3.5 rounded-full transition-all text-sm uppercase tracking-widest hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="w-full skew-box bg-gradient-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-4 md:px-8 md:py-5 transition-all text-sm md:text-lg uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
                         >
-                          {isPending ? "Menyimpan Data..." : "Kirim Pendaftaran"}
+                          <span className="unskew-content flex items-center justify-center gap-2 italic">
+                            {isPending ? "MEMPROSES..." : "KIRIM PENDAFTARAN"} 
+                            {!isPending && <span className="group-hover:translate-x-2 transition-transform">→</span>}
+                          </span>
                         </button>
-                      </>
+                      </div>
                     )}
                   </div>
                 </form>
@@ -291,29 +318,31 @@ function RegisterContent() {
             )}
 
             {!selectedHomebase?.name && (
-              <p className="text-white/20 text-xs text-center tracking-widest uppercase">
-                ↑ Pilih homebase di atas untuk melanjutkan
-              </p>
+              <div className="text-center pt-8 animate-pulse">
+                <p className="text-brand-yellow font-black text-xs tracking-widest uppercase italic">
+                  ↑ PILIH LOKASI DI ATAS UNTUK LANJUT ↑
+                </p>
+              </div>
             )}
           </div>
         </div>
       </div>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-white/10 py-6">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
-          <Link href="/" className="text-white/30 text-xs hover:text-primary transition-colors">
-            ← Kembali ke Beranda
+      <footer className="relative z-10 border-t-4 border-brand-purple py-8 bg-black/60 backdrop-blur-md">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          <Link href="/" className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-brand-orange transition-colors">
+            ← KEMBALI
           </Link>
-          <p className="text-white/20 text-[10px]">
+          <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">
             &copy; {new Date().getFullYear()} ADORA Basketball Club
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <a
               href={`https://instagram.com/${CONTACT.instagram}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/30 text-xs hover:text-primary transition-colors"
+              className="text-white/40 text-xs font-bold uppercase hover:text-brand-orange transition-colors"
             >
               IG @{CONTACT.instagram}
             </a>
@@ -321,7 +350,7 @@ function RegisterContent() {
               href={`https://www.tiktok.com/@${CONTACT.tiktok}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-white/30 text-xs hover:text-primary transition-colors"
+              className="text-white/40 text-xs font-bold uppercase hover:text-brand-orange transition-colors"
             >
               TikTok @{CONTACT.tiktok}
             </a>

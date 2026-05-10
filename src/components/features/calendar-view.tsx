@@ -127,7 +127,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <CalendarDays size={14} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Hari & Tanggal</div>
+                  <div className="text-micro text-white/50 mb-0.5">Hari & Tanggal</div>
                   <div className="text-sm font-semibold text-white/80 wrap-break-word">{formatJakarta(selectedEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
                 </div>
               </div>
@@ -138,7 +138,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <Clock size={14} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Waktu</div>
+                  <div className="text-micro text-white/50 mb-0.5">Waktu</div>
                   <div className="text-sm font-semibold text-white/80">{formatJakarta(selectedEvent.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
                 </div>
               </div>
@@ -150,7 +150,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     <MapPin size={14} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Lokasi</div>
+                    <div className="text-micro text-white/50 mb-0.5">Lokasi</div>
                     <div className="text-sm font-semibold text-white/80 wrap-break-word">{selectedEvent.location}</div>
                   </div>
                 </div>
@@ -163,7 +163,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     <AlignLeft size={14} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Keterangan</div>
+                    <div className="text-micro text-white/50 mb-0.5">Keterangan</div>
                     <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{selectedEvent.description}</p>
                   </div>
                 </div>

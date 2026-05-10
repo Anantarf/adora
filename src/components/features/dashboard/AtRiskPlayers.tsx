@@ -34,10 +34,10 @@ export function AtRiskPlayers({ metrics, isLoading }: AtRiskPlayersProps) {
   }
 
   return (
-    <Card className="border-red-500/20 bg-red-500/5 shadow-sm">
-      <CardHeader className="pb-3 border-b border-red-500/10 flex flex-row items-center gap-2 space-y-0">
-        <AlertTriangle className="size-5 text-red-500 shrink-0" />
-        <CardTitle className="text-red-500 flex-1 font-heading tracking-widest text-lg uppercase">
+    <Card className="border-destructive/20 bg-destructive/5 shadow-sm">
+      <CardHeader className="pb-3 border-b border-destructive/10 flex flex-row items-center gap-2 space-y-0">
+        <AlertTriangle className="size-5 text-destructive shrink-0" />
+        <CardTitle className="text-destructive flex-1 font-heading tracking-widest text-lg uppercase">
           Peringatan Absensi
         </CardTitle>
       </CardHeader>
@@ -47,12 +47,12 @@ export function AtRiskPlayers({ metrics, isLoading }: AtRiskPlayersProps) {
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {atRiskPlayers.map((player) => (
-            <div key={player.id} className="flex items-center justify-between p-3 rounded-md bg-background border border-red-500/20">
+            <div key={player.id} className="flex items-center justify-between p-3 rounded-md bg-background border border-destructive/20">
               <div className="overflow-hidden pr-2">
                 <p className="font-semibold text-sm truncate">{player.name}</p>
                 <p className="text-xs text-muted-foreground truncate">{player.groupName}</p>
               </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-red-500/10 text-red-500 shrink-0">
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/10 text-destructive shrink-0">
                 <UserX className="size-3" />
                 <span className="text-xs font-bold">{player.alpaCount}x</span>
               </div>

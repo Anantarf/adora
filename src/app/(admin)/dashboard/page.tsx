@@ -23,7 +23,7 @@ export default function AdminDashboardPage() {
       <FadeIn direction="up">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border/50 pb-6">
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            <p className="text-micro text-muted-foreground/50">
               Selamat Datang,
             </p>
             <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">

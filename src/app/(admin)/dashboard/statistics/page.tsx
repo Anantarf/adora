@@ -60,6 +60,66 @@ const periodDisplayLabel = (period: { name: string; startDate: Date | string; en
   return `Periode ${startLabel} - ${endLabel}`;
 };
 
+// ─── Subcomponents ──────────────────────────────────────
+
+const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, settings }: { player: any, idx: number, stat: any, group: any, selectedPeriod: any, settings: any }) => {
+  const rawM = stat?.metricsJson;
+  const m = getValidMetrics(rawM);
+
+  return (
+    <TableRow className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
+      <TableCell className="text-center text-muted-foreground font-medium sticky left-0 bg-inherit z-10">{idx + 1}</TableCell>
+      <TableCell className="font-semibold sticky left-8 bg-inherit z-10">{player.name}</TableCell>
+      {FLAT_METRIC_DEFS.map((def) => (
+        <TableCell key={def.key} className="text-center font-mono text-sm">
+          <MetricCell v={m ? def.getValue(m) : undefined} />
+        </TableCell>
+      ))}
+      <TableCell className="text-center">
+        {m ? <GradeBadge score={averageScore(m)} /> : <span className="text-muted-foreground">—</span>}
+      </TableCell>
+      <TableCell className="text-center">
+        <Badge variant="outline" className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}>
+          {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum Diisi"}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-2">
+          {m && (
+            <button
+              title="Download Rapor PDF"
+              onClick={() =>
+                generateRaporPDF({
+                  playerName: player.name,
+                  groupName: group.name,
+                  schoolOrigin: player.schoolOrigin,
+                  periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
+                  metrics: m,
+                  assets: {
+                    headerUrl: settings?.rapor_header_url,
+                    ceoSignUrl: settings?.rapor_ceo_sign_url,
+                    coachSignUrl: settings?.rapor_coach_sign_url,
+                    stampUrl: settings?.rapor_stamp_url,
+                  },
+                  signers: {
+                    coachName: settings?.rapor_coach_name,
+                    ceoName: settings?.rapor_ceo_name,
+                  },
+                })
+              }
+              className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors"
+            >
+              <FileDown className="size-4" />
+            </button>
+          )}
+          <AddStatDialog player={player} periodId={selectedPeriod?.id} isPeriodActive={selectedPeriod?.isActive} existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined} />
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+});
+PlayerStatRow.displayName = "PlayerStatRow";
+
 // ─── Page ─────────────────────────────────────────────
 export default function StatisticsPage() {
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
@@ -82,11 +142,6 @@ export default function StatisticsPage() {
       initialized.current = true;
     }
   }, [periods]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setActiveGroup("all");
-  }, [selectedPeriodId]);
 
   const statsMap = useMemo(() => Object.fromEntries((stats ?? []).map((s) => [s.player.id, s])), [stats]);
 
@@ -147,127 +202,130 @@ export default function StatisticsPage() {
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4 items-start bg-card p-4 rounded-xl border border-border/40 shadow-sm">
-        {/* Period selector */}
-        <div className="flex flex-col gap-1.5 w-full md:min-w-[16rem]">
-          <div className="flex items-center gap-3 ml-1">
-            <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground mr-1">Periode Evaluasi</label>
-            {/* Contextual Actions */}
-            <div className="flex items-center gap-1.5">
-              {selectedPeriod && !selectedPeriod.isActive && (
-                <button onClick={() => handleSetActive(selectedPeriod.id)} className="text-[10px] px-2.5 py-1 rounded flex items-center justify-center font-bold uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
-                  Aktifkan
-                </button>
-              )}
-              {selectedPeriod && (
-                <AlertDialog>
-                  <AlertDialogTrigger className="p-1.5 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors outline-none">
-                    <Trash2 className="size-3.5" />
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Periode?</AlertDialogTitle>
-                      <AlertDialogDescription className="flex flex-col gap-2">
-                         <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
-                         {!canDeletePeriod ? (
-                           <span className="text-amber-500/80 text-xs leading-relaxed">
-                            Periode ini memiliki {statsSummary.published + statsSummary.draft} data nilai pemain. Kosongkan semua data nilai terlebih dahulu sebelum menghapus periode.
-                           </span>
-                         ) : (
-                           <span className="text-muted-foreground text-xs leading-relaxed">
-                            Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus periode yang tepat.
-                           </span>
-                         )}
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Batal</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDeletePeriod} disabled={!canDeletePeriod} className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50">
-                        Hapus Periode
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+      <div className="flex flex-col gap-4 bg-card p-4 rounded-xl border border-border/40 shadow-sm">
+        {/* Selects row — side by side on mobile, inline on md+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:flex md:flex-row gap-4 items-end">
+          {/* Period selector */}
+          <div className="flex flex-col gap-1.5 w-full md:min-w-[16rem]">
+            <div className="flex items-center gap-3 ml-1">
+              <label className="text-micro text-muted-foreground mr-1">Periode Evaluasi</label>
+              {/* Contextual Actions */}
+              <div className="flex items-center gap-1.5">
+                {selectedPeriod && !selectedPeriod.isActive && (
+                  <button onClick={() => handleSetActive(selectedPeriod.id)} className="text-[10px] px-2.5 py-1 rounded flex items-center justify-center font-bold uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                    Aktifkan
+                  </button>
+                )}
+                {selectedPeriod && (
+                  <AlertDialog>
+                    <AlertDialogTrigger className="p-1.5 rounded text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors outline-none">
+                      <Trash2 className="size-3.5" />
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Periode?</AlertDialogTitle>
+                        <AlertDialogDescription className="flex flex-col gap-2">
+                           <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
+                           {!canDeletePeriod ? (
+                             <span className="text-amber-500/80 text-xs leading-relaxed">
+                              Periode ini memiliki {statsSummary.published + statsSummary.draft} data nilai pemain. Kosongkan semua data nilai terlebih dahulu sebelum menghapus periode.
+                             </span>
+                           ) : (
+                             <span className="text-muted-foreground text-xs leading-relaxed">
+                              Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus periode yang tepat.
+                             </span>
+                           )}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Batal</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleDeletePeriod} disabled={!canDeletePeriod} className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50">
+                          Hapus Periode
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
+              </div>
+            </div>
+            <div className="relative group w-full">
+              <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
+              <Select value={selectedPeriodId ?? ""} onValueChange={(val) => {
+                setSelectedPeriodId(val);
+                setActiveGroup("all");
+              }}>
+                <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
+                  <SelectValue placeholder={periods?.length === 0 ? "Belum ada periode - buat dulu" : "Pilih Periode"}>
+                    {selectedPeriod ? (
+                      <div className="flex items-center">
+                        <span>{periodDisplayLabel(selectedPeriod)}</span>
+                        {selectedPeriod.isActive && (
+                          <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
+                            Aktif
+                          </span>
+                        )}
+                      </div>
+                    ) : undefined}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
+                  {periods?.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      <div className="flex items-center justify-between w-full">
+                        <span>{periodDisplayLabel(p)}</span>
+                        {p.isActive && (
+                          <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
+                            Aktif
+                          </span>
+                        )}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="relative group w-full">
-            <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
-            <Select value={selectedPeriodId ?? ""} onValueChange={setSelectedPeriodId}>
-              <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder={periods?.length === 0 ? "Belum ada periode - buat dulu" : "Pilih Periode"}>
-                  {selectedPeriod ? (
-                    <div className="flex items-center">
-                      <span>{periodDisplayLabel(selectedPeriod)}</span>
-                      {selectedPeriod.isActive && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
-                          Aktif
-                        </span>
-                      )}
-                    </div>
-                  ) : undefined}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
-                {periods?.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    <div className="flex items-center justify-between w-full">
-                      <span>{periodDisplayLabel(p)}</span>
-                      {p.isActive && (
-                        <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
-                          Aktif
-                        </span>
-                      )}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
 
-        {/* Group filter */}
-        <div className="flex flex-col gap-1.5 w-full md:min-w-[14rem]">
-          <label className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Filter Kelompok</label>
-          <div className="relative group">
-            <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
-            <Select value={activeGroup} onValueChange={(v) => setActiveGroup(v ?? "all")}>
-              <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder="Pilih Kelompok">
-                  {activeGroup === "all" ? "Semua Kelompok" : groups?.find((g) => g.id === activeGroup)?.name}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
-                <SelectItem value="all">Semua Kelompok</SelectItem>
-                {groups?.map((g) => (
-                  <SelectItem key={g.id} value={g.id}>
-                    {g.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Group filter */}
+          <div className="flex flex-col gap-1.5 w-full md:min-w-[14rem]">
+            <label className="text-micro text-muted-foreground">Filter Kelompok</label>
+            <div className="relative group">
+              <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
+              <Select value={activeGroup} onValueChange={(v) => setActiveGroup(v ?? "all")}>
+                <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
+                  <SelectValue placeholder="Pilih Kelompok">
+                    {activeGroup === "all" ? "Semua Kelompok" : groups?.find((g) => g.id === activeGroup)?.name}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
+                  <SelectItem value="all">Semua Kelompok</SelectItem>
+                  {groups?.map((g) => (
+                    <SelectItem key={g.id} value={g.id}>
+                      {g.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-        </div>
+        </div>{/* end selects row */}
 
-        {/* Stats summary - Precise Alignment Structure */}
+        {/* Stats summary — wraps cleanly on mobile */}
         {selectedPeriodId && !statsLoading && (
-          <div className="md:self-end ml-auto">
-            <div className="flex items-center gap-6 h-11">
-              <div className="w-px h-6 bg-border/60 mx-2" />
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Selesai</span>
-                <span className="text-sm font-bold text-primary tabular-nums">{statsSummary.published}</span>
-              </div>
-              <div className="size-1 rounded-full bg-border/60" />
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Sementara</span>
-                <span className="text-sm font-bold text-foreground tabular-nums">{statsSummary.draft}</span>
-              </div>
-              <div className="size-1 rounded-full bg-border/60" />
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Total</span>
-                <span className="text-sm font-bold text-foreground tabular-nums">{totalPlayerCount}</span>
-              </div>
+          <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-border/40">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Selesai</span>
+              <span className="text-sm font-bold text-primary tabular-nums">{statsSummary.published}</span>
+            </div>
+            <div className="size-1 rounded-full bg-border/60" />
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Sementara</span>
+              <span className="text-sm font-bold text-foreground tabular-nums">{statsSummary.draft}</span>
+            </div>
+            <div className="size-1 rounded-full bg-border/60" />
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Total</span>
+              <span className="text-sm font-bold text-foreground tabular-nums">{totalPlayerCount}</span>
             </div>
           </div>
         )}
@@ -277,7 +335,7 @@ export default function StatisticsPage() {
       {!selectedPeriodId && (
         <div className="rounded-xl border border-dashed border-border/60 bg-card p-12 text-center">
           <CalendarRange className="size-10 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada periode evaluasi</p>
+          <p className="text-sm font-medium text-muted-foreground">Belum ada periode evaluasi</p>
           <p className="text-xs text-muted-foreground/60 mt-1">Buat periode baru untuk mulai input nilai.</p>
         </div>
       )}
@@ -338,62 +396,18 @@ export default function StatisticsPage() {
                       </TableCell>
                     </TableRow>
 
-                    {/* Player rows */}
                     {gPlayers.map((player, idx) => {
                       const stat = statsMap[player.id];
-                      const rawM = stat?.metricsJson;
-                      const m = getValidMetrics(rawM);
-
                       return (
-                        <TableRow key={player.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
-                          <TableCell className="text-center text-muted-foreground font-medium sticky left-0 bg-inherit z-10">{idx + 1}</TableCell>
-                          <TableCell className="font-semibold sticky left-8 bg-inherit z-10">{player.name}</TableCell>
-                          {FLAT_METRIC_DEFS.map((def) => (
-                            <TableCell key={def.key} className="text-center font-mono text-sm">
-                              <MetricCell v={m ? def.getValue(m) : undefined} />
-                            </TableCell>
-                          ))}
-                          <TableCell className="text-center">
-                            {m ? <GradeBadge score={averageScore(m)} /> : <span className="text-muted-foreground">—</span>}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge variant="outline" className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}>
-                              {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum Diisi"}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              {m && (
-                                <button
-                                  title="Download Rapor PDF"
-                                  onClick={() =>
-                                    generateRaporPDF({
-                                      playerName: player.name,
-                                      groupName: group.name,
-                                      schoolOrigin: player.schoolOrigin,
-                                      periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
-                                      metrics: m,
-                                      assets: {
-                                        headerUrl: settings?.rapor_header_url,
-                                        ceoSignUrl: settings?.rapor_ceo_sign_url,
-                                        coachSignUrl: settings?.rapor_coach_sign_url,
-                                        stampUrl: settings?.rapor_stamp_url,
-                                      },
-                                      signers: {
-                                        coachName: settings?.rapor_coach_name,
-                                        ceoName: settings?.rapor_ceo_name,
-                                      },
-                                    })
-                                  }
-                                  className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors"
-                                >
-                                  <FileDown className="size-4" />
-                                </button>
-                              )}
-                              <AddStatDialog player={player} periodId={selectedPeriodId} isPeriodActive={selectedPeriod?.isActive} existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined} />
-                            </div>
-                          </TableCell>
-                        </TableRow>
+                        <PlayerStatRow
+                          key={player.id}
+                          player={player}
+                          idx={idx}
+                          stat={stat}
+                          group={group}
+                          selectedPeriod={selectedPeriod}
+                          settings={settings}
+                        />
                       );
                     })}
                   </React.Fragment>

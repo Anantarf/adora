@@ -282,3 +282,52 @@ export async function deletePlayerAction(id: string) {
 
   revalidatePath("/dashboard/players");
 }
+
+// 6. Ambil pemain yang belum terhubung ke akun mana pun (Available Players)
+export async function getAvailablePlayersAction() {
+  await requireAdmin();
+  return prisma.player.findMany({
+    where: { parentId: null, isDeleted: false },
+    select: { id: true, name: true, group: { select: { name: true } } },
+    orderBy: { name: "asc" },
+  });
+}
+
+// 7. Hubungkan pemain ke akun orang tua
+export async function linkPlayerAction(playerId: string, parentId: string) {
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
+
+  await prisma.$transaction(async (tx) => {
+    const target = await tx.player.findUnique({ where: { id: playerId }, select: { name: true, parentId: true } });
+    
+    if (target?.parentId) {
+      throw new Error(`Pemain ini sudah dihubungkan ke akun lain.`);
+    }
+
+    await tx.player.update({ where: { id: playerId }, data: { parentId } });
+    await createAuditLog(tx, "UPDATE", "player_link", playerId, userId, {
+      message: `Pemain ${target?.name} dihubungkan ke parentId: ${parentId}`,
+    });
+  });
+
+  revalidatePath("/dashboard/users");
+  revalidatePath("/dashboard/players");
+}
+
+// 8. Putuskan hubungan pemain dari akun orang tua
+export async function unlinkPlayerAction(playerId: string) {
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
+
+  await prisma.$transaction(async (tx) => {
+    const target = await tx.player.findUnique({ where: { id: playerId }, select: { name: true } });
+    await tx.player.update({ where: { id: playerId }, data: { parentId: null } });
+    await createAuditLog(tx, "UPDATE", "player_unlink", playerId, userId, {
+      message: `Pemain ${target?.name} diputuskan hubungannya dari orang tuanya.`,
+    });
+  });
+
+  revalidatePath("/dashboard/users");
+  revalidatePath("/dashboard/players");
+}

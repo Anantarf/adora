@@ -31,7 +31,7 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
       <div className="flex gap-2 p-1 bg-muted/30 rounded-xl w-fit border border-border/50">
         <button
           onClick={() => onRoleChange("PARENT")}
-          className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+          className={`px-4 py-2 rounded-lg text-micro transition-all ${
             isParent ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-muted"
           }`}
         >
@@ -39,7 +39,7 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
         </button>
         <button
           onClick={() => onRoleChange("ADMIN")}
-          className={`px-4 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all ${
+          className={`px-4 py-2 rounded-lg text-micro transition-all ${
             !isParent ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-muted"
           }`}
         >
@@ -57,7 +57,7 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
             className="pl-11 h-12 bg-card/60 border-border/50 rounded-pill shadow-sm font-medium focus:ring-primary/20"
           />
         </div>
-        <div className="px-6 h-12 flex items-center gap-3 bg-muted/30 border border-border/50 text-foreground rounded-pill font-bold text-[10px] uppercase tracking-widest min-w-50 justify-center shadow-sm">
+        <div className="px-5 h-12 flex items-center gap-2.5 bg-muted/30 border border-border/50 text-foreground rounded-full font-bold text-micro min-w-40 justify-center shadow-sm">
           <UserCheck2 className="size-4 text-primary" /> Total Akun: {totalAccounts}
         </div>
       </div>

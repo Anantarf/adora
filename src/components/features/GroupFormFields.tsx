@@ -49,7 +49,7 @@ export function GroupFormFields({
   return (
     <>
       <div className="space-y-2">
-        <label htmlFor={`group_name${checkboxIdSuffix}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+        <label htmlFor={`group_name${checkboxIdSuffix}`} className="text-micro text-muted-foreground">
           Nama Kelompok
         </label>
         <p className="text-[10px] text-muted-foreground/60">Contoh: KU-16 Putra, Tim SD Gandul</p>
@@ -70,7 +70,7 @@ export function GroupFormFields({
               }}
               className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
             />
-            <label htmlFor={`isUsia${checkboxIdSuffix}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 cursor-pointer whitespace-nowrap">
+            <label htmlFor={`isUsia${checkboxIdSuffix}`} className="text-micro text-muted-foreground cursor-pointer whitespace-nowrap">
               Kelompok Umur
             </label>
           </div>
@@ -103,7 +103,7 @@ export function GroupFormFields({
               }}
               className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
             />
-            <label htmlFor={`isSekolah${checkboxIdSuffix}`} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 cursor-pointer whitespace-nowrap">
+            <label htmlFor={`isSekolah${checkboxIdSuffix}`} className="text-micro text-muted-foreground cursor-pointer whitespace-nowrap">
               Sekolah
             </label>
           </div>
@@ -127,7 +127,7 @@ export function GroupFormFields({
 
       {homebases.length > 0 && (
         <div className="space-y-2">
-          <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+          <label className="text-micro text-muted-foreground">
             Lokasi Latihan <span className="normal-case font-normal">(Opsional)</span>
           </label>
           <Select

@@ -73,7 +73,7 @@ export function AttendanceCardView() {
       {months.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
           <CalendarDays className="size-10 text-muted-foreground/30 mb-1" />
-          <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+          <p className="text-sm font-medium text-muted-foreground">
             {searchQuery ? "Hasil tidak ditemukan" : "Belum ada agenda yang tercatat"}
           </p>
           <p className="text-xs text-muted-foreground/60 mt-1">
@@ -96,7 +96,7 @@ export function AttendanceCardView() {
                   <div className="grid w-full grid-cols-1 sm:grid-cols-[64px_minmax(0,1fr)_auto] gap-3 items-center text-left">
                     <div className="hidden sm:flex flex-col items-center justify-center rounded-lg px-2 py-2 border transition-colors" style={{ backgroundColor: `${cfg.color}15`, borderColor: `${cfg.color}30` }}>
                       <span className="text-lg leading-none font-black" style={{ color: cfg.color }}>{format(eventDate, "dd", { locale: idLocale })}</span>
-                      <span className="text-[10px] font-bold uppercase tracking-widest" style={{ color: cfg.color }}>{format(eventDate, "MMM", { locale: idLocale })}</span>
+                      <span className="text-micro" style={{ color: cfg.color }}>{format(eventDate, "MMM", { locale: idLocale })}</span>
                     </div>
 
                     <div className="min-w-0 space-y-1">

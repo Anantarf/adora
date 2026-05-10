@@ -132,7 +132,7 @@ export default function SettingsPage() {
                             {uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? "File sudah diunggah" : "Belum ada file dipilih"}
                           </span>
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-primary px-3 py-1 rounded-lg bg-primary/10">
+                        <span className="text-micro text-primary px-3 py-1 rounded-lg bg-primary/10">
                           Pilih File
                         </span>
                       </label>
@@ -147,7 +147,7 @@ export default function SettingsPage() {
                         </div>
                       ) : (
                         <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative">
-                          <Image src={localValues[asset.key]} alt="Preview" fill unoptimized className="object-contain" />
+                          <Image src={localValues[asset.key]} alt="Preview" fill sizes="300px" unoptimized className="object-contain" />
                         </div>
                       )}
                       <div className="flex flex-col">
@@ -186,7 +186,7 @@ export default function SettingsPage() {
                   <button
                     onClick={() => handleTextSave(key, label)}
                     disabled={saving[key]}
-                    className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-primary text-black text-xs font-bold uppercase tracking-widest hover:bg-primary/80 disabled:opacity-50 transition-colors whitespace-nowrap"
+                    className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary/80 disabled:opacity-50 transition-colors whitespace-nowrap"
                   >
                     {saving[key] ? <Loader2 className="size-3.5 animate-spin" /> : <CheckCircle2 className="size-3.5" />}
                     Simpan

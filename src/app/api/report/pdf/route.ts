@@ -150,7 +150,7 @@ export async function GET(req: NextRequest) {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 3px solid #D4AF37;
+      border-bottom: 3px solid #FF6A00;
       padding-bottom: 20px;
       margin-bottom: 30px;
     }
@@ -163,7 +163,7 @@ export async function GET(req: NextRequest) {
       text-transform: uppercase;
     }
 
-    .header-brand span { color: #D4AF37; }
+    .header-brand span { color: #FF6A00; }
 
     .header-meta {
       text-align: right;
@@ -209,10 +209,10 @@ export async function GET(req: NextRequest) {
       font-weight: 800;
       text-transform: uppercase;
       letter-spacing: 3px;
-      color: #D4AF37;
+      color: #FF6A00;
       margin-bottom: 16px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #f0e6c8;
+      border-bottom: 2px solid #ede9fe;
     }
 
     .metrics-grid {
@@ -263,7 +263,7 @@ export async function GET(req: NextRequest) {
     .summary-card .value {
       font-size: 32px;
       font-weight: 900;
-      color: #D4AF37;
+      color: #FF6A00;
     }
 
     .summary-card .label {
@@ -276,8 +276,8 @@ export async function GET(req: NextRequest) {
     }
 
     .notes-box {
-      background: #fffbeb;
-      border-left: 4px solid #D4AF37;
+      background: #faf5ff;
+      border-left: 4px solid #FF6A00;
       border-radius: 0 10px 10px 0;
       padding: 20px;
       margin-bottom: 28px;
@@ -305,7 +305,7 @@ export async function GET(req: NextRequest) {
     }
 
     .cert-badge {
-      background: #D4AF37;
+      background: #FF6A00;
       color: white;
       padding: 2px 8px;
       border-radius: 4px;
@@ -329,7 +329,7 @@ export async function GET(req: NextRequest) {
       position: fixed;
       bottom: 30px;
       right: 30px;
-      background: #D4AF37;
+      background: #FF6A00;
       color: white;
       border: none;
       padding: 14px 28px;
@@ -339,13 +339,13 @@ export async function GET(req: NextRequest) {
       text-transform: uppercase;
       letter-spacing: 2px;
       cursor: pointer;
-      box-shadow: 0 8px 30px rgba(212,175,55,0.4);
+      box-shadow: 0 8px 30px rgba(124,58,237,0.4);
       transition: all 0.2s;
     }
 
     .print-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 12px 40px rgba(212,175,55,0.5);
+      box-shadow: 0 12px 40px rgba(124,58,237,0.5);
     }
   </style>
 </head>

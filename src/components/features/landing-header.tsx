@@ -21,31 +21,35 @@ export function LandingHeader() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-page-dark/90 backdrop-blur-xl">
-      <div className="container mx-auto px-4 h-[72px] flex items-center justify-between">
-        <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman" className="flex items-center gap-3 group">
-          <div className="w-16 h-16 flex items-center justify-center transition-all group-hover:scale-110">
-            <Image src="/logo-adora.png" alt="Adora BBC Logo" width={64} height={64} className="object-contain" />
+    <header className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-page-dark/90 backdrop-blur-xl">
+      <div className="container relative mx-auto px-4 h-[72px] flex items-center justify-between">
+        <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman" className="flex items-center gap-3 group z-10">
+          <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105">
+            <Image src="/logo-new.png" alt="Adora BBC Logo" width={48} height={48} className="w-auto h-auto object-contain" priority />
           </div>
-          <span className="font-heading text-xl tracking-widest uppercase text-white group-hover:text-primary transition-colors hidden sm:block">
-            ADORA <span className="text-primary">BBC</span>
-          </span>
+          <div className="flex flex-col justify-center hidden sm:flex">
+            <span className="font-heading font-black text-xl tracking-widest uppercase text-white group-hover:text-brand-yellow transition-colors leading-none mt-1 italic">
+              ADORA <span className="text-brand-orange">BBC</span>
+            </span>
+          </div>
         </Link>
 
-        <nav aria-label="Navigasi utama" className="hidden md:flex items-center gap-8">
+        <nav aria-label="Navigasi utama" className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
           {NAV_LINKS.map(({ label, href }) => (
-            <a key={href} href={href} className="text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-primary transition-colors">
+            <a key={href} href={href} className="font-heading font-black italic uppercase tracking-widest text-xs text-white/70 hover:text-brand-yellow transition-colors">
               {label}
             </a>
           ))}
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link href="/login" className="text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white px-5 py-2 rounded-full hover:bg-white hover:text-black transition-all">
-            Login
+          <Link href="/login" className="skew-box bg-white/10 border-2 border-white/20 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group">
+            <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">
+              PORTAL LOGIN
+            </span>
           </Link>
           <button
-            className="md:hidden w-10 h-10 flex items-center justify-center text-white/70 hover:text-primary transition-colors"
+            className="md:hidden w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors"
             onClick={() => setOpen(true)}
             aria-label="Buka menu navigasi"
           >
@@ -55,19 +59,20 @@ export function LandingHeader() {
       </div>
 
       {/* Mobile drawer overlay */}
-      {open && (
-        <div className="fixed inset-0 z-40 md:hidden" onClick={() => setOpen(false)}>
-          <div className="absolute inset-0 bg-black/60" />
-        </div>
-      )}
+      <div 
+        className={`fixed inset-0 z-40 md:hidden transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+      >
+        <div className="absolute inset-0 bg-black/60" />
+      </div>
 
-      {/* Mobile drawer panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-page-dark border-l border-white/10 z-50 md:hidden flex flex-col transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-72 bg-surface-dark border-l-4 border-brand-orange z-50 md:hidden flex flex-col transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
-          <span className="font-heading text-sm tracking-widest uppercase text-white">Menu</span>
-          <button onClick={() => setOpen(false)} aria-label="Tutup menu" className="text-white/70 hover:text-primary transition-colors">
+          <span className="font-heading font-black italic text-lg tracking-widest uppercase text-brand-yellow">MENU</span>
+          <button onClick={() => setOpen(false)} aria-label="Tutup menu" className="text-white/70 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -78,16 +83,18 @@ export function LandingHeader() {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="text-[11px] font-bold uppercase tracking-widest text-white/70 hover:text-primary py-4 border-b border-white/5 transition-colors"
+              className="font-heading font-black italic uppercase tracking-widest text-lg text-white hover:text-brand-yellow py-4 border-b border-white/10 transition-colors"
             >
               {label}
             </a>
           ))}
           <Link
             href="/login"
-            className="mt-6 text-center text-[10px] font-bold uppercase tracking-widest border border-white/20 text-white px-5 py-3 rounded-full hover:bg-white hover:text-black transition-all"
+            className="mt-8 skew-box bg-white/10 border-2 border-white/20 text-white px-5 py-3 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] text-center group"
           >
-            Login Portal
+            <span className="unskew-content block font-heading font-black italic text-xs tracking-widest uppercase">
+              PORTAL LOGIN
+            </span>
           </Link>
         </nav>
 
@@ -97,7 +104,7 @@ export function LandingHeader() {
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Instagram ADORA BBC"
-            className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-primary hover:border-primary transition-colors"
+            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-black hover:bg-brand-yellow hover:border-black transition-colors shadow-lg"
           >
             <InstagramIcon className="w-4 h-4" />
           </a>

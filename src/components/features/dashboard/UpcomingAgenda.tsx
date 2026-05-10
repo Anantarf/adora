@@ -28,7 +28,7 @@ export function UpcomingAgenda() {
       <div className="p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
         <div>
           <h2 className="font-heading text-base tracking-wider text-foreground flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-primary shrink-0" />
+            <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />
             AGENDA MENDATANG
           </h2>
           <p className="text-xs text-muted-foreground mt-1 tracking-wide">
@@ -36,8 +36,8 @@ export function UpcomingAgenda() {
           </p>
         </div>
         {upcoming.length > 0 && (
-          <div className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-md shrink-0 ml-2">
-            {upcoming.length} EVENT
+          <div className="bg-muted text-muted-foreground text-xs font-bold px-2.5 py-1 rounded-md border border-border/60 tabular-nums shrink-0 ml-2">
+            {upcoming.length}
           </div>
         )}
       </div>
@@ -53,7 +53,7 @@ export function UpcomingAgenda() {
         ) : upcoming.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 gap-2 rounded-xl border border-dashed border-border/50 text-center py-8">
             <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
+            <p className="text-sm font-medium text-muted-foreground">
               Tidak Ada Agenda Mendatang
             </p>
             <p className="text-xs text-muted-foreground/60">

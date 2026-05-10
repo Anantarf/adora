@@ -70,15 +70,3 @@ export async function createAuditLog(
   });
 }
 
-// 3. Log an audit action — Public Server Action
-export async function createAuditLogAction(action: string, targetTable: string, recordId?: string, details?: Prisma.InputJsonValue) {
-  try {
-    const session = await requireAdmin();
-    const userId = session.user.id ?? null;
-    await prisma.$transaction(async (tx) => {
-      await createAuditLog(tx, action, targetTable, recordId, userId, details);
-    });
-  } catch (e) {
-    console.error("[AUDIT_LOG_ERROR]:", e);
-  }
-}

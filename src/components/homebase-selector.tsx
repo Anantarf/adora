@@ -68,45 +68,54 @@ export function HomebaseSelector({
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {homebases.map((homebase) => (
-        <button
-          key={homebase.id}
-          onClick={() => !disabled && onSelect(homebase.id, homebase.name)}
-          disabled={disabled}
-          className={`p-6 border-2 rounded-lg transition-all text-left ${
-            value === homebase.id
-              ? "border-primary bg-primary/10"
-              : "border-white/20 hover:border-primary hover:bg-primary/5"
-          } ${disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
-        >
-          {/* Nama tanpa "(Pusat)" */}
-          <h3 className="font-heading font-bold text-xl text-primary mb-3 break-words">
-            {displayName(homebase.name)}
-          </h3>
+      {homebases.map((homebase) => {
+        const isSelected = value === homebase.id;
+        return (
+          <button
+            key={homebase.id}
+            onClick={() => !disabled && onSelect(homebase.id, homebase.name)}
+            disabled={disabled}
+            className={`p-5 md:p-6 border-2 rounded-2xl transition-all duration-300 text-left relative overflow-hidden flex flex-col ${
+              isSelected
+                ? "border-brand-purple bg-brand-purple/20 ring-4 ring-brand-purple/20 shadow-[0_0_30px_rgba(138,43,226,0.3)]"
+                : "border-white/10 bg-black/40 hover:border-white/30 hover:bg-black/60"
+            } ${disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
+          >
 
-          {showFull && (
-            <div className="flex flex-col gap-1.5">
-              {homebase.description && (
-                <p className="text-xs font-bold text-primary/80 uppercase tracking-widest mb-1 break-words">
-                  {homebase.description}
-                </p>
-              )}
-              {/* Alamat */}
-              <p className="text-sm text-white/70 flex items-start gap-1.5 break-words">
-                <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0 text-primary/60" />
-                {homebase.address}
-              </p>
-              {/* Telepon */}
-              {homebase.phone && (
-                <p className="text-sm text-white/70 flex items-center gap-1.5 break-words">
-                  <Phone className="w-3.5 h-3.5 shrink-0 text-primary/60" />
-                  {formatPhone(homebase.phone)}
-                </p>
+
+            <div className="relative z-10">
+              {/* Nama tanpa "(Pusat)" */}
+              <h3 className={`font-heading font-black text-xl md:text-2xl uppercase tracking-widest italic mb-3 break-words ${isSelected ? "text-brand-yellow" : "text-white"}`}>
+                {displayName(homebase.name)}
+              </h3>
+
+              {showFull && (
+                <div className="flex flex-col gap-2.5">
+                  {homebase.description && (
+                    <div className="inline-block bg-white/10 px-2.5 py-1 rounded self-start">
+                      <p className={`text-[10px] font-bold uppercase tracking-widest break-words ${isSelected ? "text-white" : "text-brand-orange"}`}>
+                        📍 {homebase.description}
+                      </p>
+                    </div>
+                  )}
+                  {/* Alamat */}
+                  <p className={`text-xs md:text-sm flex items-start gap-2.5 mt-1.5 font-medium leading-relaxed break-words ${isSelected ? "text-white/90" : "text-white/60"}`}>
+                    <MapPin className="w-4 h-4 md:w-5 md:h-5 shrink-0 opacity-50" />
+                    {homebase.address}
+                  </p>
+                  {/* Telepon */}
+                  {homebase.phone && (
+                    <p className={`text-xs md:text-sm flex items-center gap-2.5 font-medium break-words ${isSelected ? "text-white/90" : "text-white/60"}`}>
+                      <Phone className="w-4 h-4 md:w-5 md:h-5 shrink-0 opacity-50" />
+                      {formatPhone(homebase.phone)}
+                    </p>
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </button>
-      ))}
+          </button>
+        );
+      })}
     </div>
   );
 }

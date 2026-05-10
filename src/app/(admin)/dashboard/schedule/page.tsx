@@ -110,7 +110,7 @@ export default function SchedulePage() {
                 <div className="size-10 rounded-icon flex items-center justify-center shrink-0 shadow-lg shadow-black/20 bg-primary">
                   <CalendarDays className="size-5 text-primary-foreground" strokeWidth={2.5} />
                 </div>
-                <h2 className="font-heading text-[17px] font-semibold tracking-wide text-foreground">Agenda Mendatang</h2>
+                <h2 className="font-heading text-lg tracking-wide text-foreground">Agenda Mendatang</h2>
               </div>
             </div>
 
@@ -128,7 +128,7 @@ export default function SchedulePage() {
               ) : upcomingEvents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-14 gap-2 rounded-2xl border border-dashed border-border/50 text-center">
                   <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Tidak ada agenda mendatang</p>
+                  <p className="text-sm font-medium text-muted-foreground">Tidak ada agenda mendatang</p>
                   <p className="text-[10px] text-muted-foreground/60">Buat agenda menggunakan form di atas.</p>
                 </div>
               ) : (

@@ -40,9 +40,9 @@ const HEADER_SCAN_ROW_LIMIT = 12;
 const TEMPLATE_FONT = "Poppins";
 // ExcelJS requires ARGB hex strings — CSS variables can't be used here.
 // Sync these values manually if brand colors in globals.css :root change.
-const BRAND_PURPLE_DARK = "FF6B46C1";
-const BRAND_PURPLE = "FF8B5CF6";
-const BRAND_PURPLE_SOFT = "FFF5F0FF";
+const BRAND_PRIMARY_DARK = "FFD84315";
+const BRAND_PRIMARY = "FFFF6A00";
+const BRAND_PRIMARY_SOFT = "FFFFF3E0";
 const BRAND_ORANGE = "FFF4B183";
 const BRAND_ORANGE_SOFT = "FFFFF4E8";
 const BRAND_WHITE = "FFFFFFFF";
@@ -355,7 +355,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
       footer: 0.2,
     },
   };
-  dataSheet.properties.tabColor = { argb: BRAND_PURPLE_DARK };
+  dataSheet.properties.tabColor = { argb: BRAND_PRIMARY_DARK };
 
   dataSheet.columns = [
     { key: "no", width: 8 },
@@ -384,7 +384,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   titleRow.getCell(1).fill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: BRAND_PURPLE_DARK },
+    fgColor: { argb: BRAND_PRIMARY_DARK },
   };
   titleRow.getCell(1).alignment = { vertical: "middle", horizontal: "center" };
 
@@ -509,7 +509,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
       cell.fill = {
         type: "pattern",
         pattern: "solid",
-        fgColor: { argb: rowNumber % 2 === 0 ? BRAND_PURPLE_SOFT : BRAND_WHITE },
+        fgColor: { argb: rowNumber % 2 === 0 ? BRAND_PRIMARY_SOFT : BRAND_WHITE },
       };
       cell.border = {
         top: { style: "thin", color: { argb: BRAND_BORDER_SOFT } },
@@ -524,7 +524,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   });
 
   const guideSheet = workbook.addWorksheet("Panduan");
-  guideSheet.properties.tabColor = { argb: BRAND_PURPLE };
+  guideSheet.properties.tabColor = { argb: BRAND_PRIMARY };
   guideSheet.columns = [{ header: "Panduan Upload", key: "guide", width: 100 }];
 
   const guideRows = [
@@ -544,7 +544,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   guideSheet.getRow(1).fill = {
     type: "pattern",
     pattern: "solid",
-    fgColor: { argb: BRAND_PURPLE },
+    fgColor: { argb: BRAND_PRIMARY },
   };
 
   for (let rowNumber = 2; rowNumber <= guideSheet.rowCount; rowNumber += 1) {

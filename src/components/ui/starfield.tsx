@@ -80,7 +80,7 @@ export function Starfield() {
         ctx.beginPath();
         ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
 
-        const rgb = star.isGold ? "212, 175, 55" : "250, 250, 250";
+        const rgb = star.isGold ? "216, 180, 254" : "168, 85, 247";
         ctx.fillStyle = `rgba(${rgb}, ${star.opacity})`;
         ctx.fill();
 
@@ -182,5 +182,5 @@ export function Starfield() {
     };
   }, []);
 
-  return <canvas ref={canvasRef} className="absolute inset-0 z-0 pointer-events-none opacity-80 mix-blend-screen" />;
+  return <canvas ref={canvasRef} className="fixed inset-0 z-0 pointer-events-none opacity-80 mix-blend-screen" />;
 }

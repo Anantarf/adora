@@ -49,7 +49,7 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...
   };
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{label}</label>
+      <label className="text-micro text-muted-foreground">{label}</label>
       <Input type="number" min={0} max={max} step={1} onChange={handleChange} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
@@ -133,7 +133,7 @@ export function AddStatDialog({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-dialog-lg overflow-y-auto custom-scrollbar bg-card border-border/50">
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-primary/10 rounded-xl shrink-0"><LineChart className="size-6 text-primary" /></div>
+            <div className="p-3 bg-muted/60 rounded-xl shrink-0"><LineChart className="size-6 text-muted-foreground" /></div>
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Perbarui" : "Input"} Nilai</DialogTitle>
               <DialogDescription className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -153,7 +153,7 @@ export function AddStatDialog({
               {/* All 11 metrics in a flat grid — no section grouping */}
               <div className="rounded-lg border border-border/40 bg-muted/20 overflow-hidden">
                 <div className="flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/30">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Aspek Penilaian</span>
+                  <span className="text-micro text-muted-foreground">Aspek Penilaian</span>
                   <span className="text-sm font-bold text-primary tabular-nums">Total: {grandTotal}</span>
                 </div>
                 <div className="p-3 grid grid-cols-2 gap-2">
@@ -171,7 +171,7 @@ export function AddStatDialog({
 
               {/* Notes */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
+                <label className="text-micro text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
                 <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
               </div>
             </fieldset>

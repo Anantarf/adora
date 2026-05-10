@@ -71,7 +71,7 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">
+            <label className="text-micro text-muted-foreground ml-1">
               Sandi Baru
             </label>
             <Input
@@ -86,7 +86,7 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">
+            <label className="text-micro text-muted-foreground ml-1">
               Konfirmasi Sandi
             </label>
             <Input
@@ -125,19 +125,19 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
       <>
         <DropdownMenu>
           <DropdownMenuTrigger className="flex w-full items-center gap-3 px-3 py-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all text-left outline-none group">
-            <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-[10px] tracking-widest shrink-0 group-hover:bg-primary/20 transition-colors">
+            <div className="size-8 rounded-full bg-muted border border-border/50 flex items-center justify-center text-foreground/70 font-black text-[10px] tracking-widest shrink-0 group-hover:bg-muted/80 transition-colors">
               {initials}
             </div>
             <div className="flex flex-col flex-1 min-w-0 leading-none group-data-[collapsible=icon]:hidden">
               <span className="text-sm font-bold text-foreground truncate">{username}</span>
-              <span className="text-[9px] font-bold uppercase tracking-widest text-muted-foreground/60 mt-0.5">Pengaturan Akun</span>
+              <span className="text-micro text-muted-foreground/60 mt-0.5">Pengaturan Akun</span>
             </div>
             <ChevronUp className="size-4 text-muted-foreground/50 group-hover:text-primary group-data-[collapsible=icon]:hidden shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="right" className="w-56 bg-card border-border/50 rounded-xl shadow-xl ml-2">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Masuk sebagai</span>
+                <span className="text-micro text-muted-foreground/60">Masuk sebagai</span>
                 <span className="text-sm font-bold text-foreground">{username}</span>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
@@ -159,13 +159,13 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger className="size-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black text-xs tracking-widest hover:bg-primary/20 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
+        <DropdownMenuTrigger className="size-9 rounded-full bg-muted border border-border/50 flex items-center justify-center text-foreground/70 font-black text-xs tracking-widest hover:bg-muted/80 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50">
           {initials}
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-52 bg-card border-border/50 rounded-xl shadow-xl">
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">Masuk sebagai</span>
+              <span className="text-micro text-muted-foreground/60">Masuk sebagai</span>
               <span className="text-sm font-bold text-foreground">{username}</span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>

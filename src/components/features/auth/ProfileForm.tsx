@@ -72,11 +72,11 @@ export function ProfileForm({ initialData, onSuccess }: ProfileFormProps) {
         <div className="space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-border/50">
             <User className="size-4 text-primary" />
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Data Identitas</h2>
+            <h2 className="text-micro text-muted-foreground">Data Identitas</h2>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="field-name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            <label htmlFor="field-name" className="text-micro text-muted-foreground">
               Nama Lengkap
             </label>
             <Input
@@ -89,7 +89,7 @@ export function ProfileForm({ initialData, onSuccess }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="field-email" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            <label htmlFor="field-email" className="text-micro text-muted-foreground">
               Alamat Email
             </label>
             <Input
@@ -106,11 +106,11 @@ export function ProfileForm({ initialData, onSuccess }: ProfileFormProps) {
         <div className="space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-border/50">
             <Lock className="size-4 text-primary" />
-            <h2 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Keamanan Akun</h2>
+            <h2 className="text-micro text-muted-foreground">Keamanan Akun</h2>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="field-new-password" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            <label htmlFor="field-new-password" className="text-micro text-muted-foreground">
               Kata Sandi Baru
             </label>
             <Input
@@ -124,7 +124,7 @@ export function ProfileForm({ initialData, onSuccess }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="field-confirm-password" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+            <label htmlFor="field-confirm-password" className="text-micro text-muted-foreground">
               Konfirmasi Sandi
             </label>
             <Input

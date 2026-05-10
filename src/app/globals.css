@@ -75,16 +75,21 @@
   --color-login-icon: color-mix(in srgb, var(--primary) 80%, black);
 
   /* Landing page dark card surface */
-  --color-surface-dark: #111113;
+  --color-surface-dark: #18181B; /* Soft Zinc 900 */
 
   /* Always-dark page background (landing, login, register) */
-  --color-page-dark: #0d0d0d;
+  --color-page-dark: #0F0F12; /* Very Dark Slate */
+
+  /* Marketing / Maximalist Brand Tokens */
+  --color-brand-purple: #8A2BE2; /* Vibrant Neon Purple */
+  --color-brand-yellow: #FFE600; /* Pure Neon Yellow (instead of lime) */
+  --color-brand-orange: #FF7A00; /* Golden Orange */
 }
 
 /* Event type color tokens — konsisten di light & dark mode */
 :root,
 .dark {
-  --event-latihan: #D4AF37;
+  --event-latihan: #FFD000;
   --event-sparing: #F97316;
   --event-pertandingan: #E11D48;
   --event-evaluasi: #3B82F6;
@@ -99,10 +104,10 @@
   --card-foreground: #1A1A2E;
   --popover: #FFFFFF;
   --popover-foreground: #1A1A2E;
-  --primary: #D4AF37; /* Pure Gold */
+  --primary: #FF6A00; /* Primary Orange */
   --primary-foreground: #ffffff;
-  --secondary: #FFD700; /* Secondary Yellow */
-  --secondary-foreground: #1A1A2E;
+  --secondary: #7C3AED; /* Secondary Purple */
+  --secondary-foreground: #ffffff;
   --muted: #E4E4E7;
   --muted-foreground: #71717A;
   --accent: #E4E4E7;
@@ -110,56 +115,56 @@
   --destructive: #E63946; /* Accent Red */
   --border: #E4E4E7;
   --input: #E4E4E7;
-  --ring: #D4AF37;
-  --chart-1: #D4AF37;
-  --chart-2: #27272A;
+  --ring: #FF6A00;
+  --chart-1: #FF6A00;
+  --chart-2: #7C3AED;
   --chart-3: #52525B;
   --chart-4: #A1A1AA;
   --chart-5: #E4E4E7;
   --radius: 0.625rem;
   --sidebar: #FAFAFA;
   --sidebar-foreground: #09090B;
-  --sidebar-primary: #D4AF37;
+  --sidebar-primary: #FF6A00;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #F4F4F5;
   --sidebar-accent-foreground: #09090B;
   --sidebar-border: #E4E4E7;
-  --sidebar-ring: #D4AF37;
+  --sidebar-ring: #FF6A00;
 }
 
 .dark {
-  /* Dark Navy & Pure Gold (Vibe Utama) */
-  --background: #09090B; /* Dark Navy */
+  /* Dark Mode — Midnight Slate & Orange Sporty */
+  --background: #0F0F12; /* Midnight Slate */
   --foreground: #FAFAFA; /* Light Gray */
-  --card: #18181B; /* Lifted Navy for Cards */
+  --card: #18181B; /* Soft Zinc */
   --card-foreground: #FAFAFA;
   --popover: #18181B;
   --popover-foreground: #FAFAFA;
-  --primary: #D4AF37; /* Pure Gold Accent */
-  --primary-foreground: #1A1A2E; /* Dark text on gold */
-  --secondary: #FFD700; /* Secondary Yellow */
-  --secondary-foreground: #1A1A2E;
-  --muted: #2d2d4c; /* Surface: Charcoal/Navy mix */
+  --primary: #FF6A00; /* Primary Orange */
+  --primary-foreground: #ffffff;
+  --secondary: #8B5CF6; /* Secondary Purple (for badges only) */
+  --secondary-foreground: #ffffff;
+  --muted: #27272A; /* Neutral Zinc 800 */
   --muted-foreground: #A1A1AA;
-  --accent: #2d2d4c; /* Surface: Charcoal/Navy mix */
-  --accent-foreground: #F8F8F8;
+  --accent: #27272A; /* Neutral Zinc 800 */
+  --accent-foreground: #FAFAFA;
   --destructive: #E63946; /* Accent Red */
   --border: #27272A; /* Subtle Charcoal Border */
   --input: #27272A;
-  --ring: #D4AF37;
-  --chart-1: #D4AF37;
-  --chart-2: #E4E4E7;
+  --ring: #FF6A00;
+  --chart-1: #FF6A00;
+  --chart-2: #8B5CF6;
   --chart-3: #A1A1AA;
   --chart-4: #52525B;
   --chart-5: #27272A;
-  --sidebar: #09090B;
+  --sidebar: #0F0F12; /* Match Background */
   --sidebar-foreground: #FAFAFA;
-  --sidebar-primary: #D4AF37;
-  --sidebar-primary-foreground: #09090B;
-  --sidebar-accent: #1F1F22;
+  --sidebar-primary: #FF6A00;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #27272A;
   --sidebar-accent-foreground: #FAFAFA;
   --sidebar-border: #27272A;
-  --sidebar-ring: #D4AF37;
+  --sidebar-ring: #FF6A00;
 }
 
 /* Prevent number spinners from showing (they look boxy/ugly) */
@@ -262,5 +267,62 @@ input:-webkit-autofill:active {
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
   }
+
+  .text-micro {
+    @apply text-[10px] font-bold uppercase tracking-widest;
+  }
+
+  /* Sporty Marketing Utilities */
+  .skew-box {
+    transform: skewX(-6deg);
+  }
+  .unskew-content {
+    transform: skewX(6deg);
+  }
+  .pattern-halftone {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1.5px, transparent 1.5px);
+    background-size: 10px 10px;
+  }
+  .pattern-halftone-dark {
+    background-image: radial-gradient(rgba(0, 0, 0, 0.4) 1.5px, transparent 1.5px);
+    background-size: 10px 10px;
+  }
+  .clip-diagonal {
+    clip-path: polygon(0 5vw, 100% 0, 100% calc(100% - 5vw), 0 100%);
+  }
+  .clip-diagonal-top {
+    clip-path: polygon(0 5vw, 100% 0, 100% 100%, 0 100%);
+  }
+  .clip-diagonal-bottom {
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 5vw), 0 100%);
+  }
 }
 
+@layer base {
+  /* Memastikan semua elemen interaktif memiliki kursor tangan (pointer) */
+  button:not(:disabled), 
+  [role="button"]:not(:disabled), 
+  a[href], 
+  select, 
+  summary,
+  input[type="submit"],
+  input[type="button"] {
+    cursor: pointer;
+  }
+
+  /* Kursor dilarang untuk elemen yang didisable */
+  button:disabled, 
+  [disabled] {
+    cursor: not-allowed;
+  }
+}
+
+
+@keyframes gradient-x {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+.animate-gradient-x {
+  animation: gradient-x 4s ease infinite;
+}

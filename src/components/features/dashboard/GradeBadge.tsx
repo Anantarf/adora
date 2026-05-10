@@ -2,7 +2,7 @@ import { letterGrade } from "@/lib/metrics";
 
 const GRADE_STYLES = {
   A: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
-  B: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+  B: "text-sky-400 bg-sky-500/10 border-sky-500/30",
   C: "text-amber-400 bg-amber-500/10 border-amber-500/30",
   D: "text-destructive bg-destructive/10 border-destructive/30",
 } as const;
@@ -19,12 +19,12 @@ export function GradeBadge({ score, variant = "compact" }: GradeBadgeProps) {
   if (variant === "full") {
     return (
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
+        <span className="text-micro text-muted-foreground/60">
           Nilai Akhir
         </span>
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${styles}`}>
           <span className="text-xl font-black">{letter}</span>
-          <span className="text-[10px] font-bold uppercase tracking-widest">{label}</span>
+          <span className="text-micro">{label}</span>
         </div>
       </div>
     );

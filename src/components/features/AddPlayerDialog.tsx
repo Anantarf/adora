@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAddPlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
-import { useParents } from "@/hooks/use-users";
+
 import { toast } from "sonner";
 import { BatchPlayerUpload } from "@/components/features/BatchPlayerUpload";
 import { playerSchema, type PlayerFormValues } from "@/lib/validation/player";
@@ -20,7 +20,7 @@ export function AddPlayerDialog() {
   const [isBatchMode, setIsBatchMode] = useState(false);
   const [step, setStep] = useState(1);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
-  const { data: parentAccounts, isLoading: isParentAccountsLoading } = useParents();
+
   const { mutateAsync: addPlayer, isPending } = useAddPlayer();
 
   const {
@@ -35,7 +35,7 @@ export function AddPlayerDialog() {
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {
-      await addPlayer({ ...data, parentId: data.parentId || undefined });
+      await addPlayer({ ...data });
       reset();
       setOpen(false);
       toast.success("Pemain baru berhasil didaftarkan!");
@@ -91,8 +91,7 @@ export function AddPlayerDialog() {
                 getValues={getValues}
                 groups={groups}
                 isGroupsLoading={isGroupsLoading}
-                parentAccounts={parentAccounts}
-                isParentAccountsLoading={isParentAccountsLoading}
+
                 step={step}
               />
             </div>
@@ -126,7 +125,7 @@ export function AddPlayerDialog() {
                   Unggah Excel (Banyak Pemain)
                 </Button>
                 
-                <Button type="submit" disabled={!isValid || isPending} className="flex-1 sm:flex-none h-10 px-6 font-bold tracking-widest uppercase text-xs rounded-lg">
+                <Button type="submit" disabled={isPending} className="flex-1 sm:flex-none h-10 px-6 font-bold tracking-widest uppercase text-xs rounded-lg">
                   {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : null}
                   Simpan
                 </Button>

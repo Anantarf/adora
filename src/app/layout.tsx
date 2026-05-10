@@ -23,6 +23,14 @@ export const metadata: Metadata = {
   title: "ADORA Basketball Club | Akademi Basket Profesional Indonesia",
   description:
     "ADORA Basketball Club — Membentuk generasi pemain basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-10, KU-15, KU-18.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/logo-new.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [{ url: "/logo-new.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/logo-new.png",
+  },
 };
 
 export default function RootLayout({

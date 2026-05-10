@@ -50,7 +50,7 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
       <div className="p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
         <div>
           <h2 className="font-heading text-lg tracking-wider text-foreground flex items-center gap-2">
-            <UserPlus className="w-5 h-5 text-primary" />
+            <UserPlus className="w-5 h-5 text-muted-foreground" />
             PENDAFTAR BARU
           </h2>
           <p className="text-xs text-muted-foreground mt-1 tracking-wide">
@@ -59,8 +59,8 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
         </div>
         
         {registrations.length > 0 && (
-          <div className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-md">
-            {registrations.length} ANTREAN
+          <div className="bg-muted text-muted-foreground text-xs font-bold px-2.5 py-1 rounded-md border border-border/60 tabular-nums">
+            {registrations.length}
           </div>
         )}
       </div>
@@ -79,14 +79,14 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
             {registrations.map((reg) => (
               <div
                 key={reg.id}
-                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-background/50 border border-border/50 hover:bg-card/80 hover:border-primary/30 transition-colors group"
+                className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-background/50 border border-border/50 hover:border-border hover:bg-card/80 transition-colors group"
               >
                 <div className="flex items-start gap-3">
-                  <div className="p-2 bg-primary/10 rounded-md mt-0.5">
-                    <UserPlus className="w-4 h-4 text-primary" />
+                  <div className="p-2 bg-muted/80 rounded-md mt-0.5">
+                    <UserPlus className="w-4 h-4 text-muted-foreground" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors flex items-center gap-2">
+                    <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
                       {reg.playerName}
                     </h3>
                     <div className="flex items-center gap-3 mt-1.5">

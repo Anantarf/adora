@@ -80,7 +80,7 @@ export default function ParentDashboard() {
   if (!children || children.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] p-6 text-center animate-in fade-in zoom-in-95 duration-500">
-        <div className="size-20 rounded-full bg-secondary/5 flex items-center justify-center mb-8 text-primary/60 border border-primary/20 shadow-sm">
+        <div className="size-20 rounded-full bg-primary/5 flex items-center justify-center mb-8 text-primary/60 border border-primary/20 shadow-sm">
           <User className="size-10" />
         </div>
         <h2 className="text-xl font-heading text-foreground uppercase mb-4">Belum Ada Profil Terhubung</h2>
@@ -110,7 +110,7 @@ export default function ParentDashboard() {
 
         {children.length > 1 ? (
           <div className="flex flex-col gap-2 w-full md:w-auto">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 ml-1">Pilih Profil Anak</span>
+            <span className="text-micro text-muted-foreground/70 ml-1">Pilih Profil Anak</span>
             <Select value={effectiveChildId || undefined} onValueChange={setSelectedChildId}>
               <SelectTrigger className="w-full md:w-72 h-11 border-border bg-card font-semibold text-foreground">
                 <SelectValue placeholder="Pilih Profil...">
@@ -126,7 +126,7 @@ export default function ParentDashboard() {
           </div>
         ) : (
           <div className="flex flex-col gap-2 items-start md:items-end">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70">Profil Aktif</span>
+            <span className="text-micro text-muted-foreground/70">Profil Aktif</span>
             <div className="h-11 flex items-center px-6 rounded-lg border border-primary/20 bg-primary/5 gap-3">
               <span className="font-bold text-foreground">{activeChild.name}</span>
               <span className="text-[10px] font-bold px-2.5 py-1 rounded bg-primary/20 text-primary uppercase tracking-widest">{activeChild.group?.name || "Tanpa Kelompok"}</span>
@@ -169,7 +169,7 @@ export default function ParentDashboard() {
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                   {flatItems.map((item) => (
                     <div key={item.key} className="rounded-lg bg-muted/30 border border-border/40 p-3 text-center flex flex-col justify-center min-h-[80px]">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground leading-tight mb-1">{item.label}</p>
+                      <p className="text-micro text-muted-foreground leading-tight mb-1">{item.label}</p>
                       <p className="text-2xl font-bold tabular-nums text-foreground">{item.value}</p>
                     </div>
                   ))}
@@ -245,12 +245,12 @@ export default function ParentDashboard() {
                   <div className="flex flex-wrap gap-3 items-center">
                     {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
                       <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
-                        <span className="text-[10px] font-bold uppercase tracking-widest">{STATUS_STYLE[s].label}</span>
+                        <span className="text-micro">{STATUS_STYLE[s].label}</span>
                         <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
                       </div>
                     ))}
                     <div className="ml-auto flex items-center gap-2 px-4 py-1.5 rounded-lg border border-primary/20 bg-primary/5">
-                      <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tingkat Kehadiran</span>
+                      <span className="text-micro text-muted-foreground">Tingkat Kehadiran</span>
                       <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
                         {attendanceSummary?.rate ?? 0}%
                       </span>
@@ -259,7 +259,7 @@ export default function ParentDashboard() {
 
                   {/* Record list */}
                   <div className="flex flex-col gap-1.5">
-                    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 px-1 mb-1">10 Agenda Terakhir</p>
+                    <p className="text-micro text-muted-foreground/50 px-1 mb-1">10 Agenda Terakhir</p>
                     {attendances.slice(0, 10).map((a) => {
                       const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
                       const eventTitle = a.event?.title ?? eventLabel;
@@ -271,7 +271,7 @@ export default function ParentDashboard() {
                               {format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}
                             </span>
                           </div>
-                          <span className={`shrink-0 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>
+                          <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>
                             {STATUS_STYLE[a.status as AttendanceStatus].label}
                           </span>
                         </div>
@@ -297,7 +297,7 @@ export default function ParentDashboard() {
               </div>
             </CardHeader>
             <CardContent className="p-6">
-              <div className="relative p-6 bg-secondary/5 rounded-xl border border-secondary/10">
+              <div className="relative p-6 bg-primary/5 rounded-xl border border-primary/10">
                 <span className="absolute -top-3 -left-2 text-6xl text-primary/20 font-serif leading-none">&quot;</span>
                 <p className="text-sm font-medium leading-relaxed text-muted-foreground relative z-10 pl-4 border-l-2 border-primary">
                   {latestMetrics?.notes || "Pelatih tidak menitipkan catatan khusus pada evaluasi ini. Anak berkembang dengan baik di sesi latihan reguler."}

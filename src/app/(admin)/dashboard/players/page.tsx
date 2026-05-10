@@ -66,11 +66,11 @@ export default function PlayersPage() {
             { icon: Users,      label: "Pemain",   value: totalPlayers },
           ] as const).map(({ icon: Icon, label, value }) => (
             <div key={label} className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
-              <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+              <div className="size-10 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0">
                 <Icon className="size-5" />
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">{label}</p>
+                <p className="text-micro text-muted-foreground/50">{label}</p>
                 {isGroupsLoading
                   ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" />
                   : <p className="text-2xl font-heading tracking-widest">{value}</p>}
@@ -167,7 +167,7 @@ export default function PlayersPage() {
             {filteredPlayers.length === 0 ? (
               <div className="bg-card border border-dashed border-border/50 rounded-lg p-10 text-center flex flex-col items-center gap-3">
                 <Users className="size-8 text-muted-foreground/30" />
-                <p className="text-xs font-bold tracking-widest uppercase text-muted-foreground">{searchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}</p>
+                <p className="text-sm font-medium text-muted-foreground">{searchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}</p>
               <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Coba kata kunci lain." : "Tambah pemain baru menggunakan tombol di atas."}</p>
               </div>
             ) : (
@@ -175,9 +175,9 @@ export default function PlayersPage() {
                 {filteredPlayers.map((player: Player) => (
                   <div key={player.id} className="bg-card border border-border/50 p-4 rounded-lg flex items-center hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUiState({ type: "view-player", payload: player })}>
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center font-heading text-lg text-primary shrink-0">{player.name.charAt(0).toUpperCase()}</div>
+                      <div className="size-10 rounded-lg bg-muted flex items-center justify-center font-heading text-lg text-foreground/60 shrink-0">{player.name.charAt(0).toUpperCase()}</div>
                       <div className="flex flex-col min-w-0 gap-0.5">
-                        <h4 className="font-heading tracking-widest uppercase text-sm text-foreground truncate">{player.name}</h4>
+                        <h4 className="font-heading tracking-wide text-sm text-foreground truncate">{player.name}</h4>
                         <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.schoolOrigin || "—"}</span>
                       </div>
                     </div>

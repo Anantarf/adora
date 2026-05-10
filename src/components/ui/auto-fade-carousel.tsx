@@ -72,6 +72,7 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
               src={slot as string}
               alt={`ASBC foto ${idx + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           )}
@@ -84,7 +85,7 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
             key={idx}
             onClick={() => setCurrentIndex(idx)}
             className={`h-1.5 rounded-full transition-all duration-500 ${
-              idx === currentIndex ? "bg-primary w-6" : "bg-white/30 w-1.5 hover:bg-white/50"
+              idx === currentIndex ? "bg-brand-yellow w-6" : "bg-white/30 w-1.5 hover:bg-white/50"
             }`}
             aria-label={`Slide ${idx + 1}`}
           />

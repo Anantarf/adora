@@ -9,7 +9,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUpdatePlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
-import { useParents } from "@/hooks/use-users";
+
 import { toast } from "sonner";
 import { playerSchema, playerToFormValues, type PlayerFormValues } from "@/lib/validation/player";
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
@@ -24,7 +24,7 @@ interface ViewPlayerDialogProps {
 export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewPlayerDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
-  const { data: parentAccounts, isLoading: isParentAccountsLoading } = useParents();
+
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
   const { register, handleSubmit, control, setValue, getValues, formState: { errors }, reset } = useForm<PlayerFormValues>({
@@ -72,11 +72,11 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
           {!isEditing && (
             <dl className="rounded-lg border border-border/50 bg-background/40 divide-y divide-border/40">
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
-                <dt className="col-span-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Nama</dt>
+                <dt className="col-span-4 text-micro text-muted-foreground">Nama</dt>
                 <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.name}</dd>
               </div>
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
-                <dt className="col-span-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Kelompok</dt>
+                <dt className="col-span-4 text-micro text-muted-foreground">Kelompok</dt>
                 <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
                   {player.group ? player.group.name : "Belum masuk kelompok"}
                 </dd>
@@ -95,8 +95,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
               getValues={getValues}
               groups={groups}
               isGroupsLoading={isGroupsLoading}
-              parentAccounts={parentAccounts}
-              isParentAccountsLoading={isParentAccountsLoading}
+
               inputClassName="h-10 bg-background/50"
             />
 
@@ -123,7 +122,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
             <div className="py-1.5">
               <dl className="rounded-xl border border-border/50 bg-background/50 divide-y divide-border/40">
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+                  <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
                     <Calendar className="size-3.5" /> Tgl Lahir
                   </dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
@@ -131,43 +130,43 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
                   </dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Tempat Lahir</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Tempat Lahir</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.placeOfBirth || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Jenis Kelamin</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Jenis Kelamin</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.gender || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Berat/Tinggi</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Berat/Tinggi</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
                     {player.weight || "-"} / {player.height || "-"}
                   </dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+                  <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
                     <MapPin className="size-3.5" /> Asal Sekolah
                   </dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.schoolOrigin || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Alamat Rumah</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Alamat Rumah</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.address || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Email</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Email</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.email || "-"}</dd>
                 </div>
                 {player.phoneNumber && (
                   <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                    <dt className="col-span-4 flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">
+                    <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
                       <Phone className="size-3.5" /> No. Telf
                     </dt>
                     <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.phoneNumber}</dd>
                   </div>
                 )}
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Nama Orang Tua</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Nama Orang Tua</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
                     {player.parentName || "-"}
                     {player.user && (
@@ -179,15 +178,15 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
                   </dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">No. Telf. Orang Tua</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">No. Telf. Orang Tua</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.parentPhoneNumber || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Alamat Orang Tua</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Alamat Orang Tua</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.parentAddress || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-[10px] uppercase font-bold tracking-widest text-muted-foreground">Riwayat Penyakit</dt>
+                  <dt className="col-span-4 text-micro text-muted-foreground">Riwayat Penyakit</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.medicalHistory || "-"}</dd>
                 </div>
               </dl>

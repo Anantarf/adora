@@ -114,12 +114,14 @@ export function RegistrationActions({ regId, status }: Props) {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Hapus data pendaftar ini?</AlertDialogTitle>
-            <AlertDialogDescription className="text-destructive font-medium">
-              Data pendaftar akan dihapus secara permanen dan tidak bisa dikembalikan.
+            <AlertDialogDescription className="text-foreground/80 font-medium leading-relaxed">
+              Data pendaftar akan dihapus secara <span className="text-destructive font-bold">permanen</span> dan tidak bisa dikembalikan.
             </AlertDialogDescription>
-            <AlertDialogDescription className="text-amber-500/80 text-xs mt-1">
-              Pastikan Anda sudah mencatat informasi yang diperlukan sebelum menghapus.
-            </AlertDialogDescription>
+            <div className="mt-4 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
+              <p className="text-amber-500/90 text-xs font-medium leading-relaxed">
+                <strong className="font-bold">Catatan:</strong> Pastikan Anda sudah mencatat informasi yang diperlukan sebelum menghapus.
+              </p>
+            </div>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>

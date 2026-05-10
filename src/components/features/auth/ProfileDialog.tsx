@@ -38,10 +38,10 @@ export function ProfileDialog() {
         }
       />
       <DialogContent className="sm:max-w-2xl bg-card border-border/50 overflow-hidden p-0 gap-0">
-        <DialogHeader className="p-6 pb-4 bg-gradient-to-br from-primary/5 via-transparent to-transparent border-b border-border/40">
+        <DialogHeader className="p-6 pb-4 bg-gradient-to-br from-muted/30 via-transparent to-transparent border-b border-border/40">
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 rounded-2xl shadow-inner border border-primary/20">
-              <Settings2 className="size-6 text-primary" />
+            <div className="p-3 bg-muted/60 rounded-2xl shadow-inner border border-border/40">
+              <Settings2 className="size-6 text-muted-foreground" />
             </div>
             <div className="space-y-1 text-left">
               <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">

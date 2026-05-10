@@ -72,28 +72,25 @@ export function LoginForm() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-120 z-10">
-      <div className="bg-login-card/95 border border-white/10 rounded-3xl px-7 py-8 shadow-login-card sm:px-8">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center size-28 mb-4 relative">
-            <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full" />
+      <div className="bg-login-card/95 border border-white/10 rounded-3xl px-7 py-5 shadow-login-card sm:px-8">
+        <div className="text-center mb-1">
+          <div className="relative w-full flex items-center justify-center">
+            <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
             <Image
-              src="/logo-adora.png"
-              alt="Adora BBC"
-              width={112}
-              height={112}
-              className="object-contain relative z-10"
+              src="/logo-adora-full.png"
+              alt="Adora Basketball Club"
+              width={380}
+              height={160}
+              className="object-contain relative z-10 mx-auto w-full max-w-[380px]"
+              priority
             />
           </div>
-          <h1 className="text-white font-heading uppercase tracking-widest leading-none">
-            <span className="block text-[34px]">Adora</span>
-            <span className="block text-[22px] mt-1.5 text-white/85">Basketball Club</span>
-          </h1>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Username</label>
+              <label className="text-micro text-white/50 ml-1">Username</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <User className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
@@ -110,7 +107,7 @@ export function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-white/50 ml-1">Kata Sandi</label>
+              <label className="text-micro text-white/50 ml-1">Kata Sandi</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
                   <Lock className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />

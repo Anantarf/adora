@@ -2,6 +2,7 @@ import { SignOutButton } from "@/components/features/auth/SignOutButton";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import { ForcePasswordGate } from "@/components/features/auth/ForcePasswordGate";
 import { ProfileDialog } from "@/components/features/auth/ProfileDialog";
 
@@ -16,12 +17,15 @@ export default async function ParentLayout({ children }: { children: React.React
     <ForcePasswordGate>
       <div className="flex relative w-full flex-col min-h-dvh bg-background selection:bg-primary/20">
         <header className="flex h-15 w-full shrink-0 items-center justify-between border-b border-border/60 px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-all relative">
-          <div className="flex items-center gap-2 z-10">
-            <div className="flex flex-col">
-              <h1 className="font-heading text-lg md:text-xl lg:text-2xl text-gradient uppercase leading-tight font-black">
+          <div className="flex items-center gap-3 z-10">
+            <div className="w-10 h-10 flex items-center justify-center">
+              <Image src="/logo-new.png" alt="Adora BBC Logo" width={40} height={40} className="w-auto h-auto object-contain" priority />
+            </div>
+            <div className="flex flex-col justify-center">
+              <h1 className="font-heading text-lg md:text-xl lg:text-2xl text-gradient uppercase leading-none font-black mt-1">
                 Adora <span className="tracking-widest ml-0.5">Family</span>
               </h1>
-              <span className="text-xs text-muted-foreground font-semibold uppercase tracking-wider -mt-0.5 ml-0.5">Portal</span>
+              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-1 ml-0.5 leading-none">Portal</span>
             </div>
           </div>
 

@@ -21,13 +21,13 @@ export function BatchUploadFilePicker({ selectedFile, fileInputRef, acceptedFile
             transition-all hover:border-primary/50 hover:bg-primary/5"
       >
         <input type="file" ref={fileInputRef} className="hidden" accept={acceptedFileFormats} onChange={onFileChange} />
-        <div className="size-16 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+        <div className="size-16 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground">
           <FileUp className="size-8" />
         </div>
         <div className="text-center">
           <h4 className="font-heading text-lg text-foreground">Pilih Berkas Excel</h4>
           <p className="text-sm text-muted-foreground font-medium">Pilih atau tarik berkas .xlsx ke area ini</p>
-          <p className="text-[10px] uppercase font-bold tracking-widest text-muted-foreground/60 mt-2">Kapasitas maksimal: 1.000 data pemain</p>
+          <p className="text-micro text-muted-foreground/60 mt-2">Kapasitas maksimal: 1.000 data pemain</p>
         </div>
       </div>
     );
@@ -36,7 +36,7 @@ export function BatchUploadFilePicker({ selectedFile, fileInputRef, acceptedFile
   return (
     <div className="p-4 rounded-xl border border-border/50 bg-card flex items-center justify-between gap-3">
       <div className="flex items-center gap-4">
-        <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+        <div className="size-12 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground">
           <FileSpreadsheet className="size-6" />
         </div>
         <div className="min-w-0">

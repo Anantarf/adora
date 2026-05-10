@@ -142,7 +142,7 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
             <span className="text-[17px] font-semibold tracking-wide text-foreground">{isEditMode ? "Ubah Agenda" : "Tambah Agenda"}</span>
           </div>
           {isEditMode && (
-            <button type="button" onClick={handleCancel} className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+            <button type="button" onClick={handleCancel} className="text-micro text-muted-foreground/60 hover:text-muted-foreground transition-colors">
               Batal
             </button>
           )}
@@ -152,12 +152,12 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           {/* Nama + Jenis */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2 space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Nama <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">Nama <span className="text-destructive">*</span></label>
               <Input {...register("title")} placeholder="Contoh: Latihan Rutin" className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
               {errors.title && <p className="text-[10px] text-destructive">{errors.title.message}</p>}
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Jenis <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">Jenis <span className="text-destructive">*</span></label>
               <Select value={selectedType} onValueChange={(val: string | null) => { if (val) setValue("type", val as EventFormValues["type"]); }}>
                 <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
                   <SelectValue>{selectedType ? EVENT_TYPES[selectedType]?.label : "Pilih"}</SelectValue>
@@ -179,7 +179,7 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           {/* Kelompok Latihan */}
           {groups.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Kelompok Latihan <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">Kelompok Latihan <span className="text-destructive">*</span></label>
               <div className="flex flex-wrap gap-2">
                 {groups.map((g: { id: string; name: string }) => {
                   const checked = selectedGroupIds.includes(g.id);
@@ -201,18 +201,18 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
 
           {/* Keterangan */}
           <div className="space-y-1">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Keterangan (Opsional)</label>
+            <label className="text-micro text-muted-foreground">Keterangan (Opsional)</label>
             <Textarea {...register("description")} placeholder="Catatan tambahan agenda..." className="min-h-22 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all resize-y" />
           </div>
 
           {/* Tanggal + Waktu */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Tanggal <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">Tanggal <span className="text-destructive">*</span></label>
               <Input type="date" value={date ? toYYYYMMDD(date) : ""} onChange={(e) => (e.target.value ? setDate(new Date(e.target.value + "T00:00:00+07:00")) : setDate(undefined))} className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all dark:scheme-dark" />
             </div>
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Waktu <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">Waktu <span className="text-destructive">*</span></label>
               <Input {...register("time", { pattern: { value: /^([01]\d|2[0-3]):[0-5]\d$/, message: "Format: HH:MM" } })} placeholder="08:00" maxLength={5}
                 onInput={(e) => { const el = e.currentTarget; const raw = el.value.replace(/[^0-9]/g, ""); el.value = raw.length >= 3 ? raw.slice(0, 2) + ":" + raw.slice(2, 4) : raw; }}
                 className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
@@ -223,12 +223,12 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           {/* Lokasi + Homebase + Submit */}
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             <div className="space-y-1">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi</label>
+              <label className="text-micro text-muted-foreground">Lokasi</label>
               <Input {...register("location")} placeholder="GOR Adora" className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
             </div>
             {homebases.length > 0 && (
               <div className="space-y-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Lokasi Latihan</label>
+                <label className="text-micro text-muted-foreground">Lokasi Latihan</label>
                 <Select value={homebaseId ?? ""} onValueChange={(val: string | null) => setValue("homebaseId", val || undefined)}>
                   <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
                     <SelectValue>{homebaseId ? homebaseMap[homebaseId]?.name : "Semua Lokasi"}</SelectValue>

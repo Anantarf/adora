@@ -58,7 +58,7 @@ export function AddPeriodDialog() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md bg-card border-border/50">
           <div className="flex items-center gap-3 mb-1">
-            <div className="p-2 bg-primary/10 rounded-lg"><CalendarRange className="size-5 text-primary" /></div>
+            <div className="p-2 bg-muted/60 rounded-lg"><CalendarRange className="size-5 text-muted-foreground" /></div>
             <div>
               <DialogTitle className="text-xl font-heading uppercase tracking-widest">Buat Periode Evaluasi</DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground mt-0.5">Tentukan nama dan rentang waktu periode penilaian pemain.</DialogDescription>
@@ -67,19 +67,19 @@ export function AddPeriodDialog() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
             <div className="flex flex-col gap-1.5">
-              <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Nama Periode</label>
+              <label className="text-micro text-muted-foreground">Nama Periode</label>
               <Input placeholder="Contoh: Semester 1 2025" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Tanggal Mulai</label>
+                <label className="text-micro text-muted-foreground">Tanggal Mulai</label>
                 <Input type="date" {...register("startDate")} />
                 {errors.startDate && <p className="text-xs text-destructive">{errors.startDate.message}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">Tanggal Selesai</label>
+                <label className="text-micro text-muted-foreground">Tanggal Selesai</label>
                 <Input type="date" {...register("endDate")} />
                 {errors.endDate && <p className="text-xs text-destructive">{errors.endDate.message}</p>}
               </div>

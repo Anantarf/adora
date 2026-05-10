@@ -41,7 +41,7 @@ const METRIC_CARDS: MetricCard[] = [
     getDisplay: (m) => `${m.attendanceRate}%`,
     getColorClass: (m) => {
       if (m.attendanceRate >= 80) return "text-primary";
-      if (m.attendanceRate >= 50) return "text-yellow-500";
+      if (m.attendanceRate >= 50) return "text-amber-500";
       return "text-destructive";
     },
   },
@@ -51,7 +51,7 @@ const METRIC_CARDS: MetricCard[] = [
     subtitle: "Selesai / Draft",
     icon: FileCheck,
     getDisplay: (m) => `${m.publishedStatsCount} / ${m.draftStatsCount}`,
-    getColorClass: (m) => (m.draftStatsCount > 0 ? "text-yellow-500" : "text-foreground"),
+    getColorClass: (m) => (m.draftStatsCount > 0 ? "text-amber-500" : "text-foreground"),
   },
 ];
 
@@ -89,11 +89,11 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
             <Card className="border-border/50 bg-card shadow-sm hover:border-primary/30 transition-colors">
               <CardContent className="p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50">
+                  <p className="text-micro text-muted-foreground/50">
                     {c.label}
                   </p>
-                  <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="size-4 text-primary" />
+                  <div className="size-8 rounded-lg bg-muted/60 flex items-center justify-center">
+                    <Icon className="size-4 text-muted-foreground" />
                   </div>
                 </div>
                 <p className={`font-heading text-4xl tracking-wider ${valueClass}`}>

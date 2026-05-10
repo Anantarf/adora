@@ -18,9 +18,11 @@ export default async function LoginPage() {
   return (
     <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-page-dark px-4">
       <Starfield />
-      <Link href="/" className="absolute top-5 left-5 z-20 inline-flex items-center gap-1.5 text-sm font-semibold text-white/70 hover:text-white transition-colors">
-        <ArrowLeft className="size-4" />
-        Kembali ke Beranda
+      <Link href="/" className="absolute top-5 left-5 z-20 skew-box bg-white/10 border-2 border-white/20 text-white px-4 py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group">
+        <span className="unskew-content flex items-center gap-2 font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">
+          <ArrowLeft className="size-4" />
+          KEMBALI KE BERANDA
+        </span>
       </Link>
       <LoginForm />
     </main>

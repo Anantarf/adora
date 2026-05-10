@@ -93,13 +93,13 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Nama Lengkap</label>
+            <label className="text-micro text-muted-foreground ml-1">Nama Lengkap</label>
             <Input {...register("name")} placeholder="Contoh: Budi Santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.name && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Username Login</label>
+            <label className="text-micro text-muted-foreground ml-1">Username Login</label>
             <Input {...register("username")} placeholder="Contoh: budi_santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.username && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.username.message}</p>}
           </div>
@@ -107,7 +107,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
 
 
           <div className="space-y-1.5">
-            <label className="text-[10px] uppercase font-black tracking-widest text-muted-foreground ml-1">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
+            <label className="text-micro text-muted-foreground ml-1">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
             {isParent ? (
               <div onClick={() => toast.info("Kata sandi awal orang tua mengikuti pengaturan default sistem.")} className="cursor-not-allowed">
                 <Input value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />

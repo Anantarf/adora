@@ -47,7 +47,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
             <div className="flex items-start gap-3 min-w-0">
               <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><CalendarDays size={14} /></div>
               <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Tanggal</div>
+                <div className="text-micro text-white/50 mb-0.5">Tanggal</div>
                 <div className="text-sm font-semibold text-white/80 wrap-break-word">
                   {formatJakarta(event.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
                 </div>
@@ -57,7 +57,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
             <div className="flex items-start gap-3 min-w-0">
               <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><Clock size={14} /></div>
               <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Waktu</div>
+                <div className="text-micro text-white/50 mb-0.5">Waktu</div>
                 <div className="text-sm font-semibold text-white/80">{formatJakarta(event.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
               </div>
             </div>
@@ -66,7 +66,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
               <div className="flex items-start gap-3 min-w-0">
                 <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><MapPin size={14} /></div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Lokasi</div>
+                  <div className="text-micro text-white/50 mb-0.5">Lokasi</div>
                   <div className="text-sm font-semibold text-white/80 wrap-break-word">{event.location}</div>
                 </div>
               </div>
@@ -76,7 +76,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
               <div className="flex items-start gap-3 min-w-0">
                 <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><Users size={14} /></div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Kelompok Latihan</div>
+                  <div className="text-micro text-white/50 mb-0.5">Kelompok Latihan</div>
                   <div className="text-sm font-semibold text-white/80 wrap-break-word">{event.groups.map((g) => g.name).join(", ")}</div>
                 </div>
               </div>
@@ -86,7 +86,7 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
               <div className="flex items-start gap-3 min-w-0">
                 <div className="mt-0.5 size-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-primary shrink-0"><AlignLeft size={14} /></div>
                 <div className="min-w-0">
-                  <div className="text-[10px] font-bold uppercase tracking-widest text-white/50 mb-0.5">Keterangan</div>
+                  <div className="text-micro text-white/50 mb-0.5">Keterangan</div>
                   <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{event.description}</p>
                 </div>
               </div>

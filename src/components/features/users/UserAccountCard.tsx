@@ -30,31 +30,29 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
     >
       {/* Left: Avatar + Info */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <div className="size-8 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
-          <UserCircle2 className="size-4 text-primary" />
+        <div className="size-8 rounded-full bg-muted border border-border/60 flex items-center justify-center shrink-0">
+          <UserCircle2 className="size-4 text-muted-foreground" />
         </div>
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <span className="font-heading font-bold text-sm text-foreground truncate">{user.name ?? user.username}</span>
           {user.name && (
             <span className="text-[10px] text-muted-foreground/50 font-mono truncate hidden sm:inline">@{user.username}</span>
           )}
-          <span className="px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-[9px] font-black uppercase tracking-widest leading-none shrink-0">
+          <span className="px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-micro leading-none shrink-0">
             {ROLE_LABELS[user.role] ?? user.role}
           </span>
           {isParent && (
-            user._count.player > 0 ? (
-              <button
-                type="button"
-                onClick={() => onViewPlayers(user.id)}
-                className="flex items-center gap-1 text-[10px] text-muted-foreground font-semibold opacity-70 hover:opacity-100 hover:text-primary transition-colors shrink-0"
-              >
-                <Users className="size-3" /> {user._count.player} pemain
-              </button>
-            ) : (
-              <span className="flex items-center gap-1 text-[10px] text-muted-foreground/50 font-medium shrink-0">
-                <Users className="size-3" /> {user._count.player} pemain
-              </span>
-            )
+            <button
+              type="button"
+              onClick={() => onViewPlayers(user.id)}
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all shrink-0 text-micro ${
+                user._count.player > 0
+                  ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/50"
+                  : "border-border/50 bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+              }`}
+            >
+              <Users className="size-3" /> {user._count.player} Pemain
+            </button>
           )}
         </div>
       </div>
@@ -66,9 +64,9 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
             onClick={() => onReset(user.id)}
             variant="ghost"
             size="sm"
-            className="h-7 px-2.5 rounded-lg text-[9px] uppercase font-bold tracking-widest gap-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            className="h-7 px-2.5 rounded-lg text-micro gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
           >
-            <KeyRound className="size-3" /> Atur Sandi
+            <KeyRound className="size-3" /> <span className="hidden sm:inline">Atur Sandi</span>
           </Button>
           <Button onClick={() => onDelete(user.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0">
             <Trash2 className="size-3" />
