@@ -82,6 +82,7 @@ export function LoginForm() {
               width={380}
               height={160}
               className="object-contain relative z-10 mx-auto w-full max-w-[380px]"
+              style={{ width: "auto", height: "auto" }}
               priority
             />
           </div>
