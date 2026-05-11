@@ -1,6 +1,6 @@
 // src/lib/prisma.ts
 import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { Prisma } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
@@ -18,18 +18,11 @@ const createPrismaClient = () => {
     console.warn("⚠ WARNING: DATABASE_URL is missing. Prisma will fail to connect.");
   }
 
-  const parsedUrl = new URL(url || "mysql://localhost:3306/");
+  const connectionString = url || "postgresql://localhost:5432/postgres";
 
-  // Initialize with MariaDB adapter. Dynamic pool limit to avoid exhaustion during build workers.
+  // Initialize with PostgreSQL adapter. Dynamic pool limit to avoid exhaustion during build workers.
   const poolLimit = process.env.npm_lifecycle_event === "build" ? 10 : 25;
-  const adapter = new PrismaMariaDb({
-    host: parsedUrl.hostname,
-    port: Number(parsedUrl.port) || 3306,
-    user: parsedUrl.username,
-    password: parsedUrl.password,
-    database: parsedUrl.pathname.slice(1) || process.env.DB_NAME,
-    connectionLimit: poolLimit,
-  });
+  const adapter = new PrismaPg({ connectionString });
 
   return new PrismaClient({
     adapter,
