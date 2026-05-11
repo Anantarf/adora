@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 
 // 1. List users (Admin only) - Focused on PARENT role by default

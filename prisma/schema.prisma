@@ -1,9 +1,10 @@
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "debian-openssl-3.0.x", "rhel-openssl-3.0.x", "debian-openssl-1.1.x", "rhel-openssl-1.1.x"]
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 model homebase {
@@ -11,7 +12,7 @@ model homebase {
   name        String    @unique
   address     String
   phone       String?
-  description String?   @db.Text
+  description String?   
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -29,24 +30,24 @@ model account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String? 
+  access_token      String? 
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String? 
   session_state     String?
   user              user    @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Account_userId_fkey")
 
   @@unique([provider, providerAccountId], map: "Account_provider_providerAccountId_key")
-  @@index([userId], map: "Account_userId_fkey")
+  @@index([userId], map: "Account_userId_idx")
 }
 
 model attendance {
   id        String            @id @default(cuid())
   date      DateTime
   status    attendance_status
-  note      String?           @db.Text
+  note      String?           
   playerId  String
   eventId   String?
   createdAt DateTime          @default(now())
@@ -69,7 +70,7 @@ model auditlog {
   userId      String?
   user        user?    @relation(fields: [userId], references: [id], map: "AuditLog_userId_fkey")
 
-  @@index([userId], map: "AuditLog_userId_fkey")
+  @@index([userId], map: "AuditLog_userId_idx")
   @@index([timestamp])
 }
 
@@ -83,14 +84,14 @@ model certificate {
   group      group?   @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "Certificate_groupId_fkey")
   player     player?  @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Certificate_playerId_fkey")
 
-  @@index([groupId], map: "Certificate_groupId_fkey")
-  @@index([playerId], map: "Certificate_playerId_fkey")
+  @@index([groupId], map: "Certificate_groupId_idx")
+  @@index([playerId], map: "Certificate_playerId_idx")
 }
 
 model event {
   id          String     @id @default(cuid())
   title       String
-  description String?    @db.Text
+  description String?    
   date        DateTime
   type        event_type @default(LATIHAN)
   location    String?
@@ -124,7 +125,7 @@ model eventGroup {
 model group {
   id          String        @id @default(cuid())
   name        String        @unique(map: "Group_name_key")
-  description String?       @db.Text
+  description String?       
   homebaseId  String?
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -150,7 +151,7 @@ model player {
   address             String?
   email               String?
   phoneNumber         String?
-  medicalHistory      String?       @db.Text
+  medicalHistory      String?       
   parentName          String?
   parentAddress       String?
   parentPhoneNumber   String?
@@ -184,7 +185,7 @@ model session {
   expires      DateTime
   user         user     @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Session_userId_fkey")
 
-  @@index([userId], map: "Session_userId_fkey")
+  @@index([userId], map: "Session_userId_idx")
 }
 
 model evaluationPeriod {
@@ -284,7 +285,7 @@ model registration {
 model clubSetting {
   id        String   @id @default(cuid())
   key       String   @unique
-  value     String   @db.Text
+  value     String   
   updatedAt DateTime @updatedAt
 
   @@map("ClubSetting")

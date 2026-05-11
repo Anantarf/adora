@@ -61,12 +61,8 @@ export default function CertificatesPage() {
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Sertifikat?</AlertDialogTitle>
-          <AlertDialogDescription className="text-destructive font-semibold">
-            Sertifikat &quot;{cert.title}&quot; akan dihapus permanen dan tidak dapat dikembalikan.
-          </AlertDialogDescription>
-          <p className="text-amber-500/80 text-xs mt-1">
-            Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi dari portal.
-          </p>
+          <AlertDialogDescription className="text-destructive font-semibold">Sertifikat &quot;{cert.title}&quot; akan dihapus permanen dan tidak dapat dikembalikan.</AlertDialogDescription>
+          <p className="text-amber-500/80 text-xs mt-1">Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi dari portal.</p>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -129,9 +125,7 @@ export default function CertificatesPage() {
                     <FileBadge className="size-4 text-indigo-400 shrink-0" />
                     <span className="font-semibold text-sm text-foreground leading-tight">{cert.title}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground/50 shrink-0">
-                    #{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
-                  </span>
+                  <span className="text-[10px] font-bold text-muted-foreground/50 shrink-0">#{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
                 </div>
 
                 {/* Recipient + Date */}
@@ -149,9 +143,7 @@ export default function CertificatesPage() {
                   ) : (
                     <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>
                   )}
-                  <span className="text-xs text-muted-foreground/60">
-                    {new Date(cert.uploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
-                  </span>
+                  <span className="text-xs text-muted-foreground/60">{new Date(cert.uploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
 
                 {/* Actions */}
@@ -173,7 +165,7 @@ export default function CertificatesPage() {
 
           {/* ── Desktop Table View (md+) ── */}
           <div className="hidden md:block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
-            <Table className="min-w-[600px]">
+            <Table className="min-w-150">
               <TableHeader className="bg-muted/30">
                 <TableRow className="hover:bg-transparent border-b border-border/50">
                   <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
@@ -232,13 +224,7 @@ export default function CertificatesPage() {
         </>
       )}
 
-      {!isLoading && totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      {!isLoading && totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
     </div>
   );
 }
