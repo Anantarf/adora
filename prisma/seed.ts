@@ -10,24 +10,30 @@ const prisma = new PrismaClient({ adapter });
 // Midnight Jakarta (+07:00) helper
 const jkt = (d: string) => new Date(`${d}T00:00:00+07:00`);
 
-// Logic for generating realistic metric data
-const METRIC_PROFILES = [
-  { dribble: { inAndOut: 75, crossover: 8, vLeft: 7, vRight: 8, betweenLegsLeft: 6, betweenLegsRight: 7 }, passing: { chestPass: 8, bouncePass: 8, overheadPass: 7 }, layUp: 8, shooting: 7 },
-  { dribble: { inAndOut: 88, crossover: 9, vLeft: 8, vRight: 9, betweenLegsLeft: 8, betweenLegsRight: 8 }, passing: { chestPass: 9, bouncePass: 9, overheadPass: 8 }, layUp: 9, shooting: 8 },
-  { dribble: { inAndOut: 60, crossover: 6, vLeft: 5, vRight: 6, betweenLegsLeft: 5, betweenLegsRight: 5 }, passing: { chestPass: 7, bouncePass: 6, overheadPass: 6 }, layUp: 7, shooting: 6 },
-  { dribble: { inAndOut: 45, crossover: 4, vLeft: 4, vRight: 5, betweenLegsLeft: 3, betweenLegsRight: 4 }, passing: { chestPass: 5, bouncePass: 5, overheadPass: 4 }, layUp: 5, shooting: 4 },
-];
+/**
+ * METRIC_PROFILES: 
+ * A: Score >= 80
+ * B: Score >= 70
+ * C: Score >= 60
+ * D: Score < 60
+ */
+const METRIC_PROFILES = {
+  A: { dribble: { inAndOut: 88, crossover: 9, vLeft: 8, vRight: 9, betweenLegsLeft: 8, betweenLegsRight: 8 }, passing: { chestPass: 9, bouncePass: 9, overheadPass: 8 }, layUp: 9, shooting: 8 },
+  B: { dribble: { inAndOut: 75, crossover: 8, vLeft: 7, vRight: 8, betweenLegsLeft: 6, betweenLegsRight: 7 }, passing: { chestPass: 8, bouncePass: 8, overheadPass: 7 }, layUp: 8, shooting: 7 },
+  C: { dribble: { inAndOut: 62, crossover: 6, vLeft: 6, vRight: 6, betweenLegsLeft: 5, betweenLegsRight: 5 }, passing: { chestPass: 6, bouncePass: 6, overheadPass: 6 }, layUp: 6, shooting: 5 },
+  D: { dribble: { inAndOut: 45, crossover: 5, vLeft: 4, vRight: 4, betweenLegsLeft: 4, betweenLegsRight: 4 }, passing: { chestPass: 5, bouncePass: 5, overheadPass: 4 }, layUp: 4, shooting: 4 },
+};
 
-function genMetrics(seed: number) {
-  const profile = METRIC_PROFILES[Math.abs(seed) % METRIC_PROFILES.length];
+function genMetrics(targetGrade: "A" | "B" | "C" | "D", seed: number) {
+  const profile = METRIC_PROFILES[targetGrade];
   const variate = (val: number, max: number) => {
-    const offset = (Math.abs(seed * val + 21) % 5) - 2; // -2 to +2
+    const offset = (Math.abs(seed * val + 21) % 3) - 1; // -1 to +1 to keep it tight to the grade
     return Math.max(0, Math.min(max, val + offset));
   };
 
   return {
     dribble: {
-      inAndOut: Math.max(0, Math.min(99, profile.dribble.inAndOut + ((Math.abs(seed + 11) % 11) - 5))),
+      inAndOut: Math.max(0, Math.min(99, profile.dribble.inAndOut + ((Math.abs(seed + 11) % 7) - 3))),
       crossover: variate(profile.dribble.crossover, 10),
       vLeft: variate(profile.dribble.vLeft, 10),
       vRight: variate(profile.dribble.vRight, 10),
@@ -41,17 +47,17 @@ function genMetrics(seed: number) {
     },
     layUp: variate(profile.layUp, 10),
     shooting: variate(profile.shooting, 10),
-    notes: seed % 3 === 0 ? "Menunjukkan peningkatan pada koordinasi tangan kiri." : "",
+    notes: targetGrade === "D" ? "Perlu perhatian ekstra pada koordinasi dasar." : (targetGrade === "C" ? "Menunjukkan potensi, namun perlu konsistensi." : ""),
   };
 }
 
 async function main() {
-  console.log("🚀 Memulai proses seeding data ADORA BBC (Humanized Edition)...\n");
+  console.log("🚀 Memulai proses seeding data ADORA BBC (Humanized & Balanced Grades)...\n");
 
   const pw = await bcrypt.hash("password", 10);
 
-  // 1. USERS (Admin & Diverse Parents)
-  const admin = await prisma.user.upsert({
+  // 1. USERS
+  await prisma.user.upsert({
     where: { username: "superadmin" },
     update: { password: pw },
     create: { id: crypto.randomUUID(), username: "superadmin", password: pw, name: "Head Coach Admin", email: "admin@adora.club", role: "ADMIN" },
@@ -76,132 +82,85 @@ async function main() {
       create: { id: crypto.randomUUID(), username: p.username, name: p.name, email: p.email, password: pw, role: "PARENT" },
     });
   }
-  console.log(`✓ Berhasil membuat ${1 + parentData.length} akun pengguna.`);
 
-  // 2. HOMEBASES (With inviting descriptions)
+  // 2. HOMEBASES
   const hbPusat = await prisma.homebase.upsert({
     where: { name: "ADORA Gandul (Pusat)" },
-    update: {
-      address: "Jl. Raya Timur No. 2, Pangkalan Jati, Kec. Cinere, Kota Depok",
-      phone: "6281296701301",
-      description: "Pusat pelatihan utama dengan fasilitas lapangan indoor standar kompetisi. Fokus pada pengembangan teknik dasar dan mental juara.",
-    },
+    update: {},
     create: {
       name: "ADORA Gandul (Pusat)",
       address: "Jl. Raya Timur No. 2, Pangkalan Jati, Kec. Cinere, Kota Depok",
       phone: "6281296701301",
-      description: "Pusat pelatihan utama dengan fasilitas lapangan indoor standar kompetisi. Fokus pada pengembangan teknik dasar dan mental juara.",
+      description: "Pusat pelatihan utama dengan fasilitas lapangan indoor standar kompetisi.",
     },
   });
 
   const hbCibubur = await prisma.homebase.upsert({
     where: { name: "ADORA Cibubur" },
-    update: {
-      address: "Limus Nunggal, Kec. Cileungsi, Kabupaten Bogor",
-      phone: "6281770776888",
-      description: "Cabang strategis dengan lingkungan latihan yang asri dan mendukung fokus pemain usia dini.",
-    },
+    update: {},
     create: {
       name: "ADORA Cibubur",
       address: "Limus Nunggal, Kec. Cileungsi, Kabupaten Bogor",
       phone: "6281770776888",
-      description: "Cabang strategis dengan lingkungan latihan yang asri dan mendukung fokus pemain usia dini.",
+      description: "Cabang strategis dengan lingkungan latihan yang asri.",
     },
   });
-  console.log("✓ Berhasil menyiapkan 2 lokasi Homebase.");
 
-  // 3. GROUPS (Aspirational Names)
+  // 3. GROUPS
   const groupDefs = [
-    { name: "Adora Rookies (U-10)", homebaseId: hbPusat.id, description: "Pengenalan basket dasar untuk usia 7-10 tahun dengan metode 'Fun Learning'." },
-    { name: "Adora Rising Stars (U-13)", homebaseId: hbPusat.id, description: "Pengembangan teknik individu dan kerjasama tim untuk usia 11-13 tahun." },
-    { name: "Adora Elite (U-16)", homebaseId: hbPusat.id, description: "Persiapan kompetisi tingkat lanjut dan taktik pertandingan untuk usia 14-16 tahun." },
-    { name: "Adora Stars Cibubur (U-12)", homebaseId: hbCibubur.id, description: "Program gabungan teknik dasar dan menengah untuk area Cibubur." },
+    { name: "Adora Rookies (U-10)", homebaseId: hbPusat.id, description: "Pengenalan basket dasar." },
+    { name: "Adora Rising Stars (U-13)", homebaseId: hbPusat.id, description: "Pengembangan teknik individu." },
+    { name: "Adora Elite (U-16)", homebaseId: hbPusat.id, description: "Persiapan kompetisi tingkat lanjut." },
+    { name: "Adora Stars Cibubur (U-12)", homebaseId: hbCibubur.id, description: "Program gabungan Cibubur." },
   ];
 
   const groups: Record<string, { id: string }> = {};
   for (const g of groupDefs) {
     groups[g.name] = await prisma.group.upsert({
       where: { name: g.name },
-      update: { description: g.description },
+      update: {},
       create: g,
     });
   }
-  console.log("✓ Berhasil membuat 4 kelompok latihan aspirasional.");
 
-  // 4. PLAYERS (Detailed & Humanized)
+  // 4. PLAYERS (Assigned Target Grades)
   const playerDefs = [
-    // Rookies (U-10)
-    { name: "Arka Gibran Wijaya", dob: "2016-05-12", gender: "male", group: "Adora Rookies (U-10)", parent: "indra_wijaya", school: "SD Al-Azhar 1", weight: "32", height: "135", pob: "Jakarta" },
-    { name: "Keysha Putri", dob: "2017-02-20", gender: "female", group: "Adora Rookies (U-10)", parent: "maya_kusuma", school: "SDN 01 Depok", weight: "28", height: "130", pob: "Depok" },
-    { name: "Bimo Sakti", dob: "2016-11-05", gender: "male", group: "Adora Rookies (U-10)", parent: "bambang_sutrisno", school: "SD Global Islamic", weight: "35", height: "140", pob: "Jakarta" },
-    { name: "Zahra Amira", dob: "2017-08-14", gender: "female", group: "Adora Rookies (U-10)", parent: "nina_herlina", school: "SD Cikal", weight: "26", height: "128", pob: "Bandung" },
+    { name: "Arka Gibran Wijaya", dob: "2016-05-12", gender: "male", group: "Adora Rookies (U-10)", parent: "indra_wijaya", grade: "A" },
+    { name: "Keysha Putri", dob: "2017-02-20", gender: "female", group: "Adora Rookies (U-10)", parent: "maya_kusuma", grade: "C" }, // Grade C
+    { name: "Bimo Sakti", dob: "2016-11-05", gender: "male", group: "Adora Rookies (U-10)", parent: "bambang_sutrisno", grade: "D" }, // Grade D
+    { name: "Zahra Amira", dob: "2017-08-14", gender: "female", group: "Adora Rookies (U-10)", parent: "nina_herlina", grade: "B" },
     
-    // Rising Stars (U-13)
-    { name: "Dimas Pratama", dob: "2013-03-25", gender: "male", group: "Adora Rising Stars (U-13)", parent: "dedy_kurniawan", school: "SMPN 19 Jakarta", weight: "45", height: "155", pob: "Jakarta" },
-    { name: "Larasati Dewi", dob: "2013-09-10", gender: "female", group: "Adora Rising Stars (U-13)", parent: "santi_susanti", school: "SMP Labschool", weight: "42", height: "152", pob: "Depok" },
-    { name: "Rayyan Al-Fatih", dob: "2014-01-30", gender: "male", group: "Adora Rising Stars (U-13)", parent: "fajar_ramadhan", school: "SMP Al-Ikhlas", weight: "48", height: "160", pob: "Jakarta" },
-    { name: "Nabila Syakieb", dob: "2013-06-15", gender: "female", group: "Adora Rising Stars (U-13)", parent: "dewi_fortuna", school: "SMPN 1 Depok", weight: "40", height: "150", pob: "Bekasi" },
+    { name: "Dimas Pratama", dob: "2013-03-25", gender: "male", group: "Adora Rising Stars (U-13)", parent: "dedy_kurniawan", grade: "A" },
+    { name: "Larasati Dewi", dob: "2013-09-10", gender: "female", group: "Adora Rising Stars (U-13)", parent: "santi_susanti", grade: "B" },
+    { name: "Rayyan Al-Fatih", dob: "2014-01-30", gender: "male", group: "Adora Rising Stars (U-13)", parent: "fajar_ramadhan", grade: "A" },
+    { name: "Nabila Syakieb", dob: "2013-06-15", gender: "female", group: "Adora Rising Stars (U-13)", parent: "dewi_fortuna", grade: "B" },
 
-    // Elite (U-16)
-    { name: "Kevin Sanjaya", dob: "2010-02-14", gender: "male", group: "Adora Elite (U-16)", parent: "indra_wijaya", school: "SMAN 8 Jakarta", weight: "62", height: "178", pob: "Surabaya" },
-    { name: "Alya Rohali", dob: "2011-05-22", gender: "female", group: "Adora Elite (U-16)", parent: "maya_kusuma", school: "SMA Tarakanita", weight: "55", height: "168", pob: "Jakarta" },
-    { name: "Galang Ramadhan", dob: "2010-12-01", gender: "male", group: "Adora Elite (U-16)", parent: "bambang_sutrisno", school: "SMAN 70 Jakarta", weight: "68", height: "182", pob: "Depok" },
+    { name: "Kevin Sanjaya", dob: "2010-02-14", gender: "male", group: "Adora Elite (U-16)", parent: "indra_wijaya", grade: "A" },
+    { name: "Alya Rohali", dob: "2011-05-22", gender: "female", group: "Adora Elite (U-16)", parent: "maya_kusuma", grade: "A" },
+    { name: "Galang Ramadhan", dob: "2010-12-01", gender: "male", group: "Adora Elite (U-16)", parent: "bambang_sutrisno", grade: "B" },
 
-    // Cibubur (U-12)
-    { name: "Farel Prayoga", dob: "2014-07-07", gender: "male", group: "Adora Stars Cibubur (U-12)", parent: "dedy_kurniawan", school: "SDN Cibubur 03", weight: "38", height: "145", pob: "Bogor" },
-    { name: "Tiara Andini", dob: "2015-01-18", gender: "female", group: "Adora Stars Cibubur (U-12)", parent: "santi_susanti", school: "SD Madania", weight: "36", height: "142", pob: "Jakarta" },
+    { name: "Farel Prayoga", dob: "2014-07-07", gender: "male", group: "Adora Stars Cibubur (U-12)", parent: "dedy_kurniawan", grade: "B" },
+    { name: "Tiara Andini", dob: "2015-01-18", gender: "female", group: "Adora Stars Cibubur (U-12)", parent: "santi_susanti", grade: "B" },
   ];
 
   const players: Record<string, { id: string }> = {};
   for (const p of playerDefs) {
     const groupId = groups[p.group].id;
-    const parentId = parents[p.parent].id;
-    const hbId = p.group.includes("Cibubur") ? hbCibubur.id : hbPusat.id;
     players[p.name] = await prisma.player.upsert({
       where: { name_dateOfBirth_groupId: { name: p.name, dateOfBirth: jkt(p.dob), groupId } },
-      update: { weight: p.weight, height: p.height, placeOfBirth: p.pob },
+      update: {},
       create: {
         name: p.name,
         dateOfBirth: jkt(p.dob),
         gender: p.gender,
-        schoolOrigin: p.school,
-        weight: p.weight,
-        height: p.height,
-        placeOfBirth: p.pob,
         groupId,
-        parentId,
-        preferredHomebaseId: hbId,
+        parentId: parents[p.parent].id,
+        preferredHomebaseId: p.group.includes("Cibubur") ? hbCibubur.id : hbPusat.id,
       },
     });
   }
-  console.log(`✓ Berhasil mendaftarkan ${playerDefs.length} pemain dengan data fisik lengkap.`);
 
-  // 5. EVENTS (Varied & Engaging)
-  const eventDefs = [
-    { id: "ev-01", title: "Latihan Rutin: Fokus Shooting & Layup", type: "LATIHAN", date: "2026-05-20", location: "Indoor Court Gandul", hbId: hbPusat.id, targets: ["Adora Rookies (U-10)", "Adora Rising Stars (U-13)"] },
-    { id: "ev-02", title: "Sparing Friendly: Adora vs Tiger Academy", type: "SPARING", date: "2026-05-25", location: "GOR Depok", hbId: hbPusat.id, targets: ["Adora Elite (U-16)"] },
-    { id: "ev-03", title: "Family Day & Fun Match 2026", type: "KHUSUS", date: "2026-06-05", location: "Lapangan Utama Gandul", hbId: hbPusat.id, targets: ["Adora Rookies (U-10)", "Adora Rising Stars (U-13)", "Adora Elite (U-16)", "Adora Stars Cibubur (U-12)"] },
-    { id: "ev-04", title: "Workshop Nutrisi Atlet Muda", type: "KHUSUS", date: "2026-06-12", location: "Ruang Teater Adora", hbId: hbPusat.id, targets: ["Adora Rising Stars (U-13)", "Adora Elite (U-16)"] },
-    { id: "ev-05", title: "Evaluasi Semester Ganjil", type: "EVALUASI", date: "2026-06-20", location: "Masing-masing Homebase", hbId: hbPusat.id, targets: ["Adora Rookies (U-10)", "Adora Rising Stars (U-13)", "Adora Elite (U-16)", "Adora Stars Cibubur (U-12)"] },
-  ];
-
-  for (const ev of eventDefs) {
-    const created = await prisma.event.upsert({
-      where: { id: ev.id },
-      update: {},
-      create: { id: ev.id, title: ev.title, type: ev.type as any, date: jkt(ev.date), location: ev.location, homebaseId: ev.hbId },
-    });
-    for (const gName of ev.targets) {
-      await prisma.eventGroup.upsert({
-        where: { eventId_groupId: { eventId: created.id, groupId: groups[gName].id } },
-        update: {},
-        create: { eventId: created.id, groupId: groups[gName].id },
-      });
-    }
-  }
-  console.log("✓ Berhasil menjadwalkan 5 event variatif (Latihan, Sparing, Family Day, dll).");
-
-  // 6. PERIODS & STATS
+  // 5. PERIODS & STATS
   const period = await prisma.evaluationPeriod.upsert({
     where: { id: "period-2026" },
     update: { isActive: true },
@@ -213,14 +172,34 @@ async function main() {
     const seed = playerId.charCodeAt(0);
     await prisma.statistic.upsert({
       where: { playerId_periodId: { playerId, periodId: period.id } },
-      update: { metricsJson: genMetrics(seed) },
-      create: { playerId, periodId: period.id, date: new Date(), metricsJson: genMetrics(seed), status: "Published" },
+      update: { metricsJson: genMetrics(p.grade as any, seed) },
+      create: { playerId, periodId: period.id, date: new Date(), metricsJson: genMetrics(p.grade as any, seed), status: "Published" },
     });
   }
-  console.log("✓ Berhasil menerbitkan statistik performa untuk seluruh pemain.");
 
-  console.log("\n✨ SEEDING SELESAI DENGAN SUKSES! ✨");
-  console.log("Gunakan 'superadmin' / 'password' untuk akses penuh.");
+  // 6. CLUB SETTINGS (Kop Surat & Tanda Tangan)
+  const settings = [
+    { key: "rapor_header_url", value: "/logo-adora-full.png" },
+    { key: "rapor_coach_name", value: "Danuri Akbar" },
+    { key: "rapor_ceo_name", value: "M. Arief, S.Ak" },
+    // Untuk TTD, karena file aslinya mungkin belum ada di path /public, 
+    // kita biarkan kosong atau berikan path default jika file tersedia.
+    // { key: "rapor_ceo_sign_url", value: "/images/signatures/ceo-sign.png" },
+    // { key: "rapor_coach_sign_url", value: "/images/signatures/coach-sign.png" },
+    // { key: "rapor_stamp_url", value: "/images/signatures/stamp.png" },
+  ];
+
+  for (const s of settings) {
+    await prisma.clubSetting.upsert({
+      where: { key: s.key },
+      update: { value: s.value },
+      create: s,
+    });
+  }
+
+  console.log("✓ Berhasil mengonfigurasi Pengaturan Klub (Kop Surat & Nama Penandatangan).");
+  console.log("✓ Berhasil menerbitkan statistik dengan variasi nilai A, B (mayoritas), C (1 orang), D (1 orang).");
+  console.log("\n✨ SEEDING SELESAI! ✨");
 }
 
 main()
