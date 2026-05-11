@@ -89,14 +89,31 @@ async function main() {
   // 3. HOMEBASES & GROUPS
   const hbPusat = await prisma.homebase.upsert({
     where: { name: "ADORA Gandul (Pusat)" },
-    update: {},
-    create: { name: "ADORA Gandul (Pusat)", address: "Jl. Raya Timur No. 2, Cinere, Depok", phone: "6281296701301" },
+    update: { description: "Home Court Cinere" },
+    create: { 
+      name: "ADORA Gandul (Pusat)", 
+      address: "Jl. Raya Timur No. 2, Cinere, Depok", 
+      phone: "6281296701301",
+      description: "Home Court Cinere"
+    },
+  });
+
+  const hbCibubur = await prisma.homebase.upsert({
+    where: { name: "ADORA Cibubur" },
+    update: { description: "GOR Cileungsi (Cabang Cibubur)" },
+    create: { 
+      name: "ADORA Cibubur", 
+      address: "Pasir Angin, Kec. Cileungsi, Kab. Bogor", 
+      phone: "6281770776888",
+      description: "GOR Cileungsi (Cabang Cibubur)"
+    },
   });
 
   const groupDefs = [
     { name: "Adora Rookies (U-10)", hb: hbPusat.id },
     { name: "Adora Rising Stars (U-13)", hb: hbPusat.id },
     { name: "Adora Elite (U-16)", hb: hbPusat.id },
+    { name: "Adora Cibubur (U-12)", hb: hbCibubur.id },
   ];
 
   const groups: Record<string, { id: string }> = {};
@@ -117,6 +134,7 @@ async function main() {
     { name: "Larasati Dewi", group: "Adora Rising Stars (U-13)", parent: "maya_kusuma", grade: "B" as const },
     { name: "Kevin Sanjaya", group: "Adora Elite (U-16)", parent: "indra_wijaya", grade: "A" as const },
     { name: "Galang Ramadhan", group: "Adora Elite (U-16)", parent: "bambang_sutrisno", grade: "D" as const }, // Variation D
+    { name: "Farel Hardiansyah", group: "Adora Cibubur (U-12)", parent: "maya_kusuma", grade: "B" as const },
   ];
 
   const players: Record<string, { id: string }> = {};

@@ -214,74 +214,49 @@ export default async function LandingPage() {
       {/* ── Adora In Action (Galeri Kolase) ── */}
       <GallerySection />
 
-      {/* ── Cara Mendaftar ── */}
-      <section id="daftar" className="py-24 bg-surface-dark scroll-mt-20 relative z-20 -mt-10">
-        <div className="container mx-auto px-4">
-          <FadeIn direction="up">
-            <div className="text-center mb-16">
-              <p className="text-brand-orange font-heading font-black text-lg md:text-2xl uppercase tracking-widest italic mb-2">Mau jadi bagian dari momen ini?</p>
-              <h2 className="font-heading font-black text-2xl md:text-4xl text-white uppercase tracking-widest mb-3 italic">CARA BERGABUNG</h2>
-              <p className="text-white/60 max-w-2xl mx-auto font-medium text-sm md:text-base">Bergabunglah bersama ratusan pemain muda Adora Basketball Club. Proses pendaftaran mudah, 100% online.</p>
-            </div>
-          </FadeIn>
-
-          <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16" delay={0.2}>
-            {REGISTRATION_STEPS.map(({ step, title, desc }) => (
-              <StaggerItem key={step} className="relative group">
-                {/* Offset Shadow Box */}
-                <div className="absolute inset-0 bg-brand-orange rounded-2xl transform translate-x-2 translate-y-2 group-hover:translate-x-3 group-hover:translate-y-3 transition-transform"></div>
-
-                <div className="relative text-center p-6 bg-page-dark rounded-2xl border-2 border-black h-full flex flex-col items-center">
-                  <div className="skew-box w-14 h-14 bg-brand-yellow text-black font-heading font-black text-2xl flex items-center justify-center mb-5 border-2 border-black shadow-[4px_4px_0px_#000]">
-                    <span className="unskew-content italic">{step}</span>
-                  </div>
-                  <h3 className="font-heading font-black text-xl text-white uppercase tracking-widest mb-2 italic">{title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed font-medium">{desc}</p>
-                </div>
-              </StaggerItem>
-            ))}
-          </StaggerContainer>
-
-          <FadeIn delay={0.4} direction="up" className="text-center">
-            <Link
-              href="/register"
-              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-orange-700 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-5 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-4 transition-all text-xs sm:text-sm md:text-base uppercase tracking-widest hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
-            >
-              <span className="unskew-content flex items-center gap-2 sm:gap-3 italic">
-                <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />
-                ISI FORMULIR SEKARANG
-              </span>
-            </Link>
-          </FadeIn>
-        </div>
-      </section>
 
       {/* ── Final Call to Action ── */}
-      <section className="py-20 bg-brand-purple relative overflow-hidden z-20">
+      <section id="daftar" className="py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
         <div className="absolute inset-0 pattern-halftone opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-6 relative z-10 text-center">
           <FadeIn direction="up">
-            <h2 className="font-heading font-black text-3xl md:text-5xl text-white uppercase tracking-widest italic mb-6">
+            <h2 className="font-heading font-black text-3xl md:text-6xl text-white uppercase tracking-widest italic mb-6 drop-shadow-lg">
               SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
             </h2>
-            <p className="text-white/80 max-w-xl mx-auto mb-10 font-medium text-sm md:text-lg">
-              Jangan lewatkan kesempatan untuk bergabung dengan klub basket terbaik di Depok. Kuota pemain terbatas untuk setiap kelompok usia!
+            <p className="text-white/90 max-w-xl mx-auto mb-16 font-medium text-sm md:text-lg leading-relaxed">
+              Bergabunglah bersama ratusan pemain muda Adora Basketball Club. <br className="hidden md:block" />
+              Proses pendaftaran mudah, cepat, dan 100% online.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+
+            {/* Registration Steps Integrated */}
+            <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16" delay={0.2}>
+              {REGISTRATION_STEPS.map(({ step, title, desc }) => (
+                <StaggerItem key={step} className="relative group">
+                  <div className="flex flex-col items-center">
+                    <div className="text-brand-yellow font-heading font-black text-4xl mb-4 italic drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
+                      0{step}
+                    </div>
+                    <h3 className="font-heading font-black text-lg text-white uppercase tracking-widest mb-2 italic">{title}</h3>
+                    <p className="text-white/70 text-xs md:text-sm leading-relaxed font-medium max-w-[200px]">{desc}</p>
+                  </div>
+                  {/* Visual Connector for Desktop */}
+                  {step !== "3" && (
+                    <div className="hidden md:block absolute top-6 -right-4 w-8 h-[2px] bg-white/20"></div>
+                  )}
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+
+            <div className="flex flex-col items-center justify-center gap-6">
               <Link
                 href="/register"
-                className="w-full sm:w-auto inline-flex skew-box bg-brand-yellow text-black font-black px-8 py-4 transition-all uppercase tracking-widest hover:scale-105 shadow-[6px_6px_0px_#000] border-2 border-black"
+                className="w-full sm:w-auto inline-flex skew-box bg-brand-yellow hover:bg-white text-black font-black px-10 py-4 transition-all uppercase tracking-[0.2em] text-sm md:text-lg hover:scale-110 shadow-[8px_8px_0px_#000] border-2 border-black group"
               >
-                <span className="unskew-content italic">DAFTAR SEKARANG</span>
+                <span className="unskew-content italic flex items-center gap-3">
+                  DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">→</span>
+                </span>
               </Link>
-              <a
-                href={`https://wa.me/${CONTACT.whatsapp}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto inline-flex skew-box bg-white/10 border-2 border-white/20 text-white px-8 py-4 hover:bg-white hover:text-black transition-all uppercase tracking-widest"
-              >
-                <span className="unskew-content italic">TANYA ADMIN</span>
-              </a>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-4">Kuota terbatas untuk setiap kelompok usia</p>
             </div>
           </FadeIn>
         </div>

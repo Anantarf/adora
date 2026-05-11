@@ -114,7 +114,9 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                           <span className="leading-relaxed line-clamp-2">{homebase.address}</span>
                         </div>
                         <a 
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(homebase.name + " " + homebase.address)}`}
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                            name.includes("Gandul") ? "Homecourt Cinere" : "GOM Cileungsi"
+                          )}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"

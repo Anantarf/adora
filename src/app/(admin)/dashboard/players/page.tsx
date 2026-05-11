@@ -178,7 +178,7 @@ export default function PlayersPage() {
                       <div className="size-10 rounded-lg bg-muted flex items-center justify-center font-heading text-lg text-foreground/60 shrink-0">{player.name.charAt(0).toUpperCase()}</div>
                       <div className="flex flex-col min-w-0 gap-0.5">
                         <h4 className="font-heading tracking-wide text-sm text-foreground truncate">{player.name}</h4>
-                        <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.schoolOrigin || "—"}</span>
+                        <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.group?.name || "Tanpa Kelompok"}</span>
                       </div>
                     </div>
                   </div>
