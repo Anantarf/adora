@@ -19,7 +19,7 @@ export type PlayerStatRecord = {
   history?: StatisticHistory[];
 };
 
-// Hook (GET): Tarik data evaluasi rapor pemain via Server Action MySQL
+// Hook (GET): Tarik data evaluasi rapor pemain via Server Action Prisma
 export const usePlayerStats = (playerId: string | null) => {
   return useQuery({
     queryKey: QUERY_KEYS.PLAYER_STATS(playerId!),

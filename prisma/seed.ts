@@ -1,10 +1,10 @@
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
-import { PrismaMariaDb } from "@prisma/adapter-mariadb";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 // Midnight Jakarta (+07:00)
@@ -22,7 +22,7 @@ const METRIC_PROFILES = [
 
 function genMetrics(seed: number) {
   const profile = METRIC_PROFILES[Math.abs(seed) % METRIC_PROFILES.length];
-  
+
   // Add slight random variation (+/- 1 or 2) based on the seed
   const variate = (val: number, max: number) => {
     const offset = (Math.abs(seed * val + 13) % 5) - 2; // -2 to +2
@@ -45,7 +45,7 @@ function genMetrics(seed: number) {
     },
     layUp: variate(profile.layUp, 10),
     shooting: variate(profile.shooting, 10),
-    notes: ""
+    notes: "",
   };
 }
 
@@ -70,14 +70,14 @@ async function main() {
   });
 
   const parentData = [
-    { username: "budi_santoso",   name: "Budi Santoso",   email: "budi@gmail.com" },
-    { username: "siti_rahayu",    name: "Siti Rahayu",    email: "siti@gmail.com" },
-    { username: "ahmad_fauzi",    name: "Ahmad Fauzi",    email: "ahmad@gmail.com" },
-    { username: "dewi_lestari",   name: "Dewi Lestari",   email: "dewi@gmail.com" },
-    { username: "rudi_hermawan",  name: "Rudi Hermawan",  email: "rudi@gmail.com" },
-    { username: "maya_putri",     name: "Maya Putri",     email: "maya@gmail.com" },
-    { username: "dian_pratama",   name: "Dian Pratama",   email: "dian@gmail.com" },
-    { username: "eka_susanti",    name: "Eka Susanti",    email: "eka@gmail.com" },
+    { username: "budi_santoso", name: "Budi Santoso", email: "budi@gmail.com" },
+    { username: "siti_rahayu", name: "Siti Rahayu", email: "siti@gmail.com" },
+    { username: "ahmad_fauzi", name: "Ahmad Fauzi", email: "ahmad@gmail.com" },
+    { username: "dewi_lestari", name: "Dewi Lestari", email: "dewi@gmail.com" },
+    { username: "rudi_hermawan", name: "Rudi Hermawan", email: "rudi@gmail.com" },
+    { username: "maya_putri", name: "Maya Putri", email: "maya@gmail.com" },
+    { username: "dian_pratama", name: "Dian Pratama", email: "dian@gmail.com" },
+    { username: "eka_susanti", name: "Eka Susanti", email: "eka@gmail.com" },
   ];
 
   const parents: Record<string, { id: string }> = {};
@@ -143,10 +143,10 @@ async function main() {
 
   // ─── GROUPS ───────────────────────────────────────────────────────────────
   const groupDefs = [
-    { name: "Under-10 Pusat",  homebaseId: hbPusat.id,   description: "Kelompok usia dini 8–10 tahun di Gandul." },
-    { name: "Under-13 Pusat",  homebaseId: hbPusat.id,   description: "Kelompok usia muda 11–13 tahun di Gandul." },
-    { name: "Under-16 Pusat",  homebaseId: hbPusat.id,   description: "Kelompok remaja 14–16 tahun di Gandul." },
-    { name: "Under-12 Cibubur",homebaseId: hbCibubur.id, description: "Kelompok usia 10–12 tahun di Cibubur." },
+    { name: "Under-10 Pusat", homebaseId: hbPusat.id, description: "Kelompok usia dini 8–10 tahun di Gandul." },
+    { name: "Under-13 Pusat", homebaseId: hbPusat.id, description: "Kelompok usia muda 11–13 tahun di Gandul." },
+    { name: "Under-16 Pusat", homebaseId: hbPusat.id, description: "Kelompok remaja 14–16 tahun di Gandul." },
+    { name: "Under-12 Cibubur", homebaseId: hbCibubur.id, description: "Kelompok usia 10–12 tahun di Cibubur." },
   ];
 
   const groups: Record<string, { id: string }> = {};
@@ -162,36 +162,36 @@ async function main() {
   // ─── PLAYERS ──────────────────────────────────────────────────────────────
   const playerDefs = [
     // Under-10 Pusat
-    { name: "Rafif Arya Putra",    dob: "2016-03-15", gender: "male",   group: "Under-10 Pusat",  parent: "budi_santoso",  school: "SDN Jatinegara 01",  phone: "08111234567" },
-    { name: "Naila Zahra Putri",   dob: "2016-07-22", gender: "female", group: "Under-10 Pusat",  parent: "siti_rahayu",   school: "SDN Klender 03",     phone: "08122345678" },
-    { name: "Keanu Bima Sakti",    dob: "2017-01-10", gender: "male",   group: "Under-10 Pusat",  parent: null,            school: "SDN Cipinang 02",    phone: null },
-    { name: "Siti Fatimah Azzahra",dob: "2016-11-05", gender: "female", group: "Under-10 Pusat",  parent: "maya_putri",    school: "SDN Rawamangun 01",  phone: "08134567890" },
-    { name: "Daffa Rizky Nugroho", dob: "2017-04-18", gender: "male",   group: "Under-10 Pusat",  parent: null,            school: "SDN Jatinegara 05",  phone: null },
-    { name: "Alisha Permata Sari", dob: "2016-09-30", gender: "female", group: "Under-10 Pusat",  parent: "eka_susanti",   school: "SDN Pulogadung 01",  phone: "08156789012" },
+    { name: "Rafif Arya Putra", dob: "2016-03-15", gender: "male", group: "Under-10 Pusat", parent: "budi_santoso", school: "SDN Jatinegara 01", phone: "08111234567" },
+    { name: "Naila Zahra Putri", dob: "2016-07-22", gender: "female", group: "Under-10 Pusat", parent: "siti_rahayu", school: "SDN Klender 03", phone: "08122345678" },
+    { name: "Keanu Bima Sakti", dob: "2017-01-10", gender: "male", group: "Under-10 Pusat", parent: null, school: "SDN Cipinang 02", phone: null },
+    { name: "Siti Fatimah Azzahra", dob: "2016-11-05", gender: "female", group: "Under-10 Pusat", parent: "maya_putri", school: "SDN Rawamangun 01", phone: "08134567890" },
+    { name: "Daffa Rizky Nugroho", dob: "2017-04-18", gender: "male", group: "Under-10 Pusat", parent: null, school: "SDN Jatinegara 05", phone: null },
+    { name: "Alisha Permata Sari", dob: "2016-09-30", gender: "female", group: "Under-10 Pusat", parent: "eka_susanti", school: "SDN Pulogadung 01", phone: "08156789012" },
 
     // Under-13 Pusat
-    { name: "Farhan Aditya",       dob: "2013-05-12", gender: "male",   group: "Under-13 Pusat",  parent: null,            school: "SMPN 19 Jakarta",    phone: "08198765432" },
-    { name: "Zhafira Nur Aisyah",  dob: "2014-02-28", gender: "female", group: "Under-13 Pusat",  parent: "siti_rahayu",   school: "SMPN 44 Jakarta",    phone: "08187654321" },
-    { name: "Rizky Pratama",       dob: "2013-09-17", gender: "male",   group: "Under-13 Pusat",  parent: "dian_pratama",  school: "SMPN 73 Jakarta",    phone: "08176543210" },
-    { name: "Dara Anggraini",      dob: "2014-06-04", gender: "female", group: "Under-13 Pusat",  parent: null,            school: "SMPN 55 Jakarta",    phone: null },
-    { name: "Andika Surya Putra",  dob: "2013-11-23", gender: "male",   group: "Under-13 Pusat",  parent: null,            school: "SMPN 49 Jakarta",    phone: null },
-    { name: "Keisha Amanda",       dob: "2014-08-15", gender: "female", group: "Under-13 Pusat",  parent: "maya_putri",    school: "SMPN 103 Jakarta",   phone: "08165432109" },
-    { name: "Bagas Trihandoko",    dob: "2013-07-03", gender: "male",   group: "Under-13 Pusat",  parent: null,            school: "SMPN 67 Jakarta",    phone: null },
+    { name: "Farhan Aditya", dob: "2013-05-12", gender: "male", group: "Under-13 Pusat", parent: null, school: "SMPN 19 Jakarta", phone: "08198765432" },
+    { name: "Zhafira Nur Aisyah", dob: "2014-02-28", gender: "female", group: "Under-13 Pusat", parent: "siti_rahayu", school: "SMPN 44 Jakarta", phone: "08187654321" },
+    { name: "Rizky Pratama", dob: "2013-09-17", gender: "male", group: "Under-13 Pusat", parent: "dian_pratama", school: "SMPN 73 Jakarta", phone: "08176543210" },
+    { name: "Dara Anggraini", dob: "2014-06-04", gender: "female", group: "Under-13 Pusat", parent: null, school: "SMPN 55 Jakarta", phone: null },
+    { name: "Andika Surya Putra", dob: "2013-11-23", gender: "male", group: "Under-13 Pusat", parent: null, school: "SMPN 49 Jakarta", phone: null },
+    { name: "Keisha Amanda", dob: "2014-08-15", gender: "female", group: "Under-13 Pusat", parent: "maya_putri", school: "SMPN 103 Jakarta", phone: "08165432109" },
+    { name: "Bagas Trihandoko", dob: "2013-07-03", gender: "male", group: "Under-13 Pusat", parent: null, school: "SMPN 67 Jakarta", phone: null },
 
     // Under-16 Pusat
-    { name: "Rayhan Dinata",       dob: "2010-04-25", gender: "male",   group: "Under-16 Pusat",  parent: "ahmad_fauzi",   school: "SMAN 68 Jakarta",    phone: "08211234567" },
-    { name: "Reva Maharani",       dob: "2011-01-19", gender: "female", group: "Under-16 Pusat",  parent: "dewi_lestari",  school: "SMAN 81 Jakarta",    phone: "08222345678" },
-    { name: "Akbar Maulana",       dob: "2010-08-07", gender: "male",   group: "Under-16 Pusat",  parent: null,            school: "SMAN 14 Jakarta",    phone: null },
-    { name: "Nadya Wulandari",     dob: "2011-05-31", gender: "female", group: "Under-16 Pusat",  parent: "eka_susanti",   school: "SMAN 39 Jakarta",    phone: "08244567890" },
-    { name: "Gibran Kusuma",       dob: "2010-12-14", gender: "male",   group: "Under-16 Pusat",  parent: null,            school: "SMAN 32 Jakarta",    phone: null },
-    { name: "Intan Purnama Sari",  dob: "2011-03-22", gender: "female", group: "Under-16 Pusat",  parent: "dewi_lestari",  school: "SMAN 26 Jakarta",    phone: "08266789012" },
+    { name: "Rayhan Dinata", dob: "2010-04-25", gender: "male", group: "Under-16 Pusat", parent: "ahmad_fauzi", school: "SMAN 68 Jakarta", phone: "08211234567" },
+    { name: "Reva Maharani", dob: "2011-01-19", gender: "female", group: "Under-16 Pusat", parent: "dewi_lestari", school: "SMAN 81 Jakarta", phone: "08222345678" },
+    { name: "Akbar Maulana", dob: "2010-08-07", gender: "male", group: "Under-16 Pusat", parent: null, school: "SMAN 14 Jakarta", phone: null },
+    { name: "Nadya Wulandari", dob: "2011-05-31", gender: "female", group: "Under-16 Pusat", parent: "eka_susanti", school: "SMAN 39 Jakarta", phone: "08244567890" },
+    { name: "Gibran Kusuma", dob: "2010-12-14", gender: "male", group: "Under-16 Pusat", parent: null, school: "SMAN 32 Jakarta", phone: null },
+    { name: "Intan Purnama Sari", dob: "2011-03-22", gender: "female", group: "Under-16 Pusat", parent: "dewi_lestari", school: "SMAN 26 Jakarta", phone: "08266789012" },
 
     // Under-12 Cibubur
-    { name: "Farel Hardiansyah",   dob: "2014-06-18", gender: "male",   group: "Under-12 Cibubur", parent: "rudi_hermawan", school: "SDN Cileungsi 01",    phone: "08277890123" },
-    { name: "Calista Dewi Putri",  dob: "2014-10-03", gender: "female", group: "Under-12 Cibubur", parent: null,            school: "SDN Cibubur 02",      phone: null },
-    { name: "Yoga Pratama",        dob: "2015-02-14", gender: "male",   group: "Under-12 Cibubur", parent: "budi_santoso",  school: "SDN Cibubur 03",      phone: "08299012345" },
-    { name: "Shafira Nurfadila",   dob: "2014-08-27", gender: "female", group: "Under-12 Cibubur", parent: "maya_putri",    school: "SDN Limus Nunggal 01",phone: "08210123456" },
-    { name: "Bintang Ramadhan",    dob: "2015-04-09", gender: "male",   group: "Under-12 Cibubur", parent: null,            school: "SDN Cibubur 05",      phone: null },
+    { name: "Farel Hardiansyah", dob: "2014-06-18", gender: "male", group: "Under-12 Cibubur", parent: "rudi_hermawan", school: "SDN Cileungsi 01", phone: "08277890123" },
+    { name: "Calista Dewi Putri", dob: "2014-10-03", gender: "female", group: "Under-12 Cibubur", parent: null, school: "SDN Cibubur 02", phone: null },
+    { name: "Yoga Pratama", dob: "2015-02-14", gender: "male", group: "Under-12 Cibubur", parent: "budi_santoso", school: "SDN Cibubur 03", phone: "08299012345" },
+    { name: "Shafira Nurfadila", dob: "2014-08-27", gender: "female", group: "Under-12 Cibubur", parent: "maya_putri", school: "SDN Limus Nunggal 01", phone: "08210123456" },
+    { name: "Bintang Ramadhan", dob: "2015-04-09", gender: "male", group: "Under-12 Cibubur", parent: null, school: "SDN Cibubur 05", phone: null },
   ];
 
   const players: Record<string, { id: string }> = {};
@@ -261,7 +261,15 @@ async function main() {
     { id: "ev-2026-02-01", date: "2026-02-01", title: "Latihan Rutin Pekan 1 Februari", type: "LATIHAN", location: "GOR ADORA Gandul", homebaseId: hbPusat.id, groupTargets: ALL_PUSAT },
     { id: "ev-2026-02-03", date: "2026-02-03", title: "Latihan Rutin Selatan Februari", type: "LATIHAN", location: "GOR ADORA Cibubur", homebaseId: hbCibubur.id, groupTargets: ALL_CIBUBUR },
     { id: "ev-2026-02-08", date: "2026-02-08", title: "Latihan Rutin Pekan 2 Februari", type: "LATIHAN", location: "GOR ADORA Gandul", homebaseId: hbPusat.id, groupTargets: ALL_PUSAT },
-    { id: "ev-2026-02-15", date: "2026-02-15", title: "Kejuaraan Basket Antar Akademi Jakarta 2026", type: "PERTANDINGAN", location: "GOR Cempaka Putih, Jakarta Pusat", homebaseId: hbPusat.id, groupTargets: ["Under-13 Pusat", "Under-16 Pusat"] },
+    {
+      id: "ev-2026-02-15",
+      date: "2026-02-15",
+      title: "Kejuaraan Basket Antar Akademi Jakarta 2026",
+      type: "PERTANDINGAN",
+      location: "GOR Cempaka Putih, Jakarta Pusat",
+      homebaseId: hbPusat.id,
+      groupTargets: ["Under-13 Pusat", "Under-16 Pusat"],
+    },
     { id: "ev-2026-02-22", date: "2026-02-22", title: "Latihan Rutin Pekan 4 Februari", type: "LATIHAN", location: "GOR ADORA Gandul", homebaseId: hbPusat.id, groupTargets: ALL_PUSAT },
     { id: "ev-2026-02-24", date: "2026-02-24", title: "Latihan Gabungan Pusat & Selatan", type: "LATIHAN", location: "GOR ADORA Gandul", homebaseId: hbPusat.id, groupTargets: ALL },
     // Maret 2026
@@ -310,13 +318,13 @@ async function main() {
   // Hanya buat attendance untuk event yang sudah berlalu (≤ hari ini)
   const todayStr = new Date().toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
   const today = jkt(todayStr);
-  const pastEvents = eventDefs.filter(ev => jkt(ev.date) <= today);
+  const pastEvents = eventDefs.filter((ev) => jkt(ev.date) <= today);
 
   let attendanceCount = 0;
   for (const ev of pastEvents) {
     const evDate = jkt(ev.date);
     for (const gName of ev.groupTargets) {
-      const groupPlayers = playerDefs.filter(p => p.group === gName);
+      const groupPlayers = playerDefs.filter((p) => p.group === gName);
       for (const p of groupPlayers) {
         const playerId = players[p.name].id;
         const seed = playerId.charCodeAt(0) + ev.id.charCodeAt(5);
@@ -368,13 +376,13 @@ async function main() {
   // ─── CERTIFICATES ─────────────────────────────────────────────────────────
   const certDefs = [
     // Kelompok
-    { groupName: "Under-16 Pusat",   title: "Juara 2 Basket Antar Akademi Jakarta 2025",   fileUrl: "https://drive.google.com/file/d/example-cert-u16-2025" },
-    { groupName: "Under-13 Pusat",   title: "Juara 3 Turnamen Basket Usia Dini DKI 2025",  fileUrl: "https://drive.google.com/file/d/example-cert-u13-2025" },
+    { groupName: "Under-16 Pusat", title: "Juara 2 Basket Antar Akademi Jakarta 2025", fileUrl: "https://drive.google.com/file/d/example-cert-u16-2025" },
+    { groupName: "Under-13 Pusat", title: "Juara 3 Turnamen Basket Usia Dini DKI 2025", fileUrl: "https://drive.google.com/file/d/example-cert-u13-2025" },
     { groupName: "Under-12 Cibubur", title: "Peserta Terbaik Open Tournament Cibubur 2025", fileUrl: "https://drive.google.com/file/d/example-cert-u12-cibubur" },
     // Individu
-    { playerName: "Rayhan Dinata",   title: "MVP Kejuaraan Antar Akademi Jakarta Feb 2026", fileUrl: "https://drive.google.com/file/d/example-cert-rayhan-mvp" },
-    { playerName: "Reva Maharani",   title: "Best Defender Turnamen DKI 2025",             fileUrl: "https://drive.google.com/file/d/example-cert-reva-defender" },
-    { playerName: "Farhan Aditya",   title: "Top Scorer Under-13 Regional Jakarta 2025",   fileUrl: "https://drive.google.com/file/d/example-cert-farhan-scorer" },
+    { playerName: "Rayhan Dinata", title: "MVP Kejuaraan Antar Akademi Jakarta Feb 2026", fileUrl: "https://drive.google.com/file/d/example-cert-rayhan-mvp" },
+    { playerName: "Reva Maharani", title: "Best Defender Turnamen DKI 2025", fileUrl: "https://drive.google.com/file/d/example-cert-reva-defender" },
+    { playerName: "Farhan Aditya", title: "Top Scorer Under-13 Regional Jakarta 2025", fileUrl: "https://drive.google.com/file/d/example-cert-farhan-scorer" },
   ];
 
   let certCount = 0;
@@ -401,5 +409,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());
