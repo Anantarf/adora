@@ -56,7 +56,7 @@ export default async function LandingPage() {
           </FadeIn>
 
           <FadeIn delay={0.2} direction="up">
-            <h1 className="font-heading font-black text-3xl sm:text-5xl md:text-7xl tracking-tight uppercase mb-6 leading-tight text-white drop-shadow-2xl italic py-2">
+            <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-7xl tracking-tight uppercase mb-6 leading-tight text-white drop-shadow-2xl italic py-2">
               MEMBANGUN <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-yellow to-brand-orange pr-4 md:pr-6">KARAKTER</span>
               <br />
               MERAIH <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-4 md:pr-6">PRESTASI</span>
@@ -72,7 +72,7 @@ export default async function LandingPage() {
           <FadeIn delay={0.4} direction="up">
             <Link
               href="/register"
-              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-orange-700 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-4 transition-all text-xs sm:text-sm md:text-xl uppercase tracking-widest hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
+              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-orange-700 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-8 py-3.5 sm:px-8 sm:py-3 md:px-10 md:py-4 transition-all text-sm md:text-xl uppercase tracking-widest hover:scale-110 shadow-[4px_4px_0px_#000] md:shadow-[6px_6px_0px_#000] border-2 border-black group"
             >
               <span className="unskew-content flex items-center gap-2 sm:gap-3 italic pr-2">
                 DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">→</span>
@@ -236,7 +236,7 @@ export default async function LandingPage() {
                   </div>
                   <div className="text-left">
                     <h3 className="font-heading font-black text-xs md:text-sm text-white uppercase tracking-widest leading-none mb-1 italic">{title}</h3>
-                    <p className="text-white/60 text-[10px] md:text-xs font-medium max-w-[150px] leading-tight">{desc}</p>
+                    <p className="text-white/60 text-xs font-medium max-w-[150px] md:max-w-[180px] leading-tight">{desc}</p>
                   </div>
                   {step !== "3" && (
                     <div className="hidden md:block w-[1px] h-8 bg-white/10 ml-8"></div>
