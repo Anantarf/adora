@@ -10,6 +10,9 @@ import { submitRegistration } from "@/actions/register";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
 import { Button } from "@/components/ui/button";
+import { LandingHeader } from "@/components/features/landing-header";
+import { FadeIn } from "@/components/animations/fade-in";
+import { getAcademicYear } from "@/lib/utils";
 import React from "react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -116,43 +119,15 @@ function RegisterContent() {
   };
 
   return (
-    <main className="min-h-screen bg-page-dark text-foreground relative overflow-x-hidden">
+    <main className="min-h-screen bg-page-dark text-white relative overflow-hidden pt-18">
+      <LandingHeader />
       
       {/* Background Textures */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-orange rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
-        
-        {/* Sporty Elements */}
         <div className="absolute inset-0 pattern-halftone opacity-30"></div>
-        <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]">
-          {[...Array(10)].map((_, i) => (
-            <div key={i} className="absolute h-[1px] w-[200%] bg-white rotate-[-35deg]" style={{ top: `${i * 15}%`, left: '-50%' }} />
-          ))}
-        </div>
       </div>
-
-      {/* ── Navbar ── */}
-      <header className="sticky top-0 z-50 w-full border-b-[4px] border-brand-purple bg-page-dark/90 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" aria-label="Kembali ke beranda" className="flex items-center gap-3 group">
-            <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105">
-              <Image src="/logo-new.png" alt="Adora BBC" width={48} height={48} className="w-auto h-auto max-h-[48px] object-contain" />
-            </div>
-            <span className="font-heading font-black text-2xl tracking-widest uppercase text-white transition-colors hidden sm:block italic group-hover:text-brand-yellow">
-              ADORA <span className="text-brand-orange">BBC</span>
-            </span>
-          </Link>
-          <Link
-            href="/login"
-            className="skew-box bg-white/10 border-2 border-white/20 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
-          >
-            <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">
-              PORTAL LOGIN
-            </span>
-          </Link>
-        </div>
-      </header>
 
       {/* ── Hero ── */}
       <section className="relative pt-10 pb-6 md:pt-12 md:pb-8 text-center px-4 z-10">
