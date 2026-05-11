@@ -9,6 +9,7 @@ import { HomebaseSelector } from "@/components/homebase-selector";
 import { submitRegistration } from "@/actions/register";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
+import { Button } from "@/components/ui/button";
 import React from "react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -300,16 +301,17 @@ function RegisterContent() {
                           </div>
                         )}
 
-                        <button
+                        <Button
                           type="submit"
-                          disabled={isPending}
-                          className="w-full skew-box bg-gradient-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-4 md:px-8 md:py-5 transition-all text-sm md:text-lg uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black disabled:opacity-50 disabled:cursor-not-allowed group"
+                          loading={isPending}
+                          loadingText="MEMPROSES..."
+                          className="w-full skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-4 md:px-8 md:py-8 transition-all text-sm md:text-lg uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
                         >
                           <span className="unskew-content flex items-center justify-center gap-2 italic">
-                            {isPending ? "MEMPROSES..." : "KIRIM PENDAFTARAN"} 
-                            {!isPending && <span className="group-hover:translate-x-2 transition-transform">→</span>}
+                            KIRIM PENDAFTARAN
+                            <span className="group-hover:translate-x-2 transition-transform">→</span>
                           </span>
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
