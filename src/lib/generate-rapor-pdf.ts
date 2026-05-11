@@ -113,7 +113,8 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
     // Horizontally centered, vertically bottom-aligned agar TTD menempel ke garis nama
     const dx = boxX + (boxW - w) / 2;
     const dy = boxY + boxH - h;
-    doc.addImage(img, "PNG", dx, dy, w, h);
+    const format = props.fileType || "PNG";
+    doc.addImage(img, format, dx, dy, w, h);
   }
 
   // ─── HEADER BLOCK ─────────────────────────────────────
@@ -132,7 +133,8 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
         imgW = (imgProps.width * imgH) / imgProps.height;
       }
       const drawX = MARGIN + (CONTENT_W - imgW) / 2;
-      doc.addImage(headerImg, "PNG", drawX, y, imgW, imgH);
+      const format = imgProps.fileType || "PNG";
+      doc.addImage(headerImg, format, drawX, y, imgW, imgH);
       // HEADER_BOTTOM_TRIM memotong area transparan bawah PNG kop surat.
       // Jika header baru terlalu rapat/jauh dari garis, sesuaikan konstanta ini.
       y += imgH - HEADER_BOTTOM_TRIM;
@@ -291,26 +293,29 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   doc.text(`Gandul, ${dateStr}`, PAGE_W / 2, y, { align: "center" });
   y += 5;
 
-  if (assets?.ceoSignUrl || assets?.coachSignUrl || assets?.stampUrl) {
+  // Render signatures independently so one failure doesn't block others
+  const renderAsset = async (url: string | undefined, x: number, yPos: number, w: number, h: number, isStamp = false) => {
+    if (!url || url.toLowerCase().endsWith(".pdf")) return;
     try {
-      const [ceoImg, coachImg, stampImg] = await Promise.all([
-        assets.ceoSignUrl  ? loadImage(assets.ceoSignUrl)  : null,
-        assets.coachSignUrl ? loadImage(assets.coachSignUrl) : null,
-        assets.stampUrl    ? loadImage(assets.stampUrl)    : null,
-      ]);
-
-      if (coachImg && !assets.coachSignUrl?.endsWith(".pdf"))
-        drawFitImage(coachImg, sigLeftX,  y, SIG_BOX_W, SIG_BOX_H);
-      if (ceoImg   && !assets.ceoSignUrl?.endsWith(".pdf"))
-        drawFitImage(ceoImg,   sigRightX, y, SIG_BOX_W, SIG_BOX_H);
-      if (stampImg && !assets.stampUrl?.endsWith(".pdf")) {
-        const sx = PAGE_W / 2 - STAMP_SIZE / 2;
-        doc.addImage(stampImg, "PNG", sx, y + 5, STAMP_SIZE, STAMP_SIZE);
+      const img = await loadImage(url);
+      if (isStamp) {
+        const sx = PAGE_W / 2 - w / 2;
+        const props = doc.getImageProperties(img);
+        const format = props.fileType || "PNG";
+        doc.addImage(img, format, sx, yPos + 5, w, h);
+      } else {
+        drawFitImage(img, x, yPos, w, h);
       }
     } catch (e) {
-      console.error("Failed to load signature/stamp assets", e);
+      console.error(`Failed to load asset: ${url}`, e);
     }
-  }
+  };
+
+  await Promise.all([
+    renderAsset(assets?.coachSignUrl, sigLeftX, y, SIG_BOX_W, SIG_BOX_H),
+    renderAsset(assets?.ceoSignUrl, sigRightX, y, SIG_BOX_W, SIG_BOX_H),
+    renderAsset(assets?.stampUrl, 0, y, STAMP_SIZE, STAMP_SIZE, true),
+  ]);
 
   y += SIG_GAP;
 
