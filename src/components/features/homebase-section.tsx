@@ -113,6 +113,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                           <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 text-brand-orange mt-0.5" />
                           <span className="leading-relaxed line-clamp-2">{homebase.address}</span>
                         </div>
+                        <a 
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
                             name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi"
                           )}`}
