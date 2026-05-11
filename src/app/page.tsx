@@ -134,7 +134,7 @@ export default async function LandingPage() {
                   {/* Text Content - Bottom */}
                   <div className="absolute inset-0 p-4 md:p-5 flex flex-col justify-end z-20">
                     <h3 className="font-heading font-black text-xl md:text-2xl text-white tracking-widest mb-1 uppercase italic group-hover:text-brand-yellow transition-colors drop-shadow-lg leading-tight">{label}</h3>
-                    <p className="text-white/70 text-xs md:text-sm leading-tight font-medium drop-shadow-md line-clamp-2">{desc}</p>
+                    <p className="text-white/70 text-xs md:text-sm leading-tight font-medium drop-shadow-md">{desc}</p>
                   </div>
                 </div>
               </StaggerItem>
