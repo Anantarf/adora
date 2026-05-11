@@ -75,96 +75,96 @@
   --color-login-icon: color-mix(in srgb, var(--primary) 80%, black);
 
   /* Landing page dark card surface */
-  --color-surface-dark: #18181B; /* Soft Zinc 900 */
+  --color-surface-dark: #18181b; /* Soft Zinc 900 */
 
   /* Always-dark page background (landing, login, register) */
-  --color-page-dark: #0F0F12; /* Very Dark Slate */
+  --color-page-dark: #0f0f12; /* Very Dark Slate */
 
   /* Marketing / Maximalist Brand Tokens */
-  --color-brand-purple: #8A2BE2; /* Vibrant Neon Purple */
-  --color-brand-yellow: #FFE600; /* Pure Neon Yellow (instead of lime) */
-  --color-brand-orange: #FF7A00; /* Golden Orange */
+  --color-brand-purple: #8a2be2; /* Vibrant Neon Purple */
+  --color-brand-yellow: #ffe600; /* Pure Neon Yellow (instead of lime) */
+  --color-brand-orange: #ff7a00; /* Golden Orange */
 }
 
 /* Event type color tokens — konsisten di light & dark mode */
 :root,
 .dark {
-  --event-latihan: #FFD000;
-  --event-sparing: #F97316;
-  --event-pertandingan: #E11D48;
-  --event-evaluasi: #3B82F6;
-  --event-khusus: #8B5CF6;
+  --event-latihan: #ffd000;
+  --event-sparing: #f97316;
+  --event-pertandingan: #e11d48;
+  --event-evaluasi: #3b82f6;
+  --event-khusus: #8b5cf6;
 }
 
 :root {
   /* Ultra Clean Light Mode (Sebagai Pendamping) */
-  --background: #F8F8F8; /* Light Gray */
-  --foreground: #1A1A2E; /* Dark Navy */
-  --card: #FFFFFF;
-  --card-foreground: #1A1A2E;
-  --popover: #FFFFFF;
-  --popover-foreground: #1A1A2E;
-  --primary: #FF6A00; /* Primary Orange */
+  --background: #f8f8f8; /* Light Gray */
+  --foreground: #1a1a2e; /* Dark Navy */
+  --card: #ffffff;
+  --card-foreground: #1a1a2e;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a2e;
+  --primary: #ff6a00; /* Primary Orange */
   --primary-foreground: #ffffff;
-  --secondary: #7C3AED; /* Secondary Purple */
+  --secondary: #7c3aed; /* Secondary Purple */
   --secondary-foreground: #ffffff;
-  --muted: #E4E4E7;
-  --muted-foreground: #71717A;
-  --accent: #E4E4E7;
-  --accent-foreground: #1A1A2E;
-  --destructive: #E63946; /* Accent Red */
-  --border: #E4E4E7;
-  --input: #E4E4E7;
-  --ring: #FF6A00;
-  --chart-1: #FF6A00;
-  --chart-2: #7C3AED;
-  --chart-3: #52525B;
-  --chart-4: #A1A1AA;
-  --chart-5: #E4E4E7;
+  --muted: #e4e4e7;
+  --muted-foreground: #71717a;
+  --accent: #e4e4e7;
+  --accent-foreground: #1a1a2e;
+  --destructive: #e63946; /* Accent Red */
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+  --ring: #ff6a00;
+  --chart-1: #ff6a00;
+  --chart-2: #7c3aed;
+  --chart-3: #52525b;
+  --chart-4: #a1a1aa;
+  --chart-5: #e4e4e7;
   --radius: 0.625rem;
-  --sidebar: #FAFAFA;
-  --sidebar-foreground: #09090B;
-  --sidebar-primary: #FF6A00;
+  --sidebar: #fafafa;
+  --sidebar-foreground: #09090b;
+  --sidebar-primary: #ff6a00;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #F4F4F5;
-  --sidebar-accent-foreground: #09090B;
-  --sidebar-border: #E4E4E7;
-  --sidebar-ring: #FF6A00;
+  --sidebar-accent: #f4f4f5;
+  --sidebar-accent-foreground: #09090b;
+  --sidebar-border: #e4e4e7;
+  --sidebar-ring: #ff6a00;
 }
 
 .dark {
   /* Dark Mode — Midnight Slate & Orange Sporty */
-  --background: #0F0F12; /* Midnight Slate */
-  --foreground: #FAFAFA; /* Light Gray */
-  --card: #18181B; /* Soft Zinc */
-  --card-foreground: #FAFAFA;
-  --popover: #18181B;
-  --popover-foreground: #FAFAFA;
-  --primary: #FF6A00; /* Primary Orange */
+  --background: #0f0f12; /* Midnight Slate */
+  --foreground: #fafafa; /* Light Gray */
+  --card: #18181b; /* Soft Zinc */
+  --card-foreground: #fafafa;
+  --popover: #18181b;
+  --popover-foreground: #fafafa;
+  --primary: #ff6a00; /* Primary Orange */
   --primary-foreground: #ffffff;
-  --secondary: #8B5CF6; /* Secondary Purple (for badges only) */
+  --secondary: #8b5cf6; /* Secondary Purple (for badges only) */
   --secondary-foreground: #ffffff;
-  --muted: #27272A; /* Neutral Zinc 800 */
-  --muted-foreground: #A1A1AA;
-  --accent: #27272A; /* Neutral Zinc 800 */
-  --accent-foreground: #FAFAFA;
-  --destructive: #E63946; /* Accent Red */
-  --border: #27272A; /* Subtle Charcoal Border */
-  --input: #27272A;
-  --ring: #FF6A00;
-  --chart-1: #FF6A00;
-  --chart-2: #8B5CF6;
-  --chart-3: #A1A1AA;
-  --chart-4: #52525B;
-  --chart-5: #27272A;
-  --sidebar: #0F0F12; /* Match Background */
-  --sidebar-foreground: #FAFAFA;
-  --sidebar-primary: #FF6A00;
+  --muted: #27272a; /* Neutral Zinc 800 */
+  --muted-foreground: #a1a1aa;
+  --accent: #27272a; /* Neutral Zinc 800 */
+  --accent-foreground: #fafafa;
+  --destructive: #e63946; /* Accent Red */
+  --border: #27272a; /* Subtle Charcoal Border */
+  --input: #27272a;
+  --ring: #ff6a00;
+  --chart-1: #ff6a00;
+  --chart-2: #8b5cf6;
+  --chart-3: #a1a1aa;
+  --chart-4: #52525b;
+  --chart-5: #27272a;
+  --sidebar: #0f0f12; /* Match Background */
+  --sidebar-foreground: #fafafa;
+  --sidebar-primary: #ff6a00;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #27272A;
-  --sidebar-accent-foreground: #FAFAFA;
-  --sidebar-border: #27272A;
-  --sidebar-ring: #FF6A00;
+  --sidebar-accent: #27272a;
+  --sidebar-accent-foreground: #fafafa;
+  --sidebar-border: #27272a;
+  --sidebar-ring: #ff6a00;
 }
 
 /* Prevent number spinners from showing (they look boxy/ugly) */
@@ -173,7 +173,7 @@ input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-input[type=number] {
+input[type="number"] {
   -moz-appearance: textfield;
   appearance: textfield;
 }
@@ -201,7 +201,7 @@ input[type=number] {
     }
   }
   .modern-gradient {
-    @apply bg-gradient-to-br from-primary/10 via-background to-secondary/5;
+    @apply bg-linear-to-br from-primary/10 via-background to-secondary/5;
   }
   .text-gradient {
     @apply bg-clip-text text-transparent font-black;
@@ -211,22 +211,41 @@ input[type=number] {
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
   }
   @keyframes bounce-subtle {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-4px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
   }
   .animate-bounce-subtle {
     animation: bounce-subtle 3s ease-in-out infinite;
   }
 
   @keyframes float-orb-1 {
-    0%, 100% { transform: translate(0px, 0px) scale(1) translateZ(0); }
-    33% { transform: translate(60px, -40px) scale(1.1) translateZ(0); }
-    66% { transform: translate(-30px, 50px) scale(0.95) translateZ(0); }
+    0%,
+    100% {
+      transform: translate(0px, 0px) scale(1) translateZ(0);
+    }
+    33% {
+      transform: translate(60px, -40px) scale(1.1) translateZ(0);
+    }
+    66% {
+      transform: translate(-30px, 50px) scale(0.95) translateZ(0);
+    }
   }
   @keyframes float-orb-2 {
-    0%, 100% { transform: translate(0px, 0px) scale(1) translateZ(0); }
-    33% { transform: translate(-60px, 50px) scale(0.9) translateZ(0); }
-    66% { transform: translate(40px, -40px) scale(1.1) translateZ(0); }
+    0%,
+    100% {
+      transform: translate(0px, 0px) scale(1) translateZ(0);
+    }
+    33% {
+      transform: translate(-60px, 50px) scale(0.9) translateZ(0);
+    }
+    66% {
+      transform: translate(40px, -40px) scale(1.1) translateZ(0);
+    }
   }
   .animate-float-1 {
     animation: float-orb-1 18s cubic-bezier(0.4, 0, 0.2, 1) infinite;
@@ -236,16 +255,15 @@ input[type=number] {
     animation: float-orb-2 22s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     will-change: transform;
   }
-
 }
 
 /* Chrome/Edge Autofill Hack untuk mempertahankan warna transparan/gelap dan font putih */
 input:-webkit-autofill,
-input:-webkit-autofill:hover, 
-input:-webkit-autofill:focus, 
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    transition: background-color 5000s ease-in-out 0s;
-    -webkit-text-fill-color: #fff !important;
+  transition: background-color 5000s ease-in-out 0s;
+  -webkit-text-fill-color: #fff !important;
 }
 
 @layer utilities {
@@ -300,10 +318,10 @@ input:-webkit-autofill:active {
 
 @layer base {
   /* Memastikan semua elemen interaktif memiliki kursor tangan (pointer) */
-  button:not(:disabled), 
-  [role="button"]:not(:disabled), 
-  a[href], 
-  select, 
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  a[href],
+  select,
   summary,
   input[type="submit"],
   input[type="button"] {
@@ -311,16 +329,20 @@ input:-webkit-autofill:active {
   }
 
   /* Kursor dilarang untuk elemen yang didisable */
-  button:disabled, 
+  button:disabled,
   [disabled] {
     cursor: not-allowed;
   }
 }
 
-
 @keyframes gradient-x {
-  0%, 100% { background-position: 0% 50%; }
-  50%       { background-position: 100% 50%; }
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .animate-gradient-x {
