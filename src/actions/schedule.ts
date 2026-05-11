@@ -201,9 +201,8 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         eventGroups: {
           include: { group: { select: { id: true, name: true } } },
         },
-        attendances: {
           include: {
-            player: { select: { id: true, name: true, schoolOrigin: true } },
+            player: { select: { id: true, name: true, schoolOrigin: true, group: { select: { name: true } } } },
           },
           orderBy: { player: { name: "asc" } },
         },
@@ -220,7 +219,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
       const groupIds = event.eventGroups.map((eg) => eg.groupId);
       const players = await prisma.player.findMany({
         where: { groupId: { in: groupIds }, isDeleted: false },
-        select: { id: true, name: true, schoolOrigin: true },
+        select: { id: true, name: true, schoolOrigin: true, group: { select: { name: true } } },
         orderBy: { name: "asc" },
       });
 
@@ -234,7 +233,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         eventId: event.id,
         createdAt: new Date(),
         updatedAt: new Date(),
-        player: { id: p.id, name: p.name, schoolOrigin: p.schoolOrigin },
+        player: { id: p.id, name: p.name, schoolOrigin: p.schoolOrigin, group: p.group },
       }));
     }
 

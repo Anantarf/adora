@@ -213,7 +213,9 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                           <div className="size-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-heading text-sm shrink-0">{a.player.name.charAt(0).toUpperCase()}</div>
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm font-bold truncate text-foreground">{a.player.name}</span>
-                            {a.player.schoolOrigin && <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">{a.player.schoolOrigin}</span>}
+                            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">
+                              {(a.player as any).group?.name || "Tanpa Kelompok"}
+                            </span>
                           </div>
                         </div>
 

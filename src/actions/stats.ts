@@ -70,7 +70,7 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
         tx.attendance.upsert({
           where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
           update: { status: ps.status, note: data.note, eventId: data.eventId },
-          create: { id: crypto.randomUUID(), playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
+          create: { playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
         })
       )
     );
