@@ -11,6 +11,8 @@ import { LandingHeader, InstagramIcon } from "@/components/features/landing-head
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
 import { NAV_LINKS } from "@/lib/constants/navigation";
+import { REGISTRATION_STEPS } from "@/lib/constants/landing";
+import { getAcademicYear } from "@/lib/utils";
 import React from "react";
 
 export const metadata: Metadata = {
@@ -26,32 +28,11 @@ export const metadata: Metadata = {
   },
 };
 
-const REGISTRATION_STEPS = [
-  {
-    step: "1",
-    title: "Pilih Lokasi",
-    desc: "Tentukan lokasi latihan terdekat dengan Anda.",
-  },
-  {
-    step: "2",
-    title: "Isi Data Diri",
-    desc: "Lengkapi formulir pendaftaran pemain secara online.",
-  },
-  {
-    step: "3",
-    title: "Konfirmasi WA",
-    desc: "Hubungi admin kami via WhatsApp untuk verifikasi.",
-  },
-];
+
 
 export default async function LandingPage() {
   const homebases = await getPublicHomebases();
-
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  // Bulan dimulai dari 0 (0 = Jan, 8 = Sep)
-  const startYear = currentDate.getMonth() < 8 ? currentYear - 1 : currentYear;
-  const registrationYearText = `${startYear}/${startYear + 1}`;
+  const registrationYearText = getAcademicYear();
 
   return (
     <main className="min-h-screen bg-page-dark text-white relative overflow-x-hidden pt-18">
@@ -67,23 +48,23 @@ export default async function LandingPage() {
 
         <div className="relative z-20 container mx-auto px-4 flex flex-col items-center text-center">
           <FadeIn delay={0.1} direction="up">
-            <div className="inline-block skew-box bg-brand-yellow px-6 py-2 md:px-8 md:py-3 mb-8 border-b-4 border-r-4 border-black shadow-lg mx-2">
-              <span className="unskew-content block font-heading font-black uppercase text-black text-[10px] sm:text-xs md:text-sm tracking-wider sm:tracking-widest md:tracking-[0.2em] pr-2">
+            <div className="inline-block skew-box bg-brand-yellow px-4 py-1.5 md:px-8 md:py-3 mb-6 md:mb-8 border-b-4 border-r-4 border-black shadow-lg mx-2">
+              <span className="unskew-content block font-heading font-black uppercase text-black text-[9px] sm:text-xs md:text-sm tracking-widest md:tracking-[0.2em] pr-1 md:pr-2">
                 NOW OPEN REGISTRATION {registrationYearText}
               </span>
             </div>
           </FadeIn>
 
           <FadeIn delay={0.2} direction="up">
-            <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-7xl tracking-tight uppercase mb-6 leading-tight text-white drop-shadow-2xl italic py-2">
-              MEMBANGUN <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-yellow to-brand-orange pr-6">KARAKTER</span>
+            <h1 className="font-heading font-black text-3xl sm:text-5xl md:text-7xl tracking-tight uppercase mb-6 leading-tight text-white drop-shadow-2xl italic py-2">
+              MEMBANGUN <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-yellow to-brand-orange pr-4 md:pr-6">KARAKTER</span>
               <br />
-              MERAIH <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-6">PRESTASI</span>
+              MERAIH <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-4 md:pr-6">PRESTASI</span>
             </h1>
           </FadeIn>
 
           <FadeIn delay={0.3} direction="up">
-            <p className="max-w-2xl text-base md:text-lg text-white mb-10 leading-relaxed font-medium drop-shadow-md bg-black/30 p-5 rounded-2xl backdrop-blur-sm border border-white/10">
+            <p className="max-w-2xl text-sm sm:text-base md:text-lg text-white mb-10 leading-relaxed font-medium drop-shadow-md bg-black/30 p-4 md:p-5 rounded-2xl backdrop-blur-sm border border-white/10">
               Klub basket terdepan di Depok. Membina talenta muda usia 7–16 tahun dengan pendekatan menyenangkan, membangun karakter, dan menyiapkan mereka menuju KEJURKOT hingga kompetisi nasional.
             </p>
           </FadeIn>
@@ -91,7 +72,7 @@ export default async function LandingPage() {
           <FadeIn delay={0.4} direction="up">
             <Link
               href="/register"
-              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-4 transition-all text-xs sm:text-sm md:text-xl uppercase tracking-widest hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
+              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-orange-700 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-2.5 sm:px-8 sm:py-3 md:px-10 md:py-4 transition-all text-xs sm:text-sm md:text-xl uppercase tracking-widest hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
             >
               <span className="unskew-content flex items-center gap-2 sm:gap-3 italic pr-2">
                 DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">→</span>
@@ -110,7 +91,7 @@ export default async function LandingPage() {
                 <Zap className="w-5 h-5 text-brand-yellow fill-brand-yellow" />
                 <h2 className="font-heading font-black text-2xl md:text-4xl text-white uppercase tracking-widest italic">PROGRAM KELAS</h2>
               </div>
-              <p className="text-white/60 max-w-2xl mx-auto font-medium text-base">Pelatihan berbasis usia untuk memaksimalkan potensi, fisik, dan mental pemain.</p>
+              <p className="text-white/60 max-w-2xl mx-auto font-medium text-xs md:text-base px-4">Pelatihan berbasis usia untuk memaksimalkan potensi, fisik, dan mental pemain.</p>
             </div>
           </FadeIn>
 
@@ -182,7 +163,7 @@ export default async function LandingPage() {
                     Adora Sports <br />
                     <span className="text-brand-orange pr-2">Entertainment</span>
                   </h3>
-                  <p className="text-white/80 text-sm md:text-base leading-relaxed mb-6 font-medium">Dua turnamen resmi yang kami selenggarakan setiap tahun sebagai wadah kompetisi usia dini terbaik di Depok.</p>
+                  <p className="text-white/80 text-xs md:text-base leading-relaxed mb-6 font-medium">Dua turnamen resmi yang kami selenggarakan setiap tahun sebagai wadah kompetisi usia dini terbaik di Depok.</p>
                   <ul className="text-left space-y-3 text-sm md:text-base text-white">
                     <li className="flex items-start gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
                       <div className="bg-brand-orange p-3 rounded-xl shrink-0 text-black">
@@ -264,13 +245,44 @@ export default async function LandingPage() {
           <FadeIn delay={0.4} direction="up" className="text-center">
             <Link
               href="/register"
-              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-5 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-4 transition-all text-xs sm:text-sm md:text-base uppercase tracking-widest hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
+              className="inline-flex skew-box bg-linear-to-r from-brand-orange to-orange-700 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-5 py-2.5 sm:px-6 sm:py-3 md:px-10 md:py-4 transition-all text-xs sm:text-sm md:text-base uppercase tracking-widest hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
             >
               <span className="unskew-content flex items-center gap-2 sm:gap-3 italic">
                 <ClipboardList className="w-5 h-5 sm:w-6 sm:h-6" />
-                ISI FORMULIR
+                ISI FORMULIR SEKARANG
               </span>
             </Link>
+          </FadeIn>
+        </div>
+      </section>
+
+      {/* ── Final Call to Action ── */}
+      <section className="py-20 bg-brand-purple relative overflow-hidden z-20">
+        <div className="absolute inset-0 pattern-halftone opacity-10 pointer-events-none"></div>
+        <div className="container mx-auto px-6 relative z-10 text-center">
+          <FadeIn direction="up">
+            <h2 className="font-heading font-black text-3xl md:text-5xl text-white uppercase tracking-widest italic mb-6">
+              SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
+            </h2>
+            <p className="text-white/80 max-w-xl mx-auto mb-10 font-medium text-sm md:text-lg">
+              Jangan lewatkan kesempatan untuk bergabung dengan klub basket terbaik di Depok. Kuota pemain terbatas untuk setiap kelompok usia!
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+              <Link
+                href="/register"
+                className="w-full sm:w-auto inline-flex skew-box bg-brand-yellow text-black font-black px-8 py-4 transition-all uppercase tracking-widest hover:scale-105 shadow-[6px_6px_0px_#000] border-2 border-black"
+              >
+                <span className="unskew-content italic">DAFTAR SEKARANG</span>
+              </Link>
+              <a
+                href={`https://wa.me/${CONTACT.whatsapp}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto inline-flex skew-box bg-white/10 border-2 border-white/20 text-white px-8 py-4 hover:bg-white hover:text-black transition-all uppercase tracking-widest"
+              >
+                <span className="unskew-content italic">TANYA ADMIN</span>
+              </a>
+            </div>
           </FadeIn>
         </div>
       </section>

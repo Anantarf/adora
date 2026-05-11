@@ -73,8 +73,8 @@ export function GallerySection() {
         <FadeIn direction="up">
           <div className="text-center mb-12">
             <div className="inline-flex items-center justify-center gap-3 mb-3">
-              <Camera className="w-7 h-7 text-brand-orange" />
-              <h2 className="font-heading font-black text-3xl md:text-5xl text-white uppercase tracking-widest italic">
+              <Camera className="w-6 h-6 md:w-7 md:h-7 text-brand-orange" />
+              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">
                 ADORA IN ACTION
               </h2>
             </div>
@@ -94,10 +94,10 @@ export function GallerySection() {
           │                     │  Lapangan    │ Turnamen │
           └─────────────────────┴──────────────┴──────────┘
         */}
-        <div className="grid grid-cols-12 grid-rows-2 gap-3 md:gap-4 h-[460px] md:h-[560px]">
+        <div className="grid grid-cols-12 md:grid-rows-2 gap-4 md:gap-4 h-auto md:h-[560px]">
 
           {/* Slot 1 — Hero Carousel (Besar, 2 baris) */}
-          <div className="col-span-12 md:col-span-5 row-span-2 group relative rounded-2xl overflow-hidden border-2 border-brand-yellow/40 hover:border-brand-yellow transition-all duration-300 bg-surface-dark shadow-xl">
+          <div className="col-span-12 md:col-span-5 md:row-span-2 h-[320px] md:h-full group relative rounded-2xl overflow-hidden border-2 border-brand-yellow/40 hover:border-brand-yellow transition-all duration-300 bg-surface-dark shadow-xl">
             <GalleryHeroCarousel />
           </div>
 
@@ -107,7 +107,7 @@ export function GallerySection() {
             desc="Wajah-wajah penuh talenta yang selalu siap memberikan performa terbaik."
             image="/images/gallery/team(3-2).jpg"
             color="orange"
-            className="col-span-12 md:col-span-4 row-span-1"
+            className="col-span-12 md:col-span-4 row-span-1 h-[220px] md:h-full"
           />
 
           {/* Slot 3 — Motivasi (kanan atas kanan) */}
@@ -116,7 +116,7 @@ export function GallerySection() {
             desc="Latihan rutin yang seru dan penuh semangat! Mulai dari asah skill dasar sampai sesi drill bareng pelatih."
             image="/images/gallery/drill.jpg"
             color="yellow"
-            className="col-span-12 md:col-span-3 row-span-1"
+            className="col-span-12 md:col-span-3 row-span-1 h-[220px] md:h-full"
           />
 
           {/* Slot 4 — Pengarahan & Evaluasi (kanan bawah kiri) */}
@@ -125,7 +125,7 @@ export function GallerySection() {
             desc="Potret anak-anak saat kumpul dan fokus menyimak masukan serta evaluasi dari pelatih."
             image="/images/gallery/latbrief.jpg"
             color="yellow"
-            className="col-span-12 md:col-span-4 row-span-1"
+            className="col-span-12 md:col-span-4 row-span-1 h-[220px] md:h-full"
           />
 
           {/* Slot 5 — Keceriaan (kanan bawah kanan) */}
@@ -134,7 +134,7 @@ export function GallerySection() {
             desc="Senyum dan tawa lepas anak-anak yang jadi bukti serunya kebersamaan di Adora."
             image="/images/gallery/keceriaan.JPG"
             color="orange"
-            className="col-span-12 md:col-span-3 row-span-1"
+            className="col-span-12 md:col-span-3 row-span-1 h-[220px] md:h-full"
           />
 
         </div>

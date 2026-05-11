@@ -33,3 +33,15 @@ export function unwrapAction<T>(result: T): Exclude<T, { success: false; error: 
 export function sanitizePhone(phone: string): string {
   return phone.replace(/\D/g, "");
 }
+/**
+ * Returns the current academic year in "YYYY/YYYY" format.
+ * Transition month is August (8).
+ */
+export function getAcademicYear(): string {
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear();
+  // Month starts from 0 (8 = September, so < 8 is before Sept)
+  // School usually starts around July/August in Indo, but for season 8 (Sept) is safe boundary
+  const startYear = currentDate.getMonth() < 8 ? currentYear - 1 : currentYear;
+  return `${startYear}/${startYear + 1}`;
+}

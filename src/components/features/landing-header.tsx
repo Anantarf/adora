@@ -22,7 +22,7 @@ export function LandingHeader() {
 
   return (
     <header className="fixed top-0 left-0 z-50 w-full border-b border-white/10 bg-page-dark/90 backdrop-blur-xl">
-      <div className="container relative mx-auto px-4 h-18 flex items-center justify-between">
+      <div className="container relative mx-auto px-6 md:px-4 h-18 flex items-center justify-between">
         <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman" className="flex items-center gap-3 group z-10">
           <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105">
             <Image src="/logo-new.png" alt="Adora BBC Logo" width={48} height={48} className="w-auto h-auto object-contain" priority />
@@ -45,7 +45,7 @@ export function LandingHeader() {
         <div className="flex items-center gap-3">
           <Link
             href="/login"
-            className="skew-box bg-white/10 border-2 border-white/20 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
+            className="skew-box bg-white/15 border-2 border-white/30 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
           >
             <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">PORTAL LOGIN</span>
           </Link>
@@ -61,7 +61,7 @@ export function LandingHeader() {
       </div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-72 bg-page-dark border-l-4 border-brand-orange z-50 md:hidden flex flex-col shadow-2xl ring-1 ring-white/10 transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-[80vw] max-w-sm bg-page-dark/95 backdrop-blur-2xl border-l-4 border-brand-orange z-50 md:hidden flex flex-col shadow-2xl ring-1 ring-white/10 transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
           <span className="font-heading font-black italic text-lg tracking-widest uppercase text-brand-yellow">MENU</span>
@@ -76,9 +76,10 @@ export function LandingHeader() {
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="font-heading font-black italic uppercase tracking-widest text-lg text-white drop-shadow-sm hover:text-brand-yellow py-4 px-3 bg-black/60 border-b border-white/10 transition-colors"
+              className="font-heading font-black italic uppercase tracking-[0.2em] text-xl text-white hover:text-brand-yellow py-5 border-b border-white/5 transition-all flex items-center justify-between group"
             >
               {label}
+              <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange">→</span>
             </a>
           ))}
           <Link

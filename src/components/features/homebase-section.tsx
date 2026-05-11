@@ -1,7 +1,7 @@
 import { type homebase as Homebase } from "@prisma/client";
 import Link from "next/link";
 import Image from "next/image";
-import { MapPin, Phone, Zap } from "lucide-react";
+import { ExternalLink, MapPin, Phone, Zap } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 
 interface HomebaseSectionProps {
@@ -40,7 +40,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <Zap className="w-8 h-8 text-brand-orange fill-brand-orange" />
-              <h2 className="font-heading font-black text-3xl md:text-5xl text-white uppercase tracking-widest italic">HOMEBASE</h2>
+              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">HOMEBASE</h2>
             </div>
             <p className="text-white/60 text-base md:text-lg max-w-2xl mx-auto font-medium">
               Pilih lokasi latihan terdekat dan jadilah bagian dari kami.
@@ -109,10 +109,19 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                       </h3>
 
                       <div className="space-y-1">
-                        <div className="flex items-start gap-2 text-white/80 text-[10px] md:text-xs font-medium drop-shadow-md">
+                        <div className="flex items-start gap-2 text-white/80 text-[10px] md:text-xs font-medium drop-shadow-md mb-2">
                           <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 text-brand-orange mt-0.5" />
                           <span className="leading-relaxed line-clamp-2">{homebase.address}</span>
                         </div>
+                        <a 
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(homebase.name + " " + homebase.address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-[9px] md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
+                        >
+                          Buka di Google Maps
+                          <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                        </a>
                       </div>
                     </div>
                   </div>

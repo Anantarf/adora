@@ -3,27 +3,7 @@
 import { useState, useEffect } from "react";
 import { Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
-
-const GALLERY_SLIDES = [
-  {
-    label: "Laga Kejurkot",
-    desc: "Momen krusial penyusunan strategi dan semangat pantang menyerah tim Adora saat berlaga di ajang Kejurkot.",
-    color: "brand-yellow",
-    image: "/images/gallery/kejurkot.jpg",
-  },
-  {
-    label: "Aksi di Lapangan",
-    desc: "Keseruan dan intensitas para pemain saat bertanding, memberikan yang terbaik di setiap menitnya.",
-    color: "brand-orange",
-    image: "/images/gallery/carousel2.jpg",
-  },
-  {
-    label: "Sparring Match",
-    desc: "Uji taktik dan strategi di lapangan melalui sesi tanding melawan tim Buls.",
-    color: "brand-yellow",
-    image: "/images/gallery/hero1.jpg",
-  },
-];
+import { GALLERY_HERO_SLIDES as GALLERY_SLIDES } from "@/lib/constants/landing";
 
 export function GalleryHeroCarousel() {
   const [current, setCurrent] = useState(0);

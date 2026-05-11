@@ -290,6 +290,12 @@ input:-webkit-autofill:active {
     @apply text-[10px] font-bold uppercase tracking-widest;
   }
 
+  .wrap-break-word {
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+  }
+
   /* Sporty Marketing Utilities */
   .skew-box {
     transform: skewX(-6deg);
