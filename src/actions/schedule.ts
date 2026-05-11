@@ -201,6 +201,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         eventGroups: {
           include: { group: { select: { id: true, name: true } } },
         },
+        attendances: {
           include: {
             player: { select: { id: true, name: true, schoolOrigin: true, group: { select: { name: true } } } },
           },
