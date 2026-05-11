@@ -155,7 +155,7 @@ function RegisterContent() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="relative pt-12 pb-8 text-center px-4 z-10">
+      <section className="relative pt-10 pb-6 md:pt-12 md:pb-8 text-center px-4 z-10">
         <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-6 border-2 border-black shadow-[4px_4px_0px_#000]">
           <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">
             // JOIN THE SQUAD //
@@ -173,7 +173,7 @@ function RegisterContent() {
       <div className="container mx-auto px-4 pb-20 relative z-10">
         <div className="max-w-3xl mx-auto">
 
-          <div className="space-y-10">
+          <div className="space-y-6 md:space-y-10">
 
             {/* Step 1: Pilih Homebase */}
             <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative">
@@ -312,7 +312,7 @@ function RegisterContent() {
                           type="submit"
                           loading={isPending}
                           loadingText="MEMPROSES..."
-                          className="w-full skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-4 md:px-8 md:py-4 transition-all text-sm md:text-base uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
+                          className="w-full skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-3 md:px-8 md:py-4 transition-all text-sm md:text-base uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
                         >
                           <span className="unskew-content flex items-center justify-center gap-2 italic">
                             KIRIM PENDAFTARAN
@@ -338,7 +338,7 @@ function RegisterContent() {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t-4 border-brand-purple py-8 bg-black/60 backdrop-blur-md">
+      <footer className="relative z-10 border-t-4 border-brand-purple py-6 md:py-8 bg-black/60 backdrop-blur-md">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <Link href="/" className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-brand-orange transition-colors">
             ← KEMBALI

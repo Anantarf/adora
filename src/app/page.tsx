@@ -39,7 +39,7 @@ export default async function LandingPage() {
       <LandingHeader />
 
       {/* ── Hero Section ── */}
-      <section id="home" className="relative min-h-[calc(100vh-72px)] flex items-center justify-center bg-brand-purple py-20 clip-diagonal-bottom">
+      <section id="home" className="relative min-h-[calc(100vh-72px)] flex items-center justify-center bg-brand-purple pt-14 pb-12 md:py-20 clip-diagonal-bottom">
         <div className="absolute inset-0 z-0 overflow-hidden">
           <Image src="/images/hero/hero.jpg" alt="ADORA Basketball Team" fill sizes="100vw" className="object-cover object-center opacity-30 mix-blend-luminosity" priority />
           <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/80 to-brand-purple/40 mix-blend-multiply z-10" />
@@ -56,15 +56,15 @@ export default async function LandingPage() {
           </FadeIn>
 
           <FadeIn delay={0.2} direction="up">
-            <h1 className="font-heading font-black text-4xl sm:text-5xl md:text-7xl tracking-tight uppercase mb-6 leading-tight text-white drop-shadow-2xl italic py-2">
-              MEMBANGUN <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-yellow to-brand-orange pr-4 md:pr-6">KARAKTER</span>
+            <h1 className="font-heading font-black text-[2.1rem] sm:text-5xl md:text-7xl tracking-tight uppercase mb-6 leading-tight text-white drop-shadow-2xl italic py-2">
+              MEMBANGUN <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-yellow to-brand-orange pr-2 sm:pr-4 md:pr-6">KARAKTER</span>
               <br />
-              MERAIH <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-4 md:pr-6">PRESTASI</span>
+              MERAIH <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-2 sm:pr-4 md:pr-6">PRESTASI</span>
             </h1>
           </FadeIn>
 
           <FadeIn delay={0.3} direction="up">
-            <p className="max-w-2xl text-sm sm:text-base md:text-lg text-white mb-10 leading-relaxed font-medium drop-shadow-md bg-black/30 p-4 md:p-5 rounded-2xl backdrop-blur-sm border border-white/10">
+            <p className="max-w-2xl text-sm sm:text-base md:text-lg text-white mb-8 md:mb-10 leading-relaxed font-medium drop-shadow-md bg-black/30 p-3.5 md:p-5 rounded-2xl backdrop-blur-sm border border-white/10">
               Klub basket terdepan di Depok. Membina talenta muda usia 7–16 tahun dengan pendekatan menyenangkan, membangun karakter, dan menyiapkan mereka menuju KEJURKOT hingga kompetisi nasional.
             </p>
           </FadeIn>
@@ -83,7 +83,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ── Program & Kelas ── */}
-      <section id="program" className="pt-16 pb-24 bg-page-dark scroll-mt-20 relative -mt-10 z-10">
+      <section id="program" className="pt-10 pb-16 md:pt-16 md:pb-24 bg-page-dark scroll-mt-20 relative -mt-10 z-10">
         <div className="container mx-auto px-4">
           <FadeIn direction="up">
             <div className="text-center mb-16">
@@ -147,13 +147,13 @@ export default async function LandingPage() {
       <HomebaseSection homebases={homebases} />
 
       {/* ── Adora Sports Entertainment & Turnamen ── */}
-      <section id="turnamen" className="relative pt-16 pb-24 bg-brand-purple scroll-mt-20 clip-diagonal z-30 -mt-10">
+      <section id="turnamen" className="relative pt-12 pb-16 md:pt-16 md:pb-24 bg-brand-purple scroll-mt-20 clip-diagonal z-30 -mt-10">
         {/* Background Textures */}
         <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none overflow-hidden"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <FadeIn direction="up">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-8 items-center bg-black/40 backdrop-blur-md border border-white/10 p-6 md:p-10 rounded-card-lg shadow-2xl">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-8 items-center bg-black/40 backdrop-blur-md border border-white/10 p-5 md:p-10 rounded-card-lg shadow-2xl">
               <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-8">
                 <div className="w-full">
                   <div className="inline-block skew-box bg-brand-yellow px-4 py-1 mb-4 border-b-4 border-r-4 border-black">
@@ -216,7 +216,7 @@ export default async function LandingPage() {
 
 
       {/* ── Final Call to Action ── */}
-      <section id="daftar" className="py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
+      <section id="daftar" className="py-16 md:py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
         {/* Sporty Background Ornaments */}
         <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none"></div>
         
@@ -232,15 +232,15 @@ export default async function LandingPage() {
 
         <div className="container mx-auto px-6 relative z-10 text-center">
           <FadeIn direction="up">
-            <h2 className="font-heading font-black text-3xl md:text-5xl text-white uppercase tracking-widest italic mb-4 drop-shadow-lg">
+            <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic mb-3 md:mb-4 drop-shadow-lg">
               SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
             </h2>
-            <p className="text-white/90 max-w-xl mx-auto mb-10 font-medium text-sm md:text-base leading-relaxed">
+            <p className="text-white/90 max-w-xl mx-auto mb-8 md:mb-10 font-medium text-sm md:text-base leading-relaxed">
               Pendaftaran mudah, cepat, dan 100% online.
             </p>
-
+            
             {/* Compact Registration Steps with Orange Accents */}
-            <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 max-w-4xl mx-auto mb-12" delay={0.2}>
+            <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-12 max-w-4xl mx-auto mb-10 md:mb-12" delay={0.2}>
               {REGISTRATION_STEPS.map(({ step, title, desc }) => (
                 <StaggerItem key={step} className="flex items-center gap-3 md:gap-4 relative group">
                   <div className="text-brand-orange font-heading font-black text-2xl md:text-3xl italic drop-shadow-sm shrink-0 transition-transform group-hover:scale-110">
