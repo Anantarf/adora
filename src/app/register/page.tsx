@@ -130,11 +130,6 @@ function RegisterContent() {
             <div key={i} className="absolute h-[1px] w-[200%] bg-white rotate-[-35deg]" style={{ top: `${i * 15}%`, left: '-50%' }} />
           ))}
         </div>
-        
-        {/* Massive Background Text */}
-        <div className="absolute -bottom-20 -left-20 font-heading font-black text-[15rem] md:text-[25rem] text-white/[0.02] select-none italic leading-none uppercase">
-          JOINUS
-        </div>
       </div>
 
       {/* ── Navbar ── */}

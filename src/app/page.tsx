@@ -220,11 +220,6 @@ export default async function LandingPage() {
         {/* Sporty Background Ornaments */}
         <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none"></div>
         
-        {/* Oversized Background Text */}
-        <div className="absolute -bottom-10 -right-20 font-heading font-black text-[20rem] md:text-[30rem] text-black/10 select-none pointer-events-none italic leading-none">
-          ADORA
-        </div>
-
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-orange/20 blur-[120px] -mr-48 -mt-48 pointer-events-none animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-yellow/10 blur-[100px] -ml-40 -mb-40 pointer-events-none"></div>
         
