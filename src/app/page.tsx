@@ -99,10 +99,10 @@ export default async function LandingPage() {
             {PROGRAMS.map(({ label, ages, desc, image }) => (
               <StaggerItem key={label} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-md relative group">
                 {/* Accent Background Box (Pop-out effect) */}
-                <div className="absolute inset-0 bg-brand-purple rounded-card transform translate-x-3 translate-y-3 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform z-0"></div>
+                <div className="absolute inset-0 bg-brand-purple rounded-card transform translate-x-1.5 translate-y-1.5 sm:translate-x-3 sm:translate-y-3 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform z-0"></div>
 
-                <div className="relative z-10 bg-surface-dark border-2 border-white/10 group-hover:border-brand-yellow rounded-card transition-all flex flex-col overflow-hidden shadow-xl w-full aspect-[4/3] block">
-                  {/* Background Image (4:3) */}
+                <div className="relative z-10 bg-surface-dark border-2 border-white/10 group-hover:border-brand-yellow rounded-card transition-all flex flex-col overflow-hidden shadow-xl w-full aspect-[16/10] sm:aspect-[4/3] block">
+                  {/* Background Image */}
                   <div className="absolute inset-0 bg-black">
                     {image ? (
                       <Image
@@ -127,14 +127,14 @@ export default async function LandingPage() {
                   <div className="absolute inset-0 bg-linear-to-t from-black/95 via-black/40 to-transparent z-10"></div>
 
                   {/* Age Badge - Top Right */}
-                  <div className="absolute top-4 right-4 z-20 skew-box bg-brand-yellow text-black px-3 py-1 shadow-[3px_3px_0px_#000] border border-black">
-                    <span className="unskew-content block font-heading font-black text-xs tracking-widest italic">{ages}</span>
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 skew-box bg-brand-yellow text-black px-2 py-0.5 sm:px-3 sm:py-1 shadow-[2px_2px_0px_#000] sm:shadow-[3px_3px_0px_#000] border border-black">
+                    <span className="unskew-content block font-heading font-black text-[10px] sm:text-xs tracking-widest italic">{ages}</span>
                   </div>
 
                   {/* Text Content - Bottom */}
-                  <div className="absolute inset-0 p-4 md:p-5 flex flex-col justify-end z-20">
-                    <h3 className="font-heading font-black text-xl md:text-2xl text-white tracking-widest mb-1 uppercase italic group-hover:text-brand-yellow transition-colors drop-shadow-lg leading-tight">{label}</h3>
-                    <p className="text-white/70 text-xs md:text-sm leading-tight font-medium drop-shadow-md">{desc}</p>
+                  <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-end z-20">
+                    <h3 className="font-heading font-black text-lg sm:text-2xl text-white tracking-widest mb-0.5 sm:mb-1 uppercase italic group-hover:text-brand-yellow transition-colors drop-shadow-lg leading-tight">{label}</h3>
+                    <p className="text-white/70 text-[10px] sm:text-sm leading-tight font-medium drop-shadow-md">{desc}</p>
                   </div>
                 </div>
               </StaggerItem>

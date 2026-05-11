@@ -61,25 +61,25 @@ export function LandingHeader() {
       </div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-64 bg-page-dark border-l-4 border-brand-orange z-50 md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-52 bg-[#0f0f12] border-l-4 border-brand-orange z-50 md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex items-center justify-between h-14 px-5 border-b border-white/10">
-          <span className="font-heading font-black italic text-sm tracking-widest uppercase text-brand-yellow">MENU</span>
+        <div className="flex items-center justify-between h-12 px-4 border-b border-white/10">
+          <span className="font-heading font-black italic text-xs tracking-widest uppercase text-brand-yellow">MENU</span>
           <button onClick={() => setOpen(false)} aria-label="Tutup menu" className="text-white/70 hover:text-white transition-colors">
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
-        <nav className="flex flex-col p-5">
+        <nav className="flex flex-col p-4">
           {NAV_LINKS.map(({ label, href }) => (
             <a
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="font-heading font-black italic uppercase tracking-[0.2em] text-sm text-white hover:text-brand-yellow py-3 transition-all flex items-center justify-between group"
+              className="font-heading font-black italic uppercase tracking-[0.2em] text-xs text-white hover:text-brand-yellow py-2.5 transition-all flex items-center justify-between group"
             >
               {label}
-              <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange text-xs">→</span>
+              <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange text-[10px]">→</span>
             </a>
           ))}
         </nav>
