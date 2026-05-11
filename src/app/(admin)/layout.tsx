@@ -25,8 +25,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
 
             {/* Centered Top Nav Title */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max">
-              <h1 className="font-heading text-lg md:text-xl lg:text-2xl text-gradient uppercase leading-tight font-black">
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-max max-w-[60vw]">
+              <h1 className="font-heading text-[10px] xs:text-sm sm:text-lg md:text-xl lg:text-2xl text-gradient uppercase leading-tight font-black text-center">
                 Adora <span className="tracking-widest ml-0.5">Basketball Club</span>
               </h1>
             </div>

@@ -22,7 +22,7 @@ export default async function ParentLayout({ children }: { children: React.React
               <Image src="/logo-new.png" alt="Adora BBC Logo" width={40} height={40} className="w-auto h-auto object-contain" priority />
             </div>
             <div className="flex flex-col justify-center">
-              <h1 className="font-heading text-lg md:text-xl lg:text-2xl text-gradient uppercase leading-none font-black mt-1">
+              <h1 className="font-heading text-sm md:text-xl lg:text-2xl text-gradient uppercase leading-none font-black mt-1">
                 Adora <span className="tracking-widest ml-0.5">Family</span>
               </h1>
               <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-1 ml-0.5 leading-none">Portal</span>

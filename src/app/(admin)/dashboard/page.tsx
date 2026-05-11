@@ -26,7 +26,7 @@ export default function AdminDashboardPage() {
             <p className="text-micro text-muted-foreground/50">
               Selamat Datang,
             </p>
-            <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">
+            <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">
               {displayName} 👋
             </h1>
             <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">

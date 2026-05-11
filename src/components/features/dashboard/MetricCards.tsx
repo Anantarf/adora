@@ -87,7 +87,7 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
         return (
           <StaggerItem key={c.key}>
             <Card className="border-border/50 bg-card shadow-sm hover:border-primary/30 transition-colors">
-              <CardContent className="p-5">
+              <CardContent className="p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-micro text-muted-foreground/50">
                     {c.label}
@@ -96,7 +96,7 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
                     <Icon className="size-4 text-muted-foreground" />
                   </div>
                 </div>
-                <p className={`font-heading text-4xl tracking-wider ${valueClass}`}>
+                <p className={`font-heading text-2xl sm:text-4xl tracking-wider ${valueClass}`}>
                   {display}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">{c.subtitle}</p>
