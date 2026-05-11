@@ -153,8 +153,8 @@ export default async function LandingPage() {
 
         <div className="container mx-auto px-4 relative z-10">
           <FadeIn direction="up">
-            <div className="grid lg:grid-cols-2 gap-8 lg:gap-8 items-center bg-black/40 backdrop-blur-md border border-white/10 p-5 md:p-10 rounded-card-lg shadow-2xl">
-              <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-8">
+            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center bg-black/40 backdrop-blur-md border border-white/10 p-5 md:p-10 rounded-card-lg shadow-2xl">
+              <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-6 md:gap-8">
                 <div className="w-full">
                   <div className="inline-block skew-box bg-brand-yellow px-4 py-1 mb-4 border-b-4 border-r-4 border-black">
                     <span className="unskew-content block font-heading font-black uppercase text-black text-xs tracking-widest">EVENT & TURNAMEN</span>
@@ -201,8 +201,8 @@ export default async function LandingPage() {
 
               <div className="w-full relative">
                 {/* Pop-out ornament */}
-                <div className="absolute -top-6 -right-6 w-24 h-24 bg-brand-orange rounded-full mix-blend-screen filter blur-xl animate-pulse z-0"></div>
-                <div className="relative z-10 border-4 border-black shadow-[12px_12px_0px_#CCFF00] rounded-card overflow-hidden bg-black">
+                <div className="absolute -top-6 -right-6 w-24 h-24 bg-brand-orange/20 blur-xl animate-pulse z-0"></div>
+                <div className="relative z-10 border-4 border-black shadow-[6px_6px_0px_#CCFF00] sm:shadow-[12px_12px_0px_#CCFF00] rounded-card overflow-hidden bg-black">
                   <AutoFadeCarousel images={["/images/tournaments/asbcnew1.JPG", "/images/tournaments/asbcnew2.JPG", "/images/tournaments/asbcnew3.jpg", "/images/tournaments/asbc4.jpg", "/images/tournaments/asbc5.jpg"]} />
                 </div>
               </div>

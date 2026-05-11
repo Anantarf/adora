@@ -31,13 +31,13 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
   const sorted = [...homebases].sort((a, b) => rank(a.name) - rank(b.name));
 
   return (
-    <section id="homebase" className="pt-12 pb-24 relative overflow-hidden bg-page-dark scroll-mt-20 z-20">
+    <section id="homebase" className="pt-12 pb-16 md:pb-24 relative overflow-hidden bg-page-dark scroll-mt-20 z-20">
       {/* Background Ornament */}
       <div className="absolute top-0 right-0 w-1/3 h-full bg-brand-orange/5 blur-[120px] pointer-events-none"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn direction="up">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <Zap className="w-8 h-8 text-brand-orange fill-brand-orange" />
               <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">HOMEBASE</h2>
