@@ -42,8 +42,6 @@ export async function getAuditLogsAction(options?: { take?: number; cursor?: str
   };
 }
 
-// 2. Log an audit action — Internal function for transactions
-// userId harus diambil SEBELUM memulai transaksi agar tidak memperlama TX
 export async function createAuditLog(
   tx: Omit<Prisma.TransactionClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">,
   action: string,
@@ -52,21 +50,28 @@ export async function createAuditLog(
   userId?: string | null,
   details?: Prisma.InputJsonValue,
 ) {
-  // Fallback ke session hanya jika userId tidak diberikan (backward compat sementara migrasi)
-  const resolvedUserId =
-    userId !== undefined
-      ? userId
-      : (((await getServerSession(authOptions))?.user as { id?: string } | undefined)?.id ?? null);
+  // Use provided userId, or fetch from session if not provided (fallback)
+  let resolvedUserId = userId;
+  if (resolvedUserId === undefined) {
+    const session = await getServerSession(authOptions);
+    resolvedUserId = (session?.user as { id?: string } | undefined)?.id ?? null;
+  }
 
-  return await tx.auditlog.create({
-    data: {
-      id: crypto.randomUUID(),
-      action,
-      targetTable,
-      recordId: recordId ?? null,
-      details: details ?? Prisma.JsonNull,
-      userId: resolvedUserId,
-    },
-  });
+  try {
+    return await tx.auditlog.create({
+      data: {
+        action,
+        targetTable,
+        recordId: recordId ?? null,
+        details: details ?? Prisma.JsonNull,
+        userId: resolvedUserId,
+      },
+    });
+  } catch (error) {
+    // We don't want audit log failures to crash the main transaction in production,
+    // but we should log them for monitoring.
+    console.error("[AUDIT_LOG_ERROR]:", error);
+    return null;
+  }
 }
 
