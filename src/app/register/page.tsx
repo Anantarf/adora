@@ -127,10 +127,10 @@ function RegisterContent() {
 
       {/* ── Navbar ── */}
       <header className="sticky top-0 z-50 w-full border-b-[4px] border-brand-purple bg-page-dark/90 backdrop-blur-xl">
-        <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           <Link href="/" aria-label="Kembali ke beranda" className="flex items-center gap-3 group">
-            <div className="w-16 h-16 flex items-center justify-center transition-all group-hover:scale-105">
-              <Image src="/logo-new.png" alt="Adora BBC" width={64} height={64} className="w-auto h-auto max-h-[64px] object-contain" />
+            <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105">
+              <Image src="/logo-new.png" alt="Adora BBC" width={48} height={48} className="w-auto h-auto max-h-[48px] object-contain" />
             </div>
             <span className="font-heading font-black text-2xl tracking-widest uppercase text-white transition-colors hidden sm:block italic group-hover:text-brand-yellow">
               ADORA <span className="text-brand-orange">BBC</span>
@@ -148,16 +148,16 @@ function RegisterContent() {
       </header>
 
       {/* ── Hero ── */}
-      <section className="relative pt-16 pb-12 text-center px-4 z-10">
-        <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-8 border-2 border-black shadow-[4px_4px_0px_#000]">
+      <section className="relative pt-12 pb-8 text-center px-4 z-10">
+        <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-6 border-2 border-black shadow-[4px_4px_0px_#000]">
           <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">
             // JOIN THE SQUAD //
           </span>
         </div>
-        <h1 className="font-heading font-black text-4xl md:text-6xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
+        <h1 className="font-heading font-black text-3xl md:text-5xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
           FORM <span className="inline-block text-transparent bg-clip-text bg-gradient-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>
         </h1>
-        <p className="text-white/70 text-base md:text-lg max-w-xl mx-auto font-medium">
+        <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto font-medium">
           Isi data dengan lengkap. Langkah awal menuju Kejurkot dimulai dari sini.
         </p>
       </section>
@@ -305,7 +305,7 @@ function RegisterContent() {
                           type="submit"
                           loading={isPending}
                           loadingText="MEMPROSES..."
-                          className="w-full skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-4 md:px-8 md:py-8 transition-all text-sm md:text-lg uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
+                          className="w-full skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-4 md:px-8 md:py-4 transition-all text-sm md:text-base uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
                         >
                           <span className="unskew-content flex items-center justify-center gap-2 italic">
                             KIRIM PENDAFTARAN
