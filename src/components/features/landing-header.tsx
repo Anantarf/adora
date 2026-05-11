@@ -61,46 +61,28 @@ export function LandingHeader() {
       </div>
 
       <div
-        className={`fixed top-0 right-0 h-full w-[80vw] max-w-sm bg-page-dark/95 backdrop-blur-2xl border-l-4 border-brand-orange z-50 md:hidden flex flex-col shadow-2xl ring-1 ring-white/10 transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-64 bg-page-dark border-l-4 border-brand-orange z-50 md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="flex items-center justify-between h-16 px-6 border-b border-white/10">
-          <span className="font-heading font-black italic text-lg tracking-widest uppercase text-brand-yellow">MENU</span>
+        <div className="flex items-center justify-between h-14 px-5 border-b border-white/10">
+          <span className="font-heading font-black italic text-sm tracking-widest uppercase text-brand-yellow">MENU</span>
           <button onClick={() => setOpen(false)} aria-label="Tutup menu" className="text-white/70 hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <nav className="flex flex-col p-6 flex-1">
+        <nav className="flex flex-col p-5">
           {NAV_LINKS.map(({ label, href }) => (
             <a
               key={href}
               href={href}
               onClick={() => setOpen(false)}
-              className="font-heading font-black italic uppercase tracking-[0.2em] text-xl text-white hover:text-brand-yellow py-5 border-b border-white/5 transition-all flex items-center justify-between group"
+              className="font-heading font-black italic uppercase tracking-[0.2em] text-sm text-white hover:text-brand-yellow py-3 transition-all flex items-center justify-between group"
             >
               {label}
-              <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange">→</span>
+              <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange text-xs">→</span>
             </a>
           ))}
-          <Link
-            href="/login"
-            className="mt-8 skew-box bg-white/10 border-2 border-white/20 text-white px-5 py-3 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] text-center group"
-          >
-            <span className="unskew-content block font-heading font-black italic text-xs tracking-widest uppercase">PORTAL LOGIN</span>
-          </Link>
         </nav>
-
-        <div className="px-6 pb-8 flex gap-4">
-          <a
-            href={`https://instagram.com/${CONTACT.instagram}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Instagram ADORA BBC"
-            className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:text-black hover:bg-brand-yellow hover:border-black transition-colors shadow-lg"
-          >
-            <InstagramIcon className="w-4 h-4" />
-          </a>
-        </div>
       </div>
     </header>
   );
