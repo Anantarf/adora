@@ -10,53 +10,12 @@ const prisma = new PrismaClient({ adapter });
 // Midnight Jakarta (+07:00) helper
 const jkt = (d: string) => new Date(`${d}T00:00:00+07:00`);
 
-/**
- * METRIC_PROFILES: 
- * A: Score >= 80
- * B: Score >= 70
- * C: Score >= 60
- * D: Score < 60
- */
-const METRIC_PROFILES = {
-  A: { dribble: { inAndOut: 88, crossover: 9, vLeft: 8, vRight: 9, betweenLegsLeft: 8, betweenLegsRight: 8 }, passing: { chestPass: 9, bouncePass: 9, overheadPass: 8 }, layUp: 9, shooting: 8 },
-  B: { dribble: { inAndOut: 75, crossover: 8, vLeft: 7, vRight: 8, betweenLegsLeft: 6, betweenLegsRight: 7 }, passing: { chestPass: 8, bouncePass: 8, overheadPass: 7 }, layUp: 8, shooting: 7 },
-  C: { dribble: { inAndOut: 62, crossover: 6, vLeft: 6, vRight: 6, betweenLegsLeft: 5, betweenLegsRight: 5 }, passing: { chestPass: 6, bouncePass: 6, overheadPass: 6 }, layUp: 6, shooting: 5 },
-  D: { dribble: { inAndOut: 45, crossover: 5, vLeft: 4, vRight: 4, betweenLegsLeft: 4, betweenLegsRight: 4 }, passing: { chestPass: 5, bouncePass: 5, overheadPass: 4 }, layUp: 4, shooting: 4 },
-};
-
-function genMetrics(targetGrade: "A" | "B" | "C" | "D", seed: number) {
-  const profile = METRIC_PROFILES[targetGrade];
-  const variate = (val: number, max: number) => {
-    const offset = (Math.abs(seed * val + 21) % 3) - 1; // -1 to +1 to keep it tight to the grade
-    return Math.max(0, Math.min(max, val + offset));
-  };
-
-  return {
-    dribble: {
-      inAndOut: Math.max(0, Math.min(99, profile.dribble.inAndOut + ((Math.abs(seed + 11) % 7) - 3))),
-      crossover: variate(profile.dribble.crossover, 10),
-      vLeft: variate(profile.dribble.vLeft, 10),
-      vRight: variate(profile.dribble.vRight, 10),
-      betweenLegsLeft: variate(profile.dribble.betweenLegsLeft, 10),
-      betweenLegsRight: variate(profile.dribble.betweenLegsRight, 10),
-    },
-    passing: {
-      chestPass: variate(profile.passing.chestPass, 10),
-      bouncePass: variate(profile.passing.bouncePass, 10),
-      overheadPass: variate(profile.passing.overheadPass, 10),
-    },
-    layUp: variate(profile.layUp, 10),
-    shooting: variate(profile.shooting, 10),
-    notes: targetGrade === "D" ? "Perlu perhatian ekstra pada koordinasi dasar." : (targetGrade === "C" ? "Menunjukkan potensi, namun perlu konsistensi." : ""),
-  };
-}
-
 async function main() {
-  console.log("🚀 Memulai proses seeding data ADORA BBC (Humanized & Balanced Grades)...\n");
+  console.log("🚀 Memulai proses seeding data ADORA BBC (Operational Focus)...\n");
 
   const pw = await bcrypt.hash("password", 10);
 
-  // 1. USERS
+  // 1. USERS (Admin & Parents)
   await prisma.user.upsert({
     where: { username: "superadmin" },
     update: { password: pw },
@@ -123,24 +82,21 @@ async function main() {
     });
   }
 
-  // 4. PLAYERS (Assigned Target Grades)
+  // 4. PLAYERS
   const playerDefs = [
-    { name: "Arka Gibran Wijaya", dob: "2016-05-12", gender: "male", group: "Adora Rookies (U-10)", parent: "indra_wijaya", grade: "A" },
-    { name: "Keysha Putri", dob: "2017-02-20", gender: "female", group: "Adora Rookies (U-10)", parent: "maya_kusuma", grade: "C" }, // Grade C
-    { name: "Bimo Sakti", dob: "2016-11-05", gender: "male", group: "Adora Rookies (U-10)", parent: "bambang_sutrisno", grade: "D" }, // Grade D
-    { name: "Zahra Amira", dob: "2017-08-14", gender: "female", group: "Adora Rookies (U-10)", parent: "nina_herlina", grade: "B" },
-    
-    { name: "Dimas Pratama", dob: "2013-03-25", gender: "male", group: "Adora Rising Stars (U-13)", parent: "dedy_kurniawan", grade: "A" },
-    { name: "Larasati Dewi", dob: "2013-09-10", gender: "female", group: "Adora Rising Stars (U-13)", parent: "santi_susanti", grade: "B" },
-    { name: "Rayyan Al-Fatih", dob: "2014-01-30", gender: "male", group: "Adora Rising Stars (U-13)", parent: "fajar_ramadhan", grade: "A" },
-    { name: "Nabila Syakieb", dob: "2013-06-15", gender: "female", group: "Adora Rising Stars (U-13)", parent: "dewi_fortuna", grade: "B" },
-
-    { name: "Kevin Sanjaya", dob: "2010-02-14", gender: "male", group: "Adora Elite (U-16)", parent: "indra_wijaya", grade: "A" },
-    { name: "Alya Rohali", dob: "2011-05-22", gender: "female", group: "Adora Elite (U-16)", parent: "maya_kusuma", grade: "A" },
-    { name: "Galang Ramadhan", dob: "2010-12-01", gender: "male", group: "Adora Elite (U-16)", parent: "bambang_sutrisno", grade: "B" },
-
-    { name: "Farel Prayoga", dob: "2014-07-07", gender: "male", group: "Adora Stars Cibubur (U-12)", parent: "dedy_kurniawan", grade: "B" },
-    { name: "Tiara Andini", dob: "2015-01-18", gender: "female", group: "Adora Stars Cibubur (U-12)", parent: "santi_susanti", grade: "B" },
+    { name: "Arka Gibran Wijaya", dob: "2016-05-12", gender: "male", group: "Adora Rookies (U-10)", parent: "indra_wijaya" },
+    { name: "Keysha Putri", dob: "2017-02-20", gender: "female", group: "Adora Rookies (U-10)", parent: "maya_kusuma" },
+    { name: "Bimo Sakti", dob: "2016-11-05", gender: "male", group: "Adora Rookies (U-10)", parent: "bambang_sutrisno" },
+    { name: "Zahra Amira", dob: "2017-08-14", gender: "female", group: "Adora Rookies (U-10)", parent: "nina_herlina" },
+    { name: "Dimas Pratama", dob: "2013-03-25", gender: "male", group: "Adora Rising Stars (U-13)", parent: "dedy_kurniawan" },
+    { name: "Larasati Dewi", dob: "2013-09-10", gender: "female", group: "Adora Rising Stars (U-13)", parent: "santi_susanti" },
+    { name: "Rayyan Al-Fatih", dob: "2014-01-30", gender: "male", group: "Adora Rising Stars (U-13)", parent: "fajar_ramadhan" },
+    { name: "Nabila Syakieb", dob: "2013-06-15", gender: "female", group: "Adora Rising Stars (U-13)", parent: "dewi_fortuna" },
+    { name: "Kevin Sanjaya", dob: "2010-02-14", gender: "male", group: "Adora Elite (U-16)", parent: "indra_wijaya" },
+    { name: "Alya Rohali", dob: "2011-05-22", gender: "female", group: "Adora Elite (U-16)", parent: "maya_kusuma" },
+    { name: "Galang Ramadhan", dob: "2010-12-01", gender: "male", group: "Adora Elite (U-16)", parent: "bambang_sutrisno" },
+    { name: "Farel Prayoga", dob: "2014-07-07", gender: "male", group: "Adora Stars Cibubur (U-12)", parent: "dedy_kurniawan" },
+    { name: "Tiara Andini", dob: "2015-01-18", gender: "female", group: "Adora Stars Cibubur (U-12)", parent: "santi_susanti" },
   ];
 
   const players: Record<string, { id: string }> = {};
@@ -160,33 +116,58 @@ async function main() {
     });
   }
 
-  // 5. PERIODS & STATS
-  const period = await prisma.evaluationPeriod.upsert({
-    where: { id: "period-2026" },
-    update: { isActive: true },
-    create: { id: "period-2026", name: "Musim Kompetisi 2026", startDate: jkt("2026-01-01"), endDate: jkt("2026-12-31"), isActive: true },
-  });
+  // 5. ATTENDANCE (Middle Quality: ~75% Present)
+  const eventDates = ["2026-05-01", "2026-05-04", "2026-05-08", "2026-05-11"];
+  for (const dateStr of eventDates) {
+    const date = jkt(dateStr);
+    for (const pName in players) {
+      const playerId = players[pName].id;
+      // Deterministic but varied attendance
+      const hash = (playerId.charCodeAt(0) + date.getDate()) % 100;
+      let status: "HADIR" | "IZIN" | "ALPA" = "HADIR";
+      if (hash > 85) status = "ALPA";
+      else if (hash > 70) status = "IZIN";
 
-  for (const p of playerDefs) {
-    const playerId = players[p.name].id;
-    const seed = playerId.charCodeAt(0);
-    await prisma.statistic.upsert({
-      where: { playerId_periodId: { playerId, periodId: period.id } },
-      update: { metricsJson: genMetrics(p.grade as any, seed) },
-      create: { playerId, periodId: period.id, date: new Date(), metricsJson: genMetrics(p.grade as any, seed), status: "Published" },
+      await prisma.attendance.upsert({
+        where: { playerId_date: { playerId, date } },
+        update: { status },
+        create: { playerId, date, status },
+      });
+    }
+  }
+
+  // 6. REGISTRATIONS (10 New Applicants)
+  const regDefs = [
+    { name: "Rizky Ramadhan", phone: "08121111001", ageGroup: "U-10", hb: hbPusat.id },
+    { name: "Siti Aminah", phone: "08122222002", ageGroup: "U-10", hb: hbPusat.id },
+    { name: "Budi Cahyono", phone: "08123333003", ageGroup: "U-12", hb: hbCibubur.id },
+    { name: "Ani Maryani", phone: "08124444004", ageGroup: "U-13", hb: hbPusat.id },
+    { name: "Eko Prasetyo", phone: "08125555005", ageGroup: "U-16", hb: hbPusat.id },
+    { name: "Dina Larasati", phone: "08126666006", ageGroup: "U-12", hb: hbCibubur.id },
+    { name: "Guntur Wibowo", phone: "08127777007", ageGroup: "U-10", hb: hbPusat.id },
+    { name: "Hani Fitriani", phone: "08128888008", ageGroup: "U-13", hb: hbPusat.id },
+    { name: "Iwan Setiawan", phone: "08129999009", ageGroup: "U-16", hb: hbPusat.id },
+    { name: "Joko Susilo", phone: "08120000010", ageGroup: "U-12", hb: hbCibubur.id },
+  ];
+
+  for (const r of regDefs) {
+    await prisma.registration.create({
+      data: {
+        playerName: r.name,
+        phone: r.phone,
+        email: `${r.name.toLowerCase().replace(/\s/g, ".")}@example.com`,
+        ageGroup: r.ageGroup,
+        homebaseId: r.hb,
+        status: "PENDING",
+      },
     });
   }
 
-  // 6. CLUB SETTINGS (Kop Surat & Tanda Tangan)
+  // 7. CLUB SETTINGS (Keep the settings for PDF header/footer)
   const settings = [
     { key: "rapor_header_url", value: "/logo-adora-full.png" },
     { key: "rapor_coach_name", value: "Danuri Akbar" },
     { key: "rapor_ceo_name", value: "M. Arief, S.Ak" },
-    // Untuk TTD, karena file aslinya mungkin belum ada di path /public, 
-    // kita biarkan kosong atau berikan path default jika file tersedia.
-    // { key: "rapor_ceo_sign_url", value: "/images/signatures/ceo-sign.png" },
-    // { key: "rapor_coach_sign_url", value: "/images/signatures/coach-sign.png" },
-    // { key: "rapor_stamp_url", value: "/images/signatures/stamp.png" },
   ];
 
   for (const s of settings) {
@@ -197,8 +178,9 @@ async function main() {
     });
   }
 
-  console.log("✓ Berhasil mengonfigurasi Pengaturan Klub (Kop Surat & Nama Penandatangan).");
-  console.log("✓ Berhasil menerbitkan statistik dengan variasi nilai A, B (mayoritas), C (1 orang), D (1 orang).");
+  console.log("✓ Kehadiran diset dengan kualitas menengah (~75% hadir).");
+  console.log("✓ Berhasil menambahkan 10 pendaftar baru.");
+  console.log("✓ Seed raport/statistik dihilangkan sesuai permintaan.");
   console.log("\n✨ SEEDING SELESAI! ✨");
 }
 
