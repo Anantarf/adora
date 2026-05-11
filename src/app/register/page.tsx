@@ -119,10 +119,22 @@ function RegisterContent() {
     <main className="min-h-screen bg-page-dark text-foreground relative overflow-x-hidden">
       
       {/* Background Textures */}
-      <div className="absolute inset-0 pointer-events-none z-0">
+      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
         <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-orange rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
-        <div className="absolute inset-0 pattern-halftone opacity-20"></div>
+        
+        {/* Sporty Elements */}
+        <div className="absolute inset-0 pattern-halftone opacity-30"></div>
+        <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="absolute h-[1px] w-[200%] bg-white rotate-[-35deg]" style={{ top: `${i * 15}%`, left: '-50%' }} />
+          ))}
+        </div>
+        
+        {/* Massive Background Text */}
+        <div className="absolute -bottom-20 -left-20 font-heading font-black text-[15rem] md:text-[25rem] text-white/[0.02] select-none italic leading-none uppercase">
+          JOINUS
+        </div>
       </div>
 
       {/* ── Navbar ── */}
