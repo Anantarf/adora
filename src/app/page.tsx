@@ -216,47 +216,45 @@ export default async function LandingPage() {
 
 
       {/* ── Final Call to Action ── */}
-      <section id="daftar" className="py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
+      <section id="daftar" className="py-20 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
         <div className="absolute inset-0 pattern-halftone opacity-10 pointer-events-none"></div>
         <div className="container mx-auto px-6 relative z-10 text-center">
           <FadeIn direction="up">
-            <h2 className="font-heading font-black text-3xl md:text-6xl text-white uppercase tracking-widest italic mb-6 drop-shadow-lg">
+            <h2 className="font-heading font-black text-3xl md:text-5xl text-white uppercase tracking-widest italic mb-4 drop-shadow-lg">
               SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
             </h2>
-            <p className="text-white/90 max-w-xl mx-auto mb-16 font-medium text-sm md:text-lg leading-relaxed">
-              Bergabunglah bersama ratusan pemain muda Adora Basketball Club. <br className="hidden md:block" />
-              Proses pendaftaran mudah, cepat, dan 100% online.
+            <p className="text-white/90 max-w-xl mx-auto mb-10 font-medium text-sm md:text-base leading-relaxed">
+              Pendaftaran mudah, cepat, dan 100% online.
             </p>
 
-            {/* Registration Steps Integrated */}
-            <StaggerContainer className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto mb-16" delay={0.2}>
+            {/* Compact Registration Steps */}
+            <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 max-w-4xl mx-auto mb-12" delay={0.2}>
               {REGISTRATION_STEPS.map(({ step, title, desc }) => (
-                <StaggerItem key={step} className="relative group">
-                  <div className="flex flex-col items-center">
-                    <div className="text-brand-yellow font-heading font-black text-4xl mb-4 italic drop-shadow-[2px_2px_0px_rgba(0,0,0,0.5)]">
-                      0{step}
-                    </div>
-                    <h3 className="font-heading font-black text-lg text-white uppercase tracking-widest mb-2 italic">{title}</h3>
-                    <p className="text-white/70 text-xs md:text-sm leading-relaxed font-medium max-w-[200px]">{desc}</p>
+                <StaggerItem key={step} className="flex items-center gap-3 md:gap-4 relative group">
+                  <div className="text-brand-yellow font-heading font-black text-2xl italic drop-shadow-sm shrink-0">
+                    0{step}
                   </div>
-                  {/* Visual Connector for Desktop */}
+                  <div className="text-left">
+                    <h3 className="font-heading font-black text-xs md:text-sm text-white uppercase tracking-widest leading-none mb-1 italic">{title}</h3>
+                    <p className="text-white/60 text-[10px] md:text-xs font-medium max-w-[150px] leading-tight">{desc}</p>
+                  </div>
                   {step !== "3" && (
-                    <div className="hidden md:block absolute top-6 -right-4 w-8 h-[2px] bg-white/20"></div>
+                    <div className="hidden md:block w-[1px] h-8 bg-white/10 ml-8"></div>
                   )}
                 </StaggerItem>
               ))}
             </StaggerContainer>
 
-            <div className="flex flex-col items-center justify-center gap-6">
+            <div className="flex flex-col items-center">
               <Link
                 href="/register"
-                className="w-full sm:w-auto inline-flex skew-box bg-brand-yellow hover:bg-white text-black font-black px-10 py-4 transition-all uppercase tracking-[0.2em] text-sm md:text-lg hover:scale-110 shadow-[8px_8px_0px_#000] border-2 border-black group"
+                className="inline-flex skew-box bg-brand-yellow hover:bg-white text-black font-black px-10 py-3.5 transition-all uppercase tracking-[0.2em] text-sm md:text-base hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
               >
                 <span className="unskew-content italic flex items-center gap-3">
                   DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">→</span>
                 </span>
               </Link>
-              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest mt-4">Kuota terbatas untuk setiap kelompok usia</p>
+              <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest mt-6">Kuota terbatas untuk setiap kelompok usia</p>
             </div>
           </FadeIn>
         </div>
