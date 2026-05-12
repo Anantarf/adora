@@ -152,7 +152,7 @@ export default function SettingsPage() {
                         <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative flex items-center justify-center">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img 
-                            src={localValues[asset.key]} 
+                            src={`${localValues[asset.key]}?t=${new Date().getTime()}`} 
                             alt="Preview" 
                             crossOrigin="anonymous"
                             className="max-h-full max-w-full object-contain" 
