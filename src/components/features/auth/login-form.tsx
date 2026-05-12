@@ -136,8 +136,8 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
-            aria-label={loading ? "Sedang masuk" : "Tombol masuk"}
+            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold tracking-widest text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
+            aria-label={loading ? "Sedang memproses masuk" : "Masukkan akun untuk login"}
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />
@@ -150,7 +150,7 @@ export function LoginForm() {
           </button>
 
           <div className="text-center pt-1">
-            <p className="text-white/70 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>
+            <p className="text-white/80 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>
           </div>
         </form>
       </div>
