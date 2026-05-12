@@ -91,6 +91,7 @@ export function LoginForm() {
                   {...register("username")}
                   type="text"
                   disabled={loading}
+                  onKeyDown={(e) => e.key === " " && e.preventDefault()}
                   className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="Masukkan username"
                 />
@@ -108,6 +109,7 @@ export function LoginForm() {
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
                   disabled={loading}
+                  onKeyDown={(e) => e.key === " " && e.preventDefault()}
                   className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="••••••••"
                 />
