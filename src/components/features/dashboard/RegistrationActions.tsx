@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, Clock, Trash2, Loader2 } from "lucide-react";
+import { CheckCircle2, Clock, Trash2, Loader2, AlertCircle } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
@@ -52,21 +52,21 @@ export function RegistrationActions({ regId, status }: Props) {
 
   return (
     <>
-      <div className="flex items-center gap-2 ml-2">
+      <div className="flex items-center gap-2">
         <Select disabled={isPending} value={status} onValueChange={handleStatusChange}>
           <SelectTrigger
-            className={`w-[155px] h-8 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+            className={`w-[155px] h-9 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${
               isUnpaid
-                ? "bg-amber-500/10 text-amber-500 border-amber-500/30"
-                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
+                ? "bg-amber-500/10 text-amber-500 border-amber-500/30 hover:bg-amber-500/20"
+                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/30 hover:bg-emerald-500/20"
             }`}
           >
             <SelectValue>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 {isPending ? (
                   <>
                     <Loader2 className="size-3.5 animate-spin" />
-                    <span>Menyimpan...</span>
+                    <span>Processing...</span>
                   </>
                 ) : status === "PENDING" ? (
                   <>
@@ -81,28 +81,29 @@ export function RegistrationActions({ regId, status }: Props) {
                 ) : (
                   <>
                     <Trash2 className="size-3.5" />
-                    <span>Batal Daftar</span>
+                    <span>Dibatalkan</span>
                   </>
                 )}
               </div>
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/50 min-w-[155px]">
-            <SelectItem value="PENDING" className="text-[10px] font-bold uppercase tracking-wider text-amber-500 focus:text-amber-600 focus:bg-amber-500/10 cursor-pointer">
-              <div className="flex items-center gap-1.5">
-                <Clock className="size-3.5" />
+          <SelectContent className="rounded-2xl border-border/50 min-w-[170px] p-1 shadow-2xl backdrop-blur-xl bg-card/95">
+            <SelectItem value="PENDING" className="rounded-xl text-[10px] font-black uppercase tracking-widest text-amber-500 focus:text-amber-600 focus:bg-amber-500/10 cursor-pointer py-3">
+              <div className="flex items-center gap-2">
+                <Clock className="size-4" />
                 <span>Belum Bayar</span>
               </div>
             </SelectItem>
-            <SelectItem value="REVIEWED" className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 focus:text-emerald-600 focus:bg-emerald-500/10 cursor-pointer">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-3.5" />
-                <span>Sudah Bayar</span>
+            <SelectItem value="REVIEWED" className="rounded-xl text-[10px] font-black uppercase tracking-widest text-emerald-500 focus:text-emerald-600 focus:bg-emerald-500/10 cursor-pointer py-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="size-4" />
+                <span>Sudah Bayar (Lunas)</span>
               </div>
             </SelectItem>
-            <SelectItem value="DELETED" className="text-[10px] font-bold uppercase tracking-wider text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer">
-              <div className="flex items-center gap-1.5">
-                <Trash2 className="size-3.5" />
+            <div className="my-1 border-t border-border/40 mx-2" />
+            <SelectItem value="DELETED" className="rounded-xl text-[10px] font-black uppercase tracking-widest text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer py-3">
+              <div className="flex items-center gap-2">
+                <Trash2 className="size-4" />
                 <span>Hapus Pendaftar</span>
               </div>
             </SelectItem>
@@ -111,25 +112,23 @@ export function RegistrationActions({ regId, status }: Props) {
       </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="rounded-3xl border-border/60 bg-card/95 backdrop-blur-xl shadow-2xl">
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus data pendaftar ini?</AlertDialogTitle>
-            <AlertDialogDescription className="text-foreground/80 font-medium leading-relaxed">
-              Data pendaftar akan dihapus secara <span className="text-destructive font-bold">permanen</span> dan tidak bisa dikembalikan.
-            </AlertDialogDescription>
-            <div className="mt-4 bg-amber-500/10 border border-amber-500/20 p-3 rounded-xl">
-              <p className="text-amber-500/90 text-xs font-medium leading-relaxed">
-                <strong className="font-bold">Catatan:</strong> Pastikan Anda sudah mencatat informasi yang diperlukan sebelum menghapus.
-              </p>
+            <div className="size-14 rounded-2xl bg-destructive/10 flex items-center justify-center text-destructive mb-4 mx-auto">
+              <AlertCircle className="size-8" />
             </div>
+            <AlertDialogTitle className="text-xl font-heading uppercase text-center tracking-widest">Hapus Data Pendaftar?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground font-medium text-center leading-relaxed">
+              Tindakan ini tidak bisa dibatalkan. Data pendaftar akan <span className="text-destructive font-black">dihapus permanen</span> dari sistem database ADORA BBC.
+            </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Batal</AlertDialogCancel>
+          <AlertDialogFooter className="mt-8 flex-col sm:flex-row gap-3">
+            <AlertDialogCancel className="rounded-xl border-border/60 font-bold uppercase tracking-widest text-[10px] h-12 flex-1">Batal</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
-              className="bg-destructive text-white hover:bg-destructive/90"
+              className="rounded-xl bg-destructive text-white hover:bg-destructive/90 font-bold uppercase tracking-widest text-[10px] h-12 flex-1 shadow-lg shadow-destructive/20"
             >
-              Hapus Pendaftar
+              Ya, Hapus Permanen
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
