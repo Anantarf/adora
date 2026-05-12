@@ -41,7 +41,7 @@ export default async function LandingPage() {
       {/* ── Hero Section ── */}
       <section id="home" className="relative min-h-[calc(100vh-72px)] flex items-center justify-center bg-brand-purple pt-14 pb-12 md:py-20 clip-diagonal-bottom">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <Image src="/images/hero/hero.jpg" alt="ADORA Basketball Team" fill sizes="100vw" quality={60} className="object-cover object-center opacity-30 mix-blend-luminosity" priority fetchPriority="high" />
+          <Image src="/images/hero/hero.jpg" alt="ADORA Basketball Team" fill sizes="100vw" quality={40} className="object-cover object-center opacity-30 mix-blend-luminosity" priority fetchPriority="high" />
           <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/80 to-brand-purple/40 mix-blend-multiply z-10" />
           <div className="absolute inset-0 pattern-halftone opacity-20 z-10" />
         </div>
@@ -107,8 +107,8 @@ export default async function LandingPage() {
                         src={image}
                         alt={`Program ${label}`}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        quality={70}
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        quality={50}
                         priority={label === "KU‑8" || label === "KU‑12"}
                         className="object-cover transition-all duration-700 group-hover:scale-105 opacity-70 group-hover:opacity-100"
                       />

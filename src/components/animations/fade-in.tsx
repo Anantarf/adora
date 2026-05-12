@@ -1,7 +1,9 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { m, LazyMotion, useReducedMotion } from "framer-motion";
 import { createContext, ReactNode, useContext } from "react";
+
+const loadFeatures = () => import("framer-motion").then((res) => res.domAnimation);
 
 const ReducedMotionCtx = createContext(false);
 
@@ -29,15 +31,11 @@ export function FadeIn({ children, delay = 0, direction = "up", className = "", 
   if (shouldReduceMotion) return <div className={className}>{children}</div>;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, ...DIRECTIONS[direction] }}
-      whileInView={{ opacity: 1, x: 0, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration, delay, ease: EASE }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <LazyMotion features={loadFeatures}>
+      <m.div initial={{ opacity: 0, ...DIRECTIONS[direction] }} whileInView={{ opacity: 1, x: 0, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration, delay, ease: EASE }} className={className}>
+        {children}
+      </m.div>
+    </LazyMotion>
   );
 }
 
