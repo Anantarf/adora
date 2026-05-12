@@ -47,18 +47,20 @@ export function StaggerContainer({ children, className = "", delay = 0.1 }: { ch
       {shouldReduceMotion ? (
         <div className={className}>{children}</div>
       ) : (
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={{
-            hidden: {},
-            visible: { transition: { staggerChildren: delay } },
-          }}
-          className={className}
-        >
-          {children}
-        </motion.div>
+        <LazyMotion features={loadFeatures}>
+          <m.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            variants={{
+              hidden: {},
+              visible: { transition: { staggerChildren: delay } },
+            }}
+            className={className}
+          >
+            {children}
+          </m.div>
+        </LazyMotion>
       )}
     </ReducedMotionCtx.Provider>
   );
@@ -70,14 +72,16 @@ export function StaggerItem({ children, className = "" }: { children: ReactNode;
   if (reducedMotion) return <div className={className}>{children}</div>;
 
   return (
-    <motion.div
-      variants={{
-        hidden: { opacity: 0, y: 30 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-      }}
-      className={className}
-    >
-      {children}
-    </motion.div>
+    <LazyMotion features={loadFeatures}>
+      <m.div
+        variants={{
+          hidden: { opacity: 0, y: 30 },
+          visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
+        }}
+        className={className}
+      >
+        {children}
+      </m.div>
+    </LazyMotion>
   );
 }
