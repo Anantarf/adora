@@ -338,7 +338,7 @@ async function finalizePDF(doc: jsPDF, info: any) {
       templatePage.drawPage(contentPage, { x: 0, y: 0, width: templatePage.getWidth(), height: templatePage.getHeight() });
 
       const merged = await templatePdf.save();
-      const blob = new Blob([merged], { type: "application/pdf" });
+      const blob = new Blob([merged.buffer as ArrayBuffer], { type: "application/pdf" });
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = fileName;

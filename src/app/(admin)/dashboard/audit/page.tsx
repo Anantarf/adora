@@ -5,108 +5,23 @@ import { ShieldAlert, Loader2, ChevronRight, User, Clock, FileText, RefreshCw } 
 import { useAuditLogs, type AuditLogRecord } from "@/hooks/use-audit-log";
 import { Button } from "@/components/ui/button";
 import { AUDIT_ACTION_CONFIG as ACTION_CONFIG, getAuditActionConfig as getActionConfig, type AuditActionKey as ActionKey } from "@/lib/constants/badge-configs";
-
-const TARGET_TABLE_DICT: Record<string, string> = {
-  user: "Pengguna",
-  parent: "Orang Tua",
-  player: "Pemain",
-  group: "Kelompok",
-  attendance: "Kehadiran",
-  statistic: "Statistik",
-  evaluationperiod: "Periode Evaluasi",
-  auditlog: "Log System",
-};
-
-function getHumanReadableTable(table: string): string {
-  return TARGET_TABLE_DICT[table.toLowerCase()] || table;
-}
-
-function extractTargetName(details: unknown): string | null {
-  if (!details || typeof details !== "object" || Array.isArray(details)) return null;
-  const d = details as Record<string, unknown>;
-  if (typeof d.name === "string") return d.name;
-  if (d.after && typeof d.after === "object" && !Array.isArray(d.after)) {
-    const after = d.after as Record<string, unknown>;
-    if (typeof after.name === "string") return after.name;
-  }
-  if (d.before && typeof d.before === "object" && !Array.isArray(d.before)) {
-    const before = d.before as Record<string, unknown>;
-    if (typeof before.name === "string") return before.name;
-  }
-  return null;
-}
-
-function getHumanReadableText(action: string, table: string): string {
-  const a = action.toUpperCase();
-  const t = getHumanReadableTable(table).toLowerCase();
-
-  if (a.includes("CREATE_STATS")) return `Memasukkan data ${t} baru`;
-  if (a.includes("UPDATE_STATS")) return `Memperbarui dan menyelesaikan ${t}`;
-  if (a.includes("SET_ACTIVE")) return `Mengaktifkan ${t}`;
-
-  if (a === "CREATE") return `Mendaftarkan ${t} baru`;
-  if (a === "UPDATE") return `Memperbarui informasi ${t}`;
-  if (a === "DELETE") return `Menghapus ${t} dari sistem`;
-  if (a === "RESET_PASSWORD") return `Mengatur ulang sandi ${t}`;
-  if (a === "UPDATE_SELF") return `Memperbarui profil ${t}`;
-
-  return `Perubahan pada data ${t}`;
-}
-
-// ─── Formatter ──────────────────────────────────────────
-const TIMESTAMP_FORMATTER = new Intl.DateTimeFormat("id-ID", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-  timeZone: "Asia/Jakarta",
-});
-
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
-// ─── Human-Readable Field Labels ─────────────────────────
-const FIELD_LABELS: Record<string, string> = {
-  username: "Username",
-  name: "Nama Lengkap",
-  email: "Email",
-  role: "Peran",
-  groupId: "Kelompok",
-  parentId: "Orang Tua",
-  dateOfBirth: "Tanggal Lahir",
-  homebaseId: "Lokasi Latihan",
-  description: "Keterangan",
-  startDate: "Tanggal Mulai",
-  endDate: "Tanggal Selesai",
-  isActive: "Status Aktif",
-  count: "Jumlah Ditambahkan",
-  submitted: "Data Dikirim",
-  deduped: "Data Tidak Duplikat",
-  resetTo: "Sandi Diatur Ulang Ke",
-};
+// Utilities
+import { 
+  getHumanReadableTable, 
+  getHumanReadableText, 
+  extractTargetName, 
+  formatValue, 
+  TIMESTAMP_FORMATTER,
+  FIELD_LABELS 
+} from "@/lib/utils/audit-log";
 
-const ROLE_LABELS: Record<string, string> = {
-  PARENT: "Orang Tua",
-  ADMIN: "Admin",
-};
+// ─── SUB-COMPONENTS ─────────────────────────────────────
 
-function formatValue(key: string, value: unknown): string {
-  if (value === null || value === undefined) return "—";
-  if (key === "role") return ROLE_LABELS[value as string] ?? String(value);
-  if (key === "resetTo") return value === "default" ? "Sandi awal (adora123)" : "Sandi kustom";
-  if (key === "isActive") return value ? "Aktif" : "Tidak aktif";
-  if (key.toLowerCase().includes("date") && typeof value === "string") {
-    try {
-      return new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-    } catch {
-      return value;
-    }
-  }
-  return String(value);
-}
-
+/**
+ * Renders key-value pairs of details
+ */
 function DetailRows({ data }: { data: Record<string, unknown> }) {
   const rows = Object.entries(data).filter(([k]) => !k.startsWith("_"));
   return (
@@ -121,6 +36,9 @@ function DetailRows({ data }: { data: Record<string, unknown> }) {
   );
 }
 
+/**
+ * Handles complex before/after diffing view
+ */
 function AuditDetailBody({ log }: { log: AuditLogRecord }) {
   if (!log.details) {
     return <p className="text-micro text-muted-foreground/75 text-center py-6">Riwayat ini tidak merekam detail perubahan.</p>;
@@ -128,42 +46,46 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
 
   const details = log.details as Record<string, unknown>;
 
-  // before/after comparison (UPDATE actions)
+  // Comparison View for Updates
   if (details.before && details.after) {
     const before = details.before as Record<string, unknown>;
     const after = details.after as Record<string, unknown>;
     const keys = Array.from(new Set([...Object.keys(before), ...Object.keys(after)]));
+
     return (
-      <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
-            <p className="text-micro text-muted-foreground/75 mb-2">Sebelum</p>
-            {keys.map((k) => (
-              <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-                <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
-                <span className="text-xs font-semibold text-muted-foreground">{formatValue(k, before[k])}</span>
-              </div>
-            ))}
-          </div>
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
-            <p className="text-micro text-primary/70 mb-2">Sesudah</p>
-            {keys.map((k) => (
-              <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-                <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
-                <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>{formatValue(k, after[k])}</span>
-              </div>
-            ))}
-          </div>
+      <div className="grid grid-cols-2 gap-3">
+        {/* BEFORE */}
+        <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
+          <p className="text-micro text-muted-foreground/75 mb-2 font-bold uppercase tracking-widest">Sebelum</p>
+          {keys.map((k) => (
+            <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
+              <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
+              <span className="text-xs font-semibold text-muted-foreground">{formatValue(k, before[k])}</span>
+            </div>
+          ))}
+        </div>
+        {/* AFTER */}
+        <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 shadow-inner">
+          <p className="text-micro text-primary/70 mb-2 font-bold uppercase tracking-widest">Sesudah</p>
+          {keys.map((k) => (
+            <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
+              <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
+              <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>
+                {formatValue(k, after[k])}
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
-  // flat details (CREATE, DELETE, etc.)
   return <DetailRows data={details} />;
 }
 
-// ─── Single Log Entry ───────────────────────────────────
+/**
+ * Single Entry Component with premium hover effects
+ */
 function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: number; onClick: () => void }) {
   const cfg = getActionConfig(log.action);
   const Icon = cfg.icon;
@@ -171,36 +93,31 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
   return (
     <div
       onClick={onClick}
-      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/30 hover:bg-muted/20 cursor-pointer transition-all duration-base animate-card-in"
+      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/30 hover:bg-muted/20 cursor-pointer transition-all duration-300 animate-card-in"
       style={{ animationDelay: `${index * 40}ms`, animationFillMode: "both" }}
     >
-      {/* Action Icon */}
       <div
-        className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-base mt-0.5"
-        style={{
-          backgroundColor: cfg.color,
-          boxShadow: `0 4px 14px ${cfg.color}44`,
-        }}
+        className="flex-shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-300 mt-0.5"
+        style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px ${cfg.color}44` }}
       >
         <Icon className="size-4" />
       </div>
 
-      {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-micro px-2 py-0.5 rounded-full" style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}>
+          <span className="text-micro px-2 py-0.5 rounded-full font-bold tracking-tight" style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}>
             {cfg.label}
           </span>
-          <span className="text-micro px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">{getHumanReadableTable(log.targetTable)}</span>
+          <span className="text-micro px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50 font-medium">
+            {getHumanReadableTable(log.targetTable)}
+          </span>
         </div>
 
-        {/* Details */}
         <p className="text-sm font-semibold text-foreground mt-1.5 leading-snug">
           {getHumanReadableText(log.action, log.targetTable)}
           {extractTargetName(log.details) && <span className="text-primary font-bold"> — {extractTargetName(log.details)}</span>}
         </p>
 
-        {/* Meta */}
         <div className="flex items-center gap-4 mt-2 text-[10px] text-muted-foreground font-medium">
           <span className="flex items-center gap-1">
             <User className="size-2.5" />
@@ -213,16 +130,22 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
         </div>
       </div>
 
-      <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-base flex-shrink-0 mt-3" />
+      <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-300 flex-shrink-0 mt-3" />
     </div>
   );
 }
 
-// ─── Main Audit Page ────────────────────────────────────
+// ─── MAIN PAGE ──────────────────────────────────────────
+
 export default function AuditPage() {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
   const { data, isLoading, isRefetching, refetch } = useAuditLogs(cursor);
   const [selectedLog, setSelectedLog] = useState<AuditLogRecord | null>(null);
+
+  const handleRefresh = () => {
+    setCursor(undefined);
+    refetch();
+  };
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
@@ -230,15 +153,12 @@ export default function AuditPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
           <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Riwayat Aktivitas</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Rekam jejak semua perubahan data. Pantau siapa yang menambah, mengubah, atau menghapus data.</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Rekam jejak setiap perubahan data untuk transparansi sistem.</p>
         </div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => {
-            setCursor(undefined);
-            refetch();
-          }}
+          onClick={handleRefresh}
           disabled={isRefetching}
           className="h-10 px-4 uppercase font-bold tracking-widest text-[10px] border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
         >
@@ -247,33 +167,32 @@ export default function AuditPage() {
         </Button>
       </div>
 
-      {/* Legend */}
+      {/* Legend / Filters Placeholder */}
       <div className="flex flex-wrap gap-2 items-center px-1">
-        {(Object.entries(ACTION_CONFIG) as [ActionKey, (typeof ACTION_CONFIG)[ActionKey]][]).map(([, cfg]) => (
-          <div key={cfg.label} className="flex items-center gap-2 bg-muted/60 pl-2 pr-3 py-1.5 rounded-full border border-border shadow-sm">
-            <div className="p-1 rounded-full text-white shadow-sm" style={{ backgroundColor: cfg.color }}>
+        {(Object.entries(ACTION_CONFIG) as [ActionKey, any][]).map(([, cfg]) => (
+          <div key={cfg.label} className="flex items-center gap-2 bg-muted/40 pl-2 pr-3 py-1.5 rounded-full border border-border/60">
+            <div className="p-1 rounded-full text-white" style={{ backgroundColor: cfg.color }}>
               <cfg.icon className="size-2.5" />
             </div>
             <div className="flex flex-col leading-none">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{cfg.label}</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground/80">{cfg.label}</span>
               <span className="text-[9px] text-muted-foreground mt-0.5">{cfg.description}</span>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Log Entries */}
+      {/* Content Area */}
       <div className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
             <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground font-bold animate-pulse">Memuat Rekam Jejak Aktivitas...</p>
+            <p className="text-sm text-muted-foreground font-bold tracking-widest animate-pulse">MEMUAT REKAM JEJAK...</p>
           </div>
         ) : !data?.logs || data.logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
-            <ShieldAlert className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada rekam jejak aktivitas</p>
-            <p className="text-xs text-muted-foreground/75 mt-1">Riwayat akan muncul otomatis setiap kali ada perubahan data.</p>
+          <div className="flex flex-col items-center justify-center py-20 gap-3 rounded-2xl border border-dashed border-border/50 text-center bg-muted/10">
+            <ShieldAlert className="size-10 text-muted-foreground/20" />
+            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada aktivitas</p>
           </div>
         ) : (
           <>
@@ -281,10 +200,9 @@ export default function AuditPage() {
               <AuditLogEntry key={log.id} log={log} index={i} onClick={() => setSelectedLog(log)} />
             ))}
 
-            {/* Pagination */}
             {data.nextCursor && (
-              <div className="flex justify-center mt-4">
-                <Button variant="outline" size="sm" onClick={() => setCursor(data.nextCursor!)} className="h-10 px-6 uppercase font-bold tracking-widest text-[10px] border-border/50 hover:bg-primary/10 hover:text-primary">
+              <div className="flex justify-center mt-6">
+                <Button variant="outline" size="sm" onClick={() => setCursor(data.nextCursor!)} className="h-11 px-8 uppercase font-bold tracking-widest text-[10px] border-border/50 hover:bg-primary/10 hover:text-primary">
                   Muat Lebih Banyak
                   <ChevronRight className="ml-1 size-3" />
                 </Button>
@@ -295,15 +213,17 @@ export default function AuditPage() {
       </div>
 
       {/* Detail Modal */}
-      <Dialog open={!!selectedLog} onOpenChange={(open) => (!open ? setSelectedLog(null) : null)}>
-        <DialogContent className="sm:max-w-2xl bg-card border-border/50">
-          <DialogHeader>
+      <Dialog open={!!selectedLog} onOpenChange={(open) => !open && setSelectedLog(null)}>
+        <DialogContent className="sm:max-w-2xl bg-card border-border/60 shadow-2xl">
+          <DialogHeader className="border-b border-border/30 pb-4">
             <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
               <FileText className="size-5 text-primary" /> Detail Perubahan
             </DialogTitle>
-            <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Rincian data yang tercatat saat aktivitas ini terjadi.</DialogDescription>
+            <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Log ID: {selectedLog?.id}</DialogDescription>
           </DialogHeader>
-          <div className="bg-muted/30 rounded-xl p-4 overflow-auto max-h-[60vh] border border-border/50">{selectedLog && <AuditDetailBody log={selectedLog} />}</div>
+          <div className="bg-muted/20 rounded-2xl p-5 overflow-auto max-h-[65vh] border border-border/40 mt-4 shadow-inner">
+            {selectedLog && <AuditDetailBody log={selectedLog} />}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
