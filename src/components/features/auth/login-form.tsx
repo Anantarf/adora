@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -71,7 +70,7 @@ export function LoginForm() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-120 z-10">
+    <div className="w-full max-w-120 z-10 opacity-100 animate-in fade-in duration-500">
       <div className="bg-login-card/95 border border-white/10 rounded-3xl px-7 py-5 shadow-login-card sm:px-8">
         <div className="text-center mb-1">
           <div className="relative w-full flex items-center justify-center">
@@ -81,9 +80,10 @@ export function LoginForm() {
               alt="Adora Basketball Club"
               width={380}
               height={160}
-              className="object-contain relative z-10 mx-auto w-full max-w-[380px]"
+              className="object-contain relative z-10 mx-auto w-full max-w-95"
               style={{ width: "auto", height: "auto" }}
               priority
+              fetchPriority="high"
             />
           </div>
         </div>
@@ -91,10 +91,10 @@ export function LoginForm() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="text-micro text-white/50 ml-1">Username</label>
+              <label className="text-micro text-white/70 ml-1">Username</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <User className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
+                  <User className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
                 </div>
                 <input
                   {...register("username")}
@@ -108,10 +108,10 @@ export function LoginForm() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-micro text-white/50 ml-1">Kata Sandi</label>
+              <label className="text-micro text-white/70 ml-1">Kata Sandi</label>
               <div className="relative group">
                 <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-white/30 group-focus-within:text-primary transition-colors" />
+                  <Lock className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
                 </div>
                 <input
                   {...register("password")}
@@ -120,7 +120,12 @@ export function LoginForm() {
                   className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="••••••••"
                 />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-5 flex items-center text-white/35 hover:text-white focus:outline-none transition-colors">
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-5 flex items-center text-white/60 hover:text-white/80 focus:outline-none transition-colors"
+                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
+                >
                   {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
                 </button>
               </div>
@@ -128,11 +133,11 @@ export function LoginForm() {
             </div>
           </div>
 
-          <motion.button
-            whileTap={{ scale: 0.985 }}
+          <button
             type="submit"
             disabled={loading}
             className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
+            aria-label={loading ? "Sedang masuk" : "Tombol masuk"}
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />
@@ -142,13 +147,13 @@ export function LoginForm() {
                 <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
               </span>
             )}
-          </motion.button>
+          </button>
 
           <div className="text-center pt-1">
-            <p className="text-white/45 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>
+            <p className="text-white/70 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>
           </div>
         </form>
       </div>
-    </motion.div>
+    </div>
   );
 }
