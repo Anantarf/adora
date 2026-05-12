@@ -4,9 +4,7 @@ import { getPublicHomebases } from "@/actions/homebase";
 import { Metadata } from "next";
 import { MapPin, MessageCircle, Music2, Trophy, ClipboardList, Zap } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
-import { HomebaseSection } from "@/components/features/homebase-section";
-import { GallerySection } from "@/components/features/gallery-section";
-import { AutoFadeCarousel } from "@/components/ui/auto-fade-carousel";
+import dynamic from "next/dynamic";
 import { LandingHeader, InstagramIcon } from "@/components/features/landing-header";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
@@ -14,6 +12,20 @@ import { NAV_LINKS } from "@/lib/constants/navigation";
 import { REGISTRATION_STEPS } from "@/lib/constants/landing";
 import { getAcademicYear } from "@/lib/utils";
 import React from "react";
+
+const AutoFadeCarousel = dynamic(() => import("@/components/ui/auto-fade-carousel").then((mod) => mod.AutoFadeCarousel), {
+  ssr: false,
+});
+
+const HomebaseSection = dynamic(() => import("@/components/features/homebase-section").then((mod) => mod.HomebaseSection), {
+  ssr: true, // we still want SEO for homebases, but this will split its huge bundle
+});
+
+const GallerySection = dynamic(() => import("@/components/features/gallery-section").then((mod) => mod.GallerySection), {
+  ssr: true, // for SEO
+});
+
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "ADORA Basketball Club — Official Page",
@@ -28,8 +40,6 @@ export const metadata: Metadata = {
   },
 };
 
-
-
 export default async function LandingPage() {
   const homebases = await getPublicHomebases();
   const registrationYearText = getAcademicYear();
@@ -41,7 +51,7 @@ export default async function LandingPage() {
       {/* ── Hero Section ── */}
       <section id="home" className="relative min-h-[calc(100vh-72px)] flex items-center justify-center bg-brand-purple pt-14 pb-12 md:py-20 clip-diagonal-bottom">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <Image src="/images/hero/hero.jpg" alt="ADORA Basketball Team" fill sizes="100vw" className="object-cover object-center opacity-30 mix-blend-luminosity" priority />
+          <Image src="/images/hero/hero.jpg" alt="ADORA Basketball Team" fill sizes="100vw" className="object-cover object-center opacity-30 mix-blend-luminosity" priority fetchPriority="high" />
           <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/80 to-brand-purple/40 mix-blend-multiply z-10" />
           <div className="absolute inset-0 pattern-halftone opacity-20 z-10" />
         </div>
@@ -49,9 +59,7 @@ export default async function LandingPage() {
         <div className="relative z-20 container mx-auto px-4 flex flex-col items-center text-center">
           <FadeIn delay={0.1} direction="up">
             <div className="inline-block skew-box bg-brand-yellow px-4 py-1.5 md:px-8 md:py-3 mb-6 md:mb-8 border-b-4 border-r-4 border-black shadow-lg mx-2">
-              <span className="unskew-content block font-heading font-black uppercase text-black text-[9px] sm:text-xs md:text-sm tracking-widest md:tracking-[0.2em] pr-1 md:pr-2">
-                NOW OPEN REGISTRATION {registrationYearText}
-              </span>
+              <span className="unskew-content block font-heading font-black uppercase text-black text-[9px] sm:text-xs md:text-sm tracking-widest md:tracking-[0.2em] pr-1 md:pr-2">NOW OPEN REGISTRATION {registrationYearText}</span>
             </div>
           </FadeIn>
 
@@ -101,7 +109,7 @@ export default async function LandingPage() {
                 {/* Accent Background Box (Pop-out effect) */}
                 <div className="absolute inset-0 bg-brand-purple rounded-card transform translate-x-1.5 translate-y-1.5 sm:translate-x-3 sm:translate-y-3 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform z-0"></div>
 
-                <div className="relative z-10 bg-surface-dark border-2 border-white/10 group-hover:border-brand-yellow rounded-card transition-all flex flex-col overflow-hidden shadow-xl w-full aspect-[16/10] sm:aspect-[4/3] block">
+                <div className="relative z-10 bg-surface-dark border-2 border-white/10 group-hover:border-brand-yellow rounded-card transition-all flex flex-col overflow-hidden shadow-xl w-full aspect-16/10 sm:aspect-4/3 block">
                   {/* Background Image */}
                   <div className="absolute inset-0 bg-black">
                     {image ? (
@@ -214,20 +222,19 @@ export default async function LandingPage() {
       {/* ── Adora In Action (Galeri Kolase) ── */}
       <GallerySection />
 
-
       {/* ── Final Call to Action ── */}
       <section id="daftar" className="py-16 md:py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
         {/* Sporty Background Ornaments */}
         <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none"></div>
-        
+
         <div className="absolute top-0 right-0 w-96 h-96 bg-brand-orange/20 blur-[120px] -mr-48 -mt-48 pointer-events-none animate-pulse"></div>
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-yellow/10 blur-[100px] -ml-40 -mb-40 pointer-events-none"></div>
-        
+
         {/* Sporty Diagonal Lines (Aggressive) */}
         <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none overflow-hidden">
-          <div className="absolute top-[-10%] left-[10%] w-[2px] h-[120%] bg-brand-orange rotate-45"></div>
-          <div className="absolute top-[-10%] left-[15%] w-[1px] h-[120%] bg-white rotate-45"></div>
-          <div className="absolute top-[-10%] right-[10%] w-[1px] h-[120%] bg-brand-yellow rotate-45"></div>
+          <div className="absolute top-[-10%] left-[10%] w-0.5 h-[120%] bg-brand-orange rotate-45"></div>
+          <div className="absolute top-[-10%] left-[15%] w-px h-[120%] bg-white rotate-45"></div>
+          <div className="absolute top-[-10%] right-[10%] w-px h-[120%] bg-brand-yellow rotate-45"></div>
         </div>
 
         <div className="container mx-auto px-6 relative z-10 text-center">
@@ -235,24 +242,18 @@ export default async function LandingPage() {
             <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic mb-3 md:mb-4 drop-shadow-lg">
               SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
             </h2>
-            <p className="text-white/90 max-w-xl mx-auto mb-8 md:mb-10 font-medium text-sm md:text-base leading-relaxed">
-              Pendaftaran mudah, cepat, dan 100% online.
-            </p>
-            
+            <p className="text-white/90 max-w-xl mx-auto mb-8 md:mb-10 font-medium text-sm md:text-base leading-relaxed">Pendaftaran mudah, cepat, dan 100% online.</p>
+
             {/* Compact Registration Steps with Orange Accents */}
             <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-12 max-w-4xl mx-auto mb-10 md:mb-12" delay={0.2}>
               {REGISTRATION_STEPS.map(({ step, title, desc }) => (
                 <StaggerItem key={step} className="flex items-center gap-3 md:gap-4 relative group">
-                  <div className="text-brand-orange font-heading font-black text-2xl md:text-3xl italic drop-shadow-sm shrink-0 transition-transform group-hover:scale-110">
-                    0{step}
-                  </div>
+                  <div className="text-brand-orange font-heading font-black text-2xl md:text-3xl italic drop-shadow-sm shrink-0 transition-transform group-hover:scale-110">0{step}</div>
                   <div className="text-left">
                     <h3 className="font-heading font-black text-xs md:text-sm text-white uppercase tracking-widest leading-none mb-1 italic group-hover:text-brand-yellow transition-colors">{title}</h3>
-                    <p className="text-white/60 text-xs font-medium max-w-[150px] md:max-w-[180px] leading-tight">{desc}</p>
+                    <p className="text-white/60 text-xs font-medium max-w-37.5 md:max-w-45 leading-tight">{desc}</p>
                   </div>
-                  {step !== "3" && (
-                    <div className="hidden md:block w-[1px] h-8 bg-brand-orange/30 ml-8"></div>
-                  )}
+                  {step !== "3" && <div className="hidden md:block w-px h-8 bg-brand-orange/30 ml-8"></div>}
                 </StaggerItem>
               ))}
             </StaggerContainer>

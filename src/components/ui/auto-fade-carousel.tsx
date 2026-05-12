@@ -44,7 +44,7 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
   }, [slots.length]);
 
   return (
-    <div className="relative w-full aspect-[4/3] rounded-3xl overflow-hidden bg-page-dark border border-white/10 shadow-2xl">
+    <div className="relative w-full aspect-4/3 rounded-3xl overflow-hidden bg-page-dark border border-white/10 shadow-2xl">
       {slots.map((slot, idx) => (
         <div
           key={idx}
@@ -53,7 +53,7 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
           }`}
         >
           {isPlaceholder ? (
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5 flex flex-col items-center justify-center gap-4">
+            <div className="absolute inset-0 bg-linear-to-br from-primary/10 via-transparent to-primary/5 flex flex-col items-center justify-center gap-4">
               <CourtPattern />
               <div className="relative z-10 flex flex-col items-center gap-3">
                 <div className="w-14 h-14 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">

@@ -58,13 +58,13 @@ export function LandingHeader() {
       </header>
 
       {/* Mobile drawer overlay - Outside header to avoid filter inheritance */}
-      <div className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} onClick={() => setOpen(false)} aria-hidden="true">
+      <div className={`fixed inset-0 z-60 md:hidden transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} onClick={() => setOpen(false)} aria-hidden="true">
         <div className="absolute inset-0 bg-black/80" />
       </div>
 
       {/* Mobile drawer - Solid Black Background */}
       <div
-        className={`fixed top-0 right-0 h-full w-52 bg-black border-l-4 border-brand-orange z-[70] md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-52 bg-black border-l-4 border-brand-orange z-70 md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between h-12 px-4 border-b border-white/10">
           <span className="font-heading font-black italic text-xs tracking-widest uppercase text-brand-yellow">MENU</span>
