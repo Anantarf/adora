@@ -113,7 +113,7 @@ export default function CertificatesPage() {
 
   const DeleteConfirm = ({ cert }: { cert: Certificate }) => (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
+      <AlertDialogTrigger>
         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl text-destructive/40 hover:bg-destructive/10 hover:text-destructive transition-all border border-transparent hover:border-destructive/20">
           <Trash2 className="size-4" />
         </Button>
@@ -165,7 +165,7 @@ export default function CertificatesPage() {
         </div>
 
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger>
             <Button variant="outline" className="w-full md:w-56 h-11 rounded-xl border-border/50 bg-card/40 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest hover:bg-primary/5 transition-all">
               <Filter className="size-3.5 mr-2" />
               {typeFilter === "ALL" ? "Semua Kategori" : typeFilter === "PLAYER" ? "Penerima Pemain" : "Penerima Kelompok"}
