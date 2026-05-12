@@ -4,19 +4,6 @@ const disableOptimizePackageImports = process.env.NEXT_DISABLE_OPTIMIZE_PACKAGE_
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  headers: async () => {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Link",
-            value: "<https://cdn.vercel.com>; rel=preconnect, <https://vercel.com>; rel=preconnect",
-          },
-        ],
-      },
-    ];
-  },
   serverExternalPackages: ["@prisma/client", "prisma", "bcryptjs", "bcrypt", "sharp"],
   experimental: disableOptimizePackageImports
     ? {}
