@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ASSET_KEYS = [
-  { key: "rapor_header_url", label: "Header Rapor (Kop Surat)", description: "Upload Kop Surat Klub (Format: PNG, JPG, atau PDF).", accept: ".png,.jpg,.jpeg,.pdf" },
+  { key: "rapor_header_url", label: "Template Rapor (Kop Surat)", description: "Upload Kop Surat Klub (Format: PNG, JPG, atau PDF).", accept: ".png,.jpg,.jpeg,.pdf" },
   { key: "rapor_ceo_sign_url", label: "Tanda Tangan CEO", description: "Upload Tanda Tangan CEO (Format: PNG Transparan).", accept: ".png" },
   { key: "rapor_coach_sign_url", label: "Tanda Tangan Head Coach", description: "Upload Tanda Tangan Head Coach (Format: PNG Transparan).", accept: ".png" },
   { key: "rapor_stamp_url", label: "Stempel Digital", description: "Upload Stempel Resmi ADORA BBC (Format: PNG Transparan).", accept: ".png" },
