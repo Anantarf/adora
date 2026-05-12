@@ -82,10 +82,10 @@ export function GalleryHeroCarousel() {
       <div className="relative z-20 flex items-center justify-between px-4 py-3 bg-black/30 backdrop-blur-sm">
         <button
           onClick={() => goTo((current - 1 + GALLERY_SLIDES.length) % GALLERY_SLIDES.length)}
-          className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          className="w-10 h-10 -ml-1.5 md:ml-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
           aria-label="Slide sebelumnya"
         >
-          <ChevronLeft className="w-4 h-4 text-white" />
+          <ChevronLeft className="w-5 h-5 text-white" />
         </button>
 
         {/* Dots */}
@@ -94,20 +94,22 @@ export function GalleryHeroCarousel() {
             <button
               key={idx}
               onClick={() => goTo(idx)}
-              className={`h-1.5 rounded-full transition-all duration-400 ${
-                idx === current ? "bg-brand-yellow w-5" : "bg-white/30 w-1.5 hover:bg-white/50"
-              }`}
+              className="p-2 -m-2 group flex items-center justify-center"
               aria-label={`Slide ${idx + 1}`}
-            />
+            >
+              <span className={`block h-1.5 rounded-full transition-all duration-400 ${
+                idx === current ? "bg-brand-yellow w-5" : "bg-white/30 w-1.5 group-hover:bg-white/50"
+              }`} />
+            </button>
           ))}
         </div>
 
         <button
           onClick={() => goTo((current + 1) % GALLERY_SLIDES.length)}
-          className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          className="w-10 h-10 -mr-1.5 md:mr-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
           aria-label="Slide berikutnya"
         >
-          <ChevronRight className="w-4 h-4 text-white" />
+          <ChevronRight className="w-5 h-5 text-white" />
         </button>
       </div>
     </div>

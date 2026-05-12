@@ -56,14 +56,11 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
         </div>
       ))}
 
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-3 z-20">
+      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 z-20">
         {slots.map((_, idx) => (
-          <button
-            key={idx}
-            onClick={() => setCurrentIndex(idx)}
-            className={`h-1.5 rounded-full transition-all duration-500 ${idx === currentIndex ? "bg-brand-yellow w-6" : "bg-white/30 w-1.5 hover:bg-white/50"}`}
-            aria-label={`Slide ${idx + 1}`}
-          />
+          <button key={idx} onClick={() => setCurrentIndex(idx)} className="p-2 -m-2 group" aria-label={`Slide ${idx + 1}`}>
+            <span className={`block h-1.5 rounded-full transition-all duration-500 ${idx === currentIndex ? "bg-brand-yellow w-6" : "bg-white/30 w-1.5 group-hover:bg-white/50"}`} />
+          </button>
         ))}
       </div>
     </div>

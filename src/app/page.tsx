@@ -286,6 +286,7 @@ export default async function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-brand-orange hover:text-black hover:border-black transition-all"
+                  aria-label="Instagram ADORA BBC"
                 >
                   <InstagramIcon className="w-5 h-5" />
                 </a>
@@ -294,6 +295,7 @@ export default async function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-brand-orange hover:text-black hover:border-black transition-all"
+                  aria-label="TikTok ADORA BBC"
                 >
                   <Music2 className="w-5 h-5" />
                 </a>
@@ -302,6 +304,7 @@ export default async function LandingPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-brand-orange hover:text-black hover:border-black transition-all"
+                  aria-label="WhatsApp ADORA BBC"
                 >
                   <MessageCircle className="w-5 h-5" />
                 </a>
