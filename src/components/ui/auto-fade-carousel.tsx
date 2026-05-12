@@ -51,7 +51,7 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
               </div>
             </div>
           ) : (
-            <Image src={slot as string} alt={`ASBC foto ${idx + 1}`} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover" />
+            <Image src={slot as string} alt={`ASBC foto ${idx + 1}`} fill sizes="(max-width: 768px) 100vw, 50vw" quality={75} className="object-cover" />
           )}
         </div>
       ))}

@@ -34,7 +34,7 @@ export function GalleryHeroCarousel() {
         {slide.image ? (
           <>
             {/* Real Photo Background */}
-            <Image src={slide.image} alt={slide.label} fill sizes="(max-width: 768px) 100vw, 40vw" className="object-cover object-center" priority />
+            <Image src={slide.image} alt={slide.label} fill sizes="(max-width: 768px) 100vw, 40vw" quality={75} className="object-cover object-center" priority />
             {/* Gradient overlay so text is readable */}
             <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent z-10" />
             {/* Caption on hover or always at bottom */}
