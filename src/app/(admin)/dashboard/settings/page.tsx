@@ -25,6 +25,7 @@ export default function SettingsPage() {
   const updateSetting = useUpdateClubSetting();
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
+  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -150,13 +151,19 @@ export default function SettingsPage() {
                         </div>
                       ) : (
                         <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative flex items-center justify-center">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img 
-                            src={`${localValues[asset.key]}?t=${new Date().getTime()}`} 
-                            alt="Preview" 
-                            crossOrigin="anonymous"
-                            className="max-h-full max-w-full object-contain" 
-                          />
+                          {failedImages[asset.key] ? (
+                            <div className="size-full flex items-center justify-center bg-indigo-500/10">
+                              <span className="text-[10px] font-bold text-indigo-400">PNG</span>
+                            </div>
+                          ) : (
+                            <img 
+                              src={`${localValues[asset.key]}?t=${new Date().getTime()}`} 
+                              alt="Preview" 
+                              crossOrigin="anonymous"
+                              className="max-h-full max-w-full object-contain" 
+                              onError={() => setFailedImages(prev => ({ ...prev, [asset.key]: true }))}
+                            />
+                          )}
                         </div>
                       )}
                       <div className="flex flex-col">
