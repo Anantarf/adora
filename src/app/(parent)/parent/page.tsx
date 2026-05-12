@@ -15,17 +15,14 @@ import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-c
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { getEventConfig } from "@/lib/config/events";
-import {
-  ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar,
-  LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line,
-} from "recharts";
+import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from "recharts";
 
 // ─── Page ─────────────────────────────────────────────
 export default function ParentDashboard() {
   const { data: children, isLoading: familyLoading } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
   const effectiveChildId = useMemo(() => {
-    const validIds = children?.map(c => c.id) ?? [];
+    const validIds = children?.map((c) => c.id) ?? [];
     if (selectedChildId && validIds.includes(selectedChildId)) return selectedChildId;
     return validIds[0] ?? null;
   }, [children, selectedChildId]);
@@ -47,7 +44,7 @@ export default function ParentDashboard() {
   // Line chart — perkembangan overall score per periode
   const progressionData = useMemo(() => {
     if (!stats?.length) return [];
-    return [...stats].reverse().map(s => ({
+    return [...stats].reverse().map((s) => ({
       name: s.period?.name ?? new Date(s.date).toLocaleDateString("id-ID", { month: "short", year: "2-digit" }),
       Overall: overallScore(s.metricsJson as MetricsJson),
     }));
@@ -56,7 +53,10 @@ export default function ParentDashboard() {
   const attendanceSummary = useMemo(() => {
     if (!attendances?.length) return null;
     const counts = attendances.reduce(
-      (acc, a) => { acc[a.status as AttendanceStatus] += 1; return acc; },
+      (acc, a) => {
+        acc[a.status as AttendanceStatus] += 1;
+        return acc;
+      },
       { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<AttendanceStatus, number>,
     );
     const total = attendances.length;
@@ -84,9 +84,7 @@ export default function ParentDashboard() {
           <User className="size-10" />
         </div>
         <h2 className="text-xl font-heading text-foreground uppercase mb-4">Belum Ada Profil Terhubung</h2>
-        <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">
-          Akun ini belum terhubung dengan profil pemain manapun.
-        </p>
+        <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">Akun ini belum terhubung dengan profil pemain manapun.</p>
         <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">
           Hubungi <span className="text-primary font-bold uppercase tracking-wider">Admin</span> untuk menghubungkan akun dengan putra/putri Anda.
         </p>
@@ -113,13 +111,13 @@ export default function ParentDashboard() {
             <span className="text-micro text-muted-foreground/70 ml-1">Pilih Profil Anak</span>
             <Select value={effectiveChildId || undefined} onValueChange={setSelectedChildId}>
               <SelectTrigger className="w-full md:w-72 h-11 border-border bg-card font-semibold text-foreground">
-                <SelectValue placeholder="Pilih Profil...">
-                  {effectiveChildId && children?.find((c) => c.id === effectiveChildId)?.name}
-                </SelectValue>
+                <SelectValue placeholder="Pilih Profil...">{effectiveChildId && children?.find((c) => c.id === effectiveChildId)?.name}</SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {children?.map((child: FamilyPlayer) => (
-                  <SelectItem key={child.id} value={child.id}>{child.name} • {child.group?.name || "Tanpa Kelompok"}</SelectItem>
+                  <SelectItem key={child.id} value={child.id}>
+                    {child.name} • {child.group?.name || "Tanpa Kelompok"}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -237,7 +235,7 @@ export default function ParentDashboard() {
                 <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
                   <ClipboardCheck className="size-8 text-muted-foreground/30 mb-1" />
                   <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada data kehadiran</p>
-                  <p className="text-xs text-muted-foreground/60">Data kehadiran akan muncul setelah pelatih mengisi presensi agenda.</p>
+                  <p className="text-xs text-muted-foreground/75">Data kehadiran akan muncul setelah pelatih mengisi presensi agenda.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-5">
@@ -267,13 +265,9 @@ export default function ParentDashboard() {
                         <div key={a.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
-                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-                              {format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}
-                            </span>
+                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>
                           </div>
-                          <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>
-                            {STATUS_STYLE[a.status as AttendanceStatus].label}
-                          </span>
+                          <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>{STATUS_STYLE[a.status as AttendanceStatus].label}</span>
                         </div>
                       );
                     })}

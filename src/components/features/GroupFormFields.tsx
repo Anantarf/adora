@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
 
-
 const SCHOOL_LEVELS = ["TK/RA", "SD/MI", "SMP/MTS", "SMA/MA"] as const;
 
 interface GroupFormValues {
@@ -30,29 +29,14 @@ interface GroupFormFieldsProps {
   checkboxIdSuffix?: string;
 }
 
-export function GroupFormFields({
-  register,
-  errors,
-  watch,
-  setValue,
-  isKu,
-  setIsKu,
-  targetKu,
-  setTargetKu,
-  isSchool,
-  setIsSchool,
-  schoolLevel,
-  setSchoolLevel,
-  homebases,
-  checkboxIdSuffix = "",
-}: GroupFormFieldsProps) {
+export function GroupFormFields({ register, errors, watch, setValue, isKu, setIsKu, targetKu, setTargetKu, isSchool, setIsSchool, schoolLevel, setSchoolLevel, homebases, checkboxIdSuffix = "" }: GroupFormFieldsProps) {
   return (
     <>
       <div className="space-y-2">
         <label htmlFor={`group_name${checkboxIdSuffix}`} className="text-micro text-muted-foreground">
           Nama Kelompok
         </label>
-        <p className="text-[10px] text-muted-foreground/60">Contoh: KU-16 Putra, Tim SD Gandul</p>
+        <p className="text-[10px] text-muted-foreground/75">Contoh: KU-16 Putra, Tim SD Gandul</p>
         <Input id={`group_name${checkboxIdSuffix}`} {...register("name")} placeholder="Contoh: KU-16 Putra" className="h-11" />
         {errors.name && <p className="text-destructive text-xs">{errors.name.message}</p>}
       </div>
@@ -77,15 +61,7 @@ export function GroupFormFields({
 
           {isKu && (
             <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
-              <Input
-                type="text"
-                pattern="\d*"
-                maxLength={2}
-                value={targetKu}
-                onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))}
-                placeholder="16"
-                className="h-9 w-12 text-center text-sm font-medium"
-              />
+              <Input type="text" pattern="\d*" maxLength={2} value={targetKu} onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))} placeholder="16" className="h-9 w-12 text-center text-sm font-medium" />
               <span className="text-xs font-semibold text-muted-foreground">Tahun</span>
             </div>
           )}
@@ -116,7 +92,9 @@ export function GroupFormFields({
                 </SelectTrigger>
                 <SelectContent>
                   {SCHOOL_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>{level}</SelectItem>
+                    <SelectItem key={level} value={level}>
+                      {level}
+                    </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -131,7 +109,7 @@ export function GroupFormFields({
             Lokasi Latihan <span className="normal-case font-normal">(Opsional)</span>
           </label>
           <Select
-            value={watch("homebaseId") === "__none__" ? "none" : (watch("homebaseId") || "none")}
+            value={watch("homebaseId") === "__none__" ? "none" : watch("homebaseId") || "none"}
             onValueChange={(val) => {
               if (val === "none") {
                 setValue("homebaseId", undefined, { shouldDirty: true });
@@ -142,9 +120,7 @@ export function GroupFormFields({
           >
             <SelectTrigger className="h-11 font-semibold">
               <SelectValue placeholder="Tanpa Lokasi">
-                {watch("homebaseId") && watch("homebaseId") !== "none" && watch("homebaseId") !== "__none__"
-                  ? homebases.find((hb) => hb.id === watch("homebaseId"))?.name || "Tanpa Lokasi"
-                  : "Tanpa Lokasi"}
+                {watch("homebaseId") && watch("homebaseId") !== "none" && watch("homebaseId") !== "__none__" ? homebases.find((hb) => hb.id === watch("homebaseId"))?.name || "Tanpa Lokasi" : "Tanpa Lokasi"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
@@ -152,7 +128,9 @@ export function GroupFormFields({
                 Tanpa Lokasi
               </SelectItem>
               {homebases.map((hb) => (
-                <SelectItem key={hb.id} value={hb.id}>{hb.name}</SelectItem>
+                <SelectItem key={hb.id} value={hb.id}>
+                  {hb.name}
+                </SelectItem>
               ))}
             </SelectContent>
           </Select>

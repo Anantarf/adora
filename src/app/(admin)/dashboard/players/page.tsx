@@ -60,24 +60,24 @@ export default function PlayersPage() {
         </div>
       </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {([
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {(
+          [
             { icon: FolderPlus, label: "Kelompok", value: groups?.length ?? 0 },
-            { icon: Users,      label: "Pemain",   value: totalPlayers },
-          ] as const).map(({ icon: Icon, label, value }) => (
-            <div key={label} className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
-              <div className="size-10 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0">
-                <Icon className="size-5" />
-              </div>
-              <div>
-                <p className="text-micro text-muted-foreground/50">{label}</p>
-                {isGroupsLoading
-                  ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" />
-                  : <p className="text-2xl font-heading tracking-widest">{value}</p>}
-              </div>
+            { icon: Users, label: "Pemain", value: totalPlayers },
+          ] as const
+        ).map(({ icon: Icon, label, value }) => (
+          <div key={label} className="bg-card border border-border/50 rounded-lg p-4 flex items-center gap-3">
+            <div className="size-10 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground shrink-0">
+              <Icon className="size-5" />
             </div>
-          ))}
-        </div>
+            <div>
+              <p className="text-micro text-muted-foreground/50">{label}</p>
+              {isGroupsLoading ? <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" /> : <p className="text-2xl font-heading tracking-widest">{value}</p>}
+            </div>
+          </div>
+        ))}
+      </div>
 
       {/* Control Bar */}
       <div className="bg-card border border-border/50 rounded-lg p-3 flex flex-wrap items-center gap-3">
@@ -105,7 +105,7 @@ export default function PlayersPage() {
           <FolderPlus className="size-12 text-muted-foreground/20" />
           <div className="space-y-1">
             <p className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground">Belum ada kelompok</p>
-            <p className="text-xs text-muted-foreground/60">Mulai dengan menambahkan kelompok latihan baru.</p>
+            <p className="text-xs text-muted-foreground/75">Mulai dengan menambahkan kelompok latihan baru.</p>
           </div>
           <Button variant="outline" size="xl" onClick={() => setUiState({ type: "add-group" })}>
             <FolderPlus className="size-4 mr-2" /> Tambah Kelompok
@@ -168,7 +168,7 @@ export default function PlayersPage() {
               <div className="bg-card border border-dashed border-border/50 rounded-lg p-10 text-center flex flex-col items-center gap-3">
                 <Users className="size-8 text-muted-foreground/30" />
                 <p className="text-sm font-medium text-muted-foreground">{searchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}</p>
-              <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Coba kata kunci lain." : "Tambah pemain baru menggunakan tombol di atas."}</p>
+                <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Coba kata kunci lain." : "Tambah pemain baru menggunakan tombol di atas."}</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ShieldAlert,
-  Loader2,
-  ChevronRight,
-  User,
-  Clock,
-  FileText,
-  RefreshCw,
-} from "lucide-react";
+import { ShieldAlert, Loader2, ChevronRight, User, Clock, FileText, RefreshCw } from "lucide-react";
 import { useAuditLogs, type AuditLogRecord } from "@/hooks/use-audit-log";
 import { Button } from "@/components/ui/button";
 import { AUDIT_ACTION_CONFIG as ACTION_CONFIG, getAuditActionConfig as getActionConfig, type AuditActionKey as ActionKey } from "@/lib/constants/badge-configs";
@@ -106,7 +98,11 @@ function formatValue(key: string, value: unknown): string {
   if (key === "resetTo") return value === "default" ? "Sandi awal (adora123)" : "Sandi kustom";
   if (key === "isActive") return value ? "Aktif" : "Tidak aktif";
   if (key.toLowerCase().includes("date") && typeof value === "string") {
-    try { return new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }); } catch { return value; }
+    try {
+      return new Date(value).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    } catch {
+      return value;
+    }
   }
   return String(value);
 }
@@ -117,9 +113,7 @@ function DetailRows({ data }: { data: Record<string, unknown> }) {
     <div className="flex flex-col gap-2">
       {rows.map(([key, val]) => (
         <div key={key} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
-          <span className="text-micro text-muted-foreground/60 w-32 shrink-0 pt-0.5">
-            {FIELD_LABELS[key] ?? key}
-          </span>
+          <span className="text-micro text-muted-foreground/75 w-32 shrink-0 pt-0.5">{FIELD_LABELS[key] ?? key}</span>
           <span className="text-xs font-semibold text-foreground">{formatValue(key, val)}</span>
         </div>
       ))}
@@ -129,11 +123,7 @@ function DetailRows({ data }: { data: Record<string, unknown> }) {
 
 function AuditDetailBody({ log }: { log: AuditLogRecord }) {
   if (!log.details) {
-    return (
-      <p className="text-micro text-muted-foreground/60 text-center py-6">
-        Riwayat ini tidak merekam detail perubahan.
-      </p>
-    );
+    return <p className="text-micro text-muted-foreground/75 text-center py-6">Riwayat ini tidak merekam detail perubahan.</p>;
   }
 
   const details = log.details as Record<string, unknown>;
@@ -147,7 +137,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
       <div className="flex flex-col gap-3">
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
-            <p className="text-micro text-muted-foreground/60 mb-2">Sebelum</p>
+            <p className="text-micro text-muted-foreground/75 mb-2">Sebelum</p>
             {keys.map((k) => (
               <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
                 <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
@@ -160,9 +150,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
             {keys.map((k) => (
               <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
                 <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
-                <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>
-                  {formatValue(k, after[k])}
-                </span>
+                <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>{formatValue(k, after[k])}</span>
               </div>
             ))}
           </div>
@@ -200,23 +188,16 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span
-            className="text-micro px-2 py-0.5 rounded-full"
-            style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}
-          >
+          <span className="text-micro px-2 py-0.5 rounded-full" style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}>
             {cfg.label}
           </span>
-          <span className="text-micro px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">
-            {getHumanReadableTable(log.targetTable)}
-          </span>
+          <span className="text-micro px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50">{getHumanReadableTable(log.targetTable)}</span>
         </div>
 
         {/* Details */}
         <p className="text-sm font-semibold text-foreground mt-1.5 leading-snug">
           {getHumanReadableText(log.action, log.targetTable)}
-          {extractTargetName(log.details) && (
-            <span className="text-primary font-bold"> — {extractTargetName(log.details)}</span>
-          )}
+          {extractTargetName(log.details) && <span className="text-primary font-bold"> — {extractTargetName(log.details)}</span>}
         </p>
 
         {/* Meta */}
@@ -248,17 +229,16 @@ export default function AuditPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">
-            Riwayat Aktivitas
-          </h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">
-            Rekam jejak semua perubahan data. Pantau siapa yang menambah, mengubah, atau menghapus data.
-          </p>
+          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Riwayat Aktivitas</h1>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Rekam jejak semua perubahan data. Pantau siapa yang menambah, mengubah, atau menghapus data.</p>
         </div>
         <Button
           variant="outline"
           size="sm"
-          onClick={() => { setCursor(undefined); refetch(); }}
+          onClick={() => {
+            setCursor(undefined);
+            refetch();
+          }}
           disabled={isRefetching}
           className="h-10 px-4 uppercase font-bold tracking-widest text-[10px] border-border/50 hover:bg-primary/10 hover:text-primary hover:border-primary/30"
         >
@@ -269,28 +249,17 @@ export default function AuditPage() {
 
       {/* Legend */}
       <div className="flex flex-wrap gap-2 items-center px-1">
-        {(Object.entries(ACTION_CONFIG) as [ActionKey, typeof ACTION_CONFIG[ActionKey]][])
-          .map(([, cfg]) => (
-            <div
-              key={cfg.label}
-              className="flex items-center gap-2 bg-muted/60 pl-2 pr-3 py-1.5 rounded-full border border-border shadow-sm"
-            >
-              <div
-                className="p-1 rounded-full text-white shadow-sm"
-                style={{ backgroundColor: cfg.color }}
-              >
-                <cfg.icon className="size-2.5" />
-              </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">
-                  {cfg.label}
-                </span>
-                <span className="text-[9px] text-muted-foreground mt-0.5">
-                  {cfg.description}
-                </span>
-              </div>
+        {(Object.entries(ACTION_CONFIG) as [ActionKey, (typeof ACTION_CONFIG)[ActionKey]][]).map(([, cfg]) => (
+          <div key={cfg.label} className="flex items-center gap-2 bg-muted/60 pl-2 pr-3 py-1.5 rounded-full border border-border shadow-sm">
+            <div className="p-1 rounded-full text-white shadow-sm" style={{ backgroundColor: cfg.color }}>
+              <cfg.icon className="size-2.5" />
             </div>
-          ))}
+            <div className="flex flex-col leading-none">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-foreground">{cfg.label}</span>
+              <span className="text-[9px] text-muted-foreground mt-0.5">{cfg.description}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Log Entries */}
@@ -298,19 +267,13 @@ export default function AuditPage() {
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground font-bold animate-pulse">
-              Memuat Rekam Jejak Aktivitas...
-            </p>
+            <p className="text-sm text-muted-foreground font-bold animate-pulse">Memuat Rekam Jejak Aktivitas...</p>
           </div>
         ) : !data?.logs || data.logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-3 rounded-2xl border border-dashed border-border/50 text-center">
             <ShieldAlert className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
-              Belum ada rekam jejak aktivitas
-            </p>
-            <p className="text-xs text-muted-foreground/60 mt-1">
-              Riwayat akan muncul otomatis setiap kali ada perubahan data.
-            </p>
+            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada rekam jejak aktivitas</p>
+            <p className="text-xs text-muted-foreground/75 mt-1">Riwayat akan muncul otomatis setiap kali ada perubahan data.</p>
           </div>
         ) : (
           <>
@@ -320,17 +283,12 @@ export default function AuditPage() {
 
             {/* Pagination */}
             {data.nextCursor && (
-               <div className="flex justify-center mt-4">
-                 <Button
-                   variant="outline"
-                   size="sm"
-                   onClick={() => setCursor(data.nextCursor!)}
-                   className="h-10 px-6 uppercase font-bold tracking-widest text-[10px] border-border/50 hover:bg-primary/10 hover:text-primary"
-                 >
-                   Muat Lebih Banyak
-                   <ChevronRight className="ml-1 size-3" />
-                 </Button>
-               </div>
+              <div className="flex justify-center mt-4">
+                <Button variant="outline" size="sm" onClick={() => setCursor(data.nextCursor!)} className="h-10 px-6 uppercase font-bold tracking-widest text-[10px] border-border/50 hover:bg-primary/10 hover:text-primary">
+                  Muat Lebih Banyak
+                  <ChevronRight className="ml-1 size-3" />
+                </Button>
+              </div>
             )}
           </>
         )}
@@ -343,13 +301,9 @@ export default function AuditPage() {
             <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
               <FileText className="size-5 text-primary" /> Detail Perubahan
             </DialogTitle>
-            <DialogDescription className="text-xs font-medium tracking-wide opacity-70">
-              Rincian data yang tercatat saat aktivitas ini terjadi.
-            </DialogDescription>
+            <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Rincian data yang tercatat saat aktivitas ini terjadi.</DialogDescription>
           </DialogHeader>
-          <div className="bg-muted/30 rounded-xl p-4 overflow-auto max-h-[60vh] border border-border/50">
-            {selectedLog && <AuditDetailBody log={selectedLog} />}
-          </div>
+          <div className="bg-muted/30 rounded-xl p-4 overflow-auto max-h-[60vh] border border-border/50">{selectedLog && <AuditDetailBody log={selectedLog} />}</div>
         </DialogContent>
       </Dialog>
     </div>

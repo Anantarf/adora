@@ -23,7 +23,6 @@ export function UpcomingAgenda() {
   return (
     // Sama persis strukturnya dengan RecentRegistrations: flex flex-col h-full
     <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
-
       {/* Header */}
       <div className="p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
         <div>
@@ -31,15 +30,9 @@ export function UpcomingAgenda() {
             <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />
             AGENDA MENDATANG
           </h2>
-          <p className="text-xs text-muted-foreground mt-1 tracking-wide">
-            Jadwal latihan dan kegiatan klub berikutnya
-          </p>
+          <p className="text-xs text-muted-foreground mt-1 tracking-wide">Jadwal latihan dan kegiatan klub berikutnya</p>
         </div>
-        {upcoming.length > 0 && (
-          <div className="bg-muted text-muted-foreground text-xs font-bold px-2.5 py-1 rounded-md border border-border/60 tabular-nums shrink-0 ml-2">
-            {upcoming.length}
-          </div>
-        )}
+        {upcoming.length > 0 && <div className="bg-muted text-muted-foreground text-xs font-bold px-2.5 py-1 rounded-md border border-border/60 tabular-nums shrink-0 ml-2">{upcoming.length}</div>}
       </div>
 
       {/* Content — flex-1 sama seperti RecentRegistrations */}
@@ -53,12 +46,8 @@ export function UpcomingAgenda() {
         ) : upcoming.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 gap-2 rounded-xl border border-dashed border-border/50 text-center py-8">
             <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
-            <p className="text-sm font-medium text-muted-foreground">
-              Tidak Ada Agenda Mendatang
-            </p>
-            <p className="text-xs text-muted-foreground/60">
-              Semua agenda telah selesai atau belum dijadwalkan.
-            </p>
+            <p className="text-sm font-medium text-muted-foreground">Tidak Ada Agenda Mendatang</p>
+            <p className="text-xs text-muted-foreground/75">Semua agenda telah selesai atau belum dijadwalkan.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-2">
@@ -69,26 +58,15 @@ export function UpcomingAgenda() {
               const eventDate = new Date(ev.date);
 
               return (
-                <Link
-                  key={ev.id}
-                  href="/dashboard/schedule"
-                  className="group flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all"
-                >
-                  <div
-                    className="shrink-0 size-9 rounded-lg flex items-center justify-center text-white shadow-sm"
-                    style={{ backgroundColor: cfg.color }}
-                  >
+                <Link key={ev.id} href="/dashboard/schedule" className="group flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all">
+                  <div className="shrink-0 size-9 rounded-lg flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: cfg.color }}>
                     <Icon className="size-4" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate leading-snug">
-                      {ev.title}
-                    </p>
+                    <p className="text-sm font-semibold text-foreground truncate leading-snug">{ev.title}</p>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       <Clock className="size-3 text-muted-foreground shrink-0" />
-                      <span className="text-xs text-muted-foreground truncate">
-                        {format(eventDate, "EEE, dd MMM", { locale: idLocale })}
-                      </span>
+                      <span className="text-xs text-muted-foreground truncate">{format(eventDate, "EEE, dd MMM", { locale: idLocale })}</span>
                     </div>
                   </div>
                   <div className="shrink-0 flex items-center gap-1.5">

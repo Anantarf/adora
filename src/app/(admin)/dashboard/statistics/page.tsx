@@ -21,10 +21,7 @@ import { generateRaporPDF } from "@/lib/generate-rapor-pdf";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { PERIOD_STATUS_BADGE as STATUS_BADGE_CONFIG } from "@/lib/constants/badge-configs";
 
-const MetricCell = ({ v }: { v?: number }) =>
-  v != null
-    ? <span className="font-bold text-primary">{v}</span>
-    : <span className="text-muted-foreground">—</span>;
+const MetricCell = ({ v }: { v?: number }) => (v != null ? <span className="font-bold text-primary">{v}</span> : <span className="text-muted-foreground">—</span>);
 
 /** Guard against malformed metricsJson from old/corrupted data */
 const getValidMetrics = (m: unknown): MetricsJson | null => {
@@ -39,13 +36,8 @@ const getValidMetrics = (m: unknown): MetricsJson | null => {
 
   if (!obj || typeof obj !== "object") return null;
   const o = obj as Record<string, unknown>;
-  
-  const isValid = (
-    o.dribble != null &&
-    typeof o.dribble === "object" &&
-    o.passing != null &&
-    typeof o.passing === "object"
-  );
+
+  const isValid = o.dribble != null && typeof o.dribble === "object" && o.passing != null && typeof o.passing === "object";
 
   return isValid ? (o as MetricsJson) : null;
 };
@@ -62,7 +54,7 @@ const periodDisplayLabel = (period: { name: string; startDate: Date | string; en
 
 // ─── Subcomponents ──────────────────────────────────────
 
-const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, settings }: { player: any, idx: number, stat: any, group: any, selectedPeriod: any, settings: any }) => {
+const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, settings }: { player: any; idx: number; stat: any; group: any; selectedPeriod: any; settings: any }) => {
   const rawM = stat?.metricsJson;
   const m = getValidMetrics(rawM);
 
@@ -75,9 +67,7 @@ const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, se
           <MetricCell v={m ? def.getValue(m) : undefined} />
         </TableCell>
       ))}
-      <TableCell className="text-center">
-        {m ? <GradeBadge score={averageScore(m)} /> : <span className="text-muted-foreground">—</span>}
-      </TableCell>
+      <TableCell className="text-center">{m ? <GradeBadge score={averageScore(m)} /> : <span className="text-muted-foreground">—</span>}</TableCell>
       <TableCell className="text-center">
         <Badge variant="outline" className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}>
           {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum Diisi"}
@@ -112,7 +102,12 @@ const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, se
               <FileDown className="size-4" />
             </button>
           )}
-          <AddStatDialog player={player} periodId={selectedPeriod?.id} isPeriodActive={selectedPeriod?.isActive} existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined} />
+          <AddStatDialog
+            player={player}
+            periodId={selectedPeriod?.id}
+            isPeriodActive={selectedPeriod?.isActive}
+            existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined}
+          />
         </div>
       </TableCell>
     </TableRow>
@@ -124,7 +119,7 @@ PlayerStatRow.displayName = "PlayerStatRow";
 export default function StatisticsPage() {
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<string>("all");
-  const { data: periods} = usePeriods();
+  const { data: periods } = usePeriods();
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId);
@@ -147,9 +142,7 @@ export default function StatisticsPage() {
 
   const playersByGroup = useMemo(() => {
     if (!players || !groups) return [];
-    return groups
-      .map((group) => ({ group, players: players.filter((p) => p.groupId === group.id) }))
-      .filter((g) => g.players.length > 0);
+    return groups.map((group) => ({ group, players: players.filter((p) => p.groupId === group.id) })).filter((g) => g.players.length > 0);
   }, [players, groups]);
 
   const statsSummary = useMemo(
@@ -212,7 +205,10 @@ export default function StatisticsPage() {
               {/* Contextual Actions */}
               <div className="flex items-center gap-1.5">
                 {selectedPeriod && !selectedPeriod.isActive && (
-                  <button onClick={() => handleSetActive(selectedPeriod.id)} className="text-[10px] px-2.5 py-1 rounded flex items-center justify-center font-bold uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                  <button
+                    onClick={() => handleSetActive(selectedPeriod.id)}
+                    className="text-[10px] px-2.5 py-1 rounded flex items-center justify-center font-bold uppercase tracking-widest bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                  >
                     Aktifkan
                   </button>
                 )}
@@ -225,16 +221,14 @@ export default function StatisticsPage() {
                       <AlertDialogHeader>
                         <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Periode?</AlertDialogTitle>
                         <AlertDialogDescription className="flex flex-col gap-2">
-                           <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
-                           {!canDeletePeriod ? (
-                             <span className="text-amber-500/80 text-xs leading-relaxed">
+                          <span className="text-destructive font-bold text-sm">Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.</span>
+                          {!canDeletePeriod ? (
+                            <span className="text-amber-500/80 text-xs leading-relaxed">
                               Periode ini memiliki {statsSummary.published + statsSummary.draft} data nilai pemain. Kosongkan semua data nilai terlebih dahulu sebelum menghapus periode.
-                             </span>
-                           ) : (
-                             <span className="text-muted-foreground text-xs leading-relaxed">
-                              Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus periode yang tepat.
-                             </span>
-                           )}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-xs leading-relaxed">Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus periode yang tepat.</span>
+                          )}
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
@@ -250,20 +244,19 @@ export default function StatisticsPage() {
             </div>
             <div className="relative group w-full">
               <CalendarRange className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
-              <Select value={selectedPeriodId ?? ""} onValueChange={(val) => {
-                setSelectedPeriodId(val);
-                setActiveGroup("all");
-              }}>
+              <Select
+                value={selectedPeriodId ?? ""}
+                onValueChange={(val) => {
+                  setSelectedPeriodId(val);
+                  setActiveGroup("all");
+                }}
+              >
                 <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
                   <SelectValue placeholder={periods?.length === 0 ? "Belum ada periode - buat dulu" : "Pilih Periode"}>
                     {selectedPeriod ? (
                       <div className="flex items-center">
                         <span>{periodDisplayLabel(selectedPeriod)}</span>
-                        {selectedPeriod.isActive && (
-                          <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
-                            Aktif
-                          </span>
-                        )}
+                        {selectedPeriod.isActive && <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">Aktif</span>}
                       </div>
                     ) : undefined}
                   </SelectValue>
@@ -273,11 +266,7 @@ export default function StatisticsPage() {
                     <SelectItem key={p.id} value={p.id}>
                       <div className="flex items-center justify-between w-full">
                         <span>{periodDisplayLabel(p)}</span>
-                        {p.isActive && (
-                          <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">
-                            Aktif
-                          </span>
-                        )}
+                        {p.isActive && <span className="ml-2 px-1.5 py-0.5 rounded bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20 leading-none">Aktif</span>}
                       </div>
                     </SelectItem>
                   ))}
@@ -293,9 +282,7 @@ export default function StatisticsPage() {
               <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
               <Select value={activeGroup} onValueChange={(v) => setActiveGroup(v ?? "all")}>
                 <SelectTrigger className="pl-9 h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                  <SelectValue placeholder="Pilih Kelompok">
-                    {activeGroup === "all" ? "Semua Kelompok" : groups?.find((g) => g.id === activeGroup)?.name}
-                  </SelectValue>
+                  <SelectValue placeholder="Pilih Kelompok">{activeGroup === "all" ? "Semua Kelompok" : groups?.find((g) => g.id === activeGroup)?.name}</SelectValue>
                 </SelectTrigger>
                 <SelectContent alignItemWithTrigger={false} sideOffset={6} className="max-h-60 rounded-xl border-border/50">
                   <SelectItem value="all">Semua Kelompok</SelectItem>
@@ -308,7 +295,8 @@ export default function StatisticsPage() {
               </Select>
             </div>
           </div>
-        </div>{/* end selects row */}
+        </div>
+        {/* end selects row */}
 
         {/* Stats summary — wraps cleanly on mobile */}
         {selectedPeriodId && !statsLoading && (
@@ -336,7 +324,7 @@ export default function StatisticsPage() {
         <div className="rounded-xl border border-dashed border-border/60 bg-card p-12 text-center">
           <CalendarRange className="size-10 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-sm font-medium text-muted-foreground">Belum ada periode evaluasi</p>
-          <p className="text-xs text-muted-foreground/60 mt-1">Buat periode baru untuk mulai input nilai.</p>
+          <p className="text-xs text-muted-foreground/75 mt-1">Buat periode baru untuk mulai input nilai.</p>
         </div>
       )}
 
@@ -398,17 +386,7 @@ export default function StatisticsPage() {
 
                     {gPlayers.map((player, idx) => {
                       const stat = statsMap[player.id];
-                      return (
-                        <PlayerStatRow
-                          key={player.id}
-                          player={player}
-                          idx={idx}
-                          stat={stat}
-                          group={group}
-                          selectedPeriod={selectedPeriod}
-                          settings={settings}
-                        />
-                      );
+                      return <PlayerStatRow key={player.id} player={player} idx={idx} stat={stat} group={group} selectedPeriod={selectedPeriod} settings={settings} />;
                     })}
                   </React.Fragment>
                 ))}

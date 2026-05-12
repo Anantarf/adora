@@ -57,15 +57,19 @@ export default function SettingsPage() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error("Upload failed");
-
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.error || `Upload gagal (${res.status})`);
+      }
+
       setLocalValues((prev) => ({ ...prev, [key]: data.url }));
       await updateSetting.mutateAsync({ key, value: data.url });
       toast.success(`${label} berhasil diunggah.`);
     } catch (error) {
-      toast.error("Gagal mengunggah file.");
-      console.error(error);
+      const msg = error instanceof Error ? error.message : "Gagal mengunggah file.";
+      toast.error(msg);
+      console.error("[Upload Error]", error);
     } finally {
       setUploading((prev) => ({ ...prev, [key]: false }));
     }

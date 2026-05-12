@@ -78,13 +78,7 @@ export default function UsersManagementPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
-      <UsersManagementHeader 
-        searchTerm={searchTerm} 
-        onSearchTermChange={handleSearchTermChange} 
-        totalAccounts={filteredUsers.length} 
-        role={activeRole}
-        onRoleChange={handleRoleChange}
-      />
+      <UsersManagementHeader searchTerm={searchTerm} onSearchTermChange={handleSearchTermChange} totalAccounts={filteredUsers.length} role={activeRole} onRoleChange={handleRoleChange} />
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
@@ -95,45 +89,27 @@ export default function UsersManagementPage() {
         ) : filteredUsers.length === 0 ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
             <Users className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-medium text-muted-foreground">
-              {hasUsers && isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}
-            </p>
-            <p className="text-xs text-muted-foreground/60 text-center">
-              {hasUsers && isSearchActive
-                ? "Ubah kata kunci pencarian atau kosongkan filter."
-                : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
+            <p className="text-sm font-medium text-muted-foreground">{hasUsers && isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}</p>
+            <p className="text-xs text-muted-foreground/75 text-center">
+              {hasUsers && isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
             </p>
           </div>
         ) : (
           paginatedUsers.map((user) => (
-            <UserAccountCard
-              key={user.id}
-              user={user}
-              onReset={(id) => setUiState({ type: "reset", targetId: id })}
-              onDelete={(id) => setUiState({ type: "delete", targetId: id })}
-              onViewPlayers={(id) => setLinkedPlayersParentId(id)}
-            />
+            <UserAccountCard key={user.id} user={user} onReset={(id) => setUiState({ type: "reset", targetId: id })} onDelete={(id) => setUiState({ type: "delete", targetId: id })} onViewPlayers={(id) => setLinkedPlayersParentId(id)} />
           ))
         )}
       </div>
 
-      {!isLoading && totalPages > 1 && (
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={setCurrentPage}
-        />
-      )}
+      {!isLoading && totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
       <LinkedPlayersModal
         parentId={linkedPlayersParentId}
-        parentName={
-          (linkedPlayersParentId 
-            ? (filteredUsers.find((u) => u.id === linkedPlayersParentId)?.name || filteredUsers.find((u) => u.id === linkedPlayersParentId)?.username) 
-            : undefined) ?? undefined
-        }
-        onOpenChange={(open) => { if (!open) setLinkedPlayersParentId(null); }}
+        parentName={(linkedPlayersParentId ? filteredUsers.find((u) => u.id === linkedPlayersParentId)?.name || filteredUsers.find((u) => u.id === linkedPlayersParentId)?.username : undefined) ?? undefined}
+        onOpenChange={(open) => {
+          if (!open) setLinkedPlayersParentId(null);
+        }}
       />
     </motion.div>
   );

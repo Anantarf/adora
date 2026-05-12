@@ -109,7 +109,7 @@ export default function CertificatesPage() {
         <div className="rounded-xl border border-dashed border-border/50 flex flex-col items-center gap-2 py-16 text-center">
           <FileBadge className="size-10 text-muted-foreground/30 mb-2" />
           <p className="text-sm font-medium text-muted-foreground">{searchQuery ? "Hasil tidak ditemukan" : "Belum ada sertifikat"}</p>
-          <p className="text-xs text-muted-foreground/60">{searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Tambahkan sertifikat pertama menggunakan tombol di atas."}</p>
+          <p className="text-xs text-muted-foreground/75">{searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Tambahkan sertifikat pertama menggunakan tombol di atas."}</p>
         </div>
       )}
 
@@ -143,7 +143,7 @@ export default function CertificatesPage() {
                   ) : (
                     <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>
                   )}
-                  <span className="text-xs text-muted-foreground/60">{new Date(cert.uploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
+                  <span className="text-xs text-muted-foreground/75">{new Date(cert.uploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
 
                 {/* Actions */}

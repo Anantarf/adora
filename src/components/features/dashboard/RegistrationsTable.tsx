@@ -43,7 +43,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   }, [registrations, currentPage]);
 
   const handleExport = (filter: string) => {
-    window.open(`/api/export/registrations?filter=${filter}`, '_blank');
+    window.open(`/api/export/registrations?filter=${filter}`, "_blank");
   };
 
   return (
@@ -51,14 +51,8 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
       <div className="p-4 sm:p-6">
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-3">
-            <h3 className="font-heading text-lg tracking-widest uppercase text-foreground">
-              Antrean Pendaftaran
-            </h3>
-            {registrations.length > 0 && (
-              <span className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full">
-                {registrations.length} Menunggu
-              </span>
-            )}
+            <h3 className="font-heading text-lg tracking-widest uppercase text-foreground">Antrean Pendaftaran</h3>
+            {registrations.length > 0 && <span className="bg-primary/20 text-primary text-xs font-bold px-2 py-1 rounded-full">{registrations.length} Menunggu</span>}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer">
@@ -83,14 +77,14 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
           <Info className="size-5 text-secondary shrink-0 mt-0.5" />
           <p className="text-sm text-muted-foreground leading-relaxed">
             Ini adalah daftar calon anggota yang mengisi formulir pendaftaran di web. Hubungi mereka via WhatsApp untuk mengonfirmasi pembayaran, lalu input data pemain secara manual di menu{" "}
-            <strong className="text-foreground font-semibold">Kelompok Latihan</strong>.
-            Tandai status pembayaran menggunakan tombol <strong className="text-amber-500 font-semibold">Belum Bayar</strong> atau <strong className="text-emerald-500 font-semibold">Sudah Bayar</strong>.
+            <strong className="text-foreground font-semibold">Kelompok Latihan</strong>. Tandai status pembayaran menggunakan tombol <strong className="text-amber-500 font-semibold">Belum Bayar</strong> atau{" "}
+            <strong className="text-emerald-500 font-semibold">Sudah Bayar</strong>.
           </p>
         </div>
 
         {/* ── Empty State ── */}
         {registrations.length === 0 && (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground/60">
+          <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground/75">
             <Users className="size-10" />
             <p className="text-sm font-medium uppercase tracking-widest">Belum Ada Pendaftar Baru</p>
             <p className="text-xs text-muted-foreground/40">Pendaftar dari formulir web akan muncul di sini.</p>
@@ -113,32 +107,19 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                         <span className="font-semibold text-sm text-foreground truncate">{reg.playerName}</span>
                         {reg.email && <span className="text-xs text-muted-foreground truncate">{reg.email}</span>}
                       </div>
-                      <span className="text-[10px] font-bold text-muted-foreground/50 shrink-0">
-                        #{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
-                      </span>
+                      <span className="text-[10px] font-bold text-muted-foreground/50 shrink-0">#{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
                     </div>
 
                     {/* Meta */}
                     <div className="flex flex-wrap gap-2">
-                      <span className="bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold">
-                        {reg.ageGroup}
-                      </span>
-                      <span className="text-xs text-muted-foreground border border-border/50 px-2 py-0.5 rounded">
-                        {reg.homebase.name}
-                      </span>
-                      <span className="text-xs text-muted-foreground/60">
-                        {format(new Date(reg.createdAt), "dd MMM yyyy", { locale: idLocale })}
-                      </span>
+                      <span className="bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold">{reg.ageGroup}</span>
+                      <span className="text-xs text-muted-foreground border border-border/50 px-2 py-0.5 rounded">{reg.homebase.name}</span>
+                      <span className="text-xs text-muted-foreground/75">{format(new Date(reg.createdAt), "dd MMM yyyy", { locale: idLocale })}</span>
                     </div>
 
                     {/* Phone + Actions */}
                     <div className="flex items-center justify-between gap-3 pt-1 border-t border-border/40">
-                      <a
-                        href={`https://wa.me/${sanitized}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-green-500 hover:text-green-400 font-mono text-xs transition-colors truncate"
-                      >
+                      <a href={`https://wa.me/${sanitized}`} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:text-green-400 font-mono text-xs transition-colors truncate">
                         {reg.phone}
                       </a>
                       <div className="flex items-center gap-2 shrink-0">
@@ -180,12 +161,8 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
 
                     return (
                       <tr key={reg.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
-                          {(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}
-                        </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">
-                          {format(new Date(reg.createdAt), "dd MMM yyyy, HH:mm", { locale: idLocale })}
-                        </td>
+                        <td className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{format(new Date(reg.createdAt), "dd MMM yyyy, HH:mm", { locale: idLocale })}</td>
                         <td className="px-4 py-3 font-semibold text-foreground">
                           <div className="flex flex-col gap-0.5">
                             <span>{reg.playerName}</span>
@@ -193,19 +170,12 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <a
-                            href={`https://wa.me/${sanitized}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-green-500 hover:text-green-400 font-mono transition-colors"
-                          >
+                          <a href={`https://wa.me/${sanitized}`} target="_blank" rel="noopener noreferrer" className="text-green-500 hover:text-green-400 font-mono transition-colors">
                             {reg.phone}
                           </a>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold">
-                            {reg.ageGroup}
-                          </span>
+                          <span className="bg-primary/10 border border-primary/20 text-primary px-2 py-0.5 rounded text-xs font-bold">{reg.ageGroup}</span>
                         </td>
                         <td className="px-4 py-3 text-muted-foreground">{reg.homebase.name}</td>
                         <td className="px-4 py-3 text-right">
@@ -233,11 +203,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
 
         {totalPages > 1 && (
           <div className="mt-4">
-            <Pagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPageChange={setCurrentPage}
-            />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
       </div>

@@ -24,11 +24,7 @@ const CalendarView = dynamic(() => import("@/components/features/calendar-view")
   ),
 });
 
-type UIState =
-  | { type: "edit";    event: ScheduleEvent }
-  | { type: "delete";  targetId: string     }
-  | { type: "preview"; event: ScheduleEvent }
-  | null;
+type UIState = { type: "edit"; event: ScheduleEvent } | { type: "delete"; targetId: string } | { type: "preview"; event: ScheduleEvent } | null;
 
 export default function SchedulePage() {
   const [uiState, setUiState] = useState<UIState>(null);
@@ -59,9 +55,9 @@ export default function SchedulePage() {
       .slice(0, 5);
   }, [events]);
 
-  const editEvent   = uiState?.type === "edit"    ? uiState.event    : undefined;
-  const previewEvent = uiState?.type === "preview" ? uiState.event    : null;
-  const deleteTarget = uiState?.type === "delete"  ? uiState.targetId : null;
+  const editEvent = uiState?.type === "edit" ? uiState.event : undefined;
+  const previewEvent = uiState?.type === "preview" ? uiState.event : null;
+  const deleteTarget = uiState?.type === "delete" ? uiState.targetId : null;
 
   return (
     <>
@@ -123,13 +119,13 @@ export default function SchedulePage() {
                 <div className="flex flex-col items-center justify-center py-14 gap-2 rounded-2xl border border-dashed border-destructive/30 text-center">
                   <CalendarDays className="size-8 text-destructive/40 mb-1" />
                   <p className="text-xs font-bold uppercase tracking-widest text-destructive/70">Gagal memuat agenda</p>
-                  <p className="text-[10px] text-muted-foreground/60">Periksa koneksi dan muat ulang halaman.</p>
+                  <p className="text-[10px] text-muted-foreground/75">Periksa koneksi dan muat ulang halaman.</p>
                 </div>
               ) : upcomingEvents.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-14 gap-2 rounded-2xl border border-dashed border-border/50 text-center">
                   <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
                   <p className="text-sm font-medium text-muted-foreground">Tidak ada agenda mendatang</p>
-                  <p className="text-[10px] text-muted-foreground/60">Buat agenda menggunakan form di atas.</p>
+                  <p className="text-[10px] text-muted-foreground/75">Buat agenda menggunakan form di atas.</p>
                 </div>
               ) : (
                 upcomingEvents.map((ev) => {
@@ -141,7 +137,10 @@ export default function SchedulePage() {
                       onClick={() => setUiState({ type: "preview", event: ev })}
                       className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-base cursor-pointer min-w-0 overflow-hidden"
                     >
-                      <div className="shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-base" style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px color-mix(in srgb, ${cfg.color} 33%, transparent)` }}>
+                      <div
+                        className="shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-base"
+                        style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px color-mix(in srgb, ${cfg.color} 33%, transparent)` }}
+                      >
                         <Icon className="size-5" />
                       </div>
                       <div className="flex-1 min-w-0">
@@ -163,12 +162,26 @@ export default function SchedulePage() {
                       </div>
                       <div className="flex flex-col items-center gap-1 shrink-0">
                         <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-base" />
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setUiState({ type: "edit", event: ev }); }}
-                          className="size-6 text-primary/40 hover:text-primary hover:bg-primary/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUiState({ type: "edit", event: ev });
+                          }}
+                          className="size-6 text-primary/40 hover:text-primary hover:bg-primary/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
                           <Pencil className="size-3" />
                         </Button>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setUiState({ type: "delete", targetId: ev.id }); }}
-                          className="size-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setUiState({ type: "delete", targetId: ev.id });
+                          }}
+                          className="size-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
                           <Trash2 className="size-3" />
                         </Button>
                       </div>
@@ -181,16 +194,9 @@ export default function SchedulePage() {
         </div>
       </motion.div>
 
-      <EventPreviewDialog
-        event={previewEvent}
-        onClose={() => setUiState(null)}
-        onEdit={(ev) => setUiState({ type: "edit", event: ev })}
-      />
+      <EventPreviewDialog event={previewEvent} onClose={() => setUiState(null)} onEdit={(ev) => setUiState({ type: "edit", event: ev })} />
 
-      <EventDeleteConfirm
-        targetId={deleteTarget}
-        onClose={() => setUiState(null)}
-      />
+      <EventDeleteConfirm targetId={deleteTarget} onClose={() => setUiState(null)} />
     </>
   );
 }

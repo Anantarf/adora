@@ -23,17 +23,11 @@ export default function AdminDashboardPage() {
       <FadeIn direction="up">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 border-b border-border/50 pb-6">
           <div>
-            <p className="text-micro text-muted-foreground/50">
-              Selamat Datang,
-            </p>
-            <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">
-              {displayName} 👋
-            </h1>
-            <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">
-              Pantau kondisi klub secara menyeluruh dari halaman ini.
-            </p>
+            <p className="text-micro text-muted-foreground/50">Selamat Datang,</p>
+            <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">{displayName} 👋</h1>
+            <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">Pantau kondisi klub secara menyeluruh dari halaman ini.</p>
           </div>
-          <p className="text-sm font-semibold text-muted-foreground/60 shrink-0">{todayLabel}</p>
+          <p className="text-sm font-semibold text-muted-foreground/75 shrink-0">{todayLabel}</p>
         </div>
       </FadeIn>
 
@@ -53,10 +47,7 @@ export default function AdminDashboardPage() {
       <FadeIn direction="up" delay={0.1}>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
           <div className="xl:col-span-2 h-full">
-            <RecentRegistrations
-              registrations={metrics?.recentRegistrations ?? []}
-              isLoading={isLoading}
-            />
+            <RecentRegistrations registrations={metrics?.recentRegistrations ?? []} isLoading={isLoading} />
           </div>
           <div className="xl:col-span-1 h-full">
             <UpcomingAgenda />

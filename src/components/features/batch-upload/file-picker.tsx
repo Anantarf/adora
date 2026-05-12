@@ -27,7 +27,7 @@ export function BatchUploadFilePicker({ selectedFile, fileInputRef, acceptedFile
         <div className="text-center">
           <h4 className="font-heading text-lg text-foreground">Pilih Berkas Excel</h4>
           <p className="text-sm text-muted-foreground font-medium">Pilih atau tarik berkas .xlsx ke area ini</p>
-          <p className="text-micro text-muted-foreground/60 mt-2">Kapasitas maksimal: 1.000 data pemain</p>
+          <p className="text-micro text-muted-foreground/75 mt-2">Kapasitas maksimal: 1.000 data pemain</p>
         </div>
       </div>
     );

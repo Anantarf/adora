@@ -1,6 +1,5 @@
 "use client";
 
-
 import { useState, useTransition } from "react";
 import { useSession } from "next-auth/react";
 import { KeyRound, ChevronUp } from "lucide-react";
@@ -12,15 +11,7 @@ import { updateSelfAction } from "@/actions/users";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const changePasswordSchema = z
   .object({
@@ -58,53 +49,37 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { if (!v) { reset(); onClose(); } }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        if (!v) {
+          reset();
+          onClose();
+        }
+      }}
+    >
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
             <KeyRound className="size-5 text-primary" /> Ubah Kata Sandi
           </DialogTitle>
-          <DialogDescription className="text-xs font-medium tracking-wide opacity-70">
-            Sandi baru langsung berlaku setelah disimpan.
-          </DialogDescription>
+          <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Sandi baru langsung berlaku setelah disimpan.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">
-              Sandi Baru
-            </label>
-            <Input
-              {...register("newPassword")}
-              type="password"
-              placeholder="Minimal 6 karakter"
-              className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50"
-            />
-            {errors.newPassword && (
-              <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.newPassword.message}</p>
-            )}
+            <label className="text-micro text-muted-foreground ml-1">Sandi Baru</label>
+            <Input {...register("newPassword")} type="password" placeholder="Minimal 6 karakter" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            {errors.newPassword && <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.newPassword.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">
-              Konfirmasi Sandi
-            </label>
-            <Input
-              {...register("confirmPassword")}
-              type="password"
-              placeholder="Ulangi sandi baru"
-              className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50"
-            />
-            {errors.confirmPassword && (
-              <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.confirmPassword.message}</p>
-            )}
+            <label className="text-micro text-muted-foreground ml-1">Konfirmasi Sandi</label>
+            <Input {...register("confirmPassword")} type="password" placeholder="Ulangi sandi baru" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            {errors.confirmPassword && <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.confirmPassword.message}</p>}
           </div>
 
-          <Button
-            type="submit"
-            disabled={isPending}
-            className="w-full h-11 mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs rounded-xl shadow-sm"
-          >
+          <Button type="submit" disabled={isPending} className="w-full h-11 mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs rounded-xl shadow-sm">
             {isPending ? "Menyimpan..." : "Simpan Sandi Baru"}
           </Button>
         </form>
@@ -125,19 +100,17 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
       <>
         <DropdownMenu>
           <DropdownMenuTrigger className="flex w-full items-center gap-3 px-3 py-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all text-left outline-none group">
-            <div className="size-8 rounded-full bg-muted border border-border/50 flex items-center justify-center text-foreground/70 font-black text-[10px] tracking-widest shrink-0 group-hover:bg-muted/80 transition-colors">
-              {initials}
-            </div>
+            <div className="size-8 rounded-full bg-muted border border-border/50 flex items-center justify-center text-foreground/70 font-black text-[10px] tracking-widest shrink-0 group-hover:bg-muted/80 transition-colors">{initials}</div>
             <div className="flex flex-col flex-1 min-w-0 leading-none group-data-[collapsible=icon]:hidden">
               <span className="text-sm font-bold text-foreground truncate">{username}</span>
-              <span className="text-micro text-muted-foreground/60 mt-0.5">Pengaturan Akun</span>
+              <span className="text-micro text-muted-foreground/75 mt-0.5">Pengaturan Akun</span>
             </div>
             <ChevronUp className="size-4 text-muted-foreground/50 group-hover:text-primary group-data-[collapsible=icon]:hidden shrink-0" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="right" className="w-56 bg-card border-border/50 rounded-xl shadow-xl ml-2">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
-                <span className="text-micro text-muted-foreground/60">Masuk sebagai</span>
+                <span className="text-micro text-muted-foreground/75">Masuk sebagai</span>
                 <span className="text-sm font-bold text-foreground">{username}</span>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
@@ -165,7 +138,7 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
         <DropdownMenuContent align="end" className="w-52 bg-card border-border/50 rounded-xl shadow-xl">
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-micro text-muted-foreground/60">Masuk sebagai</span>
+              <span className="text-micro text-muted-foreground/75">Masuk sebagai</span>
               <span className="text-sm font-bold text-foreground">{username}</span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>

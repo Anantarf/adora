@@ -21,13 +21,13 @@ import { combineDateAndTime, toYYYYMMDD, getJakartaToday } from "@/lib/date-util
 // ─── Schema ───────────────────────────────────────────────────────────────────
 
 const eventSchema = z.object({
-  eventId:     z.string().optional(),
-  title:       z.string().min(3, "Judul minimal 3 karakter"),
+  eventId: z.string().optional(),
+  title: z.string().min(3, "Judul minimal 3 karakter"),
   description: z.string().optional(),
-  location:    z.string().optional(),
-  type:        z.enum(["LATIHAN", "PERTANDINGAN", "SPARING", "EVALUASI", "KHUSUS"]),
-  time:        z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Waktu harus format 24 jam (opsi: 08:30 atau 14:00)"),
-  homebaseId:  z.string().optional(),
+  location: z.string().optional(),
+  type: z.enum(["LATIHAN", "PERTANDINGAN", "SPARING", "EVALUASI", "KHUSUS"]),
+  time: z.string().regex(/^([01]?\d|2[0-3]):[0-5]\d$/, "Waktu harus format 24 jam (opsi: 08:30 atau 14:00)"),
+  homebaseId: z.string().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventSchema>;
@@ -51,23 +51,30 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
   const { data: homebases = [] } = useHomebases();
-  const { data: groups = [] }    = useGroups();
-  const { mutateAsync: addEvent,    isPending: isAdding  } = useAddEvent();
+  const { data: groups = [] } = useGroups();
+  const { mutateAsync: addEvent, isPending: isAdding } = useAddEvent();
   const { mutateAsync: updateEvent, isPending: isUpdating } = useUpdateEvent();
 
-  const isPending  = isAdding || isUpdating;
+  const isPending = isAdding || isUpdating;
   const isEditMode = !!editEvent;
 
   const homebaseMap = useMemo(() => Object.fromEntries(homebases.map((h) => [h.id, h])), [homebases]);
 
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<EventFormValues>({
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: getBlankFormValues(),
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library
-  const selectedType    = watch("type");
-  const homebaseId      = watch("homebaseId");
+  const selectedType = watch("type");
+  const homebaseId = watch("homebaseId");
   const selectedEventCfg = selectedType ? getEventConfig(selectedType) : null;
   const SelectedEventIcon = selectedEventCfg?.icon ?? CalendarDays;
 
@@ -77,13 +84,13 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
       setDate(new Date(editEvent.date));
       setSelectedGroupIds(editEvent.groups?.map((g) => g.id) ?? []);
       reset({
-        eventId:     editEvent.id,
-        title:       editEvent.title,
+        eventId: editEvent.id,
+        title: editEvent.title,
         description: editEvent.description || "",
-        location:    editEvent.location    || "",
-        type:        editEvent.type as EventFormValues["type"],
-        time:        new Date(editEvent.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }),
-        homebaseId:  editEvent.homebaseId  || undefined,
+        location: editEvent.location || "",
+        type: editEvent.type as EventFormValues["type"],
+        time: new Date(editEvent.date).toLocaleTimeString("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", minute: "2-digit", hour12: false }),
+        homebaseId: editEvent.homebaseId || undefined,
       });
     } else {
       setDate(getJakartaToday());
@@ -92,8 +99,7 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
     }
   }, [editEvent?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const toggleGroup = (groupId: string) =>
-    setSelectedGroupIds((prev) => prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]);
+  const toggleGroup = (groupId: string) => setSelectedGroupIds((prev) => (prev.includes(groupId) ? prev.filter((id) => id !== groupId) : [...prev, groupId]));
 
   const handleCancel = () => {
     setSelectedGroupIds([]);
@@ -102,18 +108,18 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
   };
 
   const onSubmit = async (data: EventFormValues) => {
-    if (!date)                       return toast.error("Pilih tanggal terlebih dahulu!");
+    if (!date) return toast.error("Pilih tanggal terlebih dahulu!");
     if (selectedGroupIds.length === 0) return toast.error("Pilih minimal satu kelompok latihan!");
 
     try {
       const eventData = {
-        title:       data.title,
+        title: data.title,
         description: data.description?.trim() || undefined,
-        location:    data.location,
-        type:        data.type,
-        date:        combineDateAndTime(date, data.time),
-        homebaseId:  data.homebaseId || undefined,
-        groupIds:    selectedGroupIds,
+        location: data.location,
+        type: data.type,
+        date: combineDateAndTime(date, data.time),
+        homebaseId: data.homebaseId || undefined,
+        groupIds: selectedGroupIds,
       };
 
       if (data.eventId) {
@@ -142,7 +148,7 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
             <span className="text-[17px] font-semibold tracking-wide text-foreground">{isEditMode ? "Ubah Agenda" : "Tambah Agenda"}</span>
           </div>
           {isEditMode && (
-            <button type="button" onClick={handleCancel} className="text-micro text-muted-foreground/60 hover:text-muted-foreground transition-colors">
+            <button type="button" onClick={handleCancel} className="text-micro text-muted-foreground/75 hover:text-muted-foreground transition-colors">
               Batal
             </button>
           )}
@@ -152,13 +158,22 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           {/* Nama + Jenis */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-2 space-y-1">
-              <label className="text-micro text-muted-foreground">Nama <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">
+                Nama <span className="text-destructive">*</span>
+              </label>
               <Input {...register("title")} placeholder="Contoh: Latihan Rutin" className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
               {errors.title && <p className="text-[10px] text-destructive">{errors.title.message}</p>}
             </div>
             <div className="space-y-1">
-              <label className="text-micro text-muted-foreground">Jenis <span className="text-destructive">*</span></label>
-              <Select value={selectedType} onValueChange={(val: string | null) => { if (val) setValue("type", val as EventFormValues["type"]); }}>
+              <label className="text-micro text-muted-foreground">
+                Jenis <span className="text-destructive">*</span>
+              </label>
+              <Select
+                value={selectedType}
+                onValueChange={(val: string | null) => {
+                  if (val) setValue("type", val as EventFormValues["type"]);
+                }}
+              >
                 <SelectTrigger className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all">
                   <SelectValue>{selectedType ? EVENT_TYPES[selectedType]?.label : "Pilih"}</SelectValue>
                 </SelectTrigger>
@@ -179,20 +194,31 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           {/* Kelompok Latihan */}
           {groups.length > 0 && (
             <div className="space-y-1.5">
-              <label className="text-micro text-muted-foreground">Kelompok Latihan <span className="text-destructive">*</span></label>
+              <label className="text-micro text-muted-foreground">
+                Kelompok Latihan <span className="text-destructive">*</span>
+              </label>
               <div className="flex flex-wrap gap-2">
                 {groups.map((g: { id: string; name: string }) => {
                   const checked = selectedGroupIds.includes(g.id);
                   return (
-                    <button key={g.id} type="button" onClick={() => toggleGroup(g.id)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${checked ? "bg-primary text-primary-foreground border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"}`}>
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => toggleGroup(g.id)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${checked ? "bg-primary text-primary-foreground border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"}`}
+                    >
                       {g.name}
                     </button>
                   );
                 })}
-                <button type="button"
-                  onClick={() => { const allSelected = selectedGroupIds.length === groups.length && groups.length > 0; setSelectedGroupIds(allSelected ? [] : groups.map((g: { id: string }) => g.id)); }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedGroupIds.length === groups.length && groups.length > 0 ? "bg-primary/20 text-primary border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"}`}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const allSelected = selectedGroupIds.length === groups.length && groups.length > 0;
+                    setSelectedGroupIds(allSelected ? [] : groups.map((g: { id: string }) => g.id));
+                  }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${selectedGroupIds.length === groups.length && groups.length > 0 ? "bg-primary/20 text-primary border-primary" : "bg-white/5 text-muted-foreground border-white/10 hover:border-primary/40"}`}
+                >
                   {selectedGroupIds.length === groups.length && groups.length > 0 ? "Hapus Pilihan" : "Pilih Semua"}
                 </button>
               </div>
@@ -208,15 +234,32 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           {/* Tanggal + Waktu */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <label className="text-micro text-muted-foreground">Tanggal <span className="text-destructive">*</span></label>
-              <Input type="date" value={date ? toYYYYMMDD(date) : ""} onChange={(e) => (e.target.value ? setDate(new Date(e.target.value + "T00:00:00+07:00")) : setDate(undefined))} className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all dark:scheme-dark" />
+              <label className="text-micro text-muted-foreground">
+                Tanggal <span className="text-destructive">*</span>
+              </label>
+              <Input
+                type="date"
+                value={date ? toYYYYMMDD(date) : ""}
+                onChange={(e) => (e.target.value ? setDate(new Date(e.target.value + "T00:00:00+07:00")) : setDate(undefined))}
+                className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all dark:scheme-dark"
+              />
             </div>
             <div className="space-y-1">
-              <label className="text-micro text-muted-foreground">Waktu <span className="text-destructive">*</span></label>
-              <Input {...register("time", { pattern: { value: /^([01]\d|2[0-3]):[0-5]\d$/, message: "Format: HH:MM" } })} placeholder="08:00" maxLength={5}
-                onInput={(e) => { const el = e.currentTarget; const raw = el.value.replace(/[^0-9]/g, ""); el.value = raw.length >= 3 ? raw.slice(0, 2) + ":" + raw.slice(2, 4) : raw; }}
-                className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all" />
-              {errors.time ? <p className="text-[10px] text-destructive">{errors.time.message}</p> : <p className="text-[10px] text-muted-foreground/60">Format 24 jam, Contoh: 08:00</p>}
+              <label className="text-micro text-muted-foreground">
+                Waktu <span className="text-destructive">*</span>
+              </label>
+              <Input
+                {...register("time", { pattern: { value: /^([01]\d|2[0-3]):[0-5]\d$/, message: "Format: HH:MM" } })}
+                placeholder="08:00"
+                maxLength={5}
+                onInput={(e) => {
+                  const el = e.currentTarget;
+                  const raw = el.value.replace(/[^0-9]/g, "");
+                  el.value = raw.length >= 3 ? raw.slice(0, 2) + ":" + raw.slice(2, 4) : raw;
+                }}
+                className="h-10 text-sm border border-white/10 bg-white/5 focus:border-primary/60 transition-all"
+              />
+              {errors.time ? <p className="text-[10px] text-destructive">{errors.time.message}</p> : <p className="text-[10px] text-muted-foreground/75">Format 24 jam, Contoh: 08:00</p>}
             </div>
           </div>
 
@@ -235,7 +278,9 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
                   </SelectTrigger>
                   <SelectContent>
                     {homebases.map((hb) => (
-                      <SelectItem key={hb.id} value={hb.id}>{hb.name}</SelectItem>
+                      <SelectItem key={hb.id} value={hb.id}>
+                        {hb.name}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
