@@ -72,7 +72,7 @@ export function GalleryHeroCarousel() {
         {/* Dots */}
         <div className="flex gap-2">
           {GALLERY_SLIDES.map((_, idx) => (
-            <button key={idx} onClick={() => goTo(idx)} className="p-2 -m-2 group flex items-center justify-center" aria-label={`Slide ${idx + 1}`}>
+            <button key={idx} onClick={() => goTo(idx)} className="p-2 -m-2 group min-w-12 min-h-12 flex items-center justify-center" aria-label={`Slide ${idx + 1}`}>
               <span className={`block h-1.5 rounded-full transition-all duration-400 ${idx === current ? "bg-brand-yellow w-5" : "bg-white/30 w-1.5 group-hover:bg-white/50"}`} />
             </button>
           ))}
