@@ -61,7 +61,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                   {/* Pop-out Shadow Box */}
                   <div className="absolute inset-0 bg-brand-yellow rounded-2xl transform translate-x-2 translate-y-2 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform duration-300 z-0 opacity-0 group-hover:opacity-100"></div>
 
-                  <div className="relative z-10 border-2 border-white/10 group-hover:border-brand-yellow rounded-2xl overflow-hidden shadow-xl transition-all duration-300 block w-full aspect-[3/2] bg-surface-dark">
+                  <div className="relative z-10 border-2 border-white/10 group-hover:border-brand-yellow rounded-2xl overflow-hidden shadow-xl transition-all duration-300 block w-full aspect-3/2 bg-surface-dark">
                     {/* Background Layer */}
                     <div className="absolute inset-0 z-0">
                       {imageUrl ? (
@@ -77,7 +77,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                     </div>
 
                     {/* Gradient Overlay for Text Readability (Lighter) */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent z-10" />
 
                     {/* Overlay Text Content */}
                     <div className="absolute inset-0 p-5 lg:p-6 flex flex-col justify-end z-20">
@@ -100,8 +100,8 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi")}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          aria-label={`Buka rute ke ${name} di Google Maps`}
-                          className="inline-flex items-center gap-1.5 text-[9px] min-h-[48px] md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
+                          aria-label={`Buka rute ke ${name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi"} di Google Maps`}
+                          className="inline-flex items-center gap-1.5 text-[9px] min-h-12 md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
                         >
                           Buka di Google Maps
                           <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
