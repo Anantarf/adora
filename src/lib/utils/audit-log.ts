@@ -4,50 +4,55 @@
  */
 
 export const TARGET_TABLE_DICT: Record<string, string> = {
-  user: "Pengguna",
-  parent: "Orang Tua",
-  player: "Pemain",
-  group: "Kelompok",
-  attendance: "Kehadiran",
-  statistic: "Statistik",
+  user: "Akun Admin",
+  parent: "Data Orang Tua",
+  player: "Data Pemain",
+  group: "Kelompok Latihan",
+  attendance: "Absensi/Presensi",
+  statistic: "Nilai Rapor",
   evaluationperiod: "Periode Evaluasi",
-  auditlog: "Log System",
-  clubsetting: "Pengaturan Klub",
+  auditlog: "Rekam Aktivitas",
+  clubsetting: "Profil & Dokumen Klub",
 };
 
 export const FIELD_LABELS: Record<string, string> = {
-  username: "Username",
+  username: "ID Login",
   name: "Nama Lengkap",
-  email: "Email",
-  role: "Peran",
-  groupId: "Kelompok",
-  parentId: "Orang Tua",
+  email: "Alamat Email",
+  role: "Hak Akses",
+  groupId: "Kelompok Latihan",
+  parentId: "Orang Tua/Wali",
   dateOfBirth: "Tanggal Lahir",
   homebaseId: "Lokasi Latihan",
-  description: "Keterangan",
-  startDate: "Tanggal Mulai",
-  endDate: "Tanggal Selesai",
-  isActive: "Status Aktif",
-  count: "Jumlah Ditambahkan",
-  submitted: "Data Dikirim",
-  deduped: "Data Tidak Duplikat",
-  resetTo: "Sandi Diatur Ulang Ke",
-  key: "Kunci Pengaturan",
-  value: "Nilai Pengaturan",
+  description: "Keterangan Tambahan",
+  startDate: "Mulai Berlaku",
+  endDate: "Selesai Berlaku",
+  isActive: "Status Keanggotaan",
+  count: "Jumlah Data",
+  submitted: "Waktu Pengiriman",
+  deduped: "Pembersihan Duplikat",
+  resetTo: "Sandi Baru",
+  key: "Bagian yang Diubah",
+  value: "Isi Perubahan",
+  rapor_header_url: "Kop Surat",
+  rapor_ceo_sign_url: "Tanda Tangan CEO",
+  rapor_coach_sign_url: "Tanda Tangan Pelatih",
+  rapor_stamp_url: "Stempel Klub",
+  rapor_coach_name: "Nama Pelatih di Rapor",
+  rapor_ceo_name: "Nama CEO di Rapor",
 };
 
 export const ROLE_LABELS: Record<string, string> = {
   PARENT: "Orang Tua",
-  ADMIN: "Admin",
+  ADMIN: "Administrator Utama",
 };
 
 export const TIMESTAMP_FORMATTER = new Intl.DateTimeFormat("id-ID", {
   day: "numeric",
-  month: "short",
+  month: "long",
   year: "numeric",
   hour: "2-digit",
   minute: "2-digit",
-  second: "2-digit",
   hour12: false,
   timeZone: "Asia/Jakarta",
 });
@@ -56,14 +61,14 @@ export const TIMESTAMP_FORMATTER = new Intl.DateTimeFormat("id-ID", {
  * Strategy pattern for human-readable actions
  */
 const ACTION_TRANSLATIONS: Record<string, string> = {
-  CREATE: "Mendaftarkan {t} baru",
-  UPDATE: "Memperbarui informasi {t}",
-  DELETE: "Menghapus {t} dari sistem",
-  RESET_PASSWORD: "Mengatur ulang sandi {t}",
-  UPDATE_SELF: "Memperbarui profil {t}",
-  CREATE_STATS: "Memasukkan data {t} baru",
-  UPDATE_STATS: "Memperbarui dan menyelesaikan {t}",
-  SET_ACTIVE: "Mengaktifkan {t}",
+  CREATE: "Menambahkan {t} baru",
+  UPDATE: "Mengubah informasi {t}",
+  DELETE: "Menghapus {t}",
+  RESET_PASSWORD: "Mengganti kata sandi {t}",
+  UPDATE_SELF: "Memperbarui profil diri {t}",
+  CREATE_STATS: "Mengisi {t} baru",
+  UPDATE_STATS: "Menyelesaikan input {t}",
+  SET_ACTIVE: "Mengaktifkan status {t}",
 };
 
 export function getHumanReadableTable(table: string): string {
