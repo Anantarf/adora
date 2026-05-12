@@ -63,7 +63,7 @@ export function GalleryHeroCarousel() {
       <div className="relative z-20 flex items-center justify-between px-4 py-3 bg-black/30 backdrop-blur-sm">
         <button
           onClick={() => goTo((current - 1 + GALLERY_SLIDES.length) % GALLERY_SLIDES.length)}
-          className="w-10 h-10 -ml-1.5 md:ml-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          className="w-12 h-12 -ml-1.5 md:ml-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
           aria-label="Slide sebelumnya"
         >
           <ChevronLeft className="w-5 h-5 text-white" />
@@ -78,7 +78,7 @@ export function GalleryHeroCarousel() {
           ))}
         </div>
 
-        <button onClick={() => goTo((current + 1) % GALLERY_SLIDES.length)} className="w-10 h-10 -mr-1.5 md:mr-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Slide berikutnya">
+        <button onClick={() => goTo((current + 1) % GALLERY_SLIDES.length)} className="w-12 h-12 -mr-1.5 md:mr-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Slide berikutnya">
           <ChevronRight className="w-5 h-5 text-white" />
         </button>
       </div>
