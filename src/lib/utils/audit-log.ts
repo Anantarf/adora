@@ -1,6 +1,6 @@
 /**
  * UTILITIES & CONSTANTS FOR AUDIT LOG MODULE
- * Senior Developer Quality Refactor
+ * Senior Developer Quality Refactor - User Friendly Version
  */
 
 export const TARGET_TABLE_DICT: Record<string, string> = {
@@ -14,6 +14,7 @@ export const TARGET_TABLE_DICT: Record<string, string> = {
   auditlog: "Rekam Aktivitas",
   clubsetting: "Profil & Dokumen Klub",
   attendance_batch: "Presensi Massal",
+  certificate: "Sertifikat",
 };
 
 export const FIELD_LABELS: Record<string, string> = {
@@ -59,36 +60,41 @@ export const TIMESTAMP_FORMATTER = new Intl.DateTimeFormat("id-ID", {
 });
 
 /**
- * Strategy pattern for human-readable actions
+ * Context-aware action translations
  */
-const ACTION_TRANSLATIONS: Record<string, string> = {
-  CREATE: "Menambahkan {t} baru",
-  UPDATE: "Mengubah informasi {t}",
-  DELETE: "Menghapus {t}",
-  RESET_PASSWORD: "Mengganti kata sandi {t}",
-  UPDATE_SELF: "Memperbarui profil diri {t}",
-  CREATE_STATS: "Mengisi {t} baru",
-  UPDATE_STATS: "Menyelesaikan input {t}",
-  SET_ACTIVE: "Mengaktifkan status {t}",
-};
+export function getHumanReadableText(action: string, table: string): string {
+  const a = action.toUpperCase();
+  const t = (TARGET_TABLE_DICT[table.toLowerCase()] || table).toLowerCase();
+
+  // Special cases first
+  if (table.toLowerCase() === "statistic") {
+    if (a.includes("CREATE")) return "Mengisi rapor baru untuk pemain";
+    if (a.includes("UPDATE")) return "Memperbarui nilai rapor pemain";
+  }
+
+  if (table.toLowerCase() === "attendance" || table.toLowerCase() === "attendance_batch") {
+    if (a.includes("CREATE")) return "Mencatat absensi kehadiran";
+    if (a.includes("UPDATE")) return "Mengubah data absensi";
+  }
+
+  if (a === "RESET_PASSWORD") return `Mengatur ulang kata sandi ${t}`;
+  if (a === "UPDATE_SELF") return `Memperbarui profil akun sendiri`;
+  if (a === "SET_ACTIVE") return `Mengaktifkan status ${t}`;
+
+  // Standard templates
+  if (a === "CREATE") return `Menambahkan ${t} ke sistem`;
+  if (a === "UPDATE") return `Mengubah informasi ${t}`;
+  if (a === "DELETE") return `Menghapus ${t} dari sistem`;
+
+  // Fallbacks
+  if (a.includes("CREATE")) return `Menambahkan ${t}`;
+  if (a.includes("UPDATE")) return `Mengubah ${t}`;
+  
+  return `Melakukan perubahan pada ${t}`;
+}
 
 export function getHumanReadableTable(table: string): string {
   return TARGET_TABLE_DICT[table.toLowerCase()] || table;
-}
-
-export function getHumanReadableText(action: string, table: string): string {
-  const t = getHumanReadableTable(table).toLowerCase();
-  const template = ACTION_TRANSLATIONS[action.toUpperCase()];
-  
-  if (template) {
-    return template.replace("{t}", t);
-  }
-  
-  // Fallback for partial matches or generic
-  if (action.includes("CREATE")) return `Memasukkan data ${t} baru`;
-  if (action.includes("UPDATE")) return `Memperbarui ${t}`;
-  
-  return `Perubahan pada data ${t}`;
 }
 
 export function extractTargetName(details: any): string | null {
@@ -97,6 +103,7 @@ export function extractTargetName(details: any): string | null {
   if (typeof d.name === "string") return d.name;
   if (d.after?.name) return d.after.name;
   if (d.before?.name) return d.before.name;
+  if (d.playerName) return d.playerName;
   return null;
 }
 
