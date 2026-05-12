@@ -154,6 +154,7 @@ export default function SettingsPage() {
                           <img 
                             src={localValues[asset.key]} 
                             alt="Preview" 
+                            crossOrigin="anonymous"
                             className="max-h-full max-w-full object-contain" 
                           />
                         </div>
