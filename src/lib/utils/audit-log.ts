@@ -13,6 +13,7 @@ export const TARGET_TABLE_DICT: Record<string, string> = {
   evaluationperiod: "Periode Evaluasi",
   auditlog: "Rekam Aktivitas",
   clubsetting: "Profil & Dokumen Klub",
+  attendance_batch: "Presensi Massal",
 };
 
 export const FIELD_LABELS: Record<string, string> = {
