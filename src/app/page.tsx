@@ -4,7 +4,9 @@ import { getPublicHomebases } from "@/actions/homebase";
 import { Metadata } from "next";
 import { MapPin, MessageCircle, Music2, Trophy, ClipboardList, Zap } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
-import dynamic from "next/dynamic";
+import { HomebaseSection } from "@/components/features/homebase-section";
+import { GallerySection } from "@/components/features/gallery-section";
+import { AutoFadeCarousel } from "@/components/ui/auto-fade-carousel";
 import { LandingHeader, InstagramIcon } from "@/components/features/landing-header";
 import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
@@ -12,18 +14,6 @@ import { NAV_LINKS } from "@/lib/constants/navigation";
 import { REGISTRATION_STEPS } from "@/lib/constants/landing";
 import { getAcademicYear } from "@/lib/utils";
 import React from "react";
-
-const AutoFadeCarousel = dynamic(() => import("@/components/ui/auto-fade-carousel").then((mod) => mod.AutoFadeCarousel), {
-  ssr: false,
-});
-
-const HomebaseSection = dynamic(() => import("@/components/features/homebase-section").then((mod) => mod.HomebaseSection), {
-  ssr: true, // we still want SEO for homebases, but this will split its huge bundle
-});
-
-const GallerySection = dynamic(() => import("@/components/features/gallery-section").then((mod) => mod.GallerySection), {
-  ssr: true, // for SEO
-});
 
 export const revalidate = 3600;
 
