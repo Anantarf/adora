@@ -75,11 +75,11 @@ export default function CertificatesPage() {
   );
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
         <div>
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Manajemen Sertifikat</h1>
+          <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Manajemen Sertifikat</h1>
           <p className="text-muted-foreground text-sm font-medium tracking-wide">Unggah, kelola, dan tetapkan sertifikat prestasi digital kepada pemain atau kelompok.</p>
         </div>
         <AddCertificateDialog />

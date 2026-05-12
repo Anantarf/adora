@@ -65,7 +65,7 @@ export default function SchedulePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
           <div>
-            <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Agenda Klub</h1>
+            <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Agenda Klub</h1>
             <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola jadwal latihan, tanding, dan agenda resmi klub.</p>
           </div>
         </div>
