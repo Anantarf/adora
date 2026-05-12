@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2, UserCheck } from "lucide-react";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { toast } from "sonner";
-import Image from "next/image";
 
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -150,8 +149,13 @@ export default function SettingsPage() {
                           <span className="text-[10px] font-bold text-red-500">PDF</span>
                         </div>
                       ) : (
-                        <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative">
-                          <Image src={localValues[asset.key]} alt="Preview" fill sizes="300px" unoptimized className="object-contain" />
+                        <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative flex items-center justify-center">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img 
+                            src={localValues[asset.key]} 
+                            alt="Preview" 
+                            className="max-h-full max-w-full object-contain" 
+                          />
                         </div>
                       )}
                       <div className="flex flex-col">
