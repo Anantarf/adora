@@ -1,6 +1,7 @@
 # Mobile Refactor Playbook
 
 Dokumen ini adalah acuan praktis tim untuk menyamakan kualitas UX mobile di:
+
 - Landing page
 - Admin
 - Registrasi
@@ -43,6 +44,7 @@ Dokumen ini adalah acuan praktis tim untuk menyamakan kualitas UX mobile di:
 
 1. Button, input, select, card, badge, dialog mengikuti design system yang sama.
 2. Warna status konsisten makna:
+
 - Success
 - Draft
 - Warning
@@ -69,10 +71,12 @@ Dokumen ini adalah acuan praktis tim untuk menyamakan kualitas UX mobile di:
 ### 4.1 Landing Page
 
 1. Urutan mobile default:
+
 - Judul
 - Subjudul
 - Hero image
 - CTA utama
+
 2. Maksimal 1 CTA utama per fold.
 3. Hero kuat untuk storytelling, tapi tidak menenggelamkan pesan utama.
 
@@ -123,6 +127,7 @@ Gunakan checklist ini untuk setiap halaman mobile.
 ## 7) Rubrik Skor Audit
 
 Skor per halaman:
+
 - 0 = belum memenuhi
 - 1 = memenuhi sebagian
 - 2 = memenuhi
@@ -130,6 +135,7 @@ Skor per halaman:
 Total maksimum: 26 (13 butir x 2)
 
 Interpretasi:
+
 - 22-26: siap produksi
 - 17-21: layak, perlu polishing kecil
 - <=16: perlu refactor prioritas
@@ -150,6 +156,7 @@ Interpretasi:
 4. Landing page
 
 Alasan:
+
 - Dampak tercepat ke conversion, trust, dan produktivitas.
 
 ## 10) Template Audit Mingguan
@@ -161,6 +168,7 @@ Salin section ini setiap minggu.
 PIC:
 
 Target minggu ini:
+
 1.
 2.
 3.
@@ -170,6 +178,7 @@ Target minggu ini:
 Skor total: <0-26>
 
 Checklist:
+
 1. Prioritas utama jelas: [ ] 0 [ ] 1 [ ] 2
 2. Context before action: [ ] 0 [ ] 1 [ ] 2
 3. Satu CTA utama per fold: [ ] 0 [ ] 1 [ ] 2
@@ -185,16 +194,19 @@ Checklist:
 13. Performa mobile baik: [ ] 0 [ ] 1 [ ] 2
 
 Temuan utama:
+
 1.
 2.
 3.
 
 Action minggu depan:
+
 1.
 2.
 3.
 
 Risiko/blocked:
+
 1.
 2.
 

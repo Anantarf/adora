@@ -66,12 +66,10 @@ const INPUT_CLASS =
 // ─── Inner (uses useSearchParams — harus di dalam Suspense) ──────────────────
 
 function RegisterContent() {
-  const searchParams    = useSearchParams();
+  const searchParams = useSearchParams();
   const paramHomebaseId = searchParams.get("homebase");
 
-  const [selectedHomebase, setSelectedHomebase] = useState<{ id: string; name: string } | null>(
-    paramHomebaseId ? { id: paramHomebaseId, name: "" } : null
-  );
+  const [selectedHomebase, setSelectedHomebase] = useState<{ id: string; name: string } | null>(paramHomebaseId ? { id: paramHomebaseId, name: "" } : null);
   const [form, setForm] = useState<FormState>({ name: "", phone: "", email: "", ageGroup: "" });
 
   const [isPending, startTransition] = useTransition();
@@ -81,12 +79,14 @@ function RegisterContent() {
   const waUrl = useMemo(() => {
     const message = [
       "Halo Adora Basketball Club, saya telah mengisi form pendaftaran anggota baru di website. Mohon info untuk kelanjutan proses pendaftaran dan pembayarannya.",
-      form.name             ? `Nama      : ${form.name}`             : "",
-      form.phone            ? `No HP     : ${form.phone}`            : "",
-      form.email            ? `Email     : ${form.email}`            : "",
-      form.ageGroup         ? `Program   : ${form.ageGroup}`         : "",
+      form.name ? `Nama      : ${form.name}` : "",
+      form.phone ? `No HP     : ${form.phone}` : "",
+      form.email ? `Email     : ${form.email}` : "",
+      form.ageGroup ? `Program   : ${form.ageGroup}` : "",
       selectedHomebase?.name ? `Homebase  : ${selectedHomebase.name}` : "",
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
     return `https://wa.me/${CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
   }, [form, selectedHomebase]);
 
@@ -129,7 +129,7 @@ function RegisterContent() {
   return (
     <main className="min-h-screen bg-page-dark text-white relative overflow-hidden pt-18">
       <LandingHeader />
-      
+
       {/* Background Textures */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute top-0 right-0 w-200 h-200 bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
@@ -140,24 +140,18 @@ function RegisterContent() {
       {/* ── Hero ── */}
       <section className="relative pt-9 pb-5 md:pt-12 md:pb-8 text-center px-4 z-10">
         <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-6 border-2 border-black shadow-[4px_4px_0px_#000]">
-          <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">
-            // JOIN THE SQUAD //
-          </span>
+          <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">// JOIN THE SQUAD //</span>
         </div>
         <h1 className="font-heading font-black text-3xl md:text-5xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
           FORM <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>
         </h1>
-        <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto font-medium">
-          Isi data dengan lengkap. Langkah awal menuju Kejurkot dimulai dari sini.
-        </p>
+        <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto font-medium">Isi data dengan lengkap. Langkah awal menuju Kejurkot dimulai dari sini.</p>
       </section>
 
       {/* ── Main Form ── */}
       <div className="container mx-auto px-4 pb-20 relative z-10">
         <div className="max-w-3xl mx-auto">
-
           <div className="space-y-6 md:space-y-10">
-
             {/* Step 1: Pilih Homebase */}
             <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative">
               <div className="absolute -top-5 -left-3 md:-left-5">
@@ -169,12 +163,7 @@ function RegisterContent() {
                 <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">PILIH LOKASI LATIHAN</h2>
                 <p className="text-white/60 font-medium text-xs md:text-sm">Pilih homebase yang paling dekat dengan Anda</p>
               </div>
-              <HomebaseSelector
-                value={selectedHomebase?.id}
-                onSelect={(id, name) => setSelectedHomebase({ id, name })}
-                showFull
-                disabled={isSubmitted}
-              />
+              <HomebaseSelector value={selectedHomebase?.id} onSelect={(id, name) => setSelectedHomebase({ id, name })} showFull disabled={isSubmitted} />
             </div>
 
             {/* Step 2: Form (muncul setelah homebase ter-resolve namanya) */}
@@ -230,26 +219,16 @@ function RegisterContent() {
                               disabled={isSubmitted}
                               onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
                               className={`text-left px-4 py-4 min-h-24 rounded-2xl border-2 transition-all duration-300 flex flex-col relative overflow-hidden ${
-                                isSelected
-                                  ? "bg-brand-purple/20 border-brand-purple ring-4 ring-brand-purple/20 shadow-[0_0_30px_rgba(138,43,226,0.3)]"
-                                  : "bg-black/40 border-white/10 hover:border-white/30 hover:bg-black/60"
+                                isSelected ? "bg-brand-purple/20 border-brand-purple ring-4 ring-brand-purple/20 shadow-[0_0_30px_rgba(138,43,226,0.3)]" : "bg-black/40 border-white/10 hover:border-white/30 hover:bg-black/60"
                               } ${isSubmitted ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"}`}
                             >
-
-                              
                               <div className="flex items-start justify-between w-full relative z-10">
                                 <div>
-                                  <h4 className={`font-heading font-black text-base md:text-xl tracking-widest mb-1 italic uppercase ${isSelected ? "text-brand-yellow" : "text-white"}`}>
-                                    {label}
-                                  </h4>
-                                  <div className={`inline-block px-2 py-0.5 rounded bg-white/10 font-bold tracking-widest text-[9px] mb-2 ${isSelected ? "text-white" : "text-white/60"}`}>
-                                    {ages}
-                                  </div>
+                                  <h4 className={`font-heading font-black text-base md:text-xl tracking-widest mb-1 italic uppercase ${isSelected ? "text-brand-yellow" : "text-white"}`}>{label}</h4>
+                                  <div className={`inline-block px-2 py-0.5 rounded bg-white/10 font-bold tracking-widest text-[9px] mb-2 ${isSelected ? "text-white" : "text-white/60"}`}>{ages}</div>
                                 </div>
                               </div>
-                              <p className={`text-xs md:text-sm font-medium leading-relaxed mt-2 ${isSelected ? "text-white/90" : "text-white/50"}`}>
-                                {desc}
-                              </p>
+                              <p className={`text-xs md:text-sm font-medium leading-relaxed mt-2 ${isSelected ? "text-white/90" : "text-white/50"}`}>{desc}</p>
                             </button>
                           );
                         })}
@@ -261,9 +240,7 @@ function RegisterContent() {
                         <CheckCircle2 className="size-16 text-green-400 mx-auto" />
                         <div>
                           <h3 className="font-heading font-black text-2xl md:text-3xl text-green-400 uppercase tracking-widest italic mb-2">PENDAFTARAN SUKSES!</h3>
-                          <p className="text-white/70 text-sm md:text-base font-medium">
-                            Data Anda sudah masuk ke sistem kami. Langkah terakhir, klik tombol di bawah untuk konfirmasi via WhatsApp.
-                          </p>
+                          <p className="text-white/70 text-sm md:text-base font-medium">Data Anda sudah masuk ke sistem kami. Langkah terakhir, klik tombol di bawah untuk konfirmasi via WhatsApp.</p>
                         </div>
                         <a
                           href={waUrl}
@@ -277,11 +254,7 @@ function RegisterContent() {
                           </span>
                         </a>
                         <div className="pt-4">
-                          <button
-                            type="button"
-                            onClick={handleReset}
-                            className="cursor-pointer text-white/50 hover:text-white font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4"
-                          >
+                          <button type="button" onClick={handleReset} className="cursor-pointer text-white/50 hover:text-white font-bold text-xs uppercase tracking-widest transition-all underline underline-offset-4">
                             Daftar Anggota Lain
                           </button>
                         </div>
@@ -314,9 +287,7 @@ function RegisterContent() {
 
             {!selectedHomebase?.name && (
               <div className="text-center pt-8 animate-pulse">
-                <p className="text-brand-yellow font-black text-xs tracking-widest uppercase italic">
-                  ↑ PILIH LOKASI DI ATAS UNTUK LANJUT ↑
-                </p>
+                <p className="text-brand-yellow font-black text-xs tracking-widest uppercase italic">↑ PILIH LOKASI DI ATAS UNTUK LANJUT ↑</p>
               </div>
             )}
           </div>
@@ -329,24 +300,12 @@ function RegisterContent() {
           <Link href="/" className="text-white/50 text-xs font-bold uppercase tracking-widest hover:text-brand-orange transition-colors">
             ← KEMBALI
           </Link>
-          <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">
-            &copy; {new Date().getFullYear()} ADORA Basketball Club
-          </p>
+          <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">&copy; {new Date().getFullYear()} ADORA Basketball Club</p>
           <div className="flex items-center gap-6">
-            <a
-              href={`https://instagram.com/${CONTACT.instagram}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/40 text-xs font-bold uppercase hover:text-brand-orange transition-colors"
-            >
+            <a href={`https://instagram.com/${CONTACT.instagram}`} target="_blank" rel="noopener noreferrer" className="text-white/40 text-xs font-bold uppercase hover:text-brand-orange transition-colors">
               IG @{CONTACT.instagram}
             </a>
-            <a
-              href={`https://www.tiktok.com/@${CONTACT.tiktok}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white/40 text-xs font-bold uppercase hover:text-brand-orange transition-colors"
-            >
+            <a href={`https://www.tiktok.com/@${CONTACT.tiktok}`} target="_blank" rel="noopener noreferrer" className="text-white/40 text-xs font-bold uppercase hover:text-brand-orange transition-colors">
               TikTok @{CONTACT.tiktok}
             </a>
           </div>

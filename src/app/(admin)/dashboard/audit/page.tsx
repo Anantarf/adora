@@ -8,14 +8,7 @@ import { AUDIT_ACTION_CONFIG as ACTION_CONFIG, getAuditActionConfig as getAction
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Utilities
-import { 
-  getHumanReadableTable, 
-  getHumanReadableText, 
-  extractTargetName, 
-  formatValue, 
-  TIMESTAMP_FORMATTER,
-  FIELD_LABELS 
-} from "@/lib/utils/audit-log";
+import { getHumanReadableTable, getHumanReadableText, extractTargetName, formatValue, TIMESTAMP_FORMATTER, FIELD_LABELS } from "@/lib/utils/audit-log";
 
 // ─── SUB-COMPONENTS ─────────────────────────────────────
 
@@ -70,9 +63,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
           {keys.map((k) => (
             <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
               <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
-              <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>
-                {formatValue(k, after[k])}
-              </span>
+              <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>{formatValue(k, after[k])}</span>
             </div>
           ))}
         </div>
@@ -108,9 +99,7 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
           <span className="text-micro px-2 py-0.5 rounded-full font-bold tracking-tight" style={{ backgroundColor: `${cfg.color}18`, color: cfg.color }}>
             {cfg.label}
           </span>
-          <span className="text-micro px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50 font-medium">
-            {getHumanReadableTable(log.targetTable)}
-          </span>
+          <span className="text-micro px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border/50 font-medium">{getHumanReadableTable(log.targetTable)}</span>
         </div>
 
         <p className="text-sm font-semibold text-foreground mt-1.5 leading-snug">
@@ -221,9 +210,7 @@ export default function AuditPage() {
             </DialogTitle>
             <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Log ID: {selectedLog?.id}</DialogDescription>
           </DialogHeader>
-          <div className="bg-muted/20 rounded-2xl p-5 overflow-auto max-h-[65vh] border border-border/40 mt-4 shadow-inner">
-            {selectedLog && <AuditDetailBody log={selectedLog} />}
-          </div>
+          <div className="bg-muted/20 rounded-2xl p-5 overflow-auto max-h-[65vh] border border-border/40 mt-4 shadow-inner">{selectedLog && <AuditDetailBody log={selectedLog} />}</div>
         </DialogContent>
       </Dialog>
     </div>

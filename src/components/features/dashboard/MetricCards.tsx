@@ -89,16 +89,12 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
             <Card className="border-border/50 bg-card shadow-sm hover:border-primary/30 transition-colors">
               <CardContent className="p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-2.5 md:mb-3">
-                  <p className="text-micro text-muted-foreground/60">
-                    {c.label}
-                  </p>
+                  <p className="text-micro text-muted-foreground/60">{c.label}</p>
                   <div className="size-8 rounded-lg bg-muted/60 flex items-center justify-center">
                     <Icon className="size-4 text-muted-foreground" />
                   </div>
                 </div>
-                <p className={`font-heading text-2xl sm:text-4xl tracking-wider leading-none ${valueClass}`}>
-                  {display}
-                </p>
+                <p className={`font-heading text-2xl sm:text-4xl tracking-wider leading-none ${valueClass}`}>{display}</p>
                 <p className="text-xs text-muted-foreground mt-1">{c.subtitle}</p>
               </CardContent>
             </Card>

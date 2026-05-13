@@ -3,37 +3,17 @@ import { Camera } from "lucide-react";
 import { GalleryHeroCarousel } from "@/components/features/gallery-hero-carousel";
 import Image from "next/image";
 
-function PhotoSlot({
-  label,
-  desc,
-  image,
-  color = "orange",
-  className = "",
-}: {
-  label: string;
-  desc: string;
-  image?: string;
-  color?: "orange" | "yellow";
-  className?: string;
-}) {
+function PhotoSlot({ label, desc, image, color = "orange", className = "" }: { label: string; desc: string; image?: string; color?: "orange" | "yellow"; className?: string }) {
   const isYellow = color === "yellow";
   return (
     <div
       className={`group relative rounded-2xl overflow-hidden border-2 transition-all duration-300 bg-surface-dark shadow-lg ${className} ${
-        image 
-          ? "border-black" 
-          : `border-dashed ${isYellow ? "border-brand-yellow/40 hover:border-brand-yellow" : "border-brand-orange/40 hover:border-brand-orange"}`
+        image ? "border-black" : `border-dashed ${isYellow ? "border-brand-yellow/40 hover:border-brand-yellow" : "border-brand-orange/40 hover:border-brand-orange"}`
       }`}
     >
       {image ? (
         <>
-          <Image
-            src={image}
-            alt={label}
-            fill
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
-          />
+          <Image src={image} alt={label} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-700" />
           {/* Always visible gradient */}
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
           {/* Caption — always visible, enhanced on hover */}
@@ -46,19 +26,11 @@ function PhotoSlot({
         <>
           <div className="absolute inset-0 pattern-halftone opacity-10 z-0" />
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-10 p-4 text-center">
-            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
-              isYellow ? "bg-brand-yellow/10 border border-brand-yellow/30" : "bg-brand-orange/10 border border-brand-orange/30"
-            }`}>
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isYellow ? "bg-brand-yellow/10 border border-brand-yellow/30" : "bg-brand-orange/10 border border-brand-orange/30"}`}>
               <Camera className={`w-4 h-4 opacity-70 ${isYellow ? "text-brand-yellow" : "text-brand-orange"}`} />
             </div>
-            <p className={`font-heading font-black text-[10px] md:text-xs uppercase tracking-widest italic leading-tight ${
-              isYellow ? "text-brand-yellow" : "text-brand-orange"
-            }`}>
-              {label}
-            </p>
-            <p className="text-white/35 text-[9px] md:text-[10px] font-medium leading-relaxed line-clamp-3 hidden sm:block max-w-45">
-              {desc}
-            </p>
+            <p className={`font-heading font-black text-[10px] md:text-xs uppercase tracking-widest italic leading-tight ${isYellow ? "text-brand-yellow" : "text-brand-orange"}`}>{label}</p>
+            <p className="text-white/35 text-[9px] md:text-[10px] font-medium leading-relaxed line-clamp-3 hidden sm:block max-w-45">{desc}</p>
           </div>
         </>
       )}
@@ -74,13 +46,9 @@ export function GallerySection() {
           <div className="text-center mb-8 md:mb-12">
             <div className="inline-flex items-center justify-center gap-2.5 md:gap-3 mb-2 md:mb-3">
               <Camera className="w-6 h-6 md:w-7 md:h-7 text-brand-orange" />
-              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">
-                ADORA IN ACTION
-              </h2>
+              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">ADORA IN ACTION</h2>
             </div>
-            <p className="text-white/60 text-sm md:text-base max-w-xl mx-auto font-medium">
-              Kilas balik momen latihan, keseruan turnamen, dan semangat juang keluarga besar Adora BBC.
-            </p>
+            <p className="text-white/60 text-sm md:text-base max-w-xl mx-auto font-medium">Kilas balik momen latihan, keseruan turnamen, dan semangat juang keluarga besar Adora BBC.</p>
           </div>
         </FadeIn>
 
@@ -95,20 +63,13 @@ export function GallerySection() {
           └─────────────────────┴──────────────┴──────────┘
         */}
         <div className="grid grid-cols-12 md:grid-rows-2 gap-4 md:gap-4 h-auto md:h-140">
-
           {/* Slot 1 — Hero Carousel (Besar, 2 baris) */}
           <div className="col-span-12 md:col-span-5 md:row-span-2 h-80 md:h-full group relative rounded-2xl overflow-hidden border-2 border-brand-yellow/40 hover:border-brand-yellow transition-all duration-300 bg-surface-dark shadow-xl">
             <GalleryHeroCarousel />
           </div>
 
           {/* Slot 2 — Foto Tim (kanan atas kiri) */}
-          <PhotoSlot
-            label="Adora Squad"
-            desc="Wajah-wajah penuh talenta yang selalu siap memberikan performa terbaik."
-            image="/images/gallery/team(3-2).jpg"
-            color="orange"
-            className="col-span-12 md:col-span-4 row-span-1 h-55 md:h-full"
-          />
+          <PhotoSlot label="Adora Squad" desc="Wajah-wajah penuh talenta yang selalu siap memberikan performa terbaik." image="/images/gallery/team(3-2).jpg" color="orange" className="col-span-12 md:col-span-4 row-span-1 h-55 md:h-full" />
 
           {/* Slot 3 — Motivasi (kanan atas kanan) */}
           <PhotoSlot
@@ -136,7 +97,6 @@ export function GallerySection() {
             color="orange"
             className="col-span-12 md:col-span-3 row-span-1 h-55 md:h-full"
           />
-
         </div>
       </div>
     </section>

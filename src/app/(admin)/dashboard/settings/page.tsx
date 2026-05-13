@@ -17,7 +17,7 @@ const ASSET_KEYS = [
 
 const SIGNER_KEYS = [
   { key: "rapor_coach_name", label: "Nama Head Coach", placeholder: "Contoh: Danuri Akbar" },
-  { key: "rapor_ceo_name",   label: "Nama CEO",        placeholder: "Contoh: M. Arief, S.Ak" },
+  { key: "rapor_ceo_name", label: "Nama CEO", placeholder: "Contoh: M. Arief, S.Ak" },
 ];
 
 export default function SettingsPage() {
@@ -93,20 +93,16 @@ export default function SettingsPage() {
               <FileImage className="size-5" />
               <CardTitle className="font-heading text-xl uppercase tracking-wider">Template Rapor PDF</CardTitle>
             </div>
-            <CardDescription className="text-xs">
-              Unggah aset visual untuk Rapor PDF. File akan disimpan secara aman di server.
-            </CardDescription>
+            <CardDescription className="text-xs">Unggah aset visual untuk Rapor PDF. File akan disimpan secara aman di server.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-8">
             {ASSET_KEYS.map((asset) => (
               <div key={asset.key} className="flex flex-col gap-3 group">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">
-                    {asset.label}
-                  </label>
+                  <label className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{asset.label}</label>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">{asset.description}</p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-4">
                   <div className="flex-1">
                     <div className="relative group/input">
@@ -132,13 +128,9 @@ export default function SettingsPage() {
                           ) : (
                             <Upload className="size-4 text-muted-foreground" />
                           )}
-                          <span className="text-xs font-medium text-muted-foreground truncate max-w-50">
-                            {uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? "File sudah diunggah" : "Belum ada file dipilih"}
-                          </span>
+                          <span className="text-xs font-medium text-muted-foreground truncate max-w-50">{uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? "File sudah diunggah" : "Belum ada file dipilih"}</span>
                         </div>
-                        <span className="text-micro text-primary px-3 py-1 rounded-lg bg-primary/10">
-                          Pilih File
-                        </span>
+                        <span className="text-micro text-primary px-3 py-1 rounded-lg bg-primary/10">Pilih File</span>
                       </label>
                     </div>
                   </div>
@@ -156,19 +148,21 @@ export default function SettingsPage() {
                               <span className="text-[10px] font-bold text-indigo-400">PNG</span>
                             </div>
                           ) : (
-                            <img 
-                              src={`${localValues[asset.key]}?t=${new Date().getTime()}`} 
-                              alt="Preview" 
+                            <img
+                              src={`${localValues[asset.key]}?t=${new Date().getTime()}`}
+                              alt="Preview"
                               crossOrigin="anonymous"
-                              className="max-h-full max-w-full object-contain" 
-                              onError={() => setFailedImages(prev => ({ ...prev, [asset.key]: true }))}
+                              className="max-h-full max-w-full object-contain"
+                              onError={() => setFailedImages((prev) => ({ ...prev, [asset.key]: true }))}
                             />
                           )}
                         </div>
                       )}
                       <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-foreground truncate max-w-30">Digunakan di Rapor</span>
-                        <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">Lihat File</a>
+                        <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">
+                          Lihat File
+                        </a>
                       </div>
                     </div>
                   )}
@@ -184,21 +178,14 @@ export default function SettingsPage() {
               <UserCheck className="size-5" />
               <CardTitle className="font-heading text-xl uppercase tracking-wider">Nama Penandatangan Rapor</CardTitle>
             </div>
-            <CardDescription className="text-xs">
-              Nama yang tercantum di bawah tanda tangan pada Rapor PDF.
-            </CardDescription>
+            <CardDescription className="text-xs">Nama yang tercantum di bawah tanda tangan pada Rapor PDF.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
             {SIGNER_KEYS.map(({ key, label, placeholder }) => (
               <div key={key} className="flex flex-col gap-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-foreground">{label}</label>
                 <div className="flex gap-3">
-                  <Input
-                    value={localValues[key] ?? ""}
-                    onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))}
-                    placeholder={placeholder}
-                    className="flex-1"
-                  />
+                  <Input value={localValues[key] ?? ""} onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))} placeholder={placeholder} className="flex-1" />
                   <button
                     onClick={() => handleTextSave(key, label)}
                     disabled={saving[key]}
@@ -218,8 +205,7 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-1">
             <p className="text-xs font-bold text-primary uppercase tracking-widest">Informasi Penting</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Aset yang belum diunggah tidak akan muncul di Rapor PDF — bagian tersebut akan dikosongkan secara otomatis.
-              Pastikan semua aset sudah terunggah sebelum mencetak rapor pemain.
+              Aset yang belum diunggah tidak akan muncul di Rapor PDF — bagian tersebut akan dikosongkan secara otomatis. Pastikan semua aset sudah terunggah sebelum mencetak rapor pemain.
             </p>
           </div>
         </div>
