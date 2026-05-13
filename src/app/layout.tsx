@@ -20,8 +20,28 @@ import { Providers } from "@/components/providers/query-provider";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://adorabbc.com"),
   title: "ADORA Basketball Club | Akademi Basket Profesional Indonesia",
-  description: "ADORA Basketball Club — Membentuk generasi pemain basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-10, KU-15, KU-18.",
+  description: "ADORA Basketball Club — Membentuk generasi pemain basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-8 hingga KU-16 di Depok.",
+  keywords: ["klub basket depok", "akademi basket anak", "latihan basket depok", "sekolah basket", "adora bbc", "kejurkot depok", "pembinaan basket usia dini"],
+  alternates: {
+    canonical: "/",
+  },
+  authors: [{ name: "ADORA Basketball Club" }],
+  openGraph: {
+    title: "ADORA Basketball Club",
+    description: "Akademi basket profesional di Depok untuk usia 7-18 tahun. Membentuk karakter dan prestasi melalui basket.",
+    url: "https://adorabbc.com",
+    siteName: "ADORA Basketball",
+    locale: "id_ID",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ADORA Basketball Club",
+    description: "Akademi basket profesional di Depok untuk usia 7-18 tahun.",
+    creator: "@adorabbc",
+  },
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

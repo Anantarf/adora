@@ -20,6 +20,9 @@ export const revalidate = 3600;
 export const metadata: Metadata = {
   title: "ADORA Basketball Club — Official Page",
   description: "Klub bola basket Depok untuk usia 7–18 tahun. ADORA BBC membentuk pemain muda berkarakter melalui pelatihan modern, mulai dari KEJURKOT, ASBC, hingga Liga Basket Depok.",
+  alternates: {
+    canonical: "https://adorabbc.com",
+  },
   openGraph: {
     title: "ADORA Basketball Club",
     description: "Karakter. Prestasi. Kejuaraan. ADORA Basketball Club berkomitmen membentuk pemain muda Depok yang siap bersaing di level nasional.",
@@ -34,14 +37,54 @@ export default async function LandingPage() {
   const homebases = await getPublicHomebases();
   const registrationYearText = getAcademicYear();
 
+  // JSON-LD Structured Data
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "SportsActivityLocation",
+    "name": "ADORA Basketball Club",
+    "image": "https://adorabbc.com/logo-new.svg",
+    "description": "Klub bola basket Depok untuk usia 7–18 tahun. Membentuk pemain muda berkarakter melalui pelatihan modern.",
+    "url": "https://adorabbc.com",
+    "telephone": `+${CONTACT.whatsapp}`,
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": CONTACT.address,
+      "addressLocality": "Depok",
+      "addressRegion": "Jawa Barat",
+      "addressCountry": "ID"
+    },
+    "geo": {
+      "@type": "GeoCoordinates",
+      "latitude": -6.3456, // Approx Cinere
+      "longitude": 106.7890
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "Program Latihan Basket",
+      "itemListElement": PROGRAMS.map((p, i) => ({
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": `Program Basket ${p.label}`,
+          "description": p.desc
+        },
+        "position": i + 1
+      }))
+    }
+  };
+
   return (
     <main className="min-h-screen bg-page-dark text-white relative overflow-x-hidden pt-18">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <LandingHeader />
 
       {/* ── Hero Section ── */}
       <section id="home" className="relative min-h-[calc(100vh-72px)] flex items-center justify-center bg-brand-purple pt-14 pb-12 md:py-20 clip-diagonal-bottom">
         <div className="absolute inset-0 z-0 overflow-hidden">
-          <Image src="/images/hero/hero.jpg" alt="ADORA Basketball Team" fill sizes="100vw" quality={40} className="object-cover object-center opacity-30 mix-blend-luminosity" priority fetchPriority="high" />
+          <Image src="/images/hero/hero.jpg" alt="Tim ADORA Basketball Club Depok - Pelatihan Basket Usia Dini" fill sizes="100vw" quality={40} className="object-cover object-center opacity-30 mix-blend-luminosity" priority fetchPriority="high" />
           <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/80 to-brand-purple/40 mix-blend-multiply z-10" />
           <div className="absolute inset-0 pattern-halftone opacity-20 z-10" />
         </div>
@@ -105,7 +148,7 @@ export default async function LandingPage() {
                     {image ? (
                       <Image
                         src={image}
-                        alt={`Program ${label}`}
+                        alt={`Program Latihan Basket ${label} Adora Basketball Club Depok - ${ages}`}
                         fill
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         quality={50}
