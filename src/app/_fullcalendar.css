@@ -269,3 +269,39 @@
   letter-spacing: 0.025em !important;
   color: hsl(var(--foreground)) !important;
 }
+
+/* --- MOBILE OPTIMIZATIONS --- */
+@media (max-width: 767px) {
+  .fc .fc-toolbar-title {
+    font-size: 1rem !important;
+  }
+  
+  .fc .fc-button {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.65rem !important;
+  }
+
+  .fc-col-header-cell-cushion {
+    font-size: 0.65rem !important;
+    padding: 8px 0 !important;
+  }
+
+  .fc-daygrid-day-number {
+    padding: 4px 6px !important;
+    font-size: 0.7rem !important;
+  }
+
+  .fc-daygrid-day-frame {
+    min-height: 60px !important;
+  }
+
+  .fc-daygrid-event-harness {
+    margin: 1px 0 !important;
+  }
+  
+  /* Make sure the toolbar is compact */
+  .fc-toolbar {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

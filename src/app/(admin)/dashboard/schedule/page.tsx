@@ -78,7 +78,7 @@ export default function SchedulePage() {
           <div className="flex-1 w-full min-w-0">
             <div className="glass-card p-5 rounded-card-lg border-border/40 shadow-sm overflow-hidden">
               <div className="w-full overflow-x-auto">
-                <div className="min-w-160">
+                <div className="min-w-0 md:min-w-160">
                   <CalendarView events={mappedEvents} />
                 </div>
               </div>

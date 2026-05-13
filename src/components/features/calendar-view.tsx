@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -32,6 +32,18 @@ const formatJakarta = (iso: string, options: Intl.DateTimeFormatOptions) => {
 
 export function CalendarView({ events }: CalendarViewProps) {
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
+  const [aspectRatio, setAspectRatio] = useState(2.2);
+
+  // Handle responsive aspect ratio
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      setAspectRatio(isMobile ? 0.8 : 2.2);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <>
@@ -51,7 +63,7 @@ export function CalendarView({ events }: CalendarViewProps) {
         }}
         height="auto"
         contentHeight="auto"
-        aspectRatio={2.8}
+        aspectRatio={aspectRatio}
         fixedWeekCount={false}
         dayMaxEvents={false}
         eventDisplay="block"
