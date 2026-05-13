@@ -375,11 +375,11 @@ export default function StatisticsPage() {
                           <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Pemain</span>
                         </div>
 
-                        <div className="grid grid-cols-4 gap-2">
+                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
                           {FLAT_METRIC_DEFS.map((def) => {
                             const value = metrics ? def.getValue(metrics) : undefined;
                             return (
-                              <div key={def.key} className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-center">
+                              <div key={def.key} className="shrink-0 rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-center min-w-20">
                                 <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{def.shortLabel}</p>
                                 <p className="text-sm font-mono font-bold text-primary leading-tight">{value != null ? value : "—"}</p>
                               </div>
