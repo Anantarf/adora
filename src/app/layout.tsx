@@ -25,10 +25,10 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/logo-new.png", type: "image/png", sizes: "512x512" },
+      { url: "/logo-new.svg", type: "image/svg+xml", sizes: "any" },
     ],
-    apple: [{ url: "/logo-new.png", sizes: "180x180", type: "image/png" }],
-    shortcut: "/logo-new.png",
+    apple: [{ url: "/logo-new.svg", sizes: "any", type: "image/svg+xml" }],
+    shortcut: "/logo-new.svg",
   },
 };
 

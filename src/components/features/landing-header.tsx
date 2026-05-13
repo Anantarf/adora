@@ -26,7 +26,7 @@ export function LandingHeader() {
         <div className="container relative mx-auto px-6 md:px-4 h-18 flex items-center justify-between">
           <Link href="/" aria-label="ADORA Basketball Club — ke atas halaman" className="flex items-center gap-3 group z-10">
             <div className="w-12 h-12 flex items-center justify-center transition-all group-hover:scale-105">
-              <Image src="/logo-new.png" alt="Adora BBC Logo" width={48} height={48} className="w-auto h-auto object-contain" priority />
+              <Image src="/logo-new.svg" alt="Adora BBC Logo" width={48} height={48} className="w-auto h-auto object-contain" priority />
             </div>
             <div className="flex flex-col justify-center hidden sm:flex">
               <span className="font-heading font-black text-xl tracking-widest uppercase text-white group-hover:text-brand-yellow transition-colors leading-none mt-1 italic">

@@ -286,7 +286,7 @@ export default async function LandingPage() {
             <div className="md:col-span-5">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-24 h-24 flex items-center justify-center">
-                  <Image src="/logo-new.png" alt="Adora BBC Logo" width={96} height={96} className="w-auto h-auto object-contain" style={{ width: "auto", height: "auto" }} />
+                  <Image src="/logo-new.svg" alt="Adora BBC Logo" width={96} height={96} className="w-auto h-auto object-contain" style={{ width: "auto", height: "auto" }} />
                 </div>
               </div>
               <p className="text-white/60 text-sm leading-relaxed mb-6 font-medium">

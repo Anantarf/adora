@@ -36,7 +36,7 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default">
               <div className="flex aspect-square size-10 items-center justify-center group-data-[collapsible=icon]:size-8">
-                <Image src="/logo-new.png" alt="Adora BBC" width={40} height={40} className="w-auto h-auto object-contain" priority />
+                <Image src="/logo-new.svg" alt="Adora BBC" width={40} height={40} className="w-auto h-auto object-contain" priority />
               </div>
               <div className="flex flex-col justify-center overflow-hidden group-data-[collapsible=icon]:hidden ml-1">
                 <span className="font-heading text-lg tracking-widest uppercase text-foreground leading-none mt-0.5">
