@@ -5,6 +5,12 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { LoginForm } from "@/components/features/auth/login-form";
 import { Starfield } from "@/components/ui/starfield";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Login Portal — ADORA Basketball Club",
+  description: "Masuk ke portal anggota ADORA Basketball Club untuk memantau perkembangan, jadwal latihan, dan raport pemain.",
+};
 
 export default async function LoginPage() {
   const session = await getServerSession(authOptions);
