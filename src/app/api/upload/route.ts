@@ -2,8 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
+import { fileTypeFromBuffer } from "file-type"; // npm i file-type
 
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+
+// Simple in‑memory rate limiter (requests per IP per minute)
+const rateLimitMap = new Map<string, { count: number; reset: number }>();
+const RATE_LIMIT = 30; // max 30 uploads per minute per IP
 
 const ALLOWED_TYPES = new Map([
   [".png", "image/png"],
@@ -22,6 +27,19 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
+    // Rate‑limit check
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const now = Date.now();
+    const bucket = rateLimitMap.get(ip) ?? { count: 0, reset: now + 60_000 };
+    if (now > bucket.reset) {
+      bucket.count = 0;
+      bucket.reset = now + 60_000;
+    }
+    bucket.count++;
+    rateLimitMap.set(ip, bucket);
+    if (bucket.count > RATE_LIMIT) {
+      return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
+    }
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
   }
@@ -54,6 +72,11 @@ export async function POST(req: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
+    // Verify actual MIME type using file-type
+    const detected = await fileTypeFromBuffer(buffer);
+    if (!detected || detected.mime !== expectedMime) {
+      return NextResponse.json({ error: "Tipe file tidak cocok dengan konten aktual." }, { status: 400 });
+    }
 
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const uniqueName = `${Date.now()}-${safeName}`;

@@ -128,25 +128,25 @@ export default function PlayersPage() {
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-background to-transparent sm:hidden" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-linear-to-l from-background to-transparent sm:hidden" />
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pr-2">
-          {groups?.map((group: Group) => {
-            const isActive = selectedGroupId === group.id;
-            return (
-              <button
-                key={group.id}
-                onClick={() => {
-                  setSelectedGroupId(group.id);
-                  setSearchQuery("");
-                  setCurrentPage(1);
-                }}
-                className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-colors ${
-                  isActive ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                }`}
-              >
-                {group.name}
-                <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? "bg-black/20" : "bg-background/50"}`}>{group._count?.player ?? 0}</span>
-              </button>
-            );
-          })}
+            {groups?.map((group: Group) => {
+              const isActive = selectedGroupId === group.id;
+              return (
+                <button
+                  key={group.id}
+                  onClick={() => {
+                    setSelectedGroupId(group.id);
+                    setSearchQuery("");
+                    setCurrentPage(1);
+                  }}
+                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-colors ${
+                    isActive ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                  }`}
+                >
+                  {group.name}
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? "bg-black/20" : "bg-background/50"}`}>{group._count?.player ?? 0}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

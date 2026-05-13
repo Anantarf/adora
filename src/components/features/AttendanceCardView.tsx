@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Loader2, Search, CalendarDays } from "lucide-react";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { Button } from "@/components/ui/button";
+import { Pagination } from "@/components/ui/pagination";
 import type { getEventsWithAttendanceAction } from "@/actions/schedule";
 import { getEventConfig } from "@/lib/config/events";
 
@@ -15,7 +16,16 @@ type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[numbe
 export function AttendanceCardView() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 20;
+
   const { data: events, isLoading } = useEventsWithAttendance();
+
+  // Reset to first page when search changes or data is fetched
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, events]);
+
   const filteredEvents = useMemo(() => {
     const eventList = events ?? [];
     if (!searchQuery.trim()) return eventList;
@@ -23,14 +33,20 @@ export function AttendanceCardView() {
     return eventList.filter((e) => e.title.toLowerCase().includes(q) || e.groups.some((g) => g.name.toLowerCase().includes(q)));
   }, [events, searchQuery]);
 
+  const totalPages = Math.ceil(filteredEvents.length / ITEMS_PER_PAGE);
+
+  const paginatedEvents = useMemo(() => {
+    return filteredEvents.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [filteredEvents, currentPage]);
+
   const groupedByMonth = useMemo(
     () =>
-      filteredEvents.reduce<Record<string, EventItem[]>>((acc, event) => {
+      paginatedEvents.reduce<Record<string, EventItem[]>>((acc, event) => {
         const key = format(new Date(event.date), "MMMM yyyy", { locale: idLocale });
         (acc[key] ??= []).push(event);
         return acc;
       }, {}),
-    [filteredEvents],
+    [paginatedEvents],
   );
 
   const months = useMemo(
@@ -132,6 +148,12 @@ export function AttendanceCardView() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center">
+          <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       )}
 
