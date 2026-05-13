@@ -71,7 +71,7 @@ export function LoginForm() {
 
   return (
     <div className="w-full max-w-120 z-10 opacity-100 animate-in fade-in duration-500">
-      <div className="bg-login-card/95 border border-white/10 rounded-3xl px-7 py-5 shadow-login-card sm:px-8">
+      <div className="bg-login-card/95 border border-white/10 rounded-3xl px-6 py-5 shadow-login-card sm:px-8">
         <div className="text-center mb-1">
           <div className="relative w-full flex items-center justify-center">
             <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
@@ -91,6 +91,12 @@ export function LoginForm() {
                   {...register("username")}
                   type="text"
                   disabled={loading}
+                  autoComplete="username"
+                  inputMode="text"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  enterKeyHint="next"
                   onKeyDown={(e) => e.key === " " && e.preventDefault()}
                   className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="Masukkan username"
@@ -109,6 +115,8 @@ export function LoginForm() {
                   {...register("password")}
                   type={showPassword ? "text" : "password"}
                   disabled={loading}
+                  autoComplete="current-password"
+                  enterKeyHint="go"
                   onKeyDown={(e) => e.key === " " && e.preventDefault()}
                   className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
                   placeholder="••••••••"
@@ -116,7 +124,7 @@ export function LoginForm() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-5 flex items-center text-white/60 hover:text-white/80 focus:outline-none transition-colors"
+                  className="absolute inset-y-0 right-0 px-4 flex items-center text-white/60 hover:text-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 rounded-r-2xl transition-colors"
                   aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
                 >
                   {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
@@ -129,7 +137,7 @@ export function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold tracking-widest text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
+            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold tracking-widest text-lg md:text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
             aria-label={loading ? "Sedang memproses masuk" : "Masukkan akun untuk login"}
           >
             {loading ? (

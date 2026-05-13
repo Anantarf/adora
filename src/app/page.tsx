@@ -146,25 +146,25 @@ export default async function LandingPage() {
       <HomebaseSection homebases={homebases} />
 
       {/* ── Adora Sports Entertainment & Turnamen ── */}
-      <section id="turnamen" className="relative pt-12 pb-16 md:pt-16 md:pb-24 bg-brand-purple scroll-mt-20 clip-diagonal z-30 -mt-10">
+      <section id="turnamen" className="relative pt-10 pb-14 md:pt-16 md:pb-24 bg-brand-purple scroll-mt-20 clip-diagonal z-30 -mt-10">
         {/* Background Textures */}
         <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none overflow-hidden"></div>
 
         <div className="container mx-auto px-4 relative z-10">
           <FadeIn direction="up">
-            <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-center bg-black/40 backdrop-blur-md border border-white/10 p-5 md:p-10 rounded-card-lg shadow-2xl">
-              <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-6 md:gap-8">
+            <div className="grid lg:grid-cols-2 gap-5 lg:gap-8 items-center bg-black/40 backdrop-blur-md border border-white/10 p-4 sm:p-5 md:p-10 rounded-card-lg shadow-2xl">
+              <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-4 md:gap-8">
                 <div className="w-full">
-                  <div className="inline-block skew-box bg-brand-yellow px-4 py-1 mb-4 border-b-4 border-r-4 border-black">
+                  <div className="inline-block skew-box bg-brand-yellow px-4 py-1 mb-3 md:mb-4 border-b-4 border-r-4 border-black">
                     <span className="unskew-content block font-heading font-black uppercase text-black text-xs tracking-widest">EVENT & TURNAMEN</span>
                   </div>
-                  <h3 className="font-heading font-black text-2xl sm:text-3xl md:text-4xl text-white uppercase tracking-widest mb-3 italic drop-shadow-lg wrap-break-word">
+                  <h3 className="font-heading font-black text-2xl sm:text-3xl md:text-4xl text-white uppercase tracking-widest mb-2 md:mb-3 italic drop-shadow-lg wrap-break-word">
                     Adora Sports <br />
                     <span className="text-brand-orange pr-2">Entertainment</span>
                   </h3>
-                  <p className="text-white/80 text-xs md:text-base leading-relaxed mb-6 font-medium">Dua turnamen resmi yang kami selenggarakan setiap tahun sebagai wadah kompetisi usia dini terbaik di Depok.</p>
-                  <ul className="text-left space-y-3 text-sm md:text-base text-white">
-                    <li className="flex items-start gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
+                  <p className="text-white/80 text-xs md:text-base leading-relaxed mb-4 md:mb-6 font-medium">Dua turnamen resmi yang kami selenggarakan setiap tahun sebagai wadah kompetisi usia dini terbaik di Depok.</p>
+                  <ul className="text-left space-y-2 md:space-y-3 text-sm md:text-base text-white">
+                    <li className="flex items-start gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
                       <div className="bg-brand-orange p-3 rounded-xl shrink-0 text-black">
                         <Trophy className="w-6 h-6" />
                       </div>
@@ -173,7 +173,7 @@ export default async function LandingPage() {
                         <span className="text-white/70">Adora Student Basketball Championship (ASBC), turnamen antar pelajar sekolah.</span>
                       </div>
                     </li>
-                    <li className="flex items-start gap-4 bg-white/5 p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
+                    <li className="flex items-start gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
                       <div className="bg-brand-orange p-3 rounded-xl shrink-0 text-black">
                         <Trophy className="w-6 h-6" />
                       </div>
@@ -189,7 +189,7 @@ export default async function LandingPage() {
                   href={`https://instagram.com/${CONTACT.asbc_instagram}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex skew-box items-center gap-2 bg-transparent border-4 border-brand-yellow text-brand-yellow hover:bg-brand-yellow hover:text-black px-6 py-3 font-black uppercase tracking-widest text-xs transition-all hover:scale-105 shadow-[4px_4px_0px_#000]"
+                  className="hidden lg:inline-flex skew-box items-center gap-2 bg-transparent border-4 border-brand-yellow text-brand-yellow hover:bg-brand-yellow hover:text-black px-6 py-3 font-black uppercase tracking-widest text-xs transition-all hover:scale-105 shadow-[4px_4px_0px_#000]"
                 >
                   <span className="unskew-content flex items-center gap-2">
                     <Trophy className="w-5 h-5" />
@@ -204,6 +204,18 @@ export default async function LandingPage() {
                 <div className="relative z-10 border-4 border-black shadow-[6px_6px_0px_#CCFF00] sm:shadow-[12px_12px_0px_#CCFF00] rounded-card overflow-hidden bg-black">
                   <AutoFadeCarousel images={["/images/tournaments/asbcnew1.JPG", "/images/tournaments/asbcnew2.JPG", "/images/tournaments/asbcnew3.jpg", "/images/tournaments/asbc4.jpg", "/images/tournaments/asbc5.jpg"]} />
                 </div>
+
+                <a
+                  href={`https://instagram.com/${CONTACT.asbc_instagram}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex lg:hidden mt-4 mx-auto skew-box items-center gap-2 bg-transparent border-4 border-brand-yellow text-brand-yellow hover:bg-brand-yellow hover:text-black px-6 py-3 font-black uppercase tracking-widest text-xs transition-all shadow-[4px_4px_0px_#000]"
+                >
+                  <span className="unskew-content flex items-center gap-2">
+                    <Trophy className="w-5 h-5" />
+                    INFO TURNAMEN
+                  </span>
+                </a>
               </div>
             </div>
           </FadeIn>
@@ -214,7 +226,7 @@ export default async function LandingPage() {
       <GallerySection />
 
       {/* ── Final Call to Action ── */}
-      <section id="daftar" className="py-16 md:py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
+      <section id="daftar" className="py-14 md:py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
         {/* Sporty Background Ornaments */}
         <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none"></div>
 
@@ -228,15 +240,15 @@ export default async function LandingPage() {
           <div className="absolute top-[-10%] right-[10%] w-px h-[120%] bg-brand-yellow rotate-45"></div>
         </div>
 
-        <div className="container mx-auto px-6 relative z-10 text-center">
+        <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
           <FadeIn direction="up">
-            <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic mb-3 md:mb-4 drop-shadow-lg">
+            <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic mb-2.5 md:mb-4 drop-shadow-lg">
               SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
             </h2>
-            <p className="text-white/90 max-w-xl mx-auto mb-8 md:mb-10 font-medium text-sm md:text-base leading-relaxed">Pendaftaran mudah, cepat, dan 100% online.</p>
+            <p className="text-white/90 max-w-xl mx-auto mb-7 md:mb-10 font-medium text-sm md:text-base leading-relaxed">Pendaftaran mudah, cepat, dan 100% online.</p>
 
             {/* Compact Registration Steps with Orange Accents */}
-            <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-12 max-w-4xl mx-auto mb-10 md:mb-12" delay={0.2}>
+            <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-12 max-w-4xl mx-auto mb-8 md:mb-12" delay={0.2}>
               {REGISTRATION_STEPS.map(({ step, title, desc }) => (
                 <StaggerItem key={step} className="flex items-center gap-3 md:gap-4 relative group">
                   <div className="text-brand-orange font-heading font-black text-2xl md:text-3xl italic drop-shadow-sm shrink-0 transition-transform group-hover:scale-110">0{step}</div>
@@ -258,7 +270,7 @@ export default async function LandingPage() {
                   DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">→</span>
                 </span>
               </Link>
-              <div className="mt-6 flex flex-col items-center gap-1">
+              <div className="mt-5 md:mt-6 flex flex-col items-center gap-1">
                 <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Kuota terbatas untuk setiap kelompok usia</p>
                 <div className="w-12 h-1 bg-brand-orange/40 rounded-full"></div>
               </div>

@@ -60,8 +60,8 @@ const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, se
 
   return (
     <TableRow className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
-      <TableCell className="text-center text-muted-foreground font-medium sticky left-0 bg-inherit z-10">{idx + 1}</TableCell>
-      <TableCell className="font-semibold sticky left-8 bg-inherit z-10">{player.name}</TableCell>
+      <TableCell className="w-12 min-w-12 max-w-12 px-2 text-center text-muted-foreground font-medium sticky left-0 bg-card z-20">{idx + 1}</TableCell>
+      <TableCell className="min-w-40 max-w-50 truncate font-semibold sticky left-12 bg-card z-20">{player.name}</TableCell>
       {FLAT_METRIC_DEFS.map((def) => (
         <TableCell key={def.key} className="text-center font-mono text-sm">
           <MetricCell v={m ? def.getValue(m) : undefined} />
@@ -276,7 +276,7 @@ export default function StatisticsPage() {
           </div>
 
           {/* Group filter */}
-          <div className="flex flex-col gap-1.5 w-full md:min-w-[14rem]">
+          <div className="flex flex-col gap-1.5 w-full md:min-w-56">
             <label className="text-micro text-muted-foreground">Filter Kelompok</label>
             <div className="relative group">
               <SelectIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
@@ -302,17 +302,17 @@ export default function StatisticsPage() {
         {selectedPeriodId && !statsLoading && (
           <div className="flex flex-wrap items-center gap-3 pt-3 border-t border-border/40">
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Selesai</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Selesai</span>
               <span className="text-sm font-bold text-primary tabular-nums">{statsSummary.published}</span>
             </div>
             <div className="size-1 rounded-full bg-border/60" />
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Sementara</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Sementara</span>
               <span className="text-sm font-bold text-foreground tabular-nums">{statsSummary.draft}</span>
             </div>
             <div className="size-1 rounded-full bg-border/60" />
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Total</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Total</span>
               <span className="text-sm font-bold text-foreground tabular-nums">{totalPlayerCount}</span>
             </div>
           </div>
@@ -328,14 +328,140 @@ export default function StatisticsPage() {
         </div>
       )}
 
-      {/* Table */}
+      {/* Mobile cards */}
       {selectedPeriodId && (
-        <div className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
-          <Table className="min-w-[900px]">
+        <div className="md:hidden space-y-4">
+          {(playersLoading || statsLoading) && (
+            <div className="rounded-xl border border-border/50 bg-card p-6 text-center">
+              <div className="flex items-center justify-center gap-2 text-primary font-bold">
+                <Loader2 className="size-5 animate-spin" /> Memuat data penilaian...
+              </div>
+            </div>
+          )}
+
+          {!playersLoading && !statsLoading && playersByGroup.length === 0 && (
+            <div className="rounded-xl border border-border/50 bg-card p-6 text-center">
+              {(players?.length ?? 0) === 0 ? (
+                <>
+                  <p className="font-semibold text-foreground text-sm">Belum ada pemain terdaftar</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tambah pemain terlebih dahulu melalui halaman Pemain.</p>
+                </>
+              ) : (
+                <>
+                  <p className="font-semibold text-foreground text-sm">Semua pemain belum memiliki kelompok</p>
+                  <p className="text-xs text-muted-foreground mt-1">Tetapkan kelompok pada pemain melalui halaman Pemain.</p>
+                </>
+              )}
+            </div>
+          )}
+
+          {!playersLoading &&
+            !statsLoading &&
+            playersByGroup.map(({ group, players: gPlayers }) => (
+              <section key={group.id} className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm">
+                <div className="px-4 py-2.5 border-b border-border/50 bg-muted/20 font-bold text-primary uppercase tracking-widest text-xs">{group.name}</div>
+                <div className="divide-y divide-border/40">
+                  {gPlayers.map((player, idx) => {
+                    const stat = statsMap[player.id];
+                    const metrics = getValidMetrics(stat?.metricsJson);
+
+                    return (
+                      <article key={player.id} className="p-4 space-y-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="font-semibold text-foreground text-sm leading-tight min-w-0 wrap-break-word">
+                            <span className="text-muted-foreground mr-1">{idx + 1}.</span>
+                            {player.name}
+                          </p>
+                          <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Pemain</span>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-2">
+                          {FLAT_METRIC_DEFS.map((def) => {
+                            const value = metrics ? def.getValue(metrics) : undefined;
+                            return (
+                              <div key={def.key} className="rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-center">
+                                <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{def.shortLabel}</p>
+                                <p className="text-sm font-mono font-bold text-primary leading-tight">{value != null ? value : "—"}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1.5 text-center">
+                            <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Nilai</p>
+                            <div className="mt-1 flex justify-center">{metrics ? <GradeBadge score={averageScore(metrics)} /> : <span className="text-muted-foreground text-xs">—</span>}</div>
+                          </div>
+                          <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1.5 text-center">
+                            <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">Status</p>
+                            <div className="mt-1 flex justify-center">
+                              <Badge
+                                variant="outline"
+                                className={`text-[10px] uppercase tracking-widest font-bold ${stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className : "text-muted-foreground border-border/50"}`}
+                              >
+                                {stat ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].label : "Belum Diisi"}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="-mx-4 mt-1 border-t border-border/40 px-4 pt-3">
+                          <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">Aksi Cepat</div>
+                          <div className="flex items-center justify-end gap-2">
+                            {metrics && (
+                              <button
+                                title="Download Rapor PDF"
+                                onClick={() =>
+                                  generateRaporPDF({
+                                    playerName: player.name,
+                                    groupName: group.name,
+                                    schoolOrigin: player.schoolOrigin,
+                                    periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
+                                    metrics,
+                                    assets: {
+                                      headerUrl: settings?.rapor_header_url,
+                                      ceoSignUrl: settings?.rapor_ceo_sign_url,
+                                      coachSignUrl: settings?.rapor_coach_sign_url,
+                                      stampUrl: settings?.rapor_stamp_url,
+                                    },
+                                    signers: {
+                                      coachName: settings?.rapor_coach_name,
+                                      ceoName: settings?.rapor_ceo_name,
+                                    },
+                                  })
+                                }
+                                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors"
+                              >
+                                <FileDown className="size-4" />
+                              </button>
+                            )}
+                            <AddStatDialog
+                              player={player}
+                              periodId={selectedPeriod?.id}
+                              isPeriodActive={selectedPeriod?.isActive}
+                              existingStat={stat ? { id: stat.id, metrics: stat.metricsJson as MetricsJson, status: stat.status as "Draft" | "Published" } : undefined}
+                              triggerClassName="h-10 px-3"
+                              alwaysShowLabel
+                            />
+                          </div>
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
+        </div>
+      )}
+
+      {/* Desktop table */}
+      {selectedPeriodId && (
+        <div className="hidden md:block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
+          <Table className="min-w-245">
             <TableHeader className="bg-muted/30">
               <TableRow className="hover:bg-transparent border-b border-border/50">
-                <TableHead className="w-8 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground sticky left-0 bg-muted/30 z-10">No</TableHead>
-                <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground min-w-[120px] sticky left-8 bg-muted/30 z-10">Nama Pemain</TableHead>
+                <TableHead className="w-12 min-w-12 max-w-12 px-2 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground sticky left-0 bg-muted/30 z-20">No</TableHead>
+                <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground min-w-40 max-w-50 sticky left-12 bg-muted/30 z-20">Nama Pemain</TableHead>
                 {FLAT_METRIC_DEFS.map((def) => (
                   <TableHead key={def.key} className="w-12 text-center text-[9px] uppercase font-bold tracking-wider text-muted-foreground px-1" title={def.label}>
                     {def.shortLabel}

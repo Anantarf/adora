@@ -98,11 +98,11 @@ export default function ParentDashboard() {
   const flatItems = latestMetrics ? flattenMetrics(latestMetrics) : [];
 
   return (
-    <div className="flex flex-col gap-8 w-full">
+    <div className="flex flex-col gap-6 md:gap-8 w-full">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-border pb-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 border-b border-border pb-6 md:pb-8">
         <div className="space-y-1">
-          <h1 className="font-heading text-3xl md:text-4xl text-foreground uppercase tracking-tight">Pantauan Pemain</h1>
+          <h1 className="font-heading text-2xl md:text-4xl text-foreground uppercase tracking-tight">Pantauan Pemain</h1>
           <p className="text-muted-foreground text-sm font-medium">Laporan evaluasi performa individual anak Anda.</p>
         </div>
 
@@ -110,7 +110,7 @@ export default function ParentDashboard() {
           <div className="flex flex-col gap-2 w-full md:w-auto">
             <span className="text-micro text-muted-foreground/70 ml-1">Pilih Profil Anak</span>
             <Select value={effectiveChildId || undefined} onValueChange={setSelectedChildId}>
-              <SelectTrigger className="w-full md:w-72 h-11 border-border bg-card font-semibold text-foreground">
+              <SelectTrigger className="w-full md:w-72 h-11 min-h-11 border-border bg-card font-semibold text-foreground">
                 <SelectValue placeholder="Pilih Profil...">{effectiveChildId && children?.find((c) => c.id === effectiveChildId)?.name}</SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -163,12 +163,12 @@ export default function ParentDashboard() {
                   <GradeBadge score={averageScore(latestMetrics)} variant="full" />
                 </div>
               </CardHeader>
-              <CardContent className="p-4">
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+              <CardContent className="p-3 md:p-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                   {flatItems.map((item) => (
-                    <div key={item.key} className="rounded-lg bg-muted/30 border border-border/40 p-3 text-center flex flex-col justify-center min-h-[80px]">
+                    <div key={item.key} className="rounded-lg bg-muted/30 border border-border/40 p-2.5 md:p-3 text-center flex flex-col justify-center min-h-18 md:min-h-20">
                       <p className="text-micro text-muted-foreground leading-tight mb-1">{item.label}</p>
-                      <p className="text-2xl font-bold tabular-nums text-foreground">{item.value}</p>
+                      <p className="text-xl md:text-2xl font-bold tabular-nums text-foreground">{item.value}</p>
                     </div>
                   ))}
                 </div>
@@ -182,8 +182,8 @@ export default function ParentDashboard() {
               <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Komposisi Kemampuan</CardTitle>
               <CardDescription className="text-xs">Perbandingan skor antar aspek teknik dasar.</CardDescription>
             </CardHeader>
-            <CardContent className="pt-6 h-80 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={280} minWidth={0} minHeight={0}>
+            <CardContent className="pt-5 md:pt-6 h-72 md:h-80 flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={240} minWidth={0} minHeight={0}>
                 <RadarChart cx="50%" cy="50%" outerRadius="60%" data={radarData}>
                   <PolarGrid stroke="var(--muted-foreground)" strokeOpacity={0.2} />
                   <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--muted-foreground)", fontSize: 9, fontWeight: 700 }} />
@@ -201,9 +201,9 @@ export default function ParentDashboard() {
                 <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Grafik Perkembangan</CardTitle>
                 <CardDescription className="text-xs">Total skor keseluruhan per periode evaluasi.</CardDescription>
               </CardHeader>
-              <CardContent className="pt-6 h-72">
-                <ResponsiveContainer width="100%" height={250} minWidth={0} minHeight={0}>
-                  <LineChart data={progressionData} margin={{ top: 5, right: 15, left: -20, bottom: 0 }}>
+              <CardContent className="pt-5 md:pt-6 h-64 md:h-72">
+                <ResponsiveContainer width="100%" height={220} minWidth={0} minHeight={0}>
+                  <LineChart data={progressionData} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted-foreground)" strokeOpacity={0.1} />
                     <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
                     <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
@@ -247,7 +247,7 @@ export default function ParentDashboard() {
                         <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
                       </div>
                     ))}
-                    <div className="ml-auto flex items-center gap-2 px-4 py-1.5 rounded-lg border border-primary/20 bg-primary/5">
+                    <div className="w-full sm:w-auto sm:ml-auto flex items-center justify-between sm:justify-start gap-2 px-4 py-1.5 rounded-lg border border-primary/20 bg-primary/5">
                       <span className="text-micro text-muted-foreground">Tingkat Kehadiran</span>
                       <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
                         {attendanceSummary?.rate ?? 0}%
@@ -285,13 +285,13 @@ export default function ParentDashboard() {
                   <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Catatan Pelatih</CardTitle>
                   <CardDescription className="text-xs">Evaluasi tekstual dari rapor terakhir.</CardDescription>
                 </div>
-                <Button size="sm" className="h-9 px-4 uppercase font-bold tracking-widest text-[10px] shrink-0" onClick={handleDownloadPDF}>
+                <Button size="sm" className="h-10 px-4 w-full sm:w-auto uppercase font-bold tracking-widest text-[10px] shrink-0" onClick={handleDownloadPDF}>
                   <FileText className="mr-2 size-3" /> Unduh Rapor PDF
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="relative p-6 bg-primary/5 rounded-xl border border-primary/10">
+            <CardContent className="p-4 md:p-6">
+              <div className="relative p-4 md:p-6 bg-primary/5 rounded-xl border border-primary/10">
                 <span className="absolute -top-3 -left-2 text-6xl text-primary/20 font-serif leading-none">&quot;</span>
                 <p className="text-sm font-medium leading-relaxed text-muted-foreground relative z-10 pl-4 border-l-2 border-primary">
                   {latestMetrics?.notes || "Pelatih tidak menitipkan catatan khusus pada evaluasi ini. Anak berkembang dengan baik di sesi latihan reguler."}

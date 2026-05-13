@@ -21,11 +21,17 @@ const scoreInAndOut = z.coerce.number().min(0, "Min 0").max(99, "Maks 99");
 
 const statSchema = z.object({
   dribble: z.object({
-    inAndOut: scoreInAndOut, crossover: scoreNormal, vLeft: scoreNormal, vRight: scoreNormal,
-    betweenLegsLeft: scoreNormal, betweenLegsRight: scoreNormal,
+    inAndOut: scoreInAndOut,
+    crossover: scoreNormal,
+    vLeft: scoreNormal,
+    vRight: scoreNormal,
+    betweenLegsLeft: scoreNormal,
+    betweenLegsRight: scoreNormal,
   }),
   passing: z.object({
-    chestPass: scoreNormal, bouncePass: scoreNormal, overheadPass: scoreNormal,
+    chestPass: scoreNormal,
+    bouncePass: scoreNormal,
+    overheadPass: scoreNormal,
   }),
   layUp: scoreNormal,
   shooting: scoreNormal,
@@ -50,7 +56,15 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...
   return (
     <div className="flex flex-col gap-1">
       <label className="text-micro text-muted-foreground">{label}</label>
-      <Input type="number" min={0} max={max} step={1} onChange={handleChange} {...props} className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner" />
+      <Input
+        type="number"
+        min={0}
+        max={max}
+        step={1}
+        onChange={handleChange}
+        {...props}
+        className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner"
+      />
       {error && <p className="text-[10px] text-destructive">{error}</p>}
     </div>
   );
@@ -75,11 +89,15 @@ export function AddStatDialog({
   periodId,
   isPeriodActive = true,
   existingStat,
+  triggerClassName,
+  alwaysShowLabel = false,
 }: {
   player: Player;
   periodId: string;
   isPeriodActive?: boolean;
   existingStat?: ExistingStat;
+  triggerClassName?: string;
+  alwaysShowLabel?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<"Draft" | "Published" | null>(null);
@@ -88,7 +106,13 @@ export function AddStatDialog({
 
   const defaultValues: StatForm = existingStat?.metrics ?? DEFAULT_METRICS;
 
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<StatForm>({
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    watch,
+  } = useForm<StatForm>({
     resolver: zodResolver(statSchema) as Resolver<StatForm>,
     defaultValues,
   });
@@ -121,19 +145,26 @@ export function AddStatDialog({
 
   return (
     <>
-      <Button
-        size="sm"
-        variant={isEdit ? "outline" : "default"}
-        className="h-8 font-bold uppercase tracking-widest text-xs gap-1.5"
-        onClick={() => setOpen(true)}
-      >
-        {isEdit ? <><Pencil className="size-3" /><span className="hidden sm:inline">Ubah</span></> : <><Plus className="size-3" /><span className="hidden sm:inline">Input Nilai</span></>}
+      <Button size="sm" variant={isEdit ? "outline" : "default"} className={`h-8 font-bold uppercase tracking-widest text-xs gap-1.5 ${triggerClassName ?? ""}`} onClick={() => setOpen(true)}>
+        {isEdit ? (
+          <>
+            <Pencil className="size-3" />
+            <span className={alwaysShowLabel ? "" : "hidden sm:inline"}>Ubah</span>
+          </>
+        ) : (
+          <>
+            <Plus className="size-3" />
+            <span className={alwaysShowLabel ? "" : "hidden sm:inline"}>Input Nilai</span>
+          </>
+        )}
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg max-h-dialog-lg overflow-y-auto custom-scrollbar bg-card border-border/50">
           <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-muted/60 rounded-xl shrink-0"><LineChart className="size-6 text-muted-foreground" /></div>
+            <div className="p-3 bg-muted/60 rounded-xl shrink-0">
+              <LineChart className="size-6 text-muted-foreground" />
+            </div>
             <div className="flex flex-col gap-0.5">
               <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Perbarui" : "Input"} Nilai</DialogTitle>
               <DialogDescription className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
@@ -143,9 +174,7 @@ export function AddStatDialog({
           </div>
 
           {!isPeriodActive && (
-            <div className="p-3 mb-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium text-center tracking-wide">
-              Periode evaluasi ini sudah tidak aktif. Data nilai tidak dapat diubah.
-            </div>
+            <div className="p-3 mb-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium text-center tracking-wide">Periode evaluasi ini sudah tidak aktif. Data nilai tidak dapat diubah.</div>
           )}
 
           <form className="flex flex-col gap-3 mt-1">
@@ -158,13 +187,7 @@ export function AddStatDialog({
                 </div>
                 <div className="p-3 grid grid-cols-2 gap-2">
                   {FLAT_METRIC_DEFS.map((def) => (
-                    <ScoreField
-                      key={def.key}
-                      label={def.label}
-                      max={def.max}
-                      {...register(def.path as Path<StatForm>)}
-                      error={getNestedError(errors as Record<string, unknown>, def.path)}
-                    />
+                    <ScoreField key={def.key} label={def.label} max={def.max} {...register(def.path as Path<StatForm>)} error={getNestedError(errors as Record<string, unknown>, def.path)} />
                   ))}
                 </div>
               </div>
@@ -192,10 +215,28 @@ export function AddStatDialog({
             {isPeriodActive && (
               <div className="flex flex-col gap-2 mt-1">
                 <Button type="button" onClick={handleSubmit((d) => onSubmit(d, "Published"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 bg-primary hover:bg-primary/90 text-primary-foreground">
-                  {pendingStatus === "Published" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan & Terbitkan"}
+                  {pendingStatus === "Published" ? (
+                    <>
+                      <Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...
+                    </>
+                  ) : (
+                    "Simpan & Terbitkan"
+                  )}
                 </Button>
-                <Button type="button" variant="outline" onClick={handleSubmit((d) => onSubmit(d, "Draft"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary transition-colors">
-                  {pendingStatus === "Draft" ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan Draft...</> : "Simpan sebagai Draft"}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleSubmit((d) => onSubmit(d, "Draft"))}
+                  disabled={isPending}
+                  className="w-full font-bold uppercase tracking-widest text-xs h-11 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary transition-colors"
+                >
+                  {pendingStatus === "Draft" ? (
+                    <>
+                      <Loader2 className="animate-spin size-4 mr-2" /> Menyimpan Draft...
+                    </>
+                  ) : (
+                    "Simpan sebagai Draft"
+                  )}
                 </Button>
               </div>
             )}

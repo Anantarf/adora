@@ -6,7 +6,7 @@ export default function AttendancesPage() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 border-b border-border/50 pb-6 md:pb-8">
         <div>
           <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Presensi Pemain</h1>
           <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola kehadiran pemain per agenda latihan.</p>

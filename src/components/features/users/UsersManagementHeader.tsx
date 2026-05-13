@@ -16,9 +16,9 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
   const isParent = role === "PARENT";
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 border-b border-border/50 pb-6 md:pb-8">
         <div>
-          <h1 className="text-4xl font-heading uppercase tracking-widest text-foreground">Manajemen Akun</h1>
+          <h1 className="text-2xl md:text-4xl font-heading uppercase tracking-widest text-foreground">Manajemen Akun</h1>
           <p className="text-muted-foreground text-sm font-medium tracking-wide">{isParent ? "Kelola akun orang tua dan akses mereka ke portal pemain." : "Kelola akun admin yang memiliki akses ke sistem manajemen klub."}</p>
         </div>
         <AddUserDialog role={role} />

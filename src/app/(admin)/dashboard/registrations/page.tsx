@@ -10,7 +10,7 @@ export default async function RegistrationsPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
-      <div className="flex flex-col gap-1 border-b border-border/50 pb-6">
+      <div className="flex flex-col gap-1 border-b border-border/50 pb-6 md:pb-8">
         <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">
           Pendaftar Baru
         </h1>

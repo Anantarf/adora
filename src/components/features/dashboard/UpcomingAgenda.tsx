@@ -24,7 +24,7 @@ export function UpcomingAgenda() {
     // Sama persis strukturnya dengan RecentRegistrations: flex flex-col h-full
     <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
       {/* Header */}
-      <div className="p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
+      <div className="p-4 md:p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
         <div>
           <h2 className="font-heading text-base tracking-wider text-foreground flex items-center gap-2">
             <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />
@@ -36,7 +36,7 @@ export function UpcomingAgenda() {
       </div>
 
       {/* Content — flex-1 sama seperti RecentRegistrations */}
-      <div className="flex-1 p-6 flex flex-col min-h-[380px]">
+      <div className="flex-1 p-4 md:p-6 flex flex-col min-h-75 md:min-h-95">
         {isLoading ? (
           <div className="space-y-3">
             {Array.from({ length: 4 }).map((_, i) => (
@@ -58,7 +58,7 @@ export function UpcomingAgenda() {
               const eventDate = new Date(ev.date);
 
               return (
-                <Link key={ev.id} href="/dashboard/schedule" className="group flex items-center gap-3 p-3 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all">
+                <Link key={ev.id} href="/dashboard/schedule" className="group flex items-center gap-3 p-3.5 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all">
                   <div className="shrink-0 size-9 rounded-lg flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: cfg.color }}>
                     <Icon className="size-4" />
                   </div>
@@ -91,10 +91,10 @@ export function UpcomingAgenda() {
 
       {/* Button — identik dengan RecentRegistrations */}
       {upcoming.length > 0 && (
-        <div className="px-6 pb-6 pt-2">
+        <div className="px-4 md:px-6 pb-4 md:pb-6 pt-2">
           <Link
             href="/dashboard/schedule"
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground rounded-lg transition-all"
+            className="w-full min-h-11 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground rounded-lg transition-all"
           >
             Lihat Semua Agenda
             <ArrowRight className="size-3.5" />

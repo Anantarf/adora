@@ -78,10 +78,10 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-12">
       {/* Header */}
-      <div className="flex flex-col gap-1 border-b border-border/50 pb-6">
+      <div className="flex flex-col gap-1 border-b border-border/50 pb-6 md:pb-8">
         <div className="flex items-center gap-3">
           <Settings className="size-8 text-primary" />
-          <h1 className="font-heading text-4xl text-foreground tracking-widest uppercase">Pengaturan Klub</h1>
+          <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Pengaturan Klub</h1>
         </div>
         <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola aset dan template dokumen resmi ADORA BBC.</p>
       </div>
@@ -132,7 +132,7 @@ export default function SettingsPage() {
                           ) : (
                             <Upload className="size-4 text-muted-foreground" />
                           )}
-                          <span className="text-xs font-medium text-muted-foreground truncate max-w-[200px]">
+                          <span className="text-xs font-medium text-muted-foreground truncate max-w-50">
                             {uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? "File sudah diunggah" : "Belum ada file dipilih"}
                           </span>
                         </div>
@@ -144,7 +144,7 @@ export default function SettingsPage() {
                   </div>
 
                   {localValues[asset.key] && (
-                    <div className="flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 min-w-[200px]">
+                    <div className="flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 min-w-50">
                       {localValues[asset.key].endsWith(".pdf") ? (
                         <div className="size-10 rounded bg-red-500/10 flex items-center justify-center">
                           <span className="text-[10px] font-bold text-red-500">PDF</span>
@@ -167,7 +167,7 @@ export default function SettingsPage() {
                         </div>
                       )}
                       <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-foreground truncate max-w-[120px]">Digunakan di Rapor</span>
+                        <span className="text-[10px] font-bold text-foreground truncate max-w-30">Digunakan di Rapor</span>
                         <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">Lihat File</a>
                       </div>
                     </div>

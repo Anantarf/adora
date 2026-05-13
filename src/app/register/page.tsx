@@ -25,6 +25,8 @@ const FORM_FIELDS: Array<{
   label: string;
   required: boolean;
   placeholder: string;
+  autoComplete?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
   sanitize?: (val: string) => string;
 }> = [
   {
@@ -33,6 +35,8 @@ const FORM_FIELDS: Array<{
     label: "Nama Lengkap Pemain",
     required: true,
     placeholder: "Contoh: Muhammad Arya Putra",
+    autoComplete: "name",
+    inputMode: "text",
     sanitize: (v) => v.replace(/[^a-zA-Z\s.'\-]/g, ""),
   },
   {
@@ -41,6 +45,8 @@ const FORM_FIELDS: Array<{
     label: "No. WhatsApp Orang Tua",
     required: true,
     placeholder: "Contoh: 08123456789",
+    autoComplete: "tel",
+    inputMode: "tel",
     sanitize: (v) => v.replace(/[^\d+]/g, "").replace(/(?!^)\+/g, ""),
   },
   {
@@ -49,11 +55,13 @@ const FORM_FIELDS: Array<{
     label: "Email (Opsional)",
     required: false,
     placeholder: "Contoh: orang.tua@email.com",
+    autoComplete: "email",
+    inputMode: "email",
   },
 ];
 
 const INPUT_CLASS =
-  "w-full px-4 py-3 bg-black/40 border-2 border-white/10 rounded-xl text-white placeholder:text-white/30 text-sm font-medium focus:outline-none focus:border-brand-yellow focus:bg-black/60 transition-colors";
+  "w-full px-4 py-3 min-h-12 bg-black/40 border-2 border-white/10 rounded-xl text-white placeholder:text-white/30 text-base md:text-sm font-medium focus:outline-none focus:border-brand-yellow focus:bg-black/60 transition-colors";
 
 // ─── Inner (uses useSearchParams — harus di dalam Suspense) ──────────────────
 
@@ -124,20 +132,20 @@ function RegisterContent() {
       
       {/* Background Textures */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-brand-orange rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
+        <div className="absolute top-0 right-0 w-200 h-200 bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
+        <div className="absolute bottom-0 left-0 w-150 h-150 bg-brand-orange rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
         <div className="absolute inset-0 pattern-halftone opacity-30"></div>
       </div>
 
       {/* ── Hero ── */}
-      <section className="relative pt-10 pb-6 md:pt-12 md:pb-8 text-center px-4 z-10">
+      <section className="relative pt-9 pb-5 md:pt-12 md:pb-8 text-center px-4 z-10">
         <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-6 border-2 border-black shadow-[4px_4px_0px_#000]">
           <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">
             // JOIN THE SQUAD //
           </span>
         </div>
         <h1 className="font-heading font-black text-3xl md:text-5xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
-          FORM <span className="inline-block text-transparent bg-clip-text bg-gradient-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>
+          FORM <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>
         </h1>
         <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto font-medium">
           Isi data dengan lengkap. Langkah awal menuju Kejurkot dimulai dari sini.
@@ -185,7 +193,7 @@ function RegisterContent() {
                 <form onSubmit={handleSubmit}>
                   <div className="space-y-6">
                     {/* Text inputs dari config */}
-                    {FORM_FIELDS.map(({ key, type, label, required, placeholder, sanitize }) => (
+                    {FORM_FIELDS.map(({ key, type, label, required, placeholder, autoComplete, inputMode, sanitize }) => (
                       <div key={key}>
                         <label className="block font-bold text-white/80 uppercase tracking-widest text-xs mb-2">
                           {label} {required && <span className="text-brand-orange">*</span>}
@@ -194,6 +202,9 @@ function RegisterContent() {
                           type={type}
                           value={form[key]}
                           disabled={isSubmitted}
+                          autoComplete={autoComplete}
+                          inputMode={inputMode}
+                          enterKeyHint={key === "email" ? "next" : "done"}
                           onChange={(e) => {
                             const val = sanitize ? sanitize(e.target.value) : e.target.value;
                             setForm((f) => ({ ...f, [key]: val }));
@@ -218,7 +229,7 @@ function RegisterContent() {
                               type="button"
                               disabled={isSubmitted}
                               onClick={() => setForm((f) => ({ ...f, ageGroup: label }))}
-                              className={`text-left px-4 py-4 rounded-2xl border-2 transition-all duration-300 flex flex-col relative overflow-hidden ${
+                              className={`text-left px-4 py-4 min-h-24 rounded-2xl border-2 transition-all duration-300 flex flex-col relative overflow-hidden ${
                                 isSelected
                                   ? "bg-brand-purple/20 border-brand-purple ring-4 ring-brand-purple/20 shadow-[0_0_30px_rgba(138,43,226,0.3)]"
                                   : "bg-black/40 border-white/10 hover:border-white/30 hover:bg-black/60"
@@ -228,7 +239,7 @@ function RegisterContent() {
                               
                               <div className="flex items-start justify-between w-full relative z-10">
                                 <div>
-                                  <h4 className={`font-heading font-black text-lg md:text-xl tracking-widest mb-1 italic uppercase ${isSelected ? "text-brand-yellow" : "text-white"}`}>
+                                  <h4 className={`font-heading font-black text-base md:text-xl tracking-widest mb-1 italic uppercase ${isSelected ? "text-brand-yellow" : "text-white"}`}>
                                     {label}
                                   </h4>
                                   <div className={`inline-block px-2 py-0.5 rounded bg-white/10 font-bold tracking-widest text-[9px] mb-2 ${isSelected ? "text-white" : "text-white/60"}`}>
@@ -236,7 +247,7 @@ function RegisterContent() {
                                   </div>
                                 </div>
                               </div>
-                              <p className={`text-sm font-medium leading-relaxed mt-2 ${isSelected ? "text-white/90" : "text-white/50"}`}>
+                              <p className={`text-xs md:text-sm font-medium leading-relaxed mt-2 ${isSelected ? "text-white/90" : "text-white/50"}`}>
                                 {desc}
                               </p>
                             </button>

@@ -35,7 +35,7 @@ function PhotoSlot({
             className="object-cover group-hover:scale-105 transition-transform duration-700"
           />
           {/* Always visible gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
           {/* Caption — always visible, enhanced on hover */}
           <div className="absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 group-hover:pb-5">
             <p className="font-heading font-black text-xs text-brand-yellow uppercase italic tracking-widest mb-1">{label}</p>
@@ -56,7 +56,7 @@ function PhotoSlot({
             }`}>
               {label}
             </p>
-            <p className="text-white/35 text-[9px] md:text-[10px] font-medium leading-relaxed line-clamp-3 hidden sm:block max-w-[180px]">
+            <p className="text-white/35 text-[9px] md:text-[10px] font-medium leading-relaxed line-clamp-3 hidden sm:block max-w-45">
               {desc}
             </p>
           </div>
@@ -68,11 +68,11 @@ function PhotoSlot({
 
 export function GallerySection() {
   return (
-    <section id="galeri" className="py-20 bg-page-dark relative z-20 overflow-hidden -mt-10 scroll-mt-20">
+    <section id="galeri" className="py-14 md:py-20 bg-page-dark relative z-20 overflow-hidden -mt-8 md:-mt-10 scroll-mt-20">
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn direction="up">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center gap-3 mb-3">
+          <div className="text-center mb-8 md:mb-12">
+            <div className="inline-flex items-center justify-center gap-2.5 md:gap-3 mb-2 md:mb-3">
               <Camera className="w-6 h-6 md:w-7 md:h-7 text-brand-orange" />
               <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">
                 ADORA IN ACTION
@@ -94,10 +94,10 @@ export function GallerySection() {
           │                     │  Lapangan    │ Turnamen │
           └─────────────────────┴──────────────┴──────────┘
         */}
-        <div className="grid grid-cols-12 md:grid-rows-2 gap-4 md:gap-4 h-auto md:h-[560px]">
+        <div className="grid grid-cols-12 md:grid-rows-2 gap-4 md:gap-4 h-auto md:h-140">
 
           {/* Slot 1 — Hero Carousel (Besar, 2 baris) */}
-          <div className="col-span-12 md:col-span-5 md:row-span-2 h-[320px] md:h-full group relative rounded-2xl overflow-hidden border-2 border-brand-yellow/40 hover:border-brand-yellow transition-all duration-300 bg-surface-dark shadow-xl">
+          <div className="col-span-12 md:col-span-5 md:row-span-2 h-80 md:h-full group relative rounded-2xl overflow-hidden border-2 border-brand-yellow/40 hover:border-brand-yellow transition-all duration-300 bg-surface-dark shadow-xl">
             <GalleryHeroCarousel />
           </div>
 
@@ -107,7 +107,7 @@ export function GallerySection() {
             desc="Wajah-wajah penuh talenta yang selalu siap memberikan performa terbaik."
             image="/images/gallery/team(3-2).jpg"
             color="orange"
-            className="col-span-12 md:col-span-4 row-span-1 h-[220px] md:h-full"
+            className="col-span-12 md:col-span-4 row-span-1 h-55 md:h-full"
           />
 
           {/* Slot 3 — Motivasi (kanan atas kanan) */}
@@ -116,7 +116,7 @@ export function GallerySection() {
             desc="Latihan rutin yang seru dan penuh semangat! Mulai dari asah skill dasar sampai sesi drill bareng pelatih."
             image="/images/gallery/drill.jpg"
             color="yellow"
-            className="col-span-12 md:col-span-3 row-span-1 h-[220px] md:h-full"
+            className="col-span-12 md:col-span-3 row-span-1 h-55 md:h-full"
           />
 
           {/* Slot 4 — Pengarahan & Evaluasi (kanan bawah kiri) */}
@@ -125,7 +125,7 @@ export function GallerySection() {
             desc="Potret anak-anak saat kumpul dan fokus menyimak masukan serta evaluasi dari pelatih."
             image="/images/gallery/latbrief.jpg"
             color="yellow"
-            className="col-span-12 md:col-span-4 row-span-1 h-[220px] md:h-full"
+            className="col-span-12 md:col-span-4 row-span-1 h-55 md:h-full"
           />
 
           {/* Slot 5 — Keceriaan (kanan bawah kanan) */}
@@ -134,7 +134,7 @@ export function GallerySection() {
             desc="Senyum dan tawa lepas anak-anak yang jadi bukti serunya kebersamaan di Adora."
             image="/images/gallery/keceriaan.JPG"
             color="orange"
-            className="col-span-12 md:col-span-3 row-span-1 h-[220px] md:h-full"
+            className="col-span-12 md:col-span-3 row-span-1 h-55 md:h-full"
           />
 
         </div>

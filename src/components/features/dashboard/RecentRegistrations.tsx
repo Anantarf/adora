@@ -47,7 +47,7 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
         }
       `}</style>
       <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
-      <div className="p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
+      <div className="p-4 md:p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
         <div>
           <h2 className="font-heading text-lg tracking-wider text-foreground flex items-center gap-2">
             <UserPlus className="w-5 h-5 text-muted-foreground" />
@@ -65,7 +65,7 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
         )}
       </div>
 
-      <div className="flex-1 p-6 flex flex-col min-h-[380px]">
+      <div className="flex-1 p-4 md:p-6 flex flex-col min-h-75 md:min-h-95">
         {registrations.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-10 text-center flex-1 border border-dashed border-border/50 rounded-lg bg-card/20">
             <UserPlus className="w-8 h-8 text-muted-foreground/30 mb-3" />
@@ -75,7 +75,7 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
             </p>
           </div>
         ) : (
-          <div className="max-h-[320px] overflow-y-auto pr-2 custom-scrollbar space-y-3">
+          <div className="max-h-70 md:max-h-80 overflow-y-auto pr-1 md:pr-2 custom-scrollbar space-y-2.5 md:space-y-3">
             {registrations.map((reg) => (
               <div
                 key={reg.id}
@@ -103,7 +103,7 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
 
                 <Link
                   href="/dashboard/registrations"
-                  className="mt-3 sm:mt-0 text-xs font-semibold text-primary/80 hover:text-primary flex items-center gap-1 self-start sm:self-center transition-colors group-hover:translate-x-1 duration-300"
+                  className="mt-3 sm:mt-0 text-xs font-semibold text-primary/80 hover:text-primary inline-flex items-center gap-1 self-start sm:self-center px-2.5 py-1.5 rounded-md hover:bg-primary/10 transition-colors group-hover:translate-x-1 duration-300"
                 >
                   Proses <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
@@ -114,10 +114,10 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
       </div>
 
       {registrations.length > 0 && (
-        <div className="px-6 pb-6 pt-2">
+        <div className="px-4 md:px-6 pb-4 md:pb-6 pt-2">
           <Link
             href="/dashboard/registrations"
-            className="w-full flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground rounded-lg transition-all"
+            className="w-full min-h-11 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground rounded-lg transition-all"
           >
             Lihat Semua Pendaftar
           </Link>
