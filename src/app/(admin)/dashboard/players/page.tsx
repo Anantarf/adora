@@ -124,7 +124,10 @@ export default function PlayersPage() {
           </Button>
         </div>
       ) : (
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+        <div className="relative overflow-hidden pb-2">
+          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-background to-transparent sm:hidden" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-linear-to-l from-background to-transparent sm:hidden" />
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pr-2">
           {groups?.map((group: Group) => {
             const isActive = selectedGroupId === group.id;
             return (
@@ -144,6 +147,7 @@ export default function PlayersPage() {
               </button>
             );
           })}
+          </div>
         </div>
       )}
 
