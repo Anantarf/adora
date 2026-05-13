@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/admin/", "/parent/", "/api/"],
     },
-    sitemap: "https://adora.club/sitemap.xml",
+    sitemap: "https://adorabbc.com/sitemap.xml",
   };
 }

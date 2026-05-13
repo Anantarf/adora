@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ADORA Basketball Club",
     description: "Karakter. Prestasi. Kejuaraan. ADORA Basketball Club berkomitmen membentuk pemain muda Depok yang siap bersaing di level nasional.",
-    url: "https://adora.club",
+    url: "https://adorabbc.com",
     siteName: "ADORA Basketball",
     locale: "id_ID",
     type: "website",

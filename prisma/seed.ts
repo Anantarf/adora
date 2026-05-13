@@ -67,7 +67,7 @@ async function main() {
   await prisma.user.upsert({
     where: { username: "superadmin" },
     update: { password: pw },
-    create: { id: crypto.randomUUID(), username: "superadmin", password: pw, name: "Head Coach Admin", email: "admin@adora.club", role: "ADMIN" },
+    create: { id: crypto.randomUUID(), username: "superadmin", password: pw, name: "Head Coach Admin", email: "admin@adorabbc.com", role: "ADMIN" },
   });
 
   const parentData = [
