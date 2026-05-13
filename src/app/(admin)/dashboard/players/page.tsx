@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Edit2, Trash2, Users, FolderPlus } from "lucide-react";
+import * as React from "react";
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
@@ -15,6 +16,7 @@ import { EditGroupDialog } from "@/components/features/EditGroupDialog";
 import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
 import { ViewPlayerDialog } from "@/components/features/ViewPlayerDialog";
 import { getGroupDisplayDescription } from "@/lib/group-meta";
+import { Pagination } from "@/components/ui/pagination";
 import { motion, AnimatePresence } from "framer-motion";
 
 type UIState =
@@ -31,6 +33,8 @@ export default function PlayersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebounce(searchQuery, 300);
   const [uiState, setUiState] = useState<UIState>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 9;
 
   const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId ?? "", debouncedSearch, !!selectedGroupId);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
@@ -41,8 +45,16 @@ export default function PlayersPage() {
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
   const filteredPlayers = players || [];
+  const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE);
+  const paginatedPlayers = useMemo(() => {
+    return filteredPlayers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  }, [filteredPlayers, currentPage]);
 
   const totalPlayers = useMemo(() => groups?.reduce((sum: number, g: Group) => sum + (g._count?.player || 0), 0) ?? 0, [groups]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedGroupId, debouncedSearch]);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
@@ -121,6 +133,7 @@ export default function PlayersPage() {
                 onClick={() => {
                   setSelectedGroupId(group.id);
                   setSearchQuery("");
+                  setCurrentPage(1);
                 }}
                 className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-colors ${
                   isActive ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
@@ -171,19 +184,23 @@ export default function PlayersPage() {
                 <p className="text-xs text-muted-foreground mt-1">{searchQuery ? "Coba kata kunci lain." : "Tambah pemain baru menggunakan tombol di atas."}</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                {filteredPlayers.map((player: Player) => (
-                  <div key={player.id} className="bg-card border border-border/50 p-4 rounded-lg flex items-center hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUiState({ type: "view-player", payload: player })}>
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="size-10 rounded-lg bg-muted flex items-center justify-center font-heading text-lg text-foreground/60 shrink-0">{player.name.charAt(0).toUpperCase()}</div>
-                      <div className="flex flex-col min-w-0 gap-0.5">
-                        <h4 className="font-heading tracking-wide text-sm text-foreground truncate">{player.name}</h4>
-                        <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.group?.name || "Tanpa Kelompok"}</span>
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {paginatedPlayers.map((player: Player) => (
+                    <div key={player.id} className="bg-card border border-border/50 p-4 rounded-lg flex items-center hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUiState({ type: "view-player", payload: player })}>
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="size-10 rounded-lg bg-muted flex items-center justify-center font-heading text-lg text-foreground/60 shrink-0">{player.name.charAt(0).toUpperCase()}</div>
+                        <div className="flex flex-col min-w-0 gap-0.5">
+                          <h4 className="font-heading tracking-wide text-sm text-foreground truncate">{player.name}</h4>
+                          <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.group?.name || "Tanpa Kelompok"}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} className="mt-6" />
+              </>
             )}
           </motion.div>
         )}
