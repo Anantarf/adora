@@ -93,7 +93,7 @@ export function AddStatDialog({
   alwaysShowLabel = false,
 }: {
   player: Player;
-  periodId: string;
+  periodId?: string;
   isPeriodActive?: boolean;
   existingStat?: ExistingStat;
   triggerClassName?: string;
@@ -130,6 +130,10 @@ export function AddStatDialog({
   }, [values]);
 
   const onSubmit = async (data: StatForm, status: "Draft" | "Published") => {
+    if (!periodId) {
+      toast.error("Periode evaluasi belum dipilih.");
+      return;
+    }
     setPendingStatus(status);
     try {
       await mutateAsync({ playerId: player.id, periodId, metrics: data as MetricsJson, status });
@@ -145,7 +149,7 @@ export function AddStatDialog({
 
   return (
     <>
-      <Button size="sm" variant={isEdit ? "outline" : "default"} className={`h-8 font-bold uppercase tracking-widest text-xs gap-1.5 ${triggerClassName ?? ""}`} onClick={() => setOpen(true)}>
+      <Button size="sm" variant={isEdit ? "outline" : "default"} disabled={!periodId && !isEdit} className={`h-8 font-bold uppercase tracking-widest text-xs gap-1.5 ${triggerClassName ?? ""}`} onClick={() => setOpen(true)}>
         {isEdit ? (
           <>
             <Pencil className="size-3" />
