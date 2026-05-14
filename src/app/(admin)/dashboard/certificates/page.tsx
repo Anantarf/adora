@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
@@ -19,6 +19,7 @@ export default function CertificatesPage() {
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
+    // Reset page when data changes
     setCurrentPage(1);
   }, [certificates?.length]);
 

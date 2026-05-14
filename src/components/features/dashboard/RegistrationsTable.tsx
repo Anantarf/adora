@@ -34,6 +34,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const ITEMS_PER_PAGE = 10;
 
   useEffect(() => {
+    // Reset pagination when data changes
     setCurrentPage(1);
   }, [registrations]);
 
@@ -52,11 +53,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
         <div className="flex items-center justify-between gap-3 mb-6">
           <div className="flex items-center gap-2 sm:gap-3">
             <h3 className="font-heading text-sm sm:text-lg tracking-widest uppercase text-foreground">Antrean Pendaftaran</h3>
-            {registrations.length > 0 && (
-              <span className="bg-primary/20 text-primary text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap shrink-0">
-                {registrations.length} Menunggu
-              </span>
-            )}
+            {registrations.length > 0 && <span className="bg-primary/20 text-primary text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full whitespace-nowrap shrink-0">{registrations.length} Menunggu</span>}
           </div>
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-colors cursor-pointer">

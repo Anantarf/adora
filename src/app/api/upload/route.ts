@@ -27,19 +27,19 @@ const supabase = createClient(
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-    // Rate‑limit check
-    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
-    const now = Date.now();
-    const bucket = rateLimitMap.get(ip) ?? { count: 0, reset: now + 60_000 };
-    if (now > bucket.reset) {
-      bucket.count = 0;
-      bucket.reset = now + 60_000;
-    }
-    bucket.count++;
-    rateLimitMap.set(ip, bucket);
-    if (bucket.count > RATE_LIMIT) {
-      return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
-    }
+  // Rate‑limit check
+  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+  const now = Date.now();
+  const bucket = rateLimitMap.get(ip) ?? { count: 0, reset: now + 60_000 };
+  if (now > bucket.reset) {
+    bucket.count = 0;
+    bucket.reset = now + 60_000;
+  }
+  bucket.count++;
+  rateLimitMap.set(ip, bucket);
+  if (bucket.count > RATE_LIMIT) {
+    return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
+  }
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
   }
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     const uniqueName = `${Date.now()}-${safeName}`;
 
     // Upload to Supabase Storage (Bucket name: "uploads")
-    const { data, error } = await supabase.storage.from("uploads").upload(uniqueName, buffer, {
+    const { error } = await supabase.storage.from("uploads").upload(uniqueName, buffer, {
       contentType: file.type || expectedMime,
       cacheControl: "3600",
       upsert: false,

@@ -1,7 +1,6 @@
 import { type homebase as Homebase } from "@prisma/client";
-import Link from "next/link";
 import Image from "next/image";
-import { ExternalLink, MapPin, Phone, Zap } from "lucide-react";
+import { ExternalLink, MapPin, Zap } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 
 interface HomebaseSectionProps {
@@ -17,12 +16,6 @@ const HOMEBASE_IMAGES: Record<string, string> = {
 /** Strip parenthetical suffix: "ADORA Gandul (Pusat)" → "ADORA Gandul" */
 function displayName(name: string): string {
   return name.replace(/\s*\(.*?\)\s*$/, "").trim();
-}
-
-/** Format raw phone to +62 xxx-xxx-xxxx */
-function formatPhone(phone: string): string {
-  if (phone.startsWith("62")) return `+${phone}`;
-  return phone;
 }
 
 export function HomebaseSection({ homebases }: HomebaseSectionProps) {

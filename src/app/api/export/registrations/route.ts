@@ -8,7 +8,6 @@ import { id as idLocale } from "date-fns/locale";
 
 const TEMPLATE_FONT = "Poppins";
 const BRAND_PRIMARY_DARK = "FFD84315";
-const BRAND_PRIMARY = "FFFF6A00";
 const BRAND_PRIMARY_SOFT = "FFFFF3E0";
 const BRAND_ORANGE = "FFF4B183";
 const BRAND_ORANGE_SOFT = "FFFFF4E8";
@@ -64,7 +63,7 @@ export async function GET(request: Request) {
       properties: { defaultRowHeight: 22 },
       views: [{ state: "frozen", ySplit: 4 }],
     });
-    
+
     dataSheet.pageSetup = {
       orientation: "landscape",
       fitToPage: true,
@@ -99,7 +98,7 @@ export async function GET(request: Request) {
     let subtitleText = "Semua Riwayat Pendaftar";
     if (filter === "daily") subtitleText = "Pendaftar Hari Ini (" + format(new Date(), "dd MMMM yyyy", { locale: idLocale }) + ")";
     if (filter === "monthly") subtitleText = "Pendaftar Bulan Ini (" + format(new Date(), "MMMM yyyy", { locale: idLocale }) + ")";
-    
+
     subtitleRow.getCell(1).value = `Laporan Pendaftaran: ${subtitleText} | Diekstrak pada: ${format(new Date(), "dd MMM yyyy HH:mm", { locale: idLocale })}`;
     subtitleRow.getCell(1).font = { name: TEMPLATE_FONT, size: 10, color: { argb: BRAND_TEXT_DARK } };
     subtitleRow.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: BRAND_ORANGE_SOFT } };
@@ -108,16 +107,7 @@ export async function GET(request: Request) {
     dataSheet.getRow(3).height = 10;
 
     const headerRow = dataSheet.getRow(4);
-    headerRow.values = [
-      "No.",
-      "Tanggal Daftar",
-      "Nama Pemain",
-      "WhatsApp",
-      "Email",
-      "Kelompok Usia",
-      "Lokasi Latihan",
-      "Status",
-    ];
+    headerRow.values = ["No.", "Tanggal Daftar", "Nama Pemain", "WhatsApp", "Email", "Kelompok Usia", "Lokasi Latihan", "Status"];
     headerRow.height = 32;
     headerRow.eachCell((cell) => {
       cell.font = { bold: true, color: { argb: BRAND_TEXT_DARK }, name: TEMPLATE_FONT, size: 11 };
@@ -165,7 +155,7 @@ export async function GET(request: Request) {
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-    
+
     let filename = "Data_Pendaftar_Adora";
     if (filter === "daily") filename += "_Harian";
     if (filter === "monthly") filename += "_Bulanan";

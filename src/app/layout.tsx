@@ -21,7 +21,7 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://adorabbc.com"),
-  title: "ADORA Basketball Club | Akademi Basket Profesional Indonesia",
+  title: "ADORA Basketball Club — Official Page",
   description: "ADORA Basketball Club — Membentuk generasi pemain basket berkarakter, berprestasi, dan siap bersaing di tingkat nasional. Program KU-8 hingga KU-16 di Depok.",
   keywords: ["klub basket depok", "akademi basket anak", "latihan basket depok", "sekolah basket", "adora bbc", "kejurkot depok", "pembinaan basket usia dini"],
   alternates: {

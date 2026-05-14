@@ -3,7 +3,6 @@
 import { useState, useMemo, Suspense, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 import { HomebaseSelector } from "@/components/homebase-selector";
 import { submitRegistration } from "@/actions/register";
@@ -11,8 +10,6 @@ import { PROGRAMS } from "@/lib/constants/programs";
 import { CONTACT } from "@/lib/constants/contact";
 import { Button } from "@/components/ui/button";
 import { LandingHeader } from "@/components/features/landing-header";
-import { FadeIn } from "@/components/animations/fade-in";
-import { getAcademicYear } from "@/lib/utils";
 import React from "react";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -210,7 +207,7 @@ function RegisterContent() {
                         PILIH KELOMPOK USIA <span className="text-brand-orange">*</span>
                       </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {PROGRAMS.map(({ label, ages, image, desc }) => {
+                        {PROGRAMS.map(({ label, ages, desc }) => {
                           const isSelected = form.ageGroup === label;
                           return (
                             <button

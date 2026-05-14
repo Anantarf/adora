@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { GALLERY_HERO_SLIDES as GALLERY_SLIDES } from "@/lib/constants/landing";
@@ -9,21 +9,24 @@ export function GalleryHeroCarousel() {
   const [current, setCurrent] = useState(0);
   const [transitioning, setTransitioning] = useState(false);
 
+  const goTo = useCallback(
+    (idx: number) => {
+      if (transitioning || idx === current) return;
+      setTransitioning(true);
+      setTimeout(() => {
+        setCurrent(idx);
+        setTransitioning(false);
+      }, 300);
+    },
+    [transitioning, current],
+  );
+
   useEffect(() => {
     const timer = setInterval(() => {
       goTo((current + 1) % GALLERY_SLIDES.length);
     }, 4500);
     return () => clearInterval(timer);
-  }, [current]);
-
-  function goTo(idx: number) {
-    if (transitioning || idx === current) return;
-    setTransitioning(true);
-    setTimeout(() => {
-      setCurrent(idx);
-      setTransitioning(false);
-    }, 300);
-  }
+  }, [current, goTo]);
 
   const slide = GALLERY_SLIDES[current];
 
