@@ -8,7 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
-import { Lock, User, ArrowRight, Loader2, ShieldCheck, AlertCircle, Eye, EyeOff } from "lucide-react";
+import { ShieldCheck, AlertCircle } from "lucide-react";
+import { LoginPasswordField, LoginUsernameField } from "@/components/features/auth/login-form-fields";
+import { LoginSubmitButton } from "@/components/features/auth/login-submit-button";
 
 const loginSchema = z.object({
   username: z.string().min(3, "Username minimal 3 karakter"),
@@ -81,74 +83,20 @@ export function LoginForm() {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-micro text-white/70 ml-1">Username</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <User className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
-                </div>
-                <input
-                  {...register("username")}
-                  type="text"
-                  disabled={loading}
-                  autoComplete="username"
-                  inputMode="text"
-                  autoCapitalize="none"
-                  autoCorrect="off"
-                  spellCheck={false}
-                  enterKeyHint="next"
-                  onKeyDown={(e) => e.key === " " && e.preventDefault()}
-                  className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
-                  placeholder="Masukkan username"
-                />
-              </div>
-              {errors.username && <p className="text-xs text-red-400 mt-1 ml-1">{errors.username.message}</p>}
-            </div>
+            <LoginUsernameField label="Username" placeholder="Masukkan username" registration={register("username")} errorMessage={errors.username?.message} disabled={loading} />
 
-            <div className="space-y-2">
-              <label className="text-micro text-white/70 ml-1">Kata Sandi</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-                  <Lock className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
-                </div>
-                <input
-                  {...register("password")}
-                  type={showPassword ? "text" : "password"}
-                  disabled={loading}
-                  autoComplete="current-password"
-                  enterKeyHint="go"
-                  onKeyDown={(e) => e.key === " " && e.preventDefault()}
-                  className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 px-4 flex items-center text-white/60 hover:text-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 rounded-r-2xl transition-colors"
-                  aria-label={showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"}
-                >
-                  {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-xs text-red-400 mt-1 ml-1">{errors.password.message}</p>}
-            </div>
+            <LoginPasswordField
+              label="Kata Sandi"
+              placeholder="••••••••"
+              registration={register("password")}
+              errorMessage={errors.password?.message}
+              disabled={loading}
+              showPassword={showPassword}
+              onTogglePassword={() => setShowPassword(!showPassword)}
+            />
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full h-14 rounded-2xl bg-primary hover:bg-primary/90 text-white font-bold tracking-widest text-lg md:text-xl uppercase transition-all group disabled:opacity-70 flex items-center justify-center"
-            aria-label={loading ? "Sedang memproses masuk" : "Masukkan akun untuk login"}
-          >
-            {loading ? (
-              <Loader2 className="size-5 animate-spin" />
-            ) : (
-              <span className="inline-flex items-center gap-2.5">
-                MASUK
-                <ArrowRight className="size-5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            )}
-          </button>
+          <LoginSubmitButton loading={loading} />
 
           <div className="text-center pt-1">
             <p className="text-white/80 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>

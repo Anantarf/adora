@@ -5,6 +5,14 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { ForcePasswordGate } from "@/components/features/auth/ForcePasswordGate";
 import { ProfileDialog } from "@/components/features/auth/ProfileDialog";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default async function ParentLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -37,16 +45,12 @@ export default async function ParentLayout({ children }: { children: React.React
 
         {/* Dynamic Content Area - Matches Admin Spacing & Animation */}
         <main className="w-full flex-1 mx-auto max-w-4xl px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
-          <div className="w-full animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">
-            {children}
-          </div>
+          <div className="w-full animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">{children}</div>
         </main>
 
         {/* Footer */}
         <footer className="py-6 text-center border-t border-border/60 bg-background/50 mt-auto">
-          <p className="text-xs font-medium text-muted-foreground">
-            &copy; {new Date().getFullYear()} ADORA BBC. All rights reserved.
-          </p>
+          <p className="text-xs font-medium text-muted-foreground">&copy; {new Date().getFullYear()} ADORA BBC. All rights reserved.</p>
         </footer>
       </div>
     </ForcePasswordGate>

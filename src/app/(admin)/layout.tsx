@@ -4,6 +4,14 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { ForcePasswordGate } from "@/components/features/auth/ForcePasswordGate";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 // The layout that strictly bounds all internal admin pages (/dashboard/*)
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -39,9 +47,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
           {/* Footer for consistency */}
           <footer className="py-6 text-center border-t border-border/60 bg-background/50 mt-auto">
-            <p className="text-xs font-medium text-muted-foreground">
-              &copy; {new Date().getFullYear()} Adora Basketball Club. All rights reserved.
-            </p>
+            <p className="text-xs font-medium text-muted-foreground">&copy; {new Date().getFullYear()} Adora Basketball Club. All rights reserved.</p>
           </footer>
         </SidebarInset>
       </SidebarProvider>

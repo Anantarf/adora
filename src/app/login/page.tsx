@@ -10,6 +10,10 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Login Portal — ADORA Basketball Club",
   description: "Masuk ke portal anggota ADORA Basketball Club untuk memantau perkembangan, jadwal latihan, dan raport pemain.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default async function LoginPage() {
