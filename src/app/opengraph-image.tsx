@@ -55,7 +55,7 @@ export default function OpenGraphImage() {
       </div>
 
       <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", gap: 16, maxWidth: 860 }}>
-        <div style={{ fontSize: 74, lineHeight: 0.95, fontWeight: 900, letterSpacing: -2 }}>
+        <div style={{ display: "flex", flexDirection: "column", fontSize: 74, lineHeight: 0.95, fontWeight: 900, letterSpacing: -2 }}>
           Membangun karakter.
           <br />
           Meraih prestasi.
@@ -63,7 +63,7 @@ export default function OpenGraphImage() {
         <div style={{ fontSize: 30, lineHeight: 1.35, color: "rgba(255,255,255,0.88)" }}>Program usia 7-16 tahun, pembinaan modern, dan jalur kompetisi untuk pemain muda.</div>
       </div>
 
-      <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "end" }}>
+      <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", alignItems: "flex-end" }}>
         <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
           <div style={{ padding: "14px 20px", border: "2px solid rgba(255,255,255,0.18)", borderRadius: 999, background: "rgba(0,0,0,0.24)", fontSize: 22, fontWeight: 700 }}>KU-8 s.d. KU-16</div>
           <div style={{ padding: "14px 20px", border: "2px solid rgba(255,255,255,0.18)", borderRadius: 999, background: "rgba(0,0,0,0.24)", fontSize: 22, fontWeight: 700 }}>Depok, Jawa Barat</div>
