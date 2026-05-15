@@ -10,6 +10,21 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🚀 Memulai proses seeding data ADORA BBC (Minimalis)...\n");
 
+  // --- CLEANUP SECTION ---
+  console.log("🧹 Membersihkan data lama...");
+  await prisma.statisticHistory.deleteMany();
+  await prisma.statistic.deleteMany();
+  await prisma.attendance.deleteMany();
+  await prisma.certificate.deleteMany();
+  await prisma.player.deleteMany();
+  await prisma.eventGroup.deleteMany();
+  await prisma.event.deleteMany();
+  await prisma.group.deleteMany();
+  await prisma.registration.deleteMany();
+  await prisma.evaluationPeriod.deleteMany();
+  await prisma.user.deleteMany({ where: { role: "PARENT" } });
+  console.log("✅ Data lama berhasil dibersihkan.\n");
+
   const pw = await bcrypt.hash("password", 10);
 
   // 1. ADMIN USER
