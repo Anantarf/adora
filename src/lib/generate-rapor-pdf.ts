@@ -266,7 +266,7 @@ function renderConclusionAndGrades(doc: jsPDF, y: number, info: ConclusionParam)
   const notesText = metrics.notes?.trim() || `${playerName} telah menyelesaikan evaluasi pada periode ${periodName}. Nilai rata-rata menunjukkan performa ${grade.label.toLowerCase()} dengan skor akhir ${score}.`;
   const splitNotes = doc.splitTextToSize(notesText, CONTENT_W);
   
-  if (y + splitNotes.length * 4.5 > 260) {
+  if (y + splitNotes.length * 4.5 > 275) {
     doc.addPage();
     y = MARGIN;
   }
@@ -306,7 +306,7 @@ interface SignatureParam {
 async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam): Promise<number> {
   const { assets, signers, printDate } = info;
   
-  if (y + SIG_BOX_H + 20 > 280) {
+  if (y + SIG_BOX_H + 20 > 285) {
     doc.addPage();
     y = MARGIN;
   }
@@ -415,6 +415,12 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
     } catch (e) {
       console.error("[PDF Gen] PDF Overlay failed, fallback to standard", e);
       toast.error("Gagal menerapkan template latar belakang: " + (e instanceof Error ? e.message : "Unknown error"));
+      
+      // DEBUG: Tulis error langsung ke PDF agar terlihat oleh user
+      doc.setFontSize(10);
+      doc.setTextColor(255, 0, 0);
+      doc.text("ERROR LOADING TEMPLATE: " + (e instanceof Error ? e.message : String(e)), 10, 10);
+      doc.setTextColor(0, 0, 0);
     }
   }
 
