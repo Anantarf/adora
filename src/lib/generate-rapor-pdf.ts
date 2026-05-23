@@ -115,25 +115,43 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   let y = MARGIN;
 
+  // To support full-page PNG backgrounds across multiple pages
+  let fullPageBg: { data: string; format: string } | null = null;
+  const addNewPage = () => {
+    doc.addPage();
+    if (fullPageBg) {
+      doc.addImage(fullPageBg.data, fullPageBg.format, 0, 0, PAGE_W, 297);
+    }
+  };
+
   // 1. HEADER
   const isPdfTemplate = assets?.headerUrl ? assets.headerUrl.split("?")[0].toLowerCase().endsWith(".pdf") : false;
   if (isPdfTemplate) {
     y += PDF_TEMPLATE_SKIP;
   } else if (assets?.headerUrl) {
     try {
-      const { data: base64, format } = await loadImageAsBase64(assets.headerUrl);
-      const props = doc.getImageProperties(base64);
-      let imgW = CONTENT_W;
-      let imgH = (props.height * imgW) / props.width;
-      if (imgH > HEADER_MAX_H) {
-        imgH = HEADER_MAX_H;
-        imgW = (props.width * imgH) / props.height;
+      const img = await loadImageAsBase64(assets.headerUrl);
+      const props = doc.getImageProperties(img.data);
+      
+      // Jika gambar portrait (tinggi > lebar), jadikan full-page background
+      if (props.height > props.width) {
+        fullPageBg = img;
+        doc.addImage(img.data, img.format, 0, 0, PAGE_W, 297);
+        y += PDF_TEMPLATE_SKIP;
+      } else {
+        // Jika landscape, jadikan Kop Surat kecil di atas
+        let imgW = CONTENT_W;
+        let imgH = (props.height * imgW) / props.width;
+        if (imgH > HEADER_MAX_H) {
+          imgH = HEADER_MAX_H;
+          imgW = (props.width * imgH) / props.height;
+        }
+        const drawX = MARGIN + (CONTENT_W - imgW) / 2;
+        doc.addImage(img.data, img.format, drawX, y, imgW, imgH);
+        y += imgH - HEADER_BOTTOM_TRIM;
+        drawHorizontalRule(doc, y, 0.3, 180);
+        y += HEADER_SEP_GAP;
       }
-      const drawX = MARGIN + (CONTENT_W - imgW) / 2;
-      doc.addImage(base64, format, drawX, y, imgW, imgH);
-      y += imgH - HEADER_BOTTOM_TRIM;
-      drawHorizontalRule(doc, y, 0.3, 180);
-      y += HEADER_SEP_GAP;
     } catch {
       y = renderDefaultTitle(doc, y, periodName);
     }
@@ -151,7 +169,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   y = renderConclusionAndGrades(doc, y, { playerName, periodName, metrics });
 
   // 5. SIGNATURE AREA
-  y = await renderSignatureArea(doc, y, { assets, signers, printDate });
+  y = await renderSignatureArea(doc, y, { assets, signers, printDate }, addNewPage);
 
   // 6. DOWNLOAD / OVERLAY
   await finalizePDF(doc, { isPdfTemplate, headerUrl: assets?.headerUrl, playerName, periodName, action: data.action });
@@ -267,7 +285,7 @@ function renderConclusionAndGrades(doc: jsPDF, y: number, info: ConclusionParam)
   const splitNotes = doc.splitTextToSize(notesText, CONTENT_W);
   
   if (y + splitNotes.length * 4.5 > 275) {
-    doc.addPage();
+    addNewPage();
     y = MARGIN;
   }
 
@@ -303,11 +321,11 @@ interface SignatureParam {
   printDate: Date;
 }
 
-async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam): Promise<number> {
+async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam, addNewPage: () => void): Promise<number> {
   const { assets, signers, printDate } = info;
   
   if (y + SIG_BOX_H + 20 > 285) {
-    doc.addPage();
+    addNewPage();
     y = MARGIN;
   }
 
