@@ -78,8 +78,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tipe file tidak cocok dengan konten aktual." }, { status: 400 });
     }
 
-    const safeName = file.name.replace(/\s+/g, "_").replace(/[^a-zA-Z0-9._-]/g, "");
-    const uniqueName = safeName;
+    const assetKey = formData.get("assetKey") as string | null;
+
+    let uniqueName = "";
+    if (assetKey) {
+      uniqueName = `${assetKey}${ext}`;
+    } else {
+      uniqueName = `upload_${Date.now()}${ext}`;
+    }
 
     // Upload to Supabase Storage (Bucket name: "uploads")
     const { error } = await supabase.storage.from("uploads").upload(uniqueName, buffer, {
