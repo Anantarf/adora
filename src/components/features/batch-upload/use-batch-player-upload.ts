@@ -87,6 +87,13 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
       return;
     }
 
+    // Enforce 2MB size limit on Excel batch upload
+    if (file.size > 2 * 1024 * 1024) {
+      clearSelectedFile();
+      toast.error("Ukuran file Excel terlalu besar. Batas maksimal adalah 2MB.");
+      return;
+    }
+
     if (isSupportedExcelFile(file)) {
       setSelectedFile(file);
       clearPreview();

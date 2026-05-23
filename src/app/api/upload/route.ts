@@ -4,7 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 import { fileTypeFromBuffer } from "file-type"; // npm i file-type
 
-const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
 
 // Simple in‑memory rate limiter (requests per IP per minute)
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: "Ukuran file melebihi batas maksimal 5MB." }, { status: 400 });
+      return NextResponse.json({ error: "Ukuran file melebihi batas maksimal 2MB." }, { status: 400 });
     }
 
     const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();

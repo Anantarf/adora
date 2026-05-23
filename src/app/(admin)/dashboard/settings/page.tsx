@@ -96,6 +96,14 @@ export default function SettingsPage() {
   };
 
   const handleFileUpload = async (key: string, file: File, label: string) => {
+    // Client-side size validation: 2MB for header, 1MB for signatures/stamps
+    const maxSizeBytes = key === "rapor_header_url" ? 2 * 1024 * 1024 : 1 * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      const limitLabel = key === "rapor_header_url" ? "2MB" : "1MB";
+      toast.error(`Ukuran file ${label} terlalu besar. Batas maksimal adalah ${limitLabel}.`);
+      return;
+    }
+
     setUploading((prev) => ({ ...prev, [key]: true }));
     const formData = new FormData();
     formData.append("file", file);
