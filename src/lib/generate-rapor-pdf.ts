@@ -367,7 +367,7 @@ interface FinalizeParam {
 
 async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
   const { isPdfTemplate, headerUrl, playerName, periodName, action = "download" } = info;
-  const fileName = `Rapor_${playerName.replace(/\s+/g, "_")}_${periodName.replace(/\s+/g, "_")}.pdf`;
+  const fileName = action === "preview" ? "Pratinjau_Rapor_Template.pdf" : `Rapor_${playerName.replace(/\s+/g, "_")}_${periodName.replace(/\s+/g, "_")}.pdf`;
 
   if (isPdfTemplate && headerUrl) {
     try {
@@ -400,14 +400,10 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
 
       if (action === "preview") {
         const url = URL.createObjectURL(file);
-        const win = window.open("", "_blank");
-        if (win) {
-          win.document.title = fileName;
-          win.document.body.style.margin = "0";
-          win.document.body.innerHTML = `<iframe width="100%" height="100%" style="border:none;" src="${url}"></iframe>`;
-        } else {
-          window.open(url, "_blank");
-        }
+        const link = document.createElement("a");
+        link.href = url;
+        link.target = "_blank";
+        link.click();
         return;
       }
 
@@ -426,14 +422,10 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
     const blob = doc.output("blob");
     const file = new File([blob], fileName, { type: "application/pdf" });
     const url = URL.createObjectURL(file);
-    const win = window.open("", "_blank");
-    if (win) {
-      win.document.title = fileName;
-      win.document.body.style.margin = "0";
-      win.document.body.innerHTML = `<iframe width="100%" height="100%" style="border:none;" src="${url}"></iframe>`;
-    } else {
-      window.open(url, "_blank");
-    }
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.click();
     return;
   }
 
