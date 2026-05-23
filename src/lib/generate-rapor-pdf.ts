@@ -166,7 +166,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   y = renderAssessmentTable(doc, y, metrics);
 
   // 4. CONCLUSION & GRADES
-  y = renderConclusionAndGrades(doc, y, { playerName, periodName, metrics });
+  y = renderConclusionAndGrades(doc, y, { playerName, periodName, metrics }, addNewPage);
 
   // 5. SIGNATURE AREA
   y = await renderSignatureArea(doc, y, { assets, signers, printDate }, addNewPage);
@@ -269,7 +269,7 @@ interface ConclusionParam {
   metrics: MetricsJson;
 }
 
-function renderConclusionAndGrades(doc: jsPDF, y: number, info: ConclusionParam): number {
+function renderConclusionAndGrades(doc: jsPDF, y: number, info: { playerName: string; periodName: string; metrics: MetricsJson }, addNewPage: () => void): number {
   const { playerName, periodName, metrics } = info;
   const score = averageScore(metrics);
   const grade = letterGrade(score);
