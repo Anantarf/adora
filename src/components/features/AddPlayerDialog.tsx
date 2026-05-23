@@ -75,7 +75,7 @@ export function AddPlayerDialog() {
 
         {isBatchMode ? (
           <div className="pt-2 space-y-3">
-            <div className="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden pr-2 pb-1 scrollbar-thin">
+            <div className="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden pr-2 pb-1 custom-scrollbar">
               <BatchPlayerUpload onDone={() => setOpen(false)} />
             </div>
             <div className="border-t border-border/50 pt-2">
@@ -86,7 +86,7 @@ export function AddPlayerDialog() {
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4 relative overflow-hidden">
-            <div className="max-h-dialog-sm overflow-y-auto overflow-x-hidden pr-2 pb-2 scrollbar-thin">
+            <div className="max-h-dialog-sm overflow-y-auto overflow-x-hidden pr-2 pb-2 custom-scrollbar">
               <PlayerFormFields
                 register={register}
                 control={control}

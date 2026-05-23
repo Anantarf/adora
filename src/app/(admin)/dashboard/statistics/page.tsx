@@ -414,7 +414,7 @@ export default function StatisticsPage() {
                           <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Pemain</span>
                         </div>
 
-                        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                        <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
                           {FLAT_METRIC_DEFS.map((def) => {
                             const value = metrics ? def.getValue(metrics) : undefined;
                             return (
