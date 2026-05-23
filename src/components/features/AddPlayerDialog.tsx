@@ -74,11 +74,15 @@ export function AddPlayerDialog() {
         </DialogHeader>
 
         {isBatchMode ? (
-          <div className="pt-4">
-            <BatchPlayerUpload onDone={() => setOpen(false)} />
-            <Button variant="ghost" className="w-full mt-4 text-sm font-medium text-muted-foreground" onClick={() => setIsBatchMode(false)}>
-              Kembali
-            </Button>
+          <div className="pt-2 space-y-3">
+            <div className="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden pr-2 pb-1 scrollbar-thin">
+              <BatchPlayerUpload onDone={() => setOpen(false)} />
+            </div>
+            <div className="border-t border-border/50 pt-2">
+              <Button type="button" variant="ghost" className="w-full text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-muted/50 rounded-lg h-10" onClick={() => setIsBatchMode(false)}>
+                Kembali
+              </Button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4 relative overflow-hidden">
