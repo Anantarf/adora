@@ -17,7 +17,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { FLAT_METRIC_DEFS, averageScore } from "@/lib/metrics";
-import { generateRaporPDF } from "@/lib/generate-rapor-pdf";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { PERIOD_STATUS_BADGE as STATUS_BADGE_CONFIG } from "@/lib/constants/badge-configs";
 
@@ -83,6 +82,36 @@ const PlayerStatRow = React.memo(
   }) => {
     const rawM = stat?.metricsJson;
     const m = getValidMetrics(rawM);
+    const [isPdfLoading, setIsPdfLoading] = useState(false);
+
+    const handleDownload = async () => {
+      if (!m) return;
+      setIsPdfLoading(true);
+      try {
+        const { generateRaporPDF } = await import("@/lib/generate-rapor-pdf");
+        await generateRaporPDF({
+          playerName: player.name,
+          groupName: group.name,
+          schoolOrigin: player.schoolOrigin,
+          periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
+          metrics: m,
+          assets: {
+            headerUrl: settings?.rapor_header_url ?? undefined,
+            ceoSignUrl: settings?.rapor_ceo_sign_url ?? undefined,
+            coachSignUrl: settings?.rapor_coach_sign_url ?? undefined,
+            stampUrl: settings?.rapor_stamp_url ?? undefined,
+          },
+          signers: {
+            coachName: settings?.rapor_coach_name ?? undefined,
+            ceoName: settings?.rapor_ceo_name ?? undefined,
+          },
+        });
+      } catch {
+        toast.error("Gagal membuat rapor PDF. Coba lagi.");
+      } finally {
+        setIsPdfLoading(false);
+      }
+    };
 
   return (
     <TableRow className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
@@ -104,28 +133,11 @@ const PlayerStatRow = React.memo(
           {m && (
             <button
               title="Download Rapor PDF"
-              onClick={() =>
-                generateRaporPDF({
-                  playerName: player.name,
-                  groupName: group.name,
-                  schoolOrigin: player.schoolOrigin,
-                  periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
-                  metrics: m,
-                  assets: {
-                    headerUrl: settings?.rapor_header_url ?? undefined,
-                    ceoSignUrl: settings?.rapor_ceo_sign_url ?? undefined,
-                    coachSignUrl: settings?.rapor_coach_sign_url ?? undefined,
-                    stampUrl: settings?.rapor_stamp_url ?? undefined,
-                  },
-                  signers: {
-                    coachName: settings?.rapor_coach_name ?? undefined,
-                    ceoName: settings?.rapor_ceo_name ?? undefined,
-                  },
-                })
-              }
-              className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors"
+              onClick={handleDownload}
+              disabled={isPdfLoading}
+              className="inline-flex items-center justify-center h-8 w-8 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors disabled:opacity-50"
             >
-              <FileDown className="size-4" />
+              {isPdfLoading ? <Loader2 className="size-4 animate-spin text-primary" /> : <FileDown className="size-4" />}
             </button>
           )}
           <AddStatDialog
@@ -145,6 +157,7 @@ PlayerStatRow.displayName = "PlayerStatRow";
 export default function StatisticsPage() {
   const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
   const [activeGroup, setActiveGroup] = useState<string>("all");
+  const [loadingPlayerId, setLoadingPlayerId] = useState<string | null>(null);
   const { data: periods } = usePeriods();
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
@@ -437,28 +450,41 @@ export default function StatisticsPage() {
                             {metrics && (
                               <button
                                 title="Download Rapor PDF"
-                                onClick={() =>
-                                  generateRaporPDF({
-                                    playerName: player.name,
-                                    groupName: group.name,
-                                    schoolOrigin: player.schoolOrigin,
-                                    periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
-                                    metrics,
-                                    assets: {
-                                      headerUrl: settings?.rapor_header_url,
-                                      ceoSignUrl: settings?.rapor_ceo_sign_url,
-                                      coachSignUrl: settings?.rapor_coach_sign_url,
-                                      stampUrl: settings?.rapor_stamp_url,
-                                    },
-                                    signers: {
-                                      coachName: settings?.rapor_coach_name,
-                                      ceoName: settings?.rapor_ceo_name,
-                                    },
-                                  })
-                                }
-                                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors"
+                                disabled={loadingPlayerId === player.id}
+                                onClick={async () => {
+                                  setLoadingPlayerId(player.id);
+                                  try {
+                                    const { generateRaporPDF } = await import("@/lib/generate-rapor-pdf");
+                                    await generateRaporPDF({
+                                      playerName: player.name,
+                                      groupName: group.name,
+                                      schoolOrigin: player.schoolOrigin,
+                                      periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
+                                      metrics,
+                                      assets: {
+                                        headerUrl: settings?.rapor_header_url ?? undefined,
+                                        ceoSignUrl: settings?.rapor_ceo_sign_url ?? undefined,
+                                        coachSignUrl: settings?.rapor_coach_sign_url ?? undefined,
+                                        stampUrl: settings?.rapor_stamp_url ?? undefined,
+                                      },
+                                      signers: {
+                                        coachName: settings?.rapor_coach_name ?? undefined,
+                                        ceoName: settings?.rapor_ceo_name ?? undefined,
+                                      },
+                                    });
+                                  } catch {
+                                    toast.error("Gagal membuat rapor PDF. Coba lagi.");
+                                  } finally {
+                                    setLoadingPlayerId(null);
+                                  }
+                                }}
+                                className="inline-flex items-center justify-center h-10 w-10 rounded-md text-muted-foreground hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors disabled:opacity-50"
                               >
-                                <FileDown className="size-4" />
+                                {loadingPlayerId === player.id ? (
+                                  <Loader2 className="size-4 animate-spin text-primary" />
+                                ) : (
+                                  <FileDown className="size-4" />
+                                )}
                               </button>
                             )}
                             <AddStatDialog
