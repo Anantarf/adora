@@ -8,6 +8,7 @@ import {
   passingTotal,
 } from "@/lib/metrics";
 import type { MetricsJson } from "@/types/dashboard";
+import { toast } from "sonner";
 
 export interface RaporData {
   playerName: string;
@@ -33,7 +34,8 @@ export interface RaporData {
 
 const loadImageAsBase64 = async (url: string): Promise<{ data: string; format: string }> => {
   try {
-    const response = await fetch(url);
+    const fetchUrl = url.includes("?") ? `${url}&t=${Date.now()}` : `${url}?t=${Date.now()}`;
+    const response = await fetch(fetchUrl);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const blob = await response.blob();
     
@@ -114,7 +116,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   let y = MARGIN;
 
   // 1. HEADER
-  const isPdfTemplate = assets?.headerUrl?.toLowerCase().endsWith(".pdf");
+  const isPdfTemplate = assets?.headerUrl ? assets.headerUrl.split("?")[0].toLowerCase().endsWith(".pdf") : false;
   if (isPdfTemplate) {
     y += PDF_TEMPLATE_SKIP;
   } else if (assets?.headerUrl) {
@@ -359,7 +361,10 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
     try {
       const pdfBytes = doc.output("arraybuffer");
       const contentPdf = await PDFDocument.load(pdfBytes);
-      const templateRes = await fetch(headerUrl);
+      const fetchUrl = headerUrl.includes("?") ? `${headerUrl}&t=${Date.now()}` : `${headerUrl}?t=${Date.now()}`;
+      const templateRes = await fetch(fetchUrl);
+      if (!templateRes.ok) throw new Error(`Gagal mengunduh template (HTTP ${templateRes.status})`);
+      
       const templatePdf = await PDFDocument.load(await templateRes.arrayBuffer());
 
       const [templatePage] = templatePdf.getPages();
@@ -382,6 +387,7 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
       return;
     } catch (e) {
       console.error("[PDF Gen] PDF Overlay failed, fallback to standard", e);
+      toast.error("Gagal menerapkan template latar belakang: " + (e instanceof Error ? e.message : "Unknown error"));
     }
   }
 
