@@ -396,7 +396,7 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
       }
 
       const merged = await templatePdf.save();
-      const file = new File([merged], fileName, { type: "application/pdf" });
+      const file = new File([merged.buffer as BlobPart], fileName, { type: "application/pdf" });
 
       if (action === "preview") {
         const url = URL.createObjectURL(file);
