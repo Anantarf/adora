@@ -265,6 +265,12 @@ function renderConclusionAndGrades(doc: jsPDF, y: number, info: ConclusionParam)
   doc.setFontSize(9);
   const notesText = metrics.notes?.trim() || `${playerName} telah menyelesaikan evaluasi pada periode ${periodName}. Nilai rata-rata menunjukkan performa ${grade.label.toLowerCase()} dengan skor akhir ${score}.`;
   const splitNotes = doc.splitTextToSize(notesText, CONTENT_W);
+  
+  if (y + splitNotes.length * 4.5 > 260) {
+    doc.addPage();
+    y = MARGIN;
+  }
+
   doc.text(splitNotes, MARGIN, y);
   y += splitNotes.length * 4.5 + 6;
 
@@ -299,6 +305,12 @@ interface SignatureParam {
 
 async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam): Promise<number> {
   const { assets, signers, printDate } = info;
+  
+  if (y + SIG_BOX_H + 20 > 280) {
+    doc.addPage();
+    y = MARGIN;
+  }
+
   drawHorizontalRule(doc, y, 0.3);
   y += 5;
 
@@ -368,20 +380,39 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
       const templatePdf = await PDFDocument.load(await templateRes.arrayBuffer());
 
       const [templatePage] = templatePdf.getPages();
-      const [contentPage] = await templatePdf.embedPdf(contentPdf);
-      templatePage.drawPage(contentPage, { x: 0, y: 0, width: templatePage.getWidth(), height: templatePage.getHeight() });
+      const contentPages = await templatePdf.embedPdf(contentPdf);
+      
+      const blankTemplates = [];
+      if (contentPages.length > 1) {
+        blankTemplates.push(...await templatePdf.copyPages(templatePdf, Array(contentPages.length - 1).fill(0)));
+      }
+
+      templatePage.drawPage(contentPages[0], { x: 0, y: 0, width: templatePage.getWidth(), height: templatePage.getHeight() });
+
+      for (let i = 1; i < contentPages.length; i++) {
+        const newPage = blankTemplates[i - 1];
+        templatePdf.addPage(newPage);
+        newPage.drawPage(contentPages[i], { x: 0, y: 0, width: newPage.getWidth(), height: newPage.getHeight() });
+      }
 
       const merged = await templatePdf.save();
-      const blob = new Blob([merged.buffer as ArrayBuffer], { type: "application/pdf" });
+      const file = new File([merged], fileName, { type: "application/pdf" });
 
       if (action === "preview") {
-        const url = URL.createObjectURL(blob);
-        window.open(url, "_blank");
+        const url = URL.createObjectURL(file);
+        const win = window.open("", "_blank");
+        if (win) {
+          win.document.title = fileName;
+          win.document.body.style.margin = "0";
+          win.document.body.innerHTML = `<iframe width="100%" height="100%" style="border:none;" src="${url}"></iframe>`;
+        } else {
+          window.open(url, "_blank");
+        }
         return;
       }
 
       const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
+      link.href = URL.createObjectURL(file);
       link.download = fileName;
       link.click();
       return;
@@ -393,8 +424,16 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
 
   if (action === "preview") {
     const blob = doc.output("blob");
-    const url = URL.createObjectURL(blob);
-    window.open(url, "_blank");
+    const file = new File([blob], fileName, { type: "application/pdf" });
+    const url = URL.createObjectURL(file);
+    const win = window.open("", "_blank");
+    if (win) {
+      win.document.title = fileName;
+      win.document.body.style.margin = "0";
+      win.document.body.innerHTML = `<iframe width="100%" height="100%" style="border:none;" src="${url}"></iframe>`;
+    } else {
+      window.open(url, "_blank");
+    }
     return;
   }
 
