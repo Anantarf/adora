@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2, UserCheck } from "lucide-react";
+import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2, UserCheck, FileText } from "lucide-react";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { toast } from "sonner";
 
@@ -27,6 +27,55 @@ export default function SettingsPage() {
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+
+  const handlePreviewPdf = async () => {
+    setIsPreviewLoading(true);
+    try {
+      const { generateRaporPDF } = await import("@/lib/generate-rapor-pdf");
+      await generateRaporPDF({
+        playerName: "Muhammad Arya Putra",
+        groupName: "KU-12 Depok",
+        schoolOrigin: "SD Sukamaju",
+        periodName: "Evaluasi Mei 2026",
+        metrics: {
+          dribble: {
+            inAndOut: 85,
+            crossover: 80,
+            vLeft: 75,
+            vRight: 80,
+            betweenLegsLeft: 70,
+            betweenLegsRight: 75,
+          },
+          passing: {
+            chestPass: 85,
+            bouncePass: 80,
+            overheadPass: 75,
+          },
+          layUp: 80,
+          shooting: 75,
+          notes: "Arya menunjukkan performa dribble yang sangat solid dan konsisten selama sesi latihan. Kerjasama tim dan akurasi passing juga sangat baik. Pertahankan fokus saat melakukan shooting.",
+        },
+        assets: {
+          headerUrl: localValues.rapor_header_url || undefined,
+          ceoSignUrl: localValues.rapor_ceo_sign_url || undefined,
+          coachSignUrl: localValues.rapor_coach_sign_url || undefined,
+          stampUrl: localValues.rapor_stamp_url || undefined,
+        },
+        signers: {
+          coachName: localValues.rapor_coach_name || "Head Coach",
+          ceoName: localValues.rapor_ceo_name || "CEO ADORA BBC",
+        },
+        printDate: new Date(),
+      });
+      toast.success("Pratinjau Rapor berhasil diunduh.");
+    } catch (error) {
+      console.error("[PDF Preview Error]", error);
+      toast.error("Gagal membuat pratinjau PDF.");
+    } finally {
+      setIsPreviewLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (settings) {
@@ -88,12 +137,27 @@ export default function SettingsPage() {
 
       <div className="grid gap-6">
         <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardHeader>
-            <div className="flex items-center gap-2 text-primary mb-1">
-              <FileImage className="size-5" />
-              <CardTitle className="font-heading text-xl uppercase tracking-wider">Template Rapor PDF</CardTitle>
+          <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="flex flex-col gap-1">
+              <div className="flex items-center gap-2 text-primary">
+                <FileImage className="size-5" />
+                <CardTitle className="font-heading text-xl uppercase tracking-wider">Template Rapor PDF</CardTitle>
+              </div>
+              <CardDescription className="text-xs">Unggah aset visual untuk Rapor PDF. File akan disimpan secara aman di server.</CardDescription>
             </div>
-            <CardDescription className="text-xs">Unggah aset visual untuk Rapor PDF. File akan disimpan secara aman di server.</CardDescription>
+            <button
+              type="button"
+              onClick={handlePreviewPdf}
+              disabled={isPreviewLoading}
+              className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary/80 disabled:opacity-50 transition-colors shrink-0"
+            >
+              {isPreviewLoading ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <FileText className="size-3.5" />
+              )}
+              Pratinjau Rapor
+            </button>
           </CardHeader>
           <CardContent className="flex flex-col gap-8">
             {ASSET_KEYS.map((asset) => (
