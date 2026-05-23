@@ -169,7 +169,15 @@ function renderDefaultTitle(doc: jsPDF, y: number, periodName: string): number {
   return y + 6;
 }
 
-function renderPlayerInfo(doc: jsPDF, y: number, info: any): number {
+interface PlayerInfoParam {
+  playerName: string;
+  groupName: string;
+  periodName: string;
+  schoolOrigin?: string | null;
+  printDate: Date;
+}
+
+function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): number {
   const { playerName, groupName, periodName, schoolOrigin, printDate } = info;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
@@ -231,10 +239,16 @@ function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJson): num
     theme: "grid",
   });
 
-  return (doc as any).lastAutoTable.finalY + 7;
+  return (doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y;
 }
 
-function renderConclusionAndGrades(doc: jsPDF, y: number, info: any): number {
+interface ConclusionParam {
+  playerName: string;
+  periodName: string;
+  metrics: MetricsJson;
+}
+
+function renderConclusionAndGrades(doc: jsPDF, y: number, info: ConclusionParam): number {
   const { playerName, periodName, metrics } = info;
   const score = averageScore(metrics);
   const grade = letterGrade(score);
@@ -274,7 +288,13 @@ function renderConclusionAndGrades(doc: jsPDF, y: number, info: any): number {
   return y + 20;
 }
 
-async function renderSignatureArea(doc: jsPDF, y: number, info: any): Promise<number> {
+interface SignatureParam {
+  assets?: RaporData["assets"];
+  signers?: RaporData["signers"];
+  printDate: Date;
+}
+
+async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam): Promise<number> {
   const { assets, signers, printDate } = info;
   drawHorizontalRule(doc, y, 0.3);
   y += 5;
@@ -322,7 +342,14 @@ async function renderSignatureArea(doc: jsPDF, y: number, info: any): Promise<nu
   return y;
 }
 
-async function finalizePDF(doc: jsPDF, info: any) {
+interface FinalizeParam {
+  isPdfTemplate?: boolean;
+  headerUrl?: string;
+  playerName: string;
+  periodName: string;
+}
+
+async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
   const { isPdfTemplate, headerUrl, playerName, periodName } = info;
   const fileName = `Rapor_${playerName.replace(/\s+/g, "_")}_${periodName.replace(/\s+/g, "_")}.pdf`;
 

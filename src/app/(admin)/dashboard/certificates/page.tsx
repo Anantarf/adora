@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useMemo, useState } from "react";
 import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
@@ -18,11 +18,6 @@ export default function CertificatesPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    // Reset page when data changes
-    setCurrentPage(1);
-  }, [certificates?.length]);
-
   const filteredCertificates = useMemo(() => {
     if (!certificates) return [];
     if (!searchQuery.trim()) return certificates;
@@ -31,9 +26,11 @@ export default function CertificatesPage() {
   }, [certificates, searchQuery]);
 
   const totalPages = Math.ceil(filteredCertificates.length / ITEMS_PER_PAGE);
+  const clampedPage = Math.min(currentPage, Math.max(1, totalPages));
+
   const paginatedCertificates = useMemo(() => {
-    return filteredCertificates.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  }, [filteredCertificates, currentPage]);
+    return filteredCertificates.slice((clampedPage - 1) * ITEMS_PER_PAGE, clampedPage * ITEMS_PER_PAGE);
+  }, [filteredCertificates, clampedPage]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -126,7 +123,7 @@ export default function CertificatesPage() {
                     <FileBadge className="size-4 text-indigo-400 shrink-0" />
                     <span className="font-semibold text-sm text-foreground leading-tight">{cert.title}</span>
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground/50 shrink-0">#{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
+                  <span className="text-[10px] font-mono font-bold text-muted-foreground/50 shrink-0 tabular-nums">#{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
                 </div>
 
                 {/* Recipient + Date */}
@@ -179,7 +176,7 @@ export default function CertificatesPage() {
               <TableBody>
                 {paginatedCertificates.map((cert, idx) => (
                   <TableRow key={cert.id} className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
-                    <TableCell className="text-center font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
+                    <TableCell className="text-center font-mono text-xs font-medium text-muted-foreground tabular-nums">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <FileBadge className="size-4 text-primary shrink-0" />
@@ -225,7 +222,7 @@ export default function CertificatesPage() {
         </>
       )}
 
-      {!isLoading && totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+      {!isLoading && totalPages > 1 && <Pagination currentPage={clampedPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
     </div>
   );
 }

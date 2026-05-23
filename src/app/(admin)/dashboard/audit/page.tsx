@@ -156,9 +156,8 @@ export default function AuditPage() {
         </Button>
       </div>
 
-      {/* Legend / Filters Placeholder */}
       <div className="flex flex-wrap gap-2 items-center px-1">
-        {(Object.entries(ACTION_CONFIG) as [ActionKey, any][]).map(([, cfg]) => (
+        {(Object.entries(ACTION_CONFIG) as [ActionKey, { label: string; color: string; icon: React.ComponentType<{ className?: string }>; description: string }][]).map(([, cfg]) => (
           <div key={cfg.label} className="flex items-center gap-2 bg-muted/40 pl-2 pr-3 py-1.5 rounded-full border border-border/60">
             <div className="p-1 rounded-full text-white" style={{ backgroundColor: cfg.color }}>
               <cfg.icon className="size-2.5" />

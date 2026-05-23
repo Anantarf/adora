@@ -97,19 +97,25 @@ export function getHumanReadableTable(table: string): string {
   return TARGET_TABLE_DICT[table.toLowerCase()] || table;
 }
 
-export function extractTargetName(details: any): string | null {
+export function extractTargetName(details: unknown): string | null {
   if (!details || typeof details !== "object" || Array.isArray(details)) return null;
-  const d = details;
+  const d = details as Record<string, unknown>;
   if (typeof d.name === "string") return d.name;
-  if (d.after?.name) return d.after.name;
-  if (d.before?.name) return d.before.name;
-  if (d.playerName) return d.playerName;
+  if (d.after && typeof d.after === "object" && !Array.isArray(d.after)) {
+    const name = (d.after as Record<string, unknown>).name;
+    if (typeof name === "string") return name;
+  }
+  if (d.before && typeof d.before === "object" && !Array.isArray(d.before)) {
+    const name = (d.before as Record<string, unknown>).name;
+    if (typeof name === "string") return name;
+  }
+  if (typeof d.playerName === "string") return d.playerName;
   return null;
 }
 
-export function formatValue(key: string, value: any): string {
+export function formatValue(key: string, value: unknown): string {
   if (value === null || value === undefined) return "—";
-  if (key === "role") return ROLE_LABELS[value as string] ?? String(value);
+  if (key === "role") return typeof value === "string" ? (ROLE_LABELS[value] ?? value) : String(value);
   if (key === "resetTo") return value === "default" ? "Sandi awal (adora123)" : "Sandi kustom";
   if (key === "isActive") return value ? "Aktif" : "Tidak aktif";
   if (key.toLowerCase().includes("date") && typeof value === "string") {

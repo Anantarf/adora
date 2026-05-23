@@ -3,6 +3,7 @@
 import { Search, UserCheck2 } from "lucide-react";
 import { AddUserDialog } from "@/components/features/AddUserDialog";
 import { Input } from "@/components/ui/input";
+import { motion } from "framer-motion";
 
 type UsersManagementHeaderProps = {
   searchTerm: string;
@@ -24,11 +25,31 @@ export function UsersManagementHeader({ searchTerm, onSearchTermChange, totalAcc
         <AddUserDialog role={role} />
       </div>
 
-      <div className="flex gap-2 p-1 bg-muted/30 rounded-xl w-fit border border-border/50">
-        <button onClick={() => onRoleChange("PARENT")} className={`px-4 py-2 rounded-lg text-micro transition-all ${isParent ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-muted"}`}>
+      <div className="flex gap-2 p-1 bg-muted/30 rounded-xl w-fit border border-border/50 relative overflow-hidden">
+        <button
+          onClick={() => onRoleChange("PARENT")}
+          className={`relative px-4 py-2 rounded-lg text-micro transition-all z-10 select-none ${isParent ? "text-primary-foreground font-black" : "text-muted-foreground hover:bg-muted/30"}`}
+        >
+          {isParent && (
+            <motion.div
+              layoutId="activeRoleTab"
+              className="absolute inset-0 bg-primary rounded-lg shadow-md -z-10"
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            />
+          )}
           Orang Tua
         </button>
-        <button onClick={() => onRoleChange("ADMIN")} className={`px-4 py-2 rounded-lg text-micro transition-all ${!isParent ? "bg-primary text-primary-foreground shadow-lg" : "text-muted-foreground hover:bg-muted"}`}>
+        <button
+          onClick={() => onRoleChange("ADMIN")}
+          className={`relative px-4 py-2 rounded-lg text-micro transition-all z-10 select-none ${!isParent ? "text-primary-foreground font-black" : "text-muted-foreground hover:bg-muted/30"}`}
+        >
+          {!isParent && (
+            <motion.div
+              layoutId="activeRoleTab"
+              className="absolute inset-0 bg-primary rounded-lg shadow-md -z-10"
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            />
+          )}
           Admin
         </button>
       </div>

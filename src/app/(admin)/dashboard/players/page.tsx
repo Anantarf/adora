@@ -44,7 +44,7 @@ export default function PlayersPage() {
   }
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
-  const filteredPlayers = players || [];
+  const filteredPlayers = useMemo(() => players || [], [players]);
   const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE);
   const paginatedPlayers = useMemo(() => {
     return filteredPlayers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);

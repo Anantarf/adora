@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Users, Info, MessageCircle, Download } from "lucide-react";
@@ -33,15 +33,12 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    // Reset pagination when data changes
-    setCurrentPage(1);
-  }, [registrations]);
-
   const totalPages = Math.ceil(registrations.length / ITEMS_PER_PAGE);
+  const clampedPage = Math.min(currentPage, Math.max(1, totalPages));
+
   const paginatedRegistrations = useMemo(() => {
-    return registrations.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  }, [registrations, currentPage]);
+    return registrations.slice((clampedPage - 1) * ITEMS_PER_PAGE, clampedPage * ITEMS_PER_PAGE);
+  }, [registrations, clampedPage]);
 
   const handleExport = (filter: string) => {
     window.open(`/api/export/registrations?filter=${filter}`, "_blank");
@@ -108,7 +105,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                         <span className="font-semibold text-sm text-foreground truncate">{reg.playerName}</span>
                         {reg.email && <span className="text-xs text-muted-foreground truncate">{reg.email}</span>}
                       </div>
-                      <span className="text-[10px] font-bold text-muted-foreground/50 shrink-0">#{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
+                      <span className="text-[10px] font-mono font-bold text-muted-foreground/50 shrink-0 tabular-nums">#{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</span>
                     </div>
 
                     {/* Meta */}
@@ -162,8 +159,8 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
 
                     return (
                       <tr key={reg.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</td>
-                        <td className="px-4 py-3 whitespace-nowrap text-xs text-muted-foreground">{format(new Date(reg.createdAt), "dd MMM yyyy, HH:mm", { locale: idLocale })}</td>
+                        <td className="px-4 py-3 text-center text-xs font-mono font-medium text-muted-foreground tabular-nums">{(currentPage - 1) * ITEMS_PER_PAGE + idx + 1}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-xs font-mono text-muted-foreground tabular-nums">{format(new Date(reg.createdAt), "dd MMM yyyy, HH:mm", { locale: idLocale })}</td>
                         <td className="px-4 py-3 font-semibold text-foreground">
                           <div className="flex flex-col gap-0.5">
                             <span>{reg.playerName}</span>
@@ -204,7 +201,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
 
         {totalPages > 1 && (
           <div className="mt-4">
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            <Pagination currentPage={clampedPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
       </div>

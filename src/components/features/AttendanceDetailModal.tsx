@@ -214,7 +214,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                           <div className="flex flex-col min-w-0">
                             <span className="text-sm font-bold truncate text-foreground">{a.player.name}</span>
                             <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">
-                              {(a.player as any).group?.name || "Tanpa Kelompok"}
+                              {(a.player as { group?: { name: string } | null }).group?.name || "Tanpa Kelompok"}
                             </span>
                           </div>
                         </div>

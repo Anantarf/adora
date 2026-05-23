@@ -9,7 +9,7 @@ import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
-import type { MetricsJson } from "@/types/dashboard";
+import type { MetricsJson, Player } from "@/types/dashboard";
 import { toast } from "sonner";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -54,16 +54,42 @@ const periodDisplayLabel = (period: { name: string; startDate: Date | string; en
 
 // ─── Subcomponents ──────────────────────────────────────
 
-const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, settings }: { player: any; idx: number; stat: any; group: any; selectedPeriod: any; settings: any }) => {
-  const rawM = stat?.metricsJson;
-  const m = getValidMetrics(rawM);
+const PlayerStatRow = React.memo(
+  ({
+    player,
+    idx,
+    stat,
+    group,
+    selectedPeriod,
+    settings,
+  }: {
+    player: Player;
+    idx: number;
+    stat?: {
+      id: string;
+      metricsJson: unknown;
+      status: string;
+    } | null;
+    group: {
+      id: string;
+      name: string;
+    };
+    selectedPeriod?: {
+      id: string;
+      name: string;
+      isActive: boolean;
+    } | null;
+    settings?: Record<string, string> | null | undefined;
+  }) => {
+    const rawM = stat?.metricsJson;
+    const m = getValidMetrics(rawM);
 
   return (
     <TableRow className="even:bg-muted/10 hover:bg-muted/30 transition-colors">
       <TableCell className="w-12 min-w-12 max-w-12 px-2 text-center text-muted-foreground font-medium sticky left-0 bg-card z-20">{idx + 1}</TableCell>
       <TableCell className="min-w-40 max-w-50 truncate font-semibold sticky left-12 bg-card z-20">{player.name}</TableCell>
       {FLAT_METRIC_DEFS.map((def) => (
-        <TableCell key={def.key} className="text-center font-mono text-sm">
+        <TableCell key={def.key} className="text-center font-mono text-sm tabular-nums">
           <MetricCell v={m ? def.getValue(m) : undefined} />
         </TableCell>
       ))}
@@ -86,14 +112,14 @@ const PlayerStatRow = React.memo(({ player, idx, stat, group, selectedPeriod, se
                   periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
                   metrics: m,
                   assets: {
-                    headerUrl: settings?.rapor_header_url,
-                    ceoSignUrl: settings?.rapor_ceo_sign_url,
-                    coachSignUrl: settings?.rapor_coach_sign_url,
-                    stampUrl: settings?.rapor_stamp_url,
+                    headerUrl: settings?.rapor_header_url ?? undefined,
+                    ceoSignUrl: settings?.rapor_ceo_sign_url ?? undefined,
+                    coachSignUrl: settings?.rapor_coach_sign_url ?? undefined,
+                    stampUrl: settings?.rapor_stamp_url ?? undefined,
                   },
                   signers: {
-                    coachName: settings?.rapor_coach_name,
-                    ceoName: settings?.rapor_ceo_name,
+                    coachName: settings?.rapor_coach_name ?? undefined,
+                    ceoName: settings?.rapor_ceo_name ?? undefined,
                   },
                 })
               }
@@ -381,7 +407,7 @@ export default function StatisticsPage() {
                             return (
                               <div key={def.key} className="shrink-0 rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-center min-w-20">
                                 <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">{def.shortLabel}</p>
-                                <p className="text-sm font-mono font-bold text-primary leading-tight">{value != null ? value : "—"}</p>
+                                <p className="text-sm font-mono font-bold text-primary leading-tight tabular-nums">{value != null ? value : "—"}</p>
                               </div>
                             );
                           })}
