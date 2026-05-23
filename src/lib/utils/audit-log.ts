@@ -36,7 +36,7 @@ export const FIELD_LABELS: Record<string, string> = {
   resetTo: "Sandi Baru",
   key: "Bagian yang Diubah",
   value: "Isi Perubahan",
-  rapor_header_url: "Kop Surat",
+  rapor_header_url: "Template Kertas Rapor",
   rapor_ceo_sign_url: "Tanda Tangan CEO",
   rapor_coach_sign_url: "Tanda Tangan Pelatih",
   rapor_stamp_url: "Stempel Klub",
