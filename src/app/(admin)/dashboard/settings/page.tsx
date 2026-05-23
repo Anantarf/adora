@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ASSET_KEYS = [
-  { key: "rapor_header_url", label: "Template Kertas Rapor (Paper Background)", description: "Unggah desain kertas rapor utuh (Format: PDF) atau Kop Surat (Format: PNG/JPG). Jika mengunggah PDF, konten tabel rapor akan otomatis dicetak di atas desain kertas tersebut.", accept: ".png,.jpg,.jpeg,.pdf" },
-  { key: "rapor_ceo_sign_url", label: "Tanda Tangan CEO", description: "Upload Tanda Tangan CEO (Format: PNG Transparan).", accept: ".png" },
-  { key: "rapor_coach_sign_url", label: "Tanda Tangan Head Coach", description: "Upload Tanda Tangan Head Coach (Format: PNG Transparan).", accept: ".png" },
-  { key: "rapor_stamp_url", label: "Stempel Digital", description: "Upload Stempel Resmi ADORA BBC (Format: PNG Transparan).", accept: ".png" },
+  { key: "rapor_header_url", label: "Template Kertas Rapor (Paper Background)", description: "Unggah desain kertas rapor utuh (Format: PDF) atau Kop Surat (Format: PNG/JPG). Jika mengunggah PDF, konten tabel rapor akan otomatis dicetak di atas desain kertas tersebut.", accept: ".png,.jpg,.jpeg,.pdf", maxSizeLabel: "Maks 2MB" },
+  { key: "rapor_ceo_sign_url", label: "Tanda Tangan CEO", description: "Upload Tanda Tangan CEO (Format: PNG Transparan).", accept: ".png", maxSizeLabel: "Maks 1MB" },
+  { key: "rapor_coach_sign_url", label: "Tanda Tangan Head Coach", description: "Upload Tanda Tangan Head Coach (Format: PNG Transparan).", accept: ".png", maxSizeLabel: "Maks 1MB" },
+  { key: "rapor_stamp_url", label: "Stempel Digital", description: "Upload Stempel Resmi ADORA BBC (Format: PNG Transparan).", accept: ".png", maxSizeLabel: "Maks 1MB" },
 ];
 
 const SIGNER_KEYS = [
@@ -67,8 +67,9 @@ export default function SettingsPage() {
           ceoName: localValues.rapor_ceo_name || "CEO ADORA BBC",
         },
         printDate: new Date(),
+        action: "preview",
       });
-      toast.success("Pratinjau Rapor berhasil diunduh.");
+      toast.success("Pratinjau Rapor berhasil dibuka di tab baru.");
     } catch (error) {
       console.error("[PDF Preview Error]", error);
       toast.error("Gagal membuat pratinjau PDF.");
@@ -171,7 +172,10 @@ export default function SettingsPage() {
             {ASSET_KEYS.map((asset) => (
               <div key={asset.key} className="flex flex-col gap-3 group">
                 <div className="flex flex-col gap-1">
-                  <label className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{asset.label}</label>
+                  <div className="flex items-center gap-2.5">
+                    <label className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{asset.label}</label>
+                    <span className="text-[9px] font-bold text-amber-500/80 px-1.5 py-0.5 rounded bg-amber-500/10 uppercase tracking-wider select-none shrink-0">{asset.maxSizeLabel}</span>
+                  </div>
                   <p className="text-[10px] text-muted-foreground leading-relaxed">{asset.description}</p>
                 </div>
 

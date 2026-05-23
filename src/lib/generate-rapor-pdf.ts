@@ -26,6 +26,7 @@ export interface RaporData {
     coachName?: string;
     ceoName?: string;
   };
+  action?: "download" | "preview";
 }
 
 // ─── UTILITIES ──────────────────────────────────────────
@@ -151,7 +152,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   y = await renderSignatureArea(doc, y, { assets, signers, printDate });
 
   // 6. DOWNLOAD / OVERLAY
-  await finalizePDF(doc, { isPdfTemplate, headerUrl: assets?.headerUrl, playerName, periodName });
+  await finalizePDF(doc, { isPdfTemplate, headerUrl: assets?.headerUrl, playerName, periodName, action: data.action });
 }
 
 // ─── SUB-RENDERERS ──────────────────────────────────────
@@ -347,10 +348,11 @@ interface FinalizeParam {
   headerUrl?: string;
   playerName: string;
   periodName: string;
+  action?: "download" | "preview";
 }
 
 async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
-  const { isPdfTemplate, headerUrl, playerName, periodName } = info;
+  const { isPdfTemplate, headerUrl, playerName, periodName, action = "download" } = info;
   const fileName = `Rapor_${playerName.replace(/\s+/g, "_")}_${periodName.replace(/\s+/g, "_")}.pdf`;
 
   if (isPdfTemplate && headerUrl) {
@@ -366,6 +368,13 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
 
       const merged = await templatePdf.save();
       const blob = new Blob([merged.buffer as ArrayBuffer], { type: "application/pdf" });
+
+      if (action === "preview") {
+        const url = URL.createObjectURL(blob);
+        window.open(url, "_blank");
+        return;
+      }
+
       const link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = fileName;
@@ -374,6 +383,13 @@ async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
     } catch (e) {
       console.error("[PDF Gen] PDF Overlay failed, fallback to standard", e);
     }
+  }
+
+  if (action === "preview") {
+    const blob = doc.output("blob");
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+    return;
   }
 
   doc.save(fileName);
