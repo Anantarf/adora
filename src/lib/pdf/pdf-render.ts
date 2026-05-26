@@ -54,7 +54,7 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
   rows.push(["Tanggal Cetak", printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })]);
 
   const perCol = Math.ceil(rows.length / 2);
-  const panelHeight = 20 + Math.max(0, rows.length - 4) * 6;
+  const panelHeight = 26; // Fixed height
   const labelWidth = 28;
   const colGap = 10;
   const colX = [MARGIN + 8, MARGIN + CONTENT_W / 2 + colGap / 2];
@@ -155,9 +155,7 @@ export function renderConclusionAndGrades(
   const leftWidth = 114;
   const rightWidth = CONTENT_W - leftWidth - 8;
   const splitNotes = doc.splitTextToSize(notesText, leftWidth - 12);
-  const noteHeight = Math.max(40, 26 + splitNotes.length * 4.2 + scales.length * 4.1);
-  const gradeHeight = 38;
-  const blockHeight = Math.max(noteHeight, gradeHeight);
+  const blockHeight = 60; // Fixed height
 
   if (y + 4 + blockHeight > PAGE_H - 45) {
     y = addNewPage();
@@ -171,11 +169,12 @@ export function renderConclusionAndGrades(
   doc.setFontSize(9);
   doc.text(splitNotes, MARGIN + 6, y + 9);
 
-  const legendY = y + 13 + splitNotes.length * 4.2;
+  // Anchor legend to the bottom of the fixed box
+  const legendY = y + 34;
   doc.setDrawColor(...PANEL_BORDER);
   doc.setLineWidth(0.25);
   doc.line(MARGIN + 6, legendY, MARGIN + leftWidth - 6, legendY);
-  doc.setDrawColor(0, 0, 0);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.text("KETERANGAN", MARGIN + 6, legendY + 5);
@@ -186,16 +185,17 @@ export function renderConclusionAndGrades(
 
   const gradeX = MARGIN + leftWidth + 8;
   drawPanel(doc, gradeX, y, rightWidth, blockHeight);
+
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
   doc.setTextColor(...SECTION_TITLE_COLOR);
   doc.text("HASIL PENILAIAN", gradeX + rightWidth / 2, y + 7, { align: "center" });
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(28);
-  doc.text(grade.letter, gradeX + rightWidth / 2, y + 21, { align: "center" });
+  doc.text(grade.letter, gradeX + rightWidth / 2, y + 27, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(grade.label, gradeX + rightWidth / 2, y + 29, { align: "center" });
+  doc.text(grade.label, gradeX + rightWidth / 2, y + 37, { align: "center" });
 
   return y + blockHeight + SECTION_GAP;
 }
