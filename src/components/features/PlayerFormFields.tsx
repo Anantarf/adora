@@ -1,9 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Controller, type Control, type FieldErrors, type UseFormRegister, type UseFormSetValue, type UseFormGetValues } from "react-hook-form";
+import { Controller, type Control, type FieldErrors, type UseFormRegister, type UseFormSetValue } from "react-hook-form";
 import type { PlayerFormValues } from "@/lib/validation/player";
 import type { Group } from "@/hooks/use-groups";
 
@@ -13,7 +12,6 @@ interface PlayerFormFieldsProps {
   control: Control<PlayerFormValues>;
   errors: FieldErrors<PlayerFormValues>;
   setValue: UseFormSetValue<PlayerFormValues>;
-  getValues: UseFormGetValues<PlayerFormValues>;
   groups: Group[] | undefined;
   isGroupsLoading?: boolean;
   inputClassName?: string;
@@ -25,16 +23,11 @@ export function PlayerFormFields({
   control,
   errors,
   setValue,
-  getValues,
   groups,
   isGroupsLoading,
   inputClassName = "h-11 rounded-xl bg-background/40",
   step = 1,
 }: PlayerFormFieldsProps) {
-  const lastAutoFilledRef = useRef("");
-
-
-
   return (
     <>
       {/* STEP 1: Data Diri Dasar & Fisik */}

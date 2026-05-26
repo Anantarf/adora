@@ -42,7 +42,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
           setStatuses(Object.fromEntries(data.attendances.map((a) => [a.playerId, a.status as AttendanceStatus])));
         }
       })
-      .catch((err) => {
+      .catch(() => {
         toast.error("Gagal memuat data presensi. Coba lagi.");
         onClose();
       })
@@ -85,7 +85,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
       queryClient.invalidateQueries({ queryKey: ["public-events"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
       onClose();
-    } catch (err) {
+    } catch {
       toast.error("Gagal menyimpan presensi. Coba lagi.");
     } finally {
       setIsSaving(false);

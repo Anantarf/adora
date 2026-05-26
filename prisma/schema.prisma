@@ -291,6 +291,20 @@ model clubSetting {
   @@map("ClubSetting")
 }
 
+model rateLimitBucket {
+  id        String   @id @default(cuid())
+  namespace String
+  key       String
+  count     Int
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([namespace, key], map: "RateLimitBucket_namespace_key_key")
+  @@index([resetAt], map: "RateLimitBucket_resetAt_idx")
+  @@map("RateLimitBucket")
+}
+
 enum attendance_status {
   HADIR
   IZIN

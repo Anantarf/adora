@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Loader2, User, FileText, Activity, ClipboardCheck } from "lucide-react";
+import { Loader2, User, FileText, Activity } from "lucide-react";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { usePlayerStats } from "@/hooks/use-player-stats";
@@ -13,10 +13,6 @@ import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-configs";
-import { format } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
-import { getEventConfig } from "@/lib/config/events";
 import { ParentRadarChart } from "./components/ParentRadarChart";
 import { ParentProgressionChart } from "./components/ParentProgressionChart";
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";

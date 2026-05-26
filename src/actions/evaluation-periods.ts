@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import type { EvaluationPeriod } from "@/types/dashboard";
+import { acquireAdvisoryLock, withSerializableTransaction } from "@/lib/db-concurrency";
 
 // 1. List all periods
 export async function getPeriodsAction(): Promise<EvaluationPeriod[]> {
@@ -24,8 +25,9 @@ export async function createPeriodAction(data: { name: string; startDate: string
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  const period = await prisma.$transaction(async (tx) => {
+  const period = await withSerializableTransaction(async (tx) => {
     if (data.setActive) {
+      await acquireAdvisoryLock(tx, "evaluation-period:active");
       await tx.evaluationPeriod.updateMany({ where: { isActive: true }, data: { isActive: false } });
     }
     const p = await tx.evaluationPeriod.create({
@@ -54,7 +56,8 @@ export async function setActivePeriodAction(periodId: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  await prisma.$transaction(async (tx) => {
+  await withSerializableTransaction(async (tx) => {
+    await acquireAdvisoryLock(tx, "evaluation-period:active");
     await tx.evaluationPeriod.updateMany({ where: { isActive: true }, data: { isActive: false } });
     await tx.evaluationPeriod.update({ where: { id: periodId }, data: { isActive: true } });
     const period = await tx.evaluationPeriod.findUnique({ where: { id: periodId }, select: { name: true } });
@@ -71,7 +74,7 @@ export async function deletePeriodAction(periodId: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  await prisma.$transaction(async (tx) => {
+  await withSerializableTransaction(async (tx) => {
     const statCount = await tx.statistic.count({ where: { periodId } });
     if (statCount > 0) {
       throw new Error(`Periode ini sudah memiliki ${statCount} data nilai. Hapus data nilai terlebih dahulu.`);

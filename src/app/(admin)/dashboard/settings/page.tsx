@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { CheckCircle2, FileImage, FileText, Info, Loader2, Settings, Upload, UserCheck } from "lucide-react";
 import { toast } from "sonner";
@@ -217,10 +218,12 @@ export default function SettingsPage() {
                                 <span className="text-[10px] font-bold">PNG</span>
                               </div>
                             ) : (
-                              <img
+                              <Image
                                 src={`${assetUrl}?t=${Date.now()}`}
                                 alt={`Preview ${asset.label}`}
-                                crossOrigin="anonymous"
+                                width={48}
+                                height={48}
+                                unoptimized
                                 className="max-h-full max-w-full object-contain"
                                 onError={() => setFailedImages((prev) => ({ ...prev, [asset.key]: true }))}
                               />

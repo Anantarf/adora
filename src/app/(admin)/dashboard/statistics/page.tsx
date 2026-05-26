@@ -171,7 +171,6 @@ export default function StatisticsPage() {
     if (initialized.current || !periods) return;
     const first = periods.find((p) => p.isActive) ?? periods[0];
     if (first) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelectedPeriodId(first.id);
       initialized.current = true;
     }

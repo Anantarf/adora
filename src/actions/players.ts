@@ -6,6 +6,7 @@ import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import { z } from "zod";
+import { withSerializableTransaction } from "@/lib/db-concurrency";
 
 const batchPlayerSchema = z.object({
   name: z.string().trim().min(2),
@@ -190,7 +191,7 @@ export async function addBatchPlayersAction(
     (_, i) => formattedData.slice(i * BATCH_CHUNK_SIZE, (i + 1) * BATCH_CHUNK_SIZE),
   );
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await withSerializableTransaction(async (tx) => {
     let count = 0;
     for (const chunk of chunks) {
       const res = await tx.player.createMany({ data: chunk, skipDuplicates: true });
@@ -271,7 +272,7 @@ export async function deletePlayerAction(id: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  await prisma.$transaction(async (tx) => {
+  await withSerializableTransaction(async (tx) => {
     const target = await tx.player.findUnique({ where: { id }, select: { name: true, groupId: true } });
     await tx.player.update({ where: { id }, data: { isDeleted: true } });
     await createAuditLog(tx, "DELETE", "player", id, userId, {
@@ -298,14 +299,21 @@ export async function linkPlayerAction(playerId: string, parentId: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  await prisma.$transaction(async (tx) => {
+  await withSerializableTransaction(async (tx) => {
     const target = await tx.player.findUnique({ where: { id: playerId }, select: { name: true, parentId: true } });
-    
-    if (target?.parentId) {
-      throw new Error(`Pemain ini sudah dihubungkan ke akun lain.`);
+    const linked = await tx.player.updateMany({
+      where: { id: playerId, parentId: null, isDeleted: false },
+      data: { parentId },
+    });
+
+    if (linked.count !== 1) {
+      if (target?.parentId) {
+        throw new Error("Pemain ini sudah dihubungkan ke akun lain.");
+      }
+
+      throw new Error("Pemain tidak ditemukan atau sudah tidak bisa dihubungkan.");
     }
 
-    await tx.player.update({ where: { id: playerId }, data: { parentId } });
     await createAuditLog(tx, "UPDATE", "player_link", playerId, userId, {
       message: `Pemain ${target?.name} dihubungkan ke parentId: ${parentId}`,
     });
@@ -320,7 +328,7 @@ export async function unlinkPlayerAction(playerId: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  await prisma.$transaction(async (tx) => {
+  await withSerializableTransaction(async (tx) => {
     const target = await tx.player.findUnique({ where: { id: playerId }, select: { name: true } });
     await tx.player.update({ where: { id: playerId }, data: { parentId: null } });
     await createAuditLog(tx, "UPDATE", "player_unlink", playerId, userId, {

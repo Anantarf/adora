@@ -1,4 +1,4 @@
-import { expect, test, vi, beforeEach, describe } from 'vitest';
+import { expect, test, beforeEach, describe } from 'vitest';
 import { deletePeriodAction } from '@/actions/evaluation-periods';
 import { prisma as originalPrisma } from '@/lib/prisma';
 import { DeepMockProxy } from 'vitest-mock-extended';

@@ -6,6 +6,7 @@ import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
+import { acquireAdvisoryLock, withSerializableTransaction } from "@/lib/db-concurrency";
 
 import { z } from "zod";
 
@@ -56,8 +57,14 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
 
   const dateObj = toJakartaDate(data.date);
 
-  await prisma.$transaction(async (tx) => {
+  await withSerializableTransaction(async (tx) => {
     const playerIds = dedupedStatuses.map((ps) => ps.playerId);
+    const lockKeys = [...playerIds].sort().map((playerId) => `attendance:${data.date}:${playerId}`);
+
+    for (const lockKey of lockKeys) {
+      await acquireAdvisoryLock(tx, lockKey);
+    }
+
     const existingPlayers = await tx.player.findMany({
       where: { id: { in: playerIds }, isDeleted: false },
       select: { id: true },
@@ -84,15 +91,13 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
       throw new Error("Sebagian pemain sudah punya absensi dari agenda lain pada tanggal yang sama.");
     }
 
-    await Promise.all(
-      dedupedStatuses.map((ps) =>
-        tx.attendance.upsert({
-          where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
-          update: { status: ps.status, note: data.note, eventId: data.eventId },
-          create: { playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
-        })
-      )
-    );
+    for (const ps of dedupedStatuses) {
+      await tx.attendance.upsert({
+        where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
+        update: { status: ps.status, note: data.note, eventId: data.eventId },
+        create: { playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
+      });
+    }
 
     await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${dedupedStatuses.length}`, userId);
   });
@@ -105,7 +110,9 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
   const session = await requireAdmin();
   const userId = session.user.id as string | undefined;
 
-  const stat = await prisma.$transaction(async (tx) => {
+  const stat = await withSerializableTransaction(async (tx) => {
+    await acquireAdvisoryLock(tx, `statistic:${data.playerId}:${data.periodId}`);
+
     const period = await tx.evaluationPeriod.findUnique({ where: { id: data.periodId } });
     if (!period) throw new Error("Periode evaluasi tidak ditemukan.");
     if (!period.isActive) throw new Error("Akses Ditolak: Periode evaluasi ini sudah dikunci/ditutup. Perubahan nilai tidak lagi diizinkan.");

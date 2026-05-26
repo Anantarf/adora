@@ -1,4 +1,4 @@
-import { expect, test, vi, beforeEach, describe } from 'vitest';
+import { expect, test, beforeEach, describe } from 'vitest';
 import { addBatchPlayersAction } from '@/actions/players';
 import { prisma as originalPrisma } from '@/lib/prisma';
 import { DeepMockProxy } from 'vitest-mock-extended';

@@ -27,7 +27,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
 
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
-  const { register, handleSubmit, control, setValue, getValues, formState: { errors }, reset } = useForm<PlayerFormValues>({
+  const { register, handleSubmit, control, setValue, formState: { errors }, reset } = useForm<PlayerFormValues>({
     resolver: zodResolver(playerSchema),
     defaultValues: playerToFormValues(player),
   });
@@ -95,7 +95,6 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
               control={control}
               errors={errors}
               setValue={setValue}
-              getValues={getValues}
               groups={groups}
               isGroupsLoading={isGroupsLoading}
 

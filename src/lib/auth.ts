@@ -2,38 +2,34 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { clearBucket, getActiveBucket, incrementBucket } from "@/lib/shared-rate-limit";
 
-// Track failed login attempts per IP — only increments on actual failures
-const loginFailures = new Map<string, { count: number; resetAt: number }>();
+const LOGIN_FAILURE_NAMESPACE = "login-failures";
 const MAX_FAILURES = 10;
 const LOCKOUT_MS = 15 * 60 * 1000;
 
-function checkFailureLimit(ip: string) {
-  const now = Date.now();
-  const record = loginFailures.get(ip);
+async function checkFailureLimit(ip: string) {
+  const record = await getActiveBucket(LOGIN_FAILURE_NAMESPACE, ip);
 
-  if (record && record.resetAt > now && record.count >= MAX_FAILURES) {
-    const remainingMinutes = Math.ceil((record.resetAt - now) / 60000);
+  if (record && record.count >= MAX_FAILURES) {
+    const remainingMinutes = Math.ceil((record.resetAt.getTime() - Date.now()) / 60000);
     throw new Error(`Akun dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam ${remainingMinutes} menit.`);
   }
 }
 
-function recordFailure(ip: string, failed: boolean) {
-  const now = Date.now();
-  const record = loginFailures.get(ip);
-  const active = record && record.resetAt > now ? record : { count: 0, resetAt: now + LOCKOUT_MS };
-
+async function recordFailure(ip: string, failed: boolean) {
   if (failed) {
-    loginFailures.set(ip, { count: active.count + 1, resetAt: active.resetAt });
-  } else {
-    loginFailures.delete(ip);
+    await incrementBucket(LOGIN_FAILURE_NAMESPACE, ip, LOCKOUT_MS);
+    return;
   }
+
+  await clearBucket(LOGIN_FAILURE_NAMESPACE, ip);
 }
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 1 hari, session otomatis kadaluwarsa
+    maxAge: 24 * 60 * 60,
   },
   pages: {
     signIn: "/login",
@@ -56,28 +52,26 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          checkFailureLimit(ip); // Cek apakah IP sudah di-banned
+          await checkFailureLimit(ip);
 
           const user = await prisma.user.findUnique({
             where: { username: credentials.username },
           });
 
           if (!user || !user.password) {
-            recordFailure(ip, true); // Catat gagal
+            await recordFailure(ip, true);
             throw new Error("Identitas ditolak: Akun tidak ditemukan.");
           }
 
-          const isPasswordCorrect = await bcrypt.compare(
-            credentials.password,
-            user.password
-          );
+          const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
 
           if (!isPasswordCorrect) {
-            recordFailure(ip, true); // Catat gagal
+            await recordFailure(ip, true);
             throw new Error("Identitas ditolak: Sandi tidak cocok.");
           }
 
-          recordFailure(ip, false); // Login sukses → hapus riwayat gagal
+          await recordFailure(ip, false);
+
           return {
             id: user.id,
             name: user.name,
@@ -102,7 +96,6 @@ export const authOptions: NextAuthOptions = {
         token.mustChangePassword = user.mustChangePassword;
       }
 
-      // Handle client-side session updates
       if (trigger === "update" && session) {
         if (typeof session.mustChangePassword === "boolean") {
           token.mustChangePassword = session.mustChangePassword;
@@ -118,8 +111,8 @@ export const authOptions: NextAuthOptions = {
         session.user.username = token.username;
         session.user.mustChangePassword = token.mustChangePassword as boolean | undefined;
       }
+
       return session;
     },
   },
-
 };

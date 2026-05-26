@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Users, Loader2 } from "lucide-react";
 import { useUsers, useDeleteUser, useResetPassword } from "@/hooks/use-users";
@@ -20,11 +20,6 @@ export default function UsersManagementPage() {
 
   const { data: users, isLoading } = useUsers(activeRole);
   
-  // Reset page when search query or roles change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, activeRole]);
-
   const { mutateAsync: deleteUser } = useDeleteUser();
   const { mutateAsync: resetPassword } = useResetPassword();
 
@@ -38,9 +33,10 @@ export default function UsersManagementPage() {
   }, [users, normalizedSearch]);
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+  const safeCurrentPage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
   const paginatedUsers = useMemo(() => {
-    return filteredUsers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  }, [filteredUsers, currentPage]);
+    return filteredUsers.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE);
+  }, [filteredUsers, safeCurrentPage]);
 
   const handleSearchTermChange = (term: string) => {
     setSearchTerm(term);
@@ -99,7 +95,7 @@ export default function UsersManagementPage() {
         )}
       </div>
 
-      {!isLoading && totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+      {!isLoading && totalPages > 1 && <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
       <LinkedPlayersModal

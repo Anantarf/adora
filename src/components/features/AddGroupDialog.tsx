@@ -61,7 +61,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
       setIsKu(false); setTargetKu(""); setIsSchool(false); setSchoolLevel("");
       setOpen(false);
       toast.success("Kelompok baru berhasil ditambahkan!");
-    } catch (error: unknown) {
+    } catch {
       toast.error("Gagal menambahkan kelompok. Silakan coba kembali.");
     }
   };

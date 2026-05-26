@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants/navigation";
-import { CONTACT } from "@/lib/constants/contact";
 
 function InstagramIcon({ className }: { className?: string }) {
   return (

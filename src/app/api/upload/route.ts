@@ -3,11 +3,12 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 import { fileTypeFromBuffer } from "file-type";
+import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 const RATE_LIMIT = 30;
 const RATE_LIMIT_WINDOW_MS = 60_000;
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
+const UPLOAD_RATE_LIMIT_NAMESPACE = "upload-api";
 
 const ALLOWED_TYPES = new Map<string, string>([
   [".png", "image/png"],
@@ -26,33 +27,25 @@ function getClientIp(req: NextRequest): string {
   return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
 }
 
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const bucket = rateLimitMap.get(ip) ?? { count: 0, reset: now + RATE_LIMIT_WINDOW_MS };
-
-  if (now > bucket.reset) {
-    bucket.count = 0;
-    bucket.reset = now + RATE_LIMIT_WINDOW_MS;
-  }
-
-  bucket.count += 1;
-  rateLimitMap.set(ip, bucket);
-
-  return bucket.count > RATE_LIMIT;
-}
-
 function resolveUploadName(assetKey: FormDataEntryValue | null, ext: string): string {
   if (typeof assetKey === "string" && assetKey.trim()) {
     return `${assetKey.trim()}${ext}`;
   }
 
-  return `upload_${Date.now()}${ext}`;
+  return `upload_${crypto.randomUUID()}${ext}`;
 }
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
+  const ip = getClientIp(req);
+  const rateLimitResult = await consumeFixedWindowLimit(
+    UPLOAD_RATE_LIMIT_NAMESPACE,
+    ip,
+    RATE_LIMIT,
+    RATE_LIMIT_WINDOW_MS,
+  );
 
-  if (isRateLimited(getClientIp(req))) {
+  if (!rateLimitResult.allowed) {
     return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
   }
 

@@ -7,7 +7,7 @@ import * as React from "react";
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useDebounce } from "use-debounce";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";

@@ -28,8 +28,7 @@ export function AddPlayerDialog() {
     handleSubmit,
     control,
     setValue,
-    getValues,
-    formState: { errors, isValid },
+    formState: { errors },
     reset,
   } = useForm<PlayerFormValues>({ resolver: zodResolver(playerSchema), mode: "onChange" });
 
@@ -92,7 +91,6 @@ export function AddPlayerDialog() {
                 control={control}
                 errors={errors}
                 setValue={setValue}
-                getValues={getValues}
                 groups={groups}
                 isGroupsLoading={isGroupsLoading}
 
