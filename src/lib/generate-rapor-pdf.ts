@@ -6,7 +6,7 @@ import {
   loadImageAsBase64, drawHorizontalRule
 } from "./pdf/pdf-utils";
 import {
-  renderDefaultTitle,
+  renderMainTitle,
   renderPlayerInfo,
   renderAssessmentTable,
   renderConclusionAndGrades,
@@ -96,11 +96,11 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
         y += HEADER_SEP_GAP;
       }
     } catch {
-      y = renderDefaultTitle(doc, y, periodName);
+      console.error("[PDF Gen] Error rendering custom header image");
     }
-  } else {
-    y = renderDefaultTitle(doc, y, periodName);
   }
+
+  y = renderMainTitle(doc, y, periodName);
 
   y = renderPlayerInfo(doc, y, { playerName, groupName, periodName, schoolOrigin, printDate });
   y = renderAssessmentTable(doc, y, metrics);

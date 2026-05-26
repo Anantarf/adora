@@ -8,7 +8,7 @@ export const CONTENT_W = PAGE_W - MARGIN * 2;
 export const HEADER_MAX_H = 35;
 export const HEADER_BOTTOM_TRIM = 6;
 export const HEADER_SEP_GAP = 5;
-export const PDF_TEMPLATE_SKIP = 25;
+export const PDF_TEMPLATE_SKIP = 35;
 
 export const SIG_BOX_H = 32;
 export const STAMP_SIZE = 34;
