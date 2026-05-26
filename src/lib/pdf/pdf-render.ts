@@ -284,10 +284,10 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
     y = addNewPage();
   }
 
-  const dateStr = printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+  const dateStr = `Gandul, ${info.printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
-  doc.text(`Gandul, ${dateStr}`, PAGE_W - MARGIN, y, { align: "right" });
+  doc.setFontSize(9);
+  doc.text(dateStr, MARGIN + CONTENT_W / 2, y + 4, { align: "center" });
   y += 4;
 
   const renderSingle = async (url: string | undefined, x: number, yPos: number, width: number, height: number, isStamp = false) => {
