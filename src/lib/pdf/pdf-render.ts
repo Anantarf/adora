@@ -129,7 +129,7 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
     theme: "grid",
   });
 
-  return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 2;
+  return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 8;
 }
 
 export function renderConclusionAndGrades(
