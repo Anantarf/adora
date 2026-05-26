@@ -152,7 +152,7 @@ export function renderConclusionAndGrades(
   const leftWidth = 114;
   const rightWidth = CONTENT_W - leftWidth - 8;
   const splitNotes = doc.splitTextToSize(notesText, leftWidth - 12);
-  const noteHeight = Math.max(40, 18 + splitNotes.length * 4.2 + scales.length * 4.1);
+  const noteHeight = Math.max(40, 26 + splitNotes.length * 4.2 + scales.length * 4.1);
   const gradeHeight = 38;
   const blockHeight = Math.max(noteHeight, gradeHeight);
 
