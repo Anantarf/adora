@@ -46,12 +46,10 @@ type ReportViewModel = {
 };
 
 const REPORT_STYLES = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   body {
-    font-family: 'Inter', -apple-system, sans-serif;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     color: #1a1a2e;
     background: #fff;
     padding: 40px;
@@ -329,34 +327,38 @@ async function getSessionActor() {
   return session.user as SessionActor;
 }
 
-async function ensurePlayerAccess(actor: SessionActor, playerId: string) {
-  if (actor.role !== "PARENT") {
-    return true;
-  }
-
-  const ownsChild = await prisma.player.findFirst({
-    where: { id: playerId, parentId: actor.id, isDeleted: false },
-  });
-
-  return Boolean(ownsChild);
-}
-
 async function getPlayerReportRecord(playerId: string) {
   return prisma.player.findUnique({
     where: { id: playerId, isDeleted: false },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      parentId: true,
+      dateOfBirth: true,
+      schoolOrigin: true,
       group: { select: { name: true } },
       statistic: {
         where: { status: "Published" },
         orderBy: { date: "desc" },
         take: MAX_STATISTICS,
+        select: {
+          date: true,
+          metricsJson: true,
+        },
       },
       attendance: {
         orderBy: { date: "desc" },
         take: MAX_ATTENDANCE,
+        select: {
+          status: true,
+        },
       },
       certificate: {
         orderBy: { uploadedAt: "desc" },
+        select: {
+          title: true,
+          uploadedAt: true,
+        },
       },
     },
   });
@@ -520,14 +522,13 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "playerId is required" }, { status: 400 });
     }
 
-    const hasAccess = await ensurePlayerAccess(actor, playerId);
-    if (!hasAccess) {
-      return NextResponse.json({ error: "Akses Terlarang: Anda tidak memiliki izin untuk data ini." }, { status: 403 });
-    }
-
     const player = await getPlayerReportRecord(playerId);
     if (!player) {
       return NextResponse.json({ error: "Player not found" }, { status: 404 });
+    }
+
+    if (actor.role === "PARENT" && player.parentId !== actor.id) {
+      return NextResponse.json({ error: "Akses Terlarang: Anda tidak memiliki izin untuk data ini." }, { status: 403 });
     }
 
     const html = renderReportHtml(buildReportViewModel(player));

@@ -1,11 +1,17 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 import { SessionProvider } from "next-auth/react";
 
+const ReactQueryDevtools = dynamic(
+  () => import("@tanstack/react-query-devtools").then((mod) => mod.ReactQueryDevtools),
+  { ssr: false },
+);
+
 export function Providers({ children }: { children: React.ReactNode }) {
+  const isDev = process.env.NODE_ENV !== "production";
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -23,7 +29,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         {children}
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+        {isDev ? <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> : null}
       </QueryClientProvider>
     </SessionProvider>
   )

@@ -3,9 +3,11 @@
 import { useEffect, useRef } from "react";
 
 const MOBILE_BREAKPOINT = 768;
-const DESKTOP_STAR_DENSITY = 6000;
-const MOBILE_STAR_DENSITY = 9000;
-const MAX_DPR = 1.5;
+const DESKTOP_STAR_DENSITY = 8000;
+const MOBILE_STAR_DENSITY = 12000;
+const MAX_DPR = 1.25;
+const TARGET_FPS = 30;
+const FRAME_INTERVAL = 1000 / TARGET_FPS;
 
 type Star = {
   x: number;
@@ -31,6 +33,7 @@ export function Starfield() {
     let prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let isTabVisible = document.visibilityState === "visible";
     let isAnimating = false;
+    let lastFrameTime = 0;
     let viewportWidth = window.innerWidth;
     let viewportHeight = window.innerHeight;
     let stars: Star[] = [];
@@ -68,7 +71,7 @@ export function Starfield() {
 
       initStars();
 
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion || viewportWidth < MOBILE_BREAKPOINT) {
         render(false);
       }
     };
@@ -109,13 +112,17 @@ export function Starfield() {
       });
     };
 
-    const draw = () => {
-      if (!isTabVisible || prefersReducedMotion) {
+    const draw = (timestamp = 0) => {
+      if (!isTabVisible || prefersReducedMotion || viewportWidth < MOBILE_BREAKPOINT) {
         isAnimating = false;
         return;
       }
 
-      render(true);
+      if (timestamp - lastFrameTime >= FRAME_INTERVAL) {
+        lastFrameTime = timestamp;
+        render(true);
+      }
+
       animationFrameId = requestAnimationFrame(draw);
       isAnimating = true;
     };
@@ -141,7 +148,7 @@ export function Starfield() {
         return;
       }
 
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion || viewportWidth < MOBILE_BREAKPOINT) {
         render(false);
         return;
       }
@@ -152,7 +159,7 @@ export function Starfield() {
     const handleReducedMotionChange = (event: MediaQueryListEvent) => {
       prefersReducedMotion = event.matches;
 
-      if (prefersReducedMotion) {
+      if (prefersReducedMotion || viewportWidth < MOBILE_BREAKPOINT) {
         stopAnimation();
         render(false);
         return;
@@ -168,7 +175,7 @@ export function Starfield() {
     reducedMotionQuery.addEventListener("change", handleReducedMotionChange);
 
     resize();
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || viewportWidth < MOBILE_BREAKPOINT) {
       render(false);
     } else {
       startAnimation();

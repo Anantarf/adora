@@ -2,7 +2,6 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import ExcelJS from "exceljs";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 
@@ -18,6 +17,8 @@ const BRAND_BORDER_SOFT = "FFE7E5E4";
 
 export async function GET(request: Request) {
   try {
+    const { default: ExcelJS } = await import("exceljs");
+
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
       return new NextResponse("Unauthorized", { status: 401 });
