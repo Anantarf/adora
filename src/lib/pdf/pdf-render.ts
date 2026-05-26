@@ -61,11 +61,13 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
     const baseX = colX[columnIndex];
     const rowY = y + 8 + rowIndex * 6;
 
-    doc.setFont("helvetica", "bold");
+    // Consistent: label bold 9pt, value normal 9pt
     doc.setFontSize(9);
+    doc.setFont("helvetica", "bold");
     doc.text(row.label, baseX, rowY);
     doc.setFont("helvetica", "normal");
     doc.text(`: ${row.value}`, baseX + labelWidth, rowY);
+    doc.setTextColor(0, 0, 0);
   });
 
   return y + panelHeight + SECTION_GAP;
@@ -110,7 +112,7 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       3: { cellWidth: CONTENT_W - 135 },
     },
     styles: {
-      fontSize: 10,
+      fontSize: 9, // consistent with rest of document body
       cellPadding: 3,
       lineColor: [0, 0, 0],
       lineWidth: 0.1,
@@ -172,7 +174,8 @@ export function renderConclusionAndGrades(
 
   drawPanel(doc, MARGIN, y, leftWidth, blockHeight);
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(9); // consistent body
+  doc.setTextColor(0, 0, 0);
   doc.text(splitNotes, MARGIN + 6, y + 9);
 
   // Anchor legend to the bottom of the fixed box
@@ -182,9 +185,12 @@ export function renderConclusionAndGrades(
   doc.line(MARGIN + 6, legendY, MARGIN + leftWidth - 6, legendY);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8); // sub-label consistent with KEHADIRAN/SERTIFIKAT
+  doc.setTextColor(...SECTION_TITLE_COLOR);
   doc.text("KETERANGAN", MARGIN + 6, legendY + 5);
+  doc.setTextColor(0, 0, 0);
   scales.forEach((scale, index) => {
+    doc.setFontSize(8);
     doc.setFont("helvetica", scale.l === grade.letter ? "bold" : "normal");
     doc.text(`${scale.l} = ${scale.d}`, MARGIN + 6, legendY + 10 + index * 4.1);
   });
@@ -193,14 +199,14 @@ export function renderConclusionAndGrades(
   drawPanel(doc, gradeX, y, rightWidth, blockHeight);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8); // consistent sub-label
   doc.setTextColor(...SECTION_TITLE_COLOR);
   doc.text("HASIL PENILAIAN", gradeX + rightWidth / 2, y + 7, { align: "center" });
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(28);
   doc.text(grade.letter, gradeX + rightWidth / 2, y + 27, { align: "center" });
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9); // consistent body
   doc.text(grade.label, gradeX + rightWidth / 2, y + 37, { align: "center" });
 
   return y + blockHeight + SECTION_GAP;
@@ -245,13 +251,13 @@ export function renderAchievements(
 
   if (hasAttendance) {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(8);
+    doc.setFontSize(8); // consistent sub-label
     doc.setTextColor(...SECTION_TITLE_COLOR);
     doc.text("KEHADIRAN", MARGIN + 6, y);
     doc.setTextColor(0, 0, 0);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.text(`Tingkat kehadiran pemain selama periode ini: ${attendanceRate}%`, MARGIN + 36, y);
+    doc.setFontSize(9); // consistent body
+    doc.text(`Tingkat kehadiran: ${attendanceRate}%`, MARGIN + 30, y);
     y += 6;
   }
 
@@ -260,14 +266,14 @@ export function renderAchievements(
   }
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8); // consistent sub-label
   doc.setTextColor(...SECTION_TITLE_COLOR);
   doc.text("RIWAYAT SERTIFIKAT", MARGIN + 6, y);
   doc.setTextColor(0, 0, 0);
   y += 4;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
+  doc.setFontSize(9); // consistent body
   doc.text(certificateLines, MARGIN + 6, y);
 
   return y + certificateLines.length * 4.2 + SECTION_GAP;
@@ -317,7 +323,7 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   };
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
+  doc.setFontSize(8); // consistent sub-label
   doc.setTextColor(...SECTION_TITLE_COLOR);
   doc.text("HEAD COACH", leftX + columnWidth / 2, y + 4, { align: "center" });
   doc.text("CEO ADORA BBC", rightX + columnWidth / 2, y + 4, { align: "center" });
@@ -337,12 +343,12 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   doc.setDrawColor(0, 0, 0);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(9);
+  doc.setFontSize(9); // consistent body
   doc.text(signers?.coachName ?? "Head Coach", leftX + columnWidth / 2, lineY + 5, { align: "center" });
   doc.text(signers?.ceoName ?? "CEO", rightX + columnWidth / 2, lineY + 5, { align: "center" });
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(8);
+  doc.setFontSize(8); // consistent sub-label
   doc.text("ADORA Basketball Club", leftX + columnWidth / 2, lineY + 9, { align: "center" });
   doc.text("ADORA Basketball Club", rightX + columnWidth / 2, lineY + 9, { align: "center" });
 
