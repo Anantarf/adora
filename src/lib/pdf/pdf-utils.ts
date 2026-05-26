@@ -10,9 +10,9 @@ export const HEADER_BOTTOM_TRIM = 6;
 export const HEADER_SEP_GAP = 5;
 export const PDF_TEMPLATE_SKIP = 25;
 
-export const SIG_BOX_H = 26;
-export const STAMP_SIZE = 28;
-export const SECTION_GAP = 4;
+export const SIG_BOX_H = 32;
+export const STAMP_SIZE = 34;
+export const SECTION_GAP = 5;
 
 export const SECTION_TITLE_COLOR: [number, number, number] = [203, 93, 24];
 export const PANEL_FILL: [number, number, number] = [250, 246, 241];
