@@ -14,11 +14,6 @@ export const SIG_BOX_H = 32;
 export const STAMP_SIZE = 34;
 export const SECTION_GAP = 5;
 
-export const SECTION_TITLE_COLOR: [number, number, number] = [203, 93, 24];
-export const PANEL_FILL: [number, number, number] = [250, 246, 241];
-export const PANEL_BORDER: [number, number, number] = [225, 214, 203];
-export const TABLE_HEAD_FILL: [number, number, number] = [243, 232, 222];
-export const TABLE_ACCENT_FILL: [number, number, number] = [252, 244, 236];
 
 export const loadImageAsBase64 = async (url: string): Promise<{ data: string; format: string }> => {
   try {
@@ -80,17 +75,4 @@ export function drawFitImage(doc: jsPDF, base64: string, format: string, x: numb
   doc.addImage(base64, format, dx, dy, finalW, finalH);
 }
 
-export function drawSectionTitle(doc: jsPDF, title: string, y: number) {
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.setTextColor(...SECTION_TITLE_COLOR);
-  doc.text(title, MARGIN, y);
-  doc.setTextColor(0, 0, 0);
-}
 
-export function drawPanel(doc: jsPDF, x: number, y: number, w: number, h: number) {
-  doc.setFillColor(...PANEL_FILL);
-  doc.setDrawColor(...PANEL_BORDER);
-  doc.roundedRect(x, y, w, h, 3, 3, "FD");
-  doc.setDrawColor(0, 0, 0);
-}

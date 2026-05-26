@@ -7,8 +7,7 @@ import { toast } from "sonner";
 import {
   PAGE_W, PAGE_H, MARGIN, CONTENT_W,
   SIG_BOX_H, STAMP_SIZE, SECTION_GAP,
-  SECTION_TITLE_COLOR, PANEL_BORDER, TABLE_HEAD_FILL, TABLE_ACCENT_FILL,
-  loadImageAsBase64, openPdfInNewTab, drawHorizontalRule, drawFitImage, drawSectionTitle, drawPanel
+  loadImageAsBase64, openPdfInNewTab, drawHorizontalRule, drawFitImage
 } from "./pdf-utils";
 import type { RaporData } from "../generate-rapor-pdf";
 
