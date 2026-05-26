@@ -43,7 +43,10 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
         onClose();
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : "Gagal memperbarui kata sandi.";
-        toast.error(msg);
+        const errorMsg = msg?.includes("Prisma") || msg?.includes("Unique constraint")
+          ? "Terjadi kesalahan pada sistem. Silakan coba kembali." 
+          : msg;
+        toast.error(errorMsg || "Gagal memperbarui profil.");
       }
     });
   };

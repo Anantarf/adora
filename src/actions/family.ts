@@ -13,7 +13,11 @@ export async function getFamilyPlayersAction() {
       parentId: userId,
       isDeleted: false,
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      dateOfBirth: true,
+      schoolOrigin: true,
       group: {
         select: { id: true, name: true },
       },

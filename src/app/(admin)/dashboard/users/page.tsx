@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Users, Loader2 } from "lucide-react";
 import { useUsers, useDeleteUser, useResetPassword } from "@/hooks/use-users";
@@ -19,13 +19,11 @@ export default function UsersManagementPage() {
   const ITEMS_PER_PAGE = 10;
 
   const { data: users, isLoading } = useUsers(activeRole);
-
-  // Reset pagination when data changes
-  const [prevDataLength, setPrevDataLength] = useState(users?.length);
-  if (users?.length !== prevDataLength) {
-    setPrevDataLength(users?.length);
+  
+  // Reset page when search query or roles change
+  useEffect(() => {
     setCurrentPage(1);
-  }
+  }, [searchTerm, activeRole]);
 
   const { mutateAsync: deleteUser } = useDeleteUser();
   const { mutateAsync: resetPassword } = useResetPassword();
@@ -114,3 +112,5 @@ export default function UsersManagementPage() {
     </motion.div>
   );
 }
+
+

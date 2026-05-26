@@ -96,7 +96,7 @@ export async function getPlayerCertificatesAction(playerId: string) {
 
   return await prisma.certificate.findMany({
     where: {
-      OR: [{ playerId }, ...(player.groupId ? [{ groupId: player.groupId }] : [])],
+      playerId,
     },
     orderBy: { uploadedAt: "desc" },
   });

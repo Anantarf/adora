@@ -2,13 +2,36 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/server-auth";
+import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
+
+const REPORT_SETTING_KEYS = [
+  "rapor_header_url",
+  "rapor_ceo_sign_url",
+  "rapor_coach_sign_url",
+  "rapor_stamp_url",
+  "rapor_coach_name",
+  "rapor_ceo_name",
+] as const;
 
 export async function getClubSettingsAction() {
   await requireAdmin();
   const settings = await prisma.clubSetting.findMany();
   return Object.fromEntries(settings.map((s) => [s.key, s.value]));
+}
+
+export async function getReportSettingsAction() {
+  await requireAuth();
+
+  const settings = await prisma.clubSetting.findMany({
+    where: {
+      key: {
+        in: [...REPORT_SETTING_KEYS],
+      },
+    },
+  });
+
+  return Object.fromEntries(settings.map((setting) => [setting.key, setting.value]));
 }
 
 export async function updateClubSettingAction(key: string, value: string) {

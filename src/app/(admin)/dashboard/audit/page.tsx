@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 // Utilities
 import { getHumanReadableTable, getHumanReadableText, extractTargetName, formatValue, TIMESTAMP_FORMATTER, FIELD_LABELS } from "@/lib/utils/audit-log";
 
-// ─── SUB-COMPONENTS ─────────────────────────────────────
+// Subcomponents
 
 /**
  * Renders key-value pairs of details
@@ -124,7 +124,7 @@ function AuditLogEntry({ log, index, onClick }: { log: AuditLogRecord; index: nu
   );
 }
 
-// ─── MAIN PAGE ──────────────────────────────────────────
+// Main page
 
 export default function AuditPage() {
   const [cursor, setCursor] = useState<string | undefined>(undefined);
@@ -215,3 +215,6 @@ export default function AuditPage() {
     </div>
   );
 }
+
+
+

@@ -7,16 +7,35 @@ import { toJakartaDate } from "@/lib/date-utils";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
 
-// ─── Helper ──────────────────────────────────────────
+import { z } from "zod";
+
+const metricsSchema = z.object({
+  dribble: z.object({
+    inAndOut: z.number().catch(0),
+    crossover: z.number().catch(0),
+    vLeft: z.number().catch(0),
+    vRight: z.number().catch(0),
+    betweenLegsLeft: z.number().catch(0),
+    betweenLegsRight: z.number().catch(0),
+  }).catch({ inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }),
+  passing: z.object({
+    chestPass: z.number().catch(0),
+    bouncePass: z.number().catch(0),
+    overheadPass: z.number().catch(0),
+  }).catch({ chestPass: 0, bouncePass: 0, overheadPass: 0 }),
+  layUp: z.number().catch(0),
+  shooting: z.number().catch(0),
+  notes: z.string().optional(),
+});
+
 const safeParseMetrics = (json: unknown): MetricsJson => {
-  try {
-    return json as MetricsJson;
-  } catch {
-    return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 };
+  const parsed = metricsSchema.safeParse(json);
+  if (parsed.success) {
+    return parsed.data;
   }
+  return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 };
 };
 
-// 1. Submit Attendance
 export async function submitAttendanceAction(data: { date: string; playerStatuses: { playerId: string; status: AttendanceStatus }[]; note?: string; eventId: string }) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
@@ -82,7 +101,6 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
   return { success: true as const, savedCount: dedupedStatuses.length };
 }
 
-// 2. Submit Statistics (period-based, dengan history revisi)
 export async function submitStatisticAction(data: { playerId: string; periodId: string; metrics: MetricsJson; status: "Draft" | "Published" }) {
   const session = await requireAdmin();
   const userId = session.user.id as string | undefined;
@@ -127,7 +145,6 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
   return stat;
 }
 
-// 3. Get all stats in a period (Admin — tabel per group)
 export async function getStatsByPeriodAction(periodId: string) {
   await requireAdmin();
 
@@ -150,7 +167,6 @@ export async function getStatsByPeriodAction(periodId: string) {
   return stats.map((s) => ({ ...s, metricsJson: safeParseMetrics(s.metricsJson) }));
 }
 
-// 4. Get history revisi untuk satu statistic
 export async function getStatHistoryAction(statisticId: string) {
   await requireAdmin();
 
@@ -163,7 +179,6 @@ export async function getStatHistoryAction(statisticId: string) {
   return history.map((h) => ({ ...h, metricsJson: safeParseMetrics(h.metricsJson) }));
 }
 
-// 5. Get Player Stats (Parent-safe — untuk portal pemain)
 export async function getPlayerStatsAction(playerId: string) {
   const session = await requireAuth();
   const { role: userRole, id: userId } = session.user;

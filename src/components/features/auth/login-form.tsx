@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
 import Image from "next/image";
-import { ShieldCheck, AlertCircle } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { LoginPasswordField, LoginUsernameField } from "@/components/features/auth/login-form-fields";
 import { LoginSubmitButton } from "@/components/features/auth/login-submit-button";
 
@@ -52,11 +52,7 @@ export function LoginForm() {
           icon: <AlertCircle className="size-4" />,
         });
       } else {
-        toast.success("Autentikasi Berhasil", {
-          description: "Anda akan diarahkan ke portal sesuai akses.",
-          icon: <ShieldCheck className="size-4" />,
-        });
-        // updateSession() has a race condition — fetch directly to get the committed JWT
+        // updateSession() has a race condition, fetch directly to get the committed JWT.
         const res = await fetch("/api/auth/session");
         const session = await res.json();
         const role = (session?.user as { role?: string })?.role;
@@ -87,7 +83,7 @@ export function LoginForm() {
 
             <LoginPasswordField
               label="Kata Sandi"
-              placeholder="••••••••"
+              placeholder="Masukkan kata sandi"
               registration={register("password")}
               errorMessage={errors.password?.message}
               disabled={loading}

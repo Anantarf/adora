@@ -51,8 +51,11 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
       reset(data);
       setIsEditing(false);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Gagal memperbarui.";
-      toast.error("Error: " + msg);
+      const msg = error instanceof Error ? error.message : "";
+      const errorMsg = msg.includes("Prisma") || msg.includes("Unique constraint") 
+        ? "Terjadi kesalahan pada sistem. Silakan coba kembali." 
+        : msg;
+      toast.error(errorMsg || "Gagal memperbarui profil pemain.");
     }
   };
 

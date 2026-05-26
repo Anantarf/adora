@@ -7,6 +7,7 @@ export type FamilyPlayer = {
   id: string;
   name: string;
   dateOfBirth: Date;
+  schoolOrigin: string | null;
   group: { id: string; name: string } | null;
 };
 

@@ -2,44 +2,60 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
-import { fileTypeFromBuffer } from "file-type"; // npm i file-type
+import { fileTypeFromBuffer } from "file-type";
 
-const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2MB
-
-// Simple in‑memory rate limiter (requests per IP per minute)
+const MAX_SIZE_BYTES = 2 * 1024 * 1024;
+const RATE_LIMIT = 30;
+const RATE_LIMIT_WINDOW_MS = 60_000;
 const rateLimitMap = new Map<string, { count: number; reset: number }>();
-const RATE_LIMIT = 30; // max 30 uploads per minute per IP
 
-const ALLOWED_TYPES = new Map([
+const ALLOWED_TYPES = new Map<string, string>([
   [".png", "image/png"],
   [".jpg", "image/jpeg"],
   [".jpeg", "image/jpeg"],
   [".pdf", "application/pdf"],
 ]);
 
-// Initialize Supabase Client.
-// We use SERVICE_ROLE_KEY to bypass RLS since this is a server-side route protected by next-auth.
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const supabase = createClient(
   supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "", // Harus di set di .env lokal maupun Vercel
+  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
 );
+
+function getClientIp(req: NextRequest): string {
+  return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+}
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const bucket = rateLimitMap.get(ip) ?? { count: 0, reset: now + RATE_LIMIT_WINDOW_MS };
+
+  if (now > bucket.reset) {
+    bucket.count = 0;
+    bucket.reset = now + RATE_LIMIT_WINDOW_MS;
+  }
+
+  bucket.count += 1;
+  rateLimitMap.set(ip, bucket);
+
+  return bucket.count > RATE_LIMIT;
+}
+
+function resolveUploadName(assetKey: FormDataEntryValue | null, ext: string): string {
+  if (typeof assetKey === "string" && assetKey.trim()) {
+    return `${assetKey.trim()}${ext}`;
+  }
+
+  return `upload_${Date.now()}${ext}`;
+}
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
-  // Rate‑limit check
-  const ip = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-  const now = Date.now();
-  const bucket = rateLimitMap.get(ip) ?? { count: 0, reset: now + 60_000 };
-  if (now > bucket.reset) {
-    bucket.count = 0;
-    bucket.reset = now + 60_000;
-  }
-  bucket.count++;
-  rateLimitMap.set(ip, bucket);
-  if (bucket.count > RATE_LIMIT) {
+
+  if (isRateLimited(getClientIp(req))) {
     return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
   }
+
   if (!session?.user || session.user.role !== "ADMIN") {
     return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
   }
@@ -70,24 +86,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tipe file tidak sesuai dengan ekstensinya. Pastikan file tidak dimodifikasi." }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    // Verify actual MIME type using file-type
+    const buffer = Buffer.from(await file.arrayBuffer());
     const detected = await fileTypeFromBuffer(buffer);
     if (!detected || detected.mime !== expectedMime) {
       return NextResponse.json({ error: "Tipe file tidak cocok dengan konten aktual." }, { status: 400 });
     }
 
-    const assetKey = formData.get("assetKey") as string | null;
-
-    let uniqueName = "";
-    if (assetKey) {
-      uniqueName = `${assetKey}${ext}`;
-    } else {
-      uniqueName = `upload_${Date.now()}${ext}`;
-    }
-
-    // Upload to Supabase Storage (Bucket name: "uploads")
+    const uniqueName = resolveUploadName(formData.get("assetKey"), ext);
     const { error } = await supabase.storage.from("uploads").upload(uniqueName, buffer, {
       contentType: file.type || expectedMime,
       cacheControl: "3600",
@@ -99,9 +104,7 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    // Get Public URL
     const { data: publicUrlData } = supabase.storage.from("uploads").getPublicUrl(uniqueName);
-
     return NextResponse.json({ url: publicUrlData.publicUrl });
   } catch (error) {
     console.error("Upload error:", error);

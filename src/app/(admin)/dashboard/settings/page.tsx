@@ -1,24 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Settings, FileImage, Loader2, Info, Upload, CheckCircle2, UserCheck, FileText } from "lucide-react";
-import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
+import { useEffect, useState } from "react";
+import { CheckCircle2, FileImage, FileText, Info, Loader2, Settings, Upload, UserCheck } from "lucide-react";
 import { toast } from "sonner";
-
-import { Input } from "@/components/ui/input";
+import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
-const ASSET_KEYS = [
-  { key: "rapor_header_url", label: "Template Kertas Rapor (Paper Background)", description: "Unggah desain kertas rapor utuh (Format: PDF) atau Kop Surat (Format: PNG/JPG). Jika mengunggah PDF, konten tabel rapor akan otomatis dicetak di atas desain kertas tersebut.", accept: ".png,.jpg,.jpeg,.pdf", maxSizeLabel: "Maks 2MB" },
-  { key: "rapor_ceo_sign_url", label: "Tanda Tangan CEO", description: "Upload Tanda Tangan CEO (Format: PNG Transparan).", accept: ".png", maxSizeLabel: "Maks 1MB" },
-  { key: "rapor_coach_sign_url", label: "Tanda Tangan Head Coach", description: "Upload Tanda Tangan Head Coach (Format: PNG Transparan).", accept: ".png", maxSizeLabel: "Maks 1MB" },
-  { key: "rapor_stamp_url", label: "Stempel Digital", description: "Upload Stempel Resmi ADORA BBC (Format: PNG Transparan).", accept: ".png", maxSizeLabel: "Maks 1MB" },
-];
-
-const SIGNER_KEYS = [
-  { key: "rapor_coach_name", label: "Nama Head Coach", placeholder: "Contoh: Danuri Akbar" },
-  { key: "rapor_ceo_name", label: "Nama CEO", placeholder: "Contoh: M. Arief, S.Ak" },
-];
+import { ASSET_KEYS, SIGNER_KEYS, getAssetPreviewMeta, type AssetKey } from "./constants";
 
 export default function SettingsPage() {
   const { data: settings } = useClubSettings();
@@ -28,6 +17,12 @@ export default function SettingsPage() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+
+  useEffect(() => {
+    if (settings) {
+      setLocalValues(settings);
+    }
+  }, [settings]);
 
   const handlePreviewPdf = async () => {
     setIsPreviewLoading(true);
@@ -69,7 +64,7 @@ export default function SettingsPage() {
         printDate: new Date(),
         action: "preview",
       });
-      toast.success("Pratinjau Rapor berhasil dibuka di tab baru.");
+      toast.success("Pratinjau rapor berhasil dibuka di tab baru.");
     } catch (error) {
       console.error("[PDF Preview Error]", error);
       toast.error("Gagal membuat pratinjau PDF.");
@@ -77,12 +72,6 @@ export default function SettingsPage() {
       setIsPreviewLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (settings) {
-      setLocalValues(settings);
-    }
-  }, [settings]);
 
   const handleTextSave = async (key: string, label: string) => {
     setSaving((prev) => ({ ...prev, [key]: true }));
@@ -96,25 +85,23 @@ export default function SettingsPage() {
     }
   };
 
-  const handleFileUpload = async (key: string, file: File, label: string) => {
-    // Client-side size validation: 2MB for header, 1MB for signatures/stamps
+  const handleFileUpload = async (key: AssetKey, file: File, label: string) => {
     const maxSizeBytes = key === "rapor_header_url" ? 2 * 1024 * 1024 : 1 * 1024 * 1024;
     if (file.size > maxSizeBytes) {
-      const limitLabel = key === "rapor_header_url" ? "2MB" : "1MB";
-      toast.error(`Ukuran file ${label} terlalu besar. Batas maksimal adalah ${limitLabel}.`);
+      toast.error(`Ukuran file ${label} terlalu besar. Batas maksimal adalah ${key === "rapor_header_url" ? "2MB" : "1MB"}.`);
       return;
     }
 
     setUploading((prev) => ({ ...prev, [key]: true }));
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("assetKey", key);
 
     try {
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
-
       const data = await res.json();
 
       if (!res.ok) {
@@ -122,11 +109,15 @@ export default function SettingsPage() {
       }
 
       setLocalValues((prev) => ({ ...prev, [key]: data.url }));
+      setFailedImages((prev) => ({ ...prev, [key]: false }));
       await updateSetting.mutateAsync({ key, value: data.url });
       toast.success(`${label} berhasil diunggah.`);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Gagal mengunggah file.";
-      toast.error(msg);
+      const errorMsg = msg?.includes("Prisma") || msg?.includes("Unique constraint")
+        ? "Terjadi kesalahan pada sistem. Silakan coba kembali."
+        : msg;
+      toast.error(errorMsg || "Gagal menyimpan pengaturan.");
       console.error("[Upload Error]", error);
     } finally {
       setUploading((prev) => ({ ...prev, [key]: false }));
@@ -135,7 +126,6 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-12">
-      {/* Header */}
       <div className="flex flex-col gap-1 border-b border-border/50 pb-6 md:pb-8">
         <div className="flex items-center gap-3">
           <Settings className="size-8 text-primary" />
@@ -152,7 +142,7 @@ export default function SettingsPage() {
                 <FileImage className="size-5" />
                 <CardTitle className="font-heading text-xl uppercase tracking-wider">Template Rapor PDF</CardTitle>
               </div>
-              <CardDescription className="text-xs">Unggah aset visual untuk Rapor PDF. File akan disimpan secara aman di server.</CardDescription>
+              <CardDescription className="text-xs">Unggah aset visual untuk rapor PDF. File akan disimpan secara aman di server.</CardDescription>
             </div>
             <button
               type="button"
@@ -160,91 +150,97 @@ export default function SettingsPage() {
               disabled={isPreviewLoading}
               className="inline-flex items-center gap-2 px-4 h-10 rounded-xl bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary/80 disabled:opacity-50 transition-colors shrink-0"
             >
-              {isPreviewLoading ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <FileText className="size-3.5" />
-              )}
+              {isPreviewLoading ? <Loader2 className="size-3.5 animate-spin" /> : <FileText className="size-3.5" />}
               Pratinjau Rapor
             </button>
           </CardHeader>
           <CardContent className="flex flex-col gap-8">
-            {ASSET_KEYS.map((asset) => (
-              <div key={asset.key} className="flex flex-col gap-3 group">
-                <div className="flex flex-col gap-1">
-                  <div className="flex items-center gap-2.5">
-                    <label className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{asset.label}</label>
-                    <span className="text-[9px] font-bold text-amber-500/80 px-1.5 py-0.5 rounded bg-amber-500/10 uppercase tracking-wider select-none shrink-0">{asset.maxSizeLabel}</span>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground leading-relaxed">{asset.description}</p>
-                </div>
+            {ASSET_KEYS.map((asset) => {
+              const previewMeta = getAssetPreviewMeta(asset.key);
+              const assetUrl = localValues[asset.key];
+              const isPdfAsset = assetUrl?.toLowerCase().endsWith(".pdf");
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative group/input">
-                      <Input
-                        type="file"
-                        accept={asset.accept}
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) handleFileUpload(asset.key, file, asset.label);
-                        }}
-                        className="hidden"
-                        id={`file-${asset.key}`}
-                      />
-                      <label
-                        htmlFor={`file-${asset.key}`}
-                        className="flex items-center justify-between px-4 h-12 rounded-xl border border-dashed border-border/50 bg-background/50 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
-                      >
-                        <div className="flex items-center gap-3">
-                          {uploading[asset.key] ? (
-                            <Loader2 className="size-4 animate-spin text-primary" />
-                          ) : localValues[asset.key] ? (
-                            <CheckCircle2 className="size-4 text-emerald-500" />
-                          ) : (
-                            <Upload className="size-4 text-muted-foreground" />
-                          )}
-                          <span className="text-xs font-medium text-muted-foreground truncate max-w-50">{uploading[asset.key] ? "Mengunggah..." : localValues[asset.key] ? "File sudah diunggah" : "Belum ada file dipilih"}</span>
-                        </div>
-                        <span className="text-micro text-primary px-3 py-1 rounded-lg bg-primary/10">Pilih File</span>
-                      </label>
+              return (
+                <div key={asset.key} className="flex flex-col gap-3 group">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2.5">
+                      <label className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{asset.label}</label>
+                      <span className="text-[9px] font-bold text-amber-500/80 px-1.5 py-0.5 rounded bg-amber-500/10 uppercase tracking-wider select-none shrink-0">{asset.maxSizeLabel}</span>
                     </div>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">{asset.description}</p>
                   </div>
 
-                  {localValues[asset.key] && (
-                    <div className="flex items-center gap-3 p-2 rounded-xl border border-border/50 bg-background/50 min-w-50">
-                      {localValues[asset.key].endsWith(".pdf") ? (
-                        <div className="size-10 rounded bg-red-500/10 flex items-center justify-center">
-                          <span className="text-[10px] font-bold text-red-500">PDF</span>
-                        </div>
-                      ) : (
-                        <div className="size-10 rounded border border-border/50 overflow-hidden bg-white/5 relative flex items-center justify-center">
-                          {failedImages[asset.key] ? (
-                            <div className="size-full flex items-center justify-center bg-indigo-500/10">
-                              <span className="text-[10px] font-bold text-indigo-400">PNG</span>
-                            </div>
-                          ) : (
-                            <img
-                              src={`${localValues[asset.key]}?t=${new Date().getTime()}`}
-                              alt="Preview"
-                              crossOrigin="anonymous"
-                              className="max-h-full max-w-full object-contain"
-                              onError={() => setFailedImages((prev) => ({ ...prev, [asset.key]: true }))}
-                            />
-                          )}
-                        </div>
-                      )}
-                      <div className="flex flex-col">
-                        <span className="text-[10px] font-bold text-foreground truncate max-w-30">Digunakan di Rapor</span>
-                        <a href={localValues[asset.key]} target="_blank" className="text-[10px] text-primary hover:underline">
-                          Lihat File
-                        </a>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="flex-1">
+                      <div className="relative group/input">
+                        <Input
+                          type="file"
+                          accept={asset.accept}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleFileUpload(asset.key, file, asset.label);
+                          }}
+                          className="hidden"
+                          id={`file-${asset.key}`}
+                        />
+                        <label
+                          htmlFor={`file-${asset.key}`}
+                          className="flex items-center justify-between px-4 h-12 rounded-xl border border-dashed border-border/50 bg-background/50 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
+                        >
+                          <div className="flex items-center gap-3">
+                            {uploading[asset.key] ? (
+                              <Loader2 className="size-4 animate-spin text-primary" />
+                            ) : assetUrl ? (
+                              <CheckCircle2 className="size-4 text-emerald-500" />
+                            ) : (
+                              <Upload className="size-4 text-muted-foreground" />
+                            )}
+                            <span className="text-xs font-medium text-muted-foreground truncate max-w-50">
+                              {uploading[asset.key] ? "Mengunggah..." : assetUrl ? "File sudah diunggah" : "Belum ada file dipilih"}
+                            </span>
+                          </div>
+                          <span className="text-micro text-primary px-3 py-1 rounded-lg bg-primary/10">Pilih File</span>
+                        </label>
                       </div>
                     </div>
-                  )}
+
+                    {assetUrl && (
+                      <div className="flex items-center gap-3 p-2.5 rounded-xl border border-border/50 bg-background/50 min-w-56">
+                        {isPdfAsset ? (
+                          <div className="size-12 rounded-lg bg-red-500/10 flex items-center justify-center">
+                            <span className="text-[10px] font-bold text-red-500">PDF</span>
+                          </div>
+                        ) : (
+                          <div className={`size-12 rounded-lg border border-border/50 overflow-hidden relative flex items-center justify-center ${previewMeta.frameClass}`}>
+                            {failedImages[asset.key] ? (
+                              <div className={`size-full flex items-center justify-center ${previewMeta.fallbackClass}`}>
+                                <span className="text-[10px] font-bold">PNG</span>
+                              </div>
+                            ) : (
+                              <img
+                                src={`${assetUrl}?t=${Date.now()}`}
+                                alt={`Preview ${asset.label}`}
+                                crossOrigin="anonymous"
+                                className="max-h-full max-w-full object-contain"
+                                onError={() => setFailedImages((prev) => ({ ...prev, [asset.key]: true }))}
+                              />
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex flex-col">
+                          <span className="text-[10px] font-bold text-foreground truncate max-w-32">{previewMeta.badge}</span>
+                          <span className="text-[10px] text-muted-foreground">{previewMeta.helperText}</span>
+                          <a href={assetUrl} target="_blank" rel="noreferrer" className="text-[10px] text-primary hover:underline">
+                            Lihat File
+                          </a>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
 
@@ -254,14 +250,19 @@ export default function SettingsPage() {
               <UserCheck className="size-5" />
               <CardTitle className="font-heading text-xl uppercase tracking-wider">Nama Penandatangan Rapor</CardTitle>
             </div>
-            <CardDescription className="text-xs">Nama yang tercantum di bawah tanda tangan pada Rapor PDF.</CardDescription>
+            <CardDescription className="text-xs">Nama yang tercantum di bawah tanda tangan pada rapor PDF.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
             {SIGNER_KEYS.map(({ key, label, placeholder }) => (
               <div key={key} className="flex flex-col gap-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-foreground">{label}</label>
                 <div className="flex gap-3">
-                  <Input value={localValues[key] ?? ""} onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))} placeholder={placeholder} className="flex-1" />
+                  <Input
+                    value={localValues[key] ?? ""}
+                    onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="flex-1"
+                  />
                   <button
                     onClick={() => handleTextSave(key, label)}
                     disabled={saving[key]}
@@ -281,7 +282,7 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-1">
             <p className="text-xs font-bold text-primary uppercase tracking-widest">Informasi Penting</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Aset yang belum diunggah tidak akan muncul di Rapor PDF — bagian tersebut akan dikosongkan secara otomatis. Pastikan semua aset sudah terunggah sebelum mencetak rapor pemain.
+              Aset yang belum diunggah tidak akan muncul di rapor PDF, dan bagian tersebut akan dikosongkan secara otomatis. Aset transparan seperti tanda tangan atau stempel bisa terlihat samar di thumbnail gelap, tetapi tetap dipakai saat rapor dicetak.
             </p>
           </div>
         </div>

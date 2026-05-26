@@ -7,7 +7,7 @@ import * as React from "react";
 import { usePlayers } from "@/hooks/use-players";
 import { type Player } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useDebounce } from "use-debounce";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
@@ -36,14 +36,12 @@ export default function PlayersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 9;
 
-  const { data: players, isLoading: isPlayersLoading } = usePlayers(selectedGroupId ?? "", debouncedSearch, !!selectedGroupId);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  
+  const effectiveGroupId = selectedGroupId || (groups && groups.length > 0 ? groups[0].id : null);
+  const { data: players, isLoading: isPlayersLoading } = usePlayers(effectiveGroupId ?? "", debouncedSearch, !!effectiveGroupId);
 
-  if (groups && groups.length > 0 && !selectedGroupId) {
-    setSelectedGroupId(groups[0].id);
-  }
-
-  const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === selectedGroupId), [groups, selectedGroupId]);
+  const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === effectiveGroupId), [groups, effectiveGroupId]);
   const filteredPlayers = useMemo(() => players || [], [players]);
   const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE);
   const paginatedPlayers = useMemo(() => {
@@ -129,7 +127,7 @@ export default function PlayersPage() {
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-linear-to-l from-background to-transparent sm:hidden" />
           <div className="flex gap-2 overflow-x-auto scrollbar-hide pr-2">
             {groups?.map((group: Group) => {
-              const isActive = selectedGroupId === group.id;
+              const isActive = effectiveGroupId === group.id;
               return (
                 <button
                   key={group.id}
@@ -153,12 +151,12 @@ export default function PlayersPage() {
 
       {/* Content */}
       <AnimatePresence mode="wait">
-        {!selectedGroupId ? null : isPlayersLoading ? (
+        {!effectiveGroupId ? null : isPlayersLoading ? (
           <div key="loading" className="flex items-center justify-center gap-2 p-10 text-primary font-bold text-xs uppercase tracking-widest">
             <Loader2 className="size-5 animate-spin" /> Memuat pemain...
           </div>
         ) : (
-          <motion.div key={selectedGroupId} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
+          <motion.div key={effectiveGroupId} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
             {selectedGroup && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <div className="flex flex-col">
@@ -212,3 +210,5 @@ export default function PlayersPage() {
     </div>
   );
 }
+
+

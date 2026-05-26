@@ -1,11 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getClubSettingsAction, updateClubSettingAction } from "@/actions/settings";
+import { getClubSettingsAction, getReportSettingsAction, updateClubSettingAction } from "@/actions/settings";
 import { toast } from "sonner";
 
 export function useClubSettings() {
   return useQuery({
     queryKey: ["club-settings"],
     queryFn: () => getClubSettingsAction(),
+  });
+}
+
+export function useReportSettings() {
+  return useQuery({
+    queryKey: ["report-settings"],
+    queryFn: () => getReportSettingsAction(),
   });
 }
 

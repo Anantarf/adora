@@ -76,8 +76,8 @@ export interface Attendance {
   playerId: string;
   eventId: string | null;
   createdAt: Date | string;
-  player?: Player;
-  event?: ScheduleEvent;
+  player?: Player | null;
+  event?: ScheduleEvent | null;
 }
 
 export interface AttendanceStats {

@@ -3,7 +3,9 @@
 import { useState, useMemo } from "react";
 import { Loader2, User, FileText, Activity, ClipboardCheck } from "lucide-react";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
+import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { usePlayerStats } from "@/hooks/use-player-stats";
+import { useReportSettings } from "@/hooks/use-settings";
 import type { MetricsJson } from "@/types/dashboard";
 import type { AttendanceStatus } from "@/types/dashboard";
 import { FLAT_METRIC_DEFS, flattenMetrics, overallScore, averageScore } from "@/lib/metrics";
@@ -15,12 +17,15 @@ import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-c
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { getEventConfig } from "@/lib/config/events";
-import { ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line } from "recharts";
+import { ParentRadarChart } from "./components/ParentRadarChart";
+import { ParentProgressionChart } from "./components/ParentProgressionChart";
+import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
+import { toast } from "sonner";
 
-// ─── Page ─────────────────────────────────────────────
 export default function ParentDashboard() {
   const { data: children, isLoading: familyLoading } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
   const effectiveChildId = useMemo(() => {
     const validIds = children?.map((c) => c.id) ?? [];
     if (selectedChildId && validIds.includes(selectedChildId)) return selectedChildId;
@@ -29,8 +34,10 @@ export default function ParentDashboard() {
 
   const { data: stats, isLoading: statsLoading } = usePlayerStats(effectiveChildId);
   const { data: attendances, isLoading: attendanceLoading } = usePlayerAttendance(effectiveChildId);
+  const { data: certificates } = usePlayerCertificates(effectiveChildId);
+  const { data: reportSettings } = useReportSettings();
 
-  // Radar dari latest stat — 11 aspek individual
+  // Radar dari latest stat - 11 aspek individual
   const radarData = useMemo(() => {
     if (!stats?.length) return [];
     const m = stats[0].metricsJson as MetricsJson;
@@ -41,7 +48,7 @@ export default function ParentDashboard() {
     }));
   }, [stats]);
 
-  // Line chart — perkembangan overall score per periode
+  // Line chart - perkembangan overall score per periode
   const progressionData = useMemo(() => {
     if (!stats?.length) return [];
     return [...stats].reverse().map((s) => ({
@@ -63,11 +70,6 @@ export default function ParentDashboard() {
     const rate = Math.round((counts.HADIR / total) * 100);
     return { counts, total, rate };
   }, [attendances]);
-
-  const handleDownloadPDF = () => {
-    if (!effectiveChildId) return;
-    window.open(`/api/report/pdf?playerId=${effectiveChildId}`, "_blank");
-  };
 
   if (familyLoading) {
     return (
@@ -96,6 +98,44 @@ export default function ParentDashboard() {
   const latestStat = stats?.[0];
   const latestMetrics = latestStat?.metricsJson as MetricsJson | undefined;
   const flatItems = latestMetrics ? flattenMetrics(latestMetrics) : [];
+  const currentPeriodLabel = latestStat?.period?.name ?? (latestStat ? new Date(latestStat.date).toLocaleDateString("id-ID", { month: "long", year: "numeric" }) : "Periode Evaluasi");
+
+  const handleDownloadPDF = async () => {
+    if (!latestMetrics) return;
+
+    setIsPdfLoading(true);
+    try {
+      const { generateRaporPDF } = await import("@/lib/generate-rapor-pdf");
+
+      await generateRaporPDF({
+        playerName: activeChild.name,
+        groupName: activeChild.group?.name || "Tanpa Kelompok",
+        schoolOrigin: activeChild.schoolOrigin,
+        periodName: currentPeriodLabel,
+        metrics: latestMetrics,
+        attendanceRate: attendanceSummary?.rate ?? null,
+        certificates: certificates?.map((certificate) => ({
+          title: certificate.title,
+          uploadedAt: certificate.uploadedAt,
+        })),
+        assets: {
+          headerUrl: reportSettings?.rapor_header_url ?? undefined,
+          ceoSignUrl: reportSettings?.rapor_ceo_sign_url ?? undefined,
+          coachSignUrl: reportSettings?.rapor_coach_sign_url ?? undefined,
+          stampUrl: reportSettings?.rapor_stamp_url ?? undefined,
+        },
+        signers: {
+          coachName: reportSettings?.rapor_coach_name ?? undefined,
+          ceoName: reportSettings?.rapor_ceo_name ?? undefined,
+        },
+      });
+    } catch (error) {
+      console.error("[PARENT_REPORT_DOWNLOAD_ERROR]", error);
+      toast.error("Gagal membuat rapor PDF. Coba lagi.");
+    } finally {
+      setIsPdfLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6 md:gap-8 w-full">
@@ -116,7 +156,7 @@ export default function ParentDashboard() {
               <SelectContent>
                 {children?.map((child: FamilyPlayer) => (
                   <SelectItem key={child.id} value={child.id}>
-                    {child.name} • {child.group?.name || "Tanpa Kelompok"}
+                    {child.name} - {child.group?.name || "Tanpa Kelompok"}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -151,14 +191,14 @@ export default function ParentDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
-          {/* Skor Terkini — 11 aspek flat */}
+          {/* Skor Terkini - 11 aspek flat */}
           {latestMetrics && (
             <Card className="border-border/50 bg-card overflow-hidden shadow-sm">
               <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Nilai Terkini</CardTitle>
-                    <CardDescription className="text-xs">{latestStat?.period?.name ?? (latestStat ? new Date(latestStat.date).toLocaleDateString("id-ID", { month: "long", year: "numeric" }) : "")}</CardDescription>
+                    <CardDescription className="text-xs">{currentPeriodLabel}</CardDescription>
                   </div>
                   <GradeBadge score={averageScore(latestMetrics)} variant="full" />
                 </div>
@@ -176,106 +216,18 @@ export default function ParentDashboard() {
             </Card>
           )}
 
-          {/* Radar Chart — 11 aspek */}
-          <Card className="border-border/50 bg-card overflow-hidden shadow-sm">
-            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-              <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Komposisi Kemampuan</CardTitle>
-              <CardDescription className="text-xs">Perbandingan skor antar aspek teknik dasar.</CardDescription>
-            </CardHeader>
-            <CardContent className="pt-5 md:pt-6 h-72 md:h-80 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height={240} minWidth={0} minHeight={0}>
-                <RadarChart cx="50%" cy="50%" outerRadius="60%" data={radarData}>
-                  <PolarGrid stroke="var(--muted-foreground)" strokeOpacity={0.2} />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--muted-foreground)", fontSize: 9, fontWeight: 700 }} />
-                  <Radar name="Skor" dataKey="A" stroke="var(--primary)" fill="var(--primary)" fillOpacity={0.35} />
-                  <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--card-foreground)", fontSize: "12px", fontWeight: "bold" }} />
-                </RadarChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+          <ParentRadarChart data={radarData} />
 
-          {/* Line Chart — Perkembangan per Periode */}
-          {progressionData.length > 1 && (
-            <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
-              <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-                <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Grafik Perkembangan</CardTitle>
-                <CardDescription className="text-xs">Total skor keseluruhan per periode evaluasi.</CardDescription>
-              </CardHeader>
-              <CardContent className="pt-5 md:pt-6 h-64 md:h-72">
-                <ResponsiveContainer width="100%" height={220} minWidth={0} minHeight={0}>
-                  <LineChart data={progressionData} margin={{ top: 5, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted-foreground)" strokeOpacity={0.1} />
-                    <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 600 }} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
-                    <Tooltip contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--card-foreground)" }} itemStyle={{ fontSize: "12px", fontWeight: "bold" }} />
-                    <Line type="monotone" name="Total Skor" dataKey="Overall" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "var(--background)" }} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
+          {/* Line Chart - Perkembangan per Periode */}
+          <ParentProgressionChart data={progressionData} />
 
           {/* Rekap Kehadiran */}
-          <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
-            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-              <div className="flex items-center gap-2">
-                <ClipboardCheck className="size-5 text-primary" />
-                <div>
-                  <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Rekap Kehadiran</CardTitle>
-                  <CardDescription className="text-xs">Riwayat kehadiran {activeChild.name} dalam 50 agenda terakhir.</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 sm:p-6">
-              {attendanceLoading ? (
-                <div className="flex items-center justify-center gap-2 py-8 text-primary font-bold text-xs uppercase tracking-widest">
-                  <Loader2 className="size-4 animate-spin" /> Memuat data kehadiran...
-                </div>
-              ) : !attendances?.length ? (
-                <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
-                  <ClipboardCheck className="size-8 text-muted-foreground/30 mb-1" />
-                  <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada data kehadiran</p>
-                  <p className="text-xs text-muted-foreground/75">Data kehadiran akan muncul setelah pelatih mengisi presensi agenda.</p>
-                </div>
-              ) : (
-                <div className="flex flex-col gap-5">
-                  {/* Summary strip */}
-                  <div className="flex flex-wrap gap-3 items-center">
-                    {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
-                      <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
-                        <span className="text-micro">{STATUS_STYLE[s].label}</span>
-                        <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
-                      </div>
-                    ))}
-                    <div className="w-full sm:w-auto sm:ml-auto flex items-center justify-between sm:justify-start gap-2 px-4 py-1.5 rounded-lg border border-primary/20 bg-primary/5">
-                      <span className="text-micro text-muted-foreground">Tingkat Kehadiran</span>
-                      <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
-                        {attendanceSummary?.rate ?? 0}%
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Record list */}
-                  <div className="flex flex-col gap-1.5">
-                    <p className="text-micro text-muted-foreground/50 px-1 mb-1">10 Agenda Terakhir</p>
-                    {attendances.slice(0, 10).map((a) => {
-                      const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
-                      const eventTitle = a.event?.title ?? eventLabel;
-                      return (
-                        <div key={a.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
-                            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>
-                          </div>
-                          <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>{STATUS_STYLE[a.status as AttendanceStatus].label}</span>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <ParentAttendanceSummary 
+            attendanceSummary={attendanceSummary} 
+            attendances={attendances} 
+            attendanceLoading={attendanceLoading} 
+            activeChildName={activeChild.name} 
+          />
 
           {/* Catatan Pelatih + PDF */}
           <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
@@ -285,8 +237,14 @@ export default function ParentDashboard() {
                   <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Catatan Pelatih</CardTitle>
                   <CardDescription className="text-xs">Evaluasi tekstual dari rapor terakhir.</CardDescription>
                 </div>
-                <Button size="sm" className="h-10 px-4 w-full sm:w-auto uppercase font-bold tracking-widest text-[10px] shrink-0" onClick={handleDownloadPDF}>
-                  <FileText className="mr-2 size-3" /> Unduh Rapor PDF
+                <Button
+                  size="sm"
+                  className="h-10 px-4 w-full sm:w-auto uppercase font-bold tracking-widest text-[10px] shrink-0"
+                  onClick={handleDownloadPDF}
+                  disabled={isPdfLoading || !latestMetrics}
+                >
+                  {isPdfLoading ? <Loader2 className="mr-2 size-3 animate-spin" /> : <FileText className="mr-2 size-3" />}
+                  Unduh Rapor PDF
                 </Button>
               </div>
             </CardHeader>
@@ -304,3 +262,6 @@ export default function ParentDashboard() {
     </div>
   );
 }
+
+
+

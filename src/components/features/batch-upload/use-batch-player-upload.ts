@@ -64,7 +64,10 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
   };
 
   const notifyError = (message: string) => {
-    toast.error(message);
+    const errorMsg = message.includes("Prisma") || message.includes("Unique constraint")
+      ? "Terjadi kesalahan pada sistem. Silakan coba kembali." 
+      : message;
+    toast.error(errorMsg || "Gagal melakukan proses ini.");
   };
 
   const downloadTemplateExcel = async () => {

@@ -8,7 +8,7 @@ import { Starfield } from "@/components/ui/starfield";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Login Portal — ADORA Basketball Club",
+  title: "Login Portal - ADORA Basketball Club",
   description: "Masuk ke portal anggota ADORA Basketball Club untuk memantau perkembangan, jadwal latihan, dan raport pemain.",
   robots: {
     index: false,
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 export default async function LoginPage() {
   const session = await getServerSession(authOptions);
 
-  // Already logged in → redirect to the correct portal
+  // Already logged in, redirect to the correct portal.
   if (session?.user) {
     const role = session.user.role;
     redirect(role === "ADMIN" ? "/dashboard" : "/parent");
