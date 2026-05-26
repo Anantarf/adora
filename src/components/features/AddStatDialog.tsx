@@ -35,7 +35,7 @@ const statSchema = z.object({
   }),
   layUp: scoreNormal,
   shooting: scoreNormal,
-  notes: z.string().optional(),
+  notes: z.string().max(160, "Maksimal 160 karakter").optional(),
 });
 
 type StatForm = z.infer<typeof statSchema>;
@@ -199,7 +199,7 @@ export function AddStatDialog({
               {/* Notes */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-micro text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
-                <Textarea {...register("notes")} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
+                <Textarea {...register("notes")} maxLength={160} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
               </div>
             </fieldset>
 
