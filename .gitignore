@@ -14,6 +14,7 @@
 /coverage
 /playwright-report/
 /test-results/
+/output/
 
 # next.js
 /.next/
@@ -34,6 +35,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -47,11 +49,6 @@ next-env.d.ts
 # data files
 *.xlsx
 
-# local development & uploads
 /public/uploads/
-*.pdf
 /scratch/
 /adora-bc.code-workspace
-
-
-.vercel
