@@ -276,7 +276,8 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   const rightX = MARGIN + columnWidth + columnGap;
   const blockHeight = 34;
 
-  if (y + blockHeight > PAGE_H - 18) {
+  // Beri jarak lebih besar di bawah (PAGE_H - 35) agar tidak menabrak footer kop surat
+  if (y + blockHeight > PAGE_H - 35) {
     y = addNewPage();
   }
 
