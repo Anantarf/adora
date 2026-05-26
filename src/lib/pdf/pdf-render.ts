@@ -114,8 +114,8 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       3: { cellWidth: CONTENT_W - 135 },
     },
     styles: {
-      fontSize: 9,
-      cellPadding: 2.5,
+      fontSize: 8,
+      cellPadding: 2,
       lineColor: [0, 0, 0],
       lineWidth: 0.2,
     },
@@ -363,7 +363,7 @@ export async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
 
       const templatePdf = await PDFDocument.load(await templateRes.arrayBuffer());
       const [templatePage] = templatePdf.getPages();
-      const contentPages = await templatePdf.embedPdf(contentPdf);
+      const contentPages = await templatePdf.embedPdf(contentPdf, contentPdf.getPageIndices());
 
       const blankTemplates = [];
       if (contentPages.length > 1) {
