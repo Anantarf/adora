@@ -322,6 +322,24 @@ model webVitalEvent {
   @@map("WebVitalEvent")
 }
 
+model operationalEvent {
+  id         String               @id @default(cuid())
+  severity   operational_severity
+  source     String
+  message    String
+  statusCode Int?
+  durationMs Int?
+  fingerprint String?
+  metadata   Json?
+  createdAt  DateTime             @default(now())
+
+  @@index([createdAt], map: "OperationalEvent_createdAt_idx")
+  @@index([severity, createdAt], map: "OperationalEvent_severity_createdAt_idx")
+  @@index([source, createdAt], map: "OperationalEvent_source_createdAt_idx")
+  @@index([fingerprint], map: "OperationalEvent_fingerprint_idx")
+  @@map("OperationalEvent")
+}
+
 enum attendance_status {
   HADIR
   IZIN
@@ -351,4 +369,10 @@ enum registration_status {
   PENDING
   REVIEWED
   COMPLETED
+}
+
+enum operational_severity {
+  INFO
+  WARN
+  ERROR
 }

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { clearBucket, getActiveBucket, incrementBucket } from "@/lib/shared-rate-limit";
+import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 
 const LOGIN_FAILURE_NAMESPACE = "login-failures";
 const MAX_FAILURES = 10;
@@ -15,6 +16,16 @@ async function checkFailureLimit(ip: string) {
     const record = await getActiveBucket(LOGIN_FAILURE_NAMESPACE, ip);
 
     if (record && record.count >= MAX_FAILURES) {
+      await recordOperationalWarning({
+        source: "auth",
+        message: "Login blocked because IP is temporarily locked out",
+        statusCode: 429,
+        metadata: {
+          ip,
+          count: record.count,
+          resetAt: record.resetAt.toISOString(),
+        },
+      });
       const remainingMinutes = Math.ceil((record.resetAt.getTime() - Date.now()) / 60000);
       throw new Error(`Akun dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam ${remainingMinutes} menit.`);
     }
@@ -23,20 +34,42 @@ async function checkFailureLimit(ip: string) {
       throw error;
     }
 
-    console.warn("[LOGIN_FAILURE_LIMIT_CHECK_ERROR]", { ip, error });
+    await recordOperationalError({
+      source: "auth",
+      message: "Failed to read login failure limiter state",
+      error,
+      metadata: { ip },
+    });
   }
 }
 
 async function recordFailure(ip: string, failed: boolean) {
   try {
     if (failed) {
-      await incrementBucket(LOGIN_FAILURE_NAMESPACE, ip, LOCKOUT_MS);
+      const bucket = await incrementBucket(LOGIN_FAILURE_NAMESPACE, ip, LOCKOUT_MS);
+      if (bucket.count === MAX_FAILURES) {
+        await recordOperationalWarning({
+          source: "auth",
+          message: "Login lockout threshold reached",
+          statusCode: 429,
+          metadata: {
+            ip,
+            count: bucket.count,
+            resetAt: bucket.resetAt.toISOString(),
+          },
+        });
+      }
       return;
     }
 
     await clearBucket(LOGIN_FAILURE_NAMESPACE, ip);
   } catch (error) {
-    console.warn("[LOGIN_FAILURE_RECORD_ERROR]", { ip, failed, error });
+    await recordOperationalError({
+      source: "auth",
+      message: "Failed to update login failure limiter state",
+      error,
+      metadata: { ip, failed },
+    });
   }
 }
 
@@ -60,7 +93,12 @@ async function findActiveUser(username: string) {
       where: { username },
     });
   } catch (error) {
-    console.error("[LOGIN_USER_LOOKUP_ERROR]", { username, error });
+    await recordOperationalError({
+      source: "auth",
+      message: "Failed to lookup login user",
+      error,
+      metadata: { username },
+    });
     throw new Error(LOGIN_TEMPORARY_ERROR);
   }
 }
@@ -69,7 +107,11 @@ async function comparePassword(password: string, hashedPassword: string) {
   try {
     return await bcrypt.compare(password, hashedPassword);
   } catch (error) {
-    console.error("[LOGIN_PASSWORD_COMPARE_ERROR]", error);
+    await recordOperationalError({
+      source: "auth",
+      message: "Failed to compare login password hash",
+      error,
+    });
     throw new Error(LOGIN_TEMPORARY_ERROR);
   }
 }

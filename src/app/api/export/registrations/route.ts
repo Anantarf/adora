@@ -21,6 +21,7 @@ import {
   formatRegistrationDate,
   idLocale,
 } from "@/lib/export/registrations-report";
+import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 
 const ALLOWED_EXPORT_FILTERS = new Set(["all", "daily", "monthly"]);
 
@@ -43,6 +44,12 @@ export async function GET(request: Request) {
 
     const totalRegistrations = await prisma.registration.count({ where: whereClause });
     if (totalRegistrations > MAX_EXPORT_ROWS) {
+      await recordOperationalWarning({
+        source: "export-registrations",
+        message: "Export registrations blocked because dataset is too large",
+        statusCode: 413,
+        metadata: { filter, totalRegistrations, maxRows: MAX_EXPORT_ROWS },
+      });
       return NextResponse.json(
         {
           error: `Jumlah data terlalu besar untuk diekspor sekaligus. Batasi filter hingga maksimal ${MAX_EXPORT_ROWS} baris.`,
@@ -190,7 +197,12 @@ export async function GET(request: Request) {
       },
     });
   } catch (error) {
-    console.error("Export registrations error:", error);
+    await recordOperationalError({
+      source: "export-registrations",
+      message: "Export registrations request failed",
+      error,
+      statusCode: 500,
+    });
     return NextResponse.json({ error: "Export data pendaftar gagal. Coba lagi sebentar lagi." }, { status: 500 });
   }
 }

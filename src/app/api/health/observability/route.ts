@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
-import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
+import { getObservabilitySnapshot } from "@/lib/observability-snapshot";
+import { recordOperationalError } from "@/lib/observability";
 
 const HEALTH_RATE_LIMIT = 60;
 const HEALTH_WINDOW_MS = 60_000;
 const REQUIRED_TOKEN = process.env.HEALTH_CHECK_TOKEN || "";
-const HEALTH_RATE_LIMIT_NAMESPACE = "health-db";
+const HEALTH_RATE_LIMIT_NAMESPACE = "health-observability";
 
 function getClientIp(req: Request): string {
   return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
@@ -15,7 +16,7 @@ function getClientIp(req: Request): string {
 export async function GET(req: Request) {
   const token = req.headers.get("x-health-token") ?? "";
   if (REQUIRED_TOKEN === "" || token !== REQUIRED_TOKEN) {
-    return NextResponse.json({ error: "Unauthorized health check" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized observability check" }, { status: 401 });
   }
 
   const rateLimitResult = await consumeFixedWindowLimit(
@@ -26,25 +27,26 @@ export async function GET(req: Request) {
   );
 
   if (!rateLimitResult.allowed) {
-    await recordOperationalWarning({
-      source: "health-db",
-      message: "Health check rate limit exceeded",
-      statusCode: 429,
-      metadata: { ip: getClientIp(req), count: rateLimitResult.count },
-    });
-    return NextResponse.json({ error: "Too many health checks" }, { status: 429 });
+    return NextResponse.json({ error: "Too many observability checks" }, { status: 429 });
   }
 
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json({ ok: true, db: true });
+    const summary = await getObservabilitySnapshot(24);
+
+    return NextResponse.json({
+      ok: true,
+      db: true,
+      summary,
+    });
   } catch (error) {
     await recordOperationalError({
-      source: "health-db",
-      message: "Database health check failed",
+      source: "health-observability",
+      message: "Observability health check failed",
       error,
       statusCode: 503,
     });
+
     return NextResponse.json({ ok: false, db: false }, { status: 503 });
   }
 }

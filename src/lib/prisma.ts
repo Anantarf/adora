@@ -7,6 +7,7 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
   prismaSlowQueryListenerAttached?: boolean;
 };
+const SLOW_QUERY_SOURCE = "prisma-slow-query";
 
 function createPrismaClient() {
   const url = process.env.DATABASE_URL;
@@ -46,8 +47,12 @@ if (slowQueryThresholdMs > 0 && !globalForPrisma.prismaSlowQueryListenerAttached
     $on(eventType: "query", callback: (event: { duration: number; target: string; query: string }) => void): void;
   };
 
-  prismaWithQueryEvents.$on("query", (event) => {
+  prismaWithQueryEvents.$on("query", async (event) => {
     if (event.duration < slowQueryThresholdMs) {
+      return;
+    }
+
+    if (event.query.includes("\"OperationalEvent\"") || event.query.includes("OperationalEvent")) {
       return;
     }
 
@@ -56,6 +61,25 @@ if (slowQueryThresholdMs > 0 && !globalForPrisma.prismaSlowQueryListenerAttached
       target: event.target,
       query: event.query,
     });
+
+    try {
+      await prisma.operationalEvent.create({
+        data: {
+          severity: "WARN",
+          source: SLOW_QUERY_SOURCE,
+          message: "Prisma query exceeded slow query threshold",
+          durationMs: event.duration,
+          metadata: {
+            target: event.target,
+            query: event.query.slice(0, 500),
+            thresholdMs: slowQueryThresholdMs,
+          },
+          fingerprint: `${SLOW_QUERY_SOURCE}:${event.target}`.slice(0, 160),
+        },
+      });
+    } catch (persistError) {
+      console.error("[PRISMA_SLOW_QUERY_PERSIST_ERROR]", persistError);
+    }
   });
 
   globalForPrisma.prismaSlowQueryListenerAttached = true;

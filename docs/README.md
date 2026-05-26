@@ -12,6 +12,12 @@ Dokumentasi internal proyek disimpan di folder ini agar keputusan teknis, evalua
   Ringkasan hardening invariant data dan authorization boundary, termasuk guard domain, validasi target relasi, dan test baru.
 - [Phase 3 Scale And Performance](./PHASE_3_SCALE_AND_PERFORMANCE.md)
   Ringkasan optimasi pagination/search server-side pada halaman admin yang paling rawan membengkak, lengkap dengan batas operasional dan test skala dasar.
+- [Phase 4 Observability And Incident Readiness](./PHASE_4_OBSERVABILITY_AND_INCIDENT_READINESS.md)
+  Ringkasan penambahan event store operasional, snapshot observability, slow query persistence, dan health endpoint yang lebih siap dipakai saat incident.
+- [Phase 5 Release Safety](./PHASE_5_RELEASE_SAFETY.md)
+  Ringkasan guard env production, smoke test pasca-deploy, checklist release/rollback, dan cleanup warning build yang mengganggu sinyal produksi.
+- [Phase 6 Regression Resistance](./PHASE_6_REGRESSION_RESISTANCE.md)
+  Ringkasan must-pass suite, tagging E2E kritikal, auto web server Playwright, dan baseline regression gate sebelum push atau deploy.
 
 ## Aturan Singkat
 

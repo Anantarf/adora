@@ -10,11 +10,15 @@
     "build:no-opt-imports": "set NEXT_DISABLE_OPTIMIZE_PACKAGE_IMPORTS=1&& next build",
     "start": "next start",
     "lint": "eslint",
+    "release:check": "tsx scripts/release-check.ts",
+    "smoke:check": "tsx scripts/smoke-check.ts",
     "seed": "tsx prisma/seed.ts",
     "repair:group-meta:dry": "tsx prisma/repair-group-meta.ts --dry-run",
     "repair:group-meta": "tsx prisma/repair-group-meta.ts",
+    "test:e2e:critical": "npm run build && playwright test --grep @critical",
     "test:e2e": "playwright test",
-    "test:integration": "vitest run"
+    "test:integration": "vitest run",
+    "test:critical": "npm run test:integration && npm run test:e2e:critical"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

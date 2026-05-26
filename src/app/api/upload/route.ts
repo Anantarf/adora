@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 import { fileTypeFromBuffer } from "file-type";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
+import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 const RATE_LIMIT = 30;
@@ -69,6 +70,12 @@ export async function POST(req: NextRequest) {
   );
 
   if (!rateLimitResult.allowed) {
+    await recordOperationalWarning({
+      source: "upload-api",
+      message: "Upload rate limit exceeded",
+      statusCode: 429,
+      metadata: { ip, count: rateLimitResult.count },
+    });
     return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
   }
 
@@ -121,24 +128,41 @@ export async function POST(req: NextRequest) {
     );
 
     if (error) {
-      console.error("Supabase storage error:", error);
       throw error;
     }
 
     const { data: publicUrlData } = supabase.storage.from("uploads").getPublicUrl(uniqueName);
     return NextResponse.json({ url: publicUrlData.publicUrl });
   } catch (error) {
-    console.error("Upload error:", error);
-
     if (error instanceof Error) {
       if (error.message === "UPLOAD_STORAGE_NOT_CONFIGURED") {
+        await recordOperationalError({
+          source: "upload-api",
+          message: "Upload storage is not configured",
+          error,
+          statusCode: 503,
+        });
         return NextResponse.json({ error: "Storage upload belum dikonfigurasi di server." }, { status: 503 });
       }
 
       if (error.message === "UPLOAD_STORAGE_TIMEOUT") {
+        await recordOperationalError({
+          source: "upload-api",
+          message: "Upload storage request timed out",
+          error,
+          statusCode: 503,
+          durationMs: STORAGE_TIMEOUT_MS,
+        });
         return NextResponse.json({ error: "Storage upload sedang lambat atau tidak merespons. Coba lagi sebentar lagi." }, { status: 503 });
       }
     }
+
+    await recordOperationalError({
+      source: "upload-api",
+      message: "Upload request failed",
+      error,
+      statusCode: 500,
+    });
 
     return NextResponse.json({ error: "Unggahan gagal. Coba lagi atau hubungi administrator." }, { status: 500 });
   }

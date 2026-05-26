@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Registration Flow', () => {
-  test('user bisa mengisi form pendaftaran sampai sukses', async ({ page }) => {
+  test('@critical user bisa mengisi form pendaftaran sampai sukses', async ({ page }) => {
     await page.goto('/register');
     
     // 1. Tunggu Homebase load dan pilih homebase pertama yang muncul
