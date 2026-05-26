@@ -7,17 +7,24 @@ import { toast } from "sonner";
 import {
   PAGE_W, PAGE_H, MARGIN, CONTENT_W,
   SIG_BOX_H, STAMP_SIZE, SECTION_GAP,
-  loadImageAsBase64, openPdfInNewTab, drawHorizontalRule, drawFitImage
+  SECTION_TITLE_COLOR, PANEL_BORDER,
+  loadImageAsBase64, openPdfInNewTab, drawHorizontalRule, drawFitImage, drawSectionTitle, drawPanel
 } from "./pdf-utils";
 import type { RaporData } from "../generate-rapor-pdf";
 
+// ─── Title ────────────────────────────────────────────────────────────────────
+
 export function renderMainTitle(doc: jsPDF, y: number, periodName: string): number {
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
+  doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
   doc.text(`RAPOR ${periodName.toUpperCase()}`, PAGE_W / 2, y, { align: "center" });
-  return y + 10;
+  y += 5;
+  drawHorizontalRule(doc, y, 0.6, 180);
+  return y + 7;
 }
+
+// ─── Player Info ──────────────────────────────────────────────────────────────
 
 export interface PlayerInfoParam {
   playerName: string;
@@ -29,39 +36,45 @@ export interface PlayerInfoParam {
 
 export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): number {
   const { playerName, groupName, periodName, schoolOrigin, printDate } = info;
-  
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(75, 85, 99);
-  doc.text("IDENTITAS PEMAIN", MARGIN, y);
-  y += 6;
-
-  const rows: { label: string; value: string; bold?: boolean }[] = [
-    { label: "Nama Pemain", value: playerName.toUpperCase(), bold: true },
+  const rows: { label: string; value: string }[] = [
+    { label: "Nama Pemain", value: playerName.toUpperCase() },
     { label: "Kelompok / Kelas", value: groupName.toUpperCase() },
-    { label: "Sekolah Asal", value: schoolOrigin || "-" },
-    { label: "Tanggal Cetak", value: printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) },
+    { label: "Periode Evaluasi", value: periodName },
   ];
 
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
+  if (schoolOrigin) rows.push({ label: "Sekolah Asal", value: schoolOrigin });
+  rows.push({ label: "Tanggal Cetak", value: printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) });
 
-  rows.forEach((row) => {
+  const perCol = Math.ceil(rows.length / 2);
+  const panelHeight = 26; // Fixed height
+  const labelWidth = 30;
+  const colGap = 10;
+  const colX = [MARGIN + 8, MARGIN + CONTENT_W / 2 + colGap / 2];
+
+  drawSectionTitle(doc, "IDENTITAS PEMAIN", y);
+  y += 4;
+  drawPanel(doc, MARGIN, y, CONTENT_W, panelHeight);
+
+  rows.forEach((row, index) => {
+    const columnIndex = index < perCol ? 0 : 1;
+    const rowIndex = columnIndex === 0 ? index : index - perCol;
+    const baseX = colX[columnIndex];
+    const rowY = y + 8 + rowIndex * 6;
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(9);
+    doc.text(row.label, baseX, rowY);
     doc.setFont("helvetica", "normal");
-    doc.text(`- ${row.label}: `, MARGIN, y);
-    if (row.bold) doc.setFont("helvetica", "bold");
-    doc.text(row.value, MARGIN + 35, y);
-    y += 5;
+    doc.text(`: ${row.value}`, baseX + labelWidth, rowY);
   });
 
-  return y + 4; // micro spacing
+  return y + panelHeight + SECTION_GAP;
 }
 
+// ─── Assessment Table ─────────────────────────────────────────────────────────
+
 export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJson): number {
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(75, 85, 99);
-  doc.text("POIN PENILAIAN", MARGIN, y);
+  drawSectionTitle(doc, "POIN PENILAIAN", y);
   y += 4;
 
   const dribTotal = dribbleTotal(metrics.dribble);
@@ -98,7 +111,7 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
     },
     styles: {
       fontSize: 10,
-      cellPadding: 3, // 6pt to 8pt equivalent
+      cellPadding: 3,
       lineColor: [0, 0, 0],
       lineWidth: 0.1,
     },
@@ -112,20 +125,22 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       lineColor: [0, 0, 0],
       lineWidth: 0.1,
     },
-    theme: "plain", // removes vertical lines and borders
+    theme: "plain",
     didDrawCell: (data) => {
-      // Draw horizontal line at bottom of each row
+      // Draw horizontal lines only (clean minimalist table)
       doc.setDrawColor(0, 0, 0);
       doc.setLineWidth(0.1);
       doc.line(data.cell.x, data.cell.y + data.cell.height, data.cell.x + data.cell.width, data.cell.y + data.cell.height);
-      if (data.row.index === 0 && data.section === 'head') {
+      if (data.row.index === 0 && data.section === "head") {
         doc.line(data.cell.x, data.cell.y, data.cell.x + data.cell.width, data.cell.y);
       }
-    }
+    },
   });
 
-  return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 12;
+  return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 8;
 }
+
+// ─── Conclusion & Grades ──────────────────────────────────────────────────────
 
 export function renderConclusionAndGrades(
   doc: jsPDF,
@@ -137,36 +152,61 @@ export function renderConclusionAndGrades(
   const score = averageScore(metrics);
   const grade = letterGrade(score);
   const notesText = metrics.notes?.trim() || `${playerName} telah menyelesaikan evaluasi pada periode ${periodName}. Nilai rata-rata menunjukkan performa ${grade.label.toLowerCase()} dengan skor akhir ${score}.`;
-  if (y + 40 > PAGE_H - 45) {
+  const scales = [
+    { l: "A", d: "SANGAT BAIK" },
+    { l: "B", d: "BAIK" },
+    { l: "C", d: "CUKUP BAIK" },
+    { l: "D", d: "KURANG BAIK" },
+  ];
+  const leftWidth = 114;
+  const rightWidth = CONTENT_W - leftWidth - 8;
+  const splitNotes = doc.splitTextToSize(notesText, leftWidth - 12);
+  const blockHeight = 60; // Fixed height
+
+  if (y + 4 + blockHeight > PAGE_H - 45) {
     y = addNewPage();
   }
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
-  doc.setTextColor(0, 0, 0);
-  doc.text(`HASIL PENILAIAN: ${grade.letter} (${grade.label.toUpperCase()})`, MARGIN, y);
-  y += 5;
+  drawSectionTitle(doc, "KESIMPULAN PENILAIAN", y);
+  y += 4;
 
+  drawPanel(doc, MARGIN, y, leftWidth, blockHeight);
   doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(splitNotes, MARGIN + 6, y + 9);
+
+  // Anchor legend to the bottom of the fixed box
+  const legendY = y + 34;
+  doc.setDrawColor(...PANEL_BORDER);
+  doc.setLineWidth(0.25);
+  doc.line(MARGIN + 6, legendY, MARGIN + leftWidth - 6, legendY);
+
+  doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.text("(A=Sangat Baik | B=Baik | C=Cukup Baik | D=Kurang Baik)", MARGIN, y);
-  y += 10;
+  doc.text("KETERANGAN", MARGIN + 6, legendY + 5);
+  scales.forEach((scale, index) => {
+    doc.setFont("helvetica", scale.l === grade.letter ? "bold" : "normal");
+    doc.text(`${scale.l} = ${scale.d}`, MARGIN + 6, legendY + 10 + index * 4.1);
+  });
+
+  const gradeX = MARGIN + leftWidth + 8;
+  drawPanel(doc, gradeX, y, rightWidth, blockHeight);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(75, 85, 99);
-  doc.text("KESIMPULAN PENILAIAN", MARGIN, y);
-  y += 6;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
+  doc.setFontSize(8);
+  doc.setTextColor(...SECTION_TITLE_COLOR);
+  doc.text("HASIL PENILAIAN", gradeX + rightWidth / 2, y + 7, { align: "center" });
   doc.setTextColor(0, 0, 0);
-  
-  const splitNotes = doc.splitTextToSize(notesText, CONTENT_W);
-  doc.text(splitNotes, MARGIN, y, { lineHeightFactor: 1.5 });
+  doc.setFontSize(28);
+  doc.text(grade.letter, gradeX + rightWidth / 2, y + 27, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(grade.label, gradeX + rightWidth / 2, y + 37, { align: "center" });
 
-  return y + splitNotes.length * 5 + 8;
+  return y + blockHeight + SECTION_GAP;
 }
+
+// ─── Achievements ─────────────────────────────────────────────────────────────
 
 export function renderAchievements(
   doc: jsPDF,
@@ -176,45 +216,64 @@ export function renderAchievements(
 ): number {
   const { attendanceRate, certificates } = info;
   const hasAttendance = typeof attendanceRate === "number";
-  const certificateLines = certificates ?? [];
+  const hasCertificates = Boolean(certificates?.length);
 
-  if (!hasAttendance && certificateLines.length === 0) {
+  if (!hasAttendance && !hasCertificates) {
     return y;
   }
 
-  if (y + 40 > PAGE_H - 45) {
+  const certificateLines = certificates?.flatMap((certificate, index) => {
+    const dateLabel = certificate.uploadedAt
+      ? new Date(certificate.uploadedAt).toLocaleDateString("id-ID", { month: "short", year: "numeric" })
+      : null;
+
+    return doc.splitTextToSize(`${index + 1}. ${certificate.title}${dateLabel ? ` (${dateLabel})` : ""}`, CONTENT_W - 14);
+  }) ?? [];
+
+  const attendanceHeight = hasAttendance ? 16 : 0;
+  const certificateHeight = hasCertificates ? Math.max(16, certificateLines.length * 4.2 + 10) : 0;
+  const panelHeight = 8 + attendanceHeight + certificateHeight;
+
+  if (y + panelHeight > PAGE_H - 48) {
     y = addNewPage();
   }
 
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(75, 85, 99);
-  doc.text("RINGKASAN PEMAIN", MARGIN, y);
-  y += 6;
+  drawSectionTitle(doc, "RINGKASAN PEMAIN", y);
+  y += 4;
+  drawPanel(doc, MARGIN, y, CONTENT_W, panelHeight);
+  y += 8;
 
   if (hasAttendance) {
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(8);
+    doc.setTextColor(...SECTION_TITLE_COLOR);
+    doc.text("KEHADIRAN", MARGIN + 6, y);
     doc.setTextColor(0, 0, 0);
-    doc.text(`Tingkat kehadiran: ${attendanceRate}%`, MARGIN, y);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.text(`Tingkat kehadiran pemain selama periode ini: ${attendanceRate}%`, MARGIN + 36, y);
     y += 6;
   }
 
-  if (certificateLines.length > 0) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
-    doc.setTextColor(0, 0, 0);
-    doc.text("Sertifikat:", MARGIN, y);
-    y += 5;
-    doc.setFont("helvetica", "normal");
-    certificateLines.forEach((c, i) => {
-      doc.text(`${i + 1}. ${c.title}`, MARGIN + 4, y);
-      y += 5;
-    });
+  if (!hasCertificates) {
+    return y + SECTION_GAP + 4;
   }
 
-  return y + 4;
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.setTextColor(...SECTION_TITLE_COLOR);
+  doc.text("RIWAYAT SERTIFIKAT", MARGIN + 6, y);
+  doc.setTextColor(0, 0, 0);
+  y += 4;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.text(certificateLines, MARGIN + 6, y);
+
+  return y + certificateLines.length * 4.2 + SECTION_GAP;
 }
+
+// ─── Signature Area ───────────────────────────────────────────────────────────
 
 export interface SignatureParam {
   assets?: RaporData["assets"];
@@ -228,18 +287,18 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   const columnWidth = (CONTENT_W - columnGap) / 2;
   const leftX = MARGIN;
   const rightX = MARGIN + columnWidth + columnGap;
-  const blockHeight = 40;
+  const blockHeight = 34;
 
-  if (y + blockHeight > PAGE_H - 25) {
+  if (y + blockHeight > PAGE_H - 35) {
     y = addNewPage();
   }
 
-  const dateStr = `Gandul, ${info.printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
+  // Date centered on the page
+  const dateStr = `Gandul, ${printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}`;
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(9);
   doc.text(dateStr, MARGIN + CONTENT_W / 2, y, { align: "center" });
-  y += 8;
+  y += 6;
 
   const renderSingle = async (url: string | undefined, x: number, yPos: number, width: number, height: number, isStamp = false) => {
     if (!url || url.toLowerCase().endsWith(".pdf")) return;
@@ -258,10 +317,11 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   };
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text("HEAD COACH", leftX + columnWidth / 2, y, { align: "center" });
-  doc.text("CEO ADORA BBC", rightX + columnWidth / 2, y, { align: "center" });
-
+  doc.setFontSize(8);
+  doc.setTextColor(...SECTION_TITLE_COLOR);
+  doc.text("HEAD COACH", leftX + columnWidth / 2, y + 4, { align: "center" });
+  doc.text("CEO ADORA BBC", rightX + columnWidth / 2, y + 4, { align: "center" });
+  doc.setTextColor(0, 0, 0);
 
   await Promise.all([
     renderSingle(assets?.coachSignUrl, leftX + 8, y + 1, columnWidth - 16, SIG_BOX_H),
@@ -277,19 +337,19 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   doc.setDrawColor(0, 0, 0);
 
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
-  doc.text(signers?.coachName ?? "Head Coach", leftX + columnWidth / 2, lineY, { align: "center" });
-  const ceoName = signers?.ceoName ?? "CEO";
-  doc.text(ceoName, rightX + columnWidth / 2, lineY, { align: "center" });
-  
-  // Footer text
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8);
-  doc.setTextColor(75, 85, 99);
-  doc.text("PT ADORA INDONESIA JUARA", MARGIN + CONTENT_W / 2, PAGE_H - 10, { align: "center" });
+  doc.setFontSize(9);
+  doc.text(signers?.coachName ?? "Head Coach", leftX + columnWidth / 2, lineY + 5, { align: "center" });
+  doc.text(signers?.ceoName ?? "CEO", rightX + columnWidth / 2, lineY + 5, { align: "center" });
 
-  return PAGE_H;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(8);
+  doc.text("ADORA Basketball Club", leftX + columnWidth / 2, lineY + 9, { align: "center" });
+  doc.text("ADORA Basketball Club", rightX + columnWidth / 2, lineY + 9, { align: "center" });
+
+  return lineY + 12;
 }
+
+// ─── Finalize PDF ─────────────────────────────────────────────────────────────
 
 export interface FinalizeParam {
   isPdfTemplate?: boolean;
