@@ -44,14 +44,14 @@ export interface PlayerInfoParam {
 
 export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): number {
   const { playerName, groupName, periodName, schoolOrigin, printDate } = info;
-  const rows: [string, string][] = [
-    ["Nama", playerName],
-    ["Kelompok", groupName],
-    ["Periode Evaluasi", periodName],
+  const rows: { label: string; value: string; bold?: boolean }[] = [
+    { label: "Nama Pemain", value: playerName.toUpperCase(), bold: true },
+    { label: "Kelompok / Kelas", value: groupName.toUpperCase() },
+    { label: "Periode Evaluasi", value: periodName },
   ];
 
-  if (schoolOrigin) rows.push(["Sekolah Asal", schoolOrigin]);
-  rows.push(["Tanggal Cetak", printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })]);
+  if (schoolOrigin) rows.push({ label: "Sekolah Asal", value: schoolOrigin });
+  rows.push({ label: "Tanggal Cetak", value: printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) });
 
   const perCol = Math.ceil(rows.length / 2);
   const panelHeight = 26; // Fixed height
@@ -61,7 +61,7 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
 
   drawPanel(doc, MARGIN, y, CONTENT_W, panelHeight);
 
-  rows.forEach(([label, value], index) => {
+  rows.forEach((row, index) => {
     const columnIndex = index < perCol ? 0 : 1;
     const rowIndex = columnIndex === 0 ? index : index - perCol;
     const baseX = colX[columnIndex];
@@ -69,9 +69,9 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9);
-    doc.text(label, baseX, rowY);
+    doc.text(row.label, baseX, rowY);
     doc.setFont("helvetica", "normal");
-    doc.text(`: ${value}`, baseX + labelWidth, rowY);
+    doc.text(`: ${row.value}`, baseX + labelWidth, rowY);
   });
 
   return y + panelHeight + SECTION_GAP;
