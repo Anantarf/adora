@@ -177,7 +177,7 @@ async function main() {
   });
 
   const settings = [
-    { key: "rapor_header_url", value: "/logo-adora-full.png" },
+    { key: "rapor_header_url", value: "/template-rapor-sd.pdf" },
     { key: "rapor_coach_name", value: "Danuri Akbar" },
     { key: "rapor_ceo_name", value: "M. Arief, S.Ak" },
   ];
