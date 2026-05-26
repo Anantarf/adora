@@ -57,7 +57,7 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
   rows.push({ label: "Tanggal Cetak", value: printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) });
 
   const perCol = Math.ceil(rows.length / 2);
-  const panelHeight = 20 + Math.max(0, rows.length - 4) * 5;
+  const panelHeight = 16 + Math.max(0, rows.length - 4) * 5;
   const labelWidth = 28;
   const colX = [MARGIN + 6, MARGIN + CONTENT_W / 2 + 5];
 
