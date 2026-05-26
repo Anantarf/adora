@@ -123,6 +123,9 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       lineColor: [0, 0, 0],
       lineWidth: 0.2,
     },
+    bodyStyles: {
+      fillColor: false,
+    },
     headStyles: {
       fillColor: TABLE_HEAD_FILL,
       textColor: 0,
