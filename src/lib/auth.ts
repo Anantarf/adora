@@ -7,23 +7,71 @@ import { clearBucket, getActiveBucket, incrementBucket } from "@/lib/shared-rate
 const LOGIN_FAILURE_NAMESPACE = "login-failures";
 const MAX_FAILURES = 10;
 const LOCKOUT_MS = 15 * 60 * 1000;
+const INVALID_CREDENTIALS_ERROR = "Username atau sandi tidak valid.";
+const LOGIN_TEMPORARY_ERROR = "Layanan login sedang bermasalah. Silakan coba lagi sebentar lagi.";
 
 async function checkFailureLimit(ip: string) {
-  const record = await getActiveBucket(LOGIN_FAILURE_NAMESPACE, ip);
+  try {
+    const record = await getActiveBucket(LOGIN_FAILURE_NAMESPACE, ip);
 
-  if (record && record.count >= MAX_FAILURES) {
-    const remainingMinutes = Math.ceil((record.resetAt.getTime() - Date.now()) / 60000);
-    throw new Error(`Akun dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam ${remainingMinutes} menit.`);
+    if (record && record.count >= MAX_FAILURES) {
+      const remainingMinutes = Math.ceil((record.resetAt.getTime() - Date.now()) / 60000);
+      throw new Error(`Akun dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam ${remainingMinutes} menit.`);
+    }
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Akun dikunci sementara")) {
+      throw error;
+    }
+
+    console.warn("[LOGIN_FAILURE_LIMIT_CHECK_ERROR]", { ip, error });
   }
 }
 
 async function recordFailure(ip: string, failed: boolean) {
-  if (failed) {
-    await incrementBucket(LOGIN_FAILURE_NAMESPACE, ip, LOCKOUT_MS);
-    return;
+  try {
+    if (failed) {
+      await incrementBucket(LOGIN_FAILURE_NAMESPACE, ip, LOCKOUT_MS);
+      return;
+    }
+
+    await clearBucket(LOGIN_FAILURE_NAMESPACE, ip);
+  } catch (error) {
+    console.warn("[LOGIN_FAILURE_RECORD_ERROR]", { ip, failed, error });
+  }
+}
+
+function normalizeAuthorizeError(error: unknown) {
+  if (error instanceof Error) {
+    if (
+      error.message === INVALID_CREDENTIALS_ERROR ||
+      error.message === "Izin akses gagal: Identitas login belum lengkap." ||
+      error.message.startsWith("Akun dikunci sementara")
+    ) {
+      return error.message;
+    }
   }
 
-  await clearBucket(LOGIN_FAILURE_NAMESPACE, ip);
+  return LOGIN_TEMPORARY_ERROR;
+}
+
+async function findActiveUser(username: string) {
+  try {
+    return await prisma.user.findUnique({
+      where: { username },
+    });
+  } catch (error) {
+    console.error("[LOGIN_USER_LOOKUP_ERROR]", { username, error });
+    throw new Error(LOGIN_TEMPORARY_ERROR);
+  }
+}
+
+async function comparePassword(password: string, hashedPassword: string) {
+  try {
+    return await bcrypt.compare(password, hashedPassword);
+  } catch (error) {
+    console.error("[LOGIN_PASSWORD_COMPARE_ERROR]", error);
+    throw new Error(LOGIN_TEMPORARY_ERROR);
+  }
 }
 
 export const authOptions: NextAuthOptions = {
@@ -54,20 +102,18 @@ export const authOptions: NextAuthOptions = {
         try {
           await checkFailureLimit(ip);
 
-          const user = await prisma.user.findUnique({
-            where: { username: credentials.username },
-          });
+          const user = await findActiveUser(credentials.username);
 
-          if (!user || !user.password) {
+          if (!user || !user.password || user.isDeleted) {
             await recordFailure(ip, true);
-            throw new Error("Identitas ditolak: Akun tidak ditemukan.");
+            throw new Error(INVALID_CREDENTIALS_ERROR);
           }
 
-          const isPasswordCorrect = await bcrypt.compare(credentials.password, user.password);
+          const isPasswordCorrect = await comparePassword(credentials.password, user.password);
 
           if (!isPasswordCorrect) {
             await recordFailure(ip, true);
-            throw new Error("Identitas ditolak: Sandi tidak cocok.");
+            throw new Error(INVALID_CREDENTIALS_ERROR);
           }
 
           await recordFailure(ip, false);
@@ -81,8 +127,7 @@ export const authOptions: NextAuthOptions = {
             mustChangePassword: user.mustChangePassword,
           };
         } catch (error) {
-          const msg = error instanceof Error ? error.message : "Terjadi kesalahan saat verifikasi.";
-          throw new Error(msg);
+          throw new Error(normalizeAuthorizeError(error));
         }
       },
     }),

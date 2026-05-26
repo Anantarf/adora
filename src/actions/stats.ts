@@ -37,32 +37,57 @@ const safeParseMetrics = (json: unknown): MetricsJson => {
   return { dribble: { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 }, passing: { chestPass: 0, bouncePass: 0, overheadPass: 0 }, layUp: 0, shooting: 0 };
 };
 
+const attendanceSubmitSchema = z.object({
+  date: z.string().trim().min(1),
+  note: z.string().max(500).optional(),
+  eventId: z.string().trim().min(1),
+  playerStatuses: z.array(z.object({
+    playerId: z.string().trim().min(1),
+    status: z.enum(["HADIR", "IZIN", "SAKIT", "ALPA"]),
+  })).min(1),
+});
+
+const statisticSubmitSchema = z.object({
+  playerId: z.string().trim().min(1),
+  periodId: z.string().trim().min(1),
+  metrics: metricsSchema,
+  status: z.enum(["Draft", "Published"]),
+});
+
 export async function submitAttendanceAction(data: { date: string; playerStatuses: { playerId: string; status: AttendanceStatus }[]; note?: string; eventId: string }) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  if (!data.playerStatuses || data.playerStatuses.length === 0) {
-    throw new Error("Minimal ada 1 pemain untuk didaftarkan kehadirannya.");
+  const parsedData = attendanceSubmitSchema.safeParse(data);
+  if (!parsedData.success) {
+    throw new Error("Payload presensi tidak valid. Periksa tanggal, agenda, dan data pemain.");
   }
 
-  const dedupedStatuses = Array.from(new Map(data.playerStatuses.filter((ps) => ps.playerId).map((ps) => [ps.playerId, ps.status] as const)).entries()).map(([playerId, status]) => ({ playerId, status }));
+  const payload = parsedData.data;
+
+  const dedupedStatuses = Array.from(new Map(payload.playerStatuses.map((ps) => [ps.playerId, ps.status] as const)).entries()).map(([playerId, status]) => ({ playerId, status }));
 
   if (dedupedStatuses.length === 0) {
     throw new Error("Data pemain untuk presensi tidak valid.");
   }
 
-  if (!data.eventId.trim()) {
-    throw new Error("Agenda tidak valid untuk submit presensi.");
-  }
-
-  const dateObj = toJakartaDate(data.date);
+  const dateObj = toJakartaDate(payload.date);
 
   await withSerializableTransaction(async (tx) => {
     const playerIds = dedupedStatuses.map((ps) => ps.playerId);
-    const lockKeys = [...playerIds].sort().map((playerId) => `attendance:${data.date}:${playerId}`);
+    const lockKeys = [...playerIds].sort().map((playerId) => `attendance:${payload.date}:${playerId}`);
 
     for (const lockKey of lockKeys) {
       await acquireAdvisoryLock(tx, lockKey);
+    }
+
+    const event = await tx.event.findUnique({
+      where: { id: payload.eventId },
+      select: { id: true },
+    });
+
+    if (!event) {
+      throw new Error("Agenda untuk presensi tidak ditemukan atau sudah dihapus.");
     }
 
     const existingPlayers = await tx.player.findMany({
@@ -94,12 +119,12 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
     for (const ps of dedupedStatuses) {
       await tx.attendance.upsert({
         where: { playerId_date: { playerId: ps.playerId, date: dateObj } },
-        update: { status: ps.status, note: data.note, eventId: data.eventId },
-        create: { playerId: ps.playerId, date: dateObj, status: ps.status, note: data.note, eventId: data.eventId },
+        update: { status: ps.status, note: payload.note, eventId: payload.eventId },
+        create: { playerId: ps.playerId, date: dateObj, status: ps.status, note: payload.note, eventId: payload.eventId },
       });
     }
 
-    await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${data.date}, Count: ${dedupedStatuses.length}`, userId);
+    await createAuditLog(tx, "SUBMIT_ATTENDANCE", "attendance_batch", `Date: ${payload.date}, Count: ${dedupedStatuses.length}`, userId);
   });
 
   revalidatePath("/dashboard/attendances");
@@ -109,24 +134,37 @@ export async function submitAttendanceAction(data: { date: string; playerStatuse
 export async function submitStatisticAction(data: { playerId: string; periodId: string; metrics: MetricsJson; status: "Draft" | "Published" }) {
   const session = await requireAdmin();
   const userId = session.user.id as string | undefined;
+  const parsedData = statisticSubmitSchema.safeParse(data);
+
+  if (!parsedData.success) {
+    throw new Error("Payload nilai tidak valid. Periksa pemain, periode, dan nilai yang dikirim.");
+  }
+
+  const payload = parsedData.data;
 
   const stat = await withSerializableTransaction(async (tx) => {
-    await acquireAdvisoryLock(tx, `statistic:${data.playerId}:${data.periodId}`);
+    await acquireAdvisoryLock(tx, `statistic:${payload.playerId}:${payload.periodId}`);
 
-    const period = await tx.evaluationPeriod.findUnique({ where: { id: data.periodId } });
+    const player = await tx.player.findUnique({
+      where: { id: payload.playerId },
+      select: { id: true, isDeleted: true },
+    });
+    if (!player || player.isDeleted) throw new Error("Pemain untuk input nilai tidak ditemukan.");
+
+    const period = await tx.evaluationPeriod.findUnique({ where: { id: payload.periodId } });
     if (!period) throw new Error("Periode evaluasi tidak ditemukan.");
     if (!period.isActive) throw new Error("Akses Ditolak: Periode evaluasi ini sudah dikunci/ditutup. Perubahan nilai tidak lagi diizinkan.");
 
     const existing = await tx.statistic.findUnique({
-      where: { playerId_periodId: { playerId: data.playerId, periodId: data.periodId } },
+      where: { playerId_periodId: { playerId: payload.playerId, periodId: payload.periodId } },
     });
 
     if (existing) {
       const updated = await tx.statistic.update({
         where: { id: existing.id },
         data: {
-          metricsJson: data.metrics,
-          status: data.status,
+          metricsJson: payload.metrics,
+          status: payload.status,
         },
       });
 
@@ -136,11 +174,11 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
 
     const created = await tx.statistic.create({
       data: {
-        playerId: data.playerId,
-        periodId: data.periodId,
+        playerId: payload.playerId,
+        periodId: payload.periodId,
         date: period.startDate,
-        metricsJson: data.metrics,
-        status: data.status,
+        metricsJson: payload.metrics,
+        status: payload.status,
       },
     });
 
@@ -190,6 +228,9 @@ export async function getStatHistoryAction(statisticId: string) {
 export async function getPlayerStatsAction(playerId: string) {
   const session = await requireAuth();
   const { role: userRole, id: userId } = session.user;
+  if (userRole !== "PARENT" && userRole !== "ADMIN") {
+    throw new Error("Akses ke evaluasi pemain tidak diizinkan untuk role ini.");
+  }
 
   if (userRole === "PARENT") {
     const parentOwnsChild = await prisma.player.findFirst({

@@ -9,6 +9,7 @@ const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 const RATE_LIMIT = 30;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const UPLOAD_RATE_LIMIT_NAMESPACE = "upload-api";
+const STORAGE_TIMEOUT_MS = 15_000;
 
 const ALLOWED_TYPES = new Map<string, string>([
   [".png", "image/png"],
@@ -17,14 +18,19 @@ const ALLOWED_TYPES = new Map<string, string>([
   [".pdf", "application/pdf"],
 ]);
 
-const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabase = createClient(
-  supabaseUrl,
-  process.env.SUPABASE_SERVICE_ROLE_KEY || "",
-);
-
 function getClientIp(req: NextRequest): string {
   return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
+}
+
+function getSupabaseClient() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error("UPLOAD_STORAGE_NOT_CONFIGURED");
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey);
 }
 
 function resolveUploadName(assetKey: FormDataEntryValue | null, ext: string): string {
@@ -33,6 +39,23 @@ function resolveUploadName(assetKey: FormDataEntryValue | null, ext: string): st
   }
 
   return `upload_${crypto.randomUUID()}${ext}`;
+}
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutCode: string) {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error(timeoutCode)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -86,11 +109,16 @@ export async function POST(req: NextRequest) {
     }
 
     const uniqueName = resolveUploadName(formData.get("assetKey"), ext);
-    const { error } = await supabase.storage.from("uploads").upload(uniqueName, buffer, {
-      contentType: file.type || expectedMime,
-      cacheControl: "3600",
-      upsert: true,
-    });
+    const supabase = getSupabaseClient();
+    const { error } = await withTimeout(
+      supabase.storage.from("uploads").upload(uniqueName, buffer, {
+        contentType: file.type || expectedMime,
+        cacheControl: "3600",
+        upsert: true,
+      }),
+      STORAGE_TIMEOUT_MS,
+      "UPLOAD_STORAGE_TIMEOUT",
+    );
 
     if (error) {
       console.error("Supabase storage error:", error);
@@ -101,6 +129,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ url: publicUrlData.publicUrl });
   } catch (error) {
     console.error("Upload error:", error);
+
+    if (error instanceof Error) {
+      if (error.message === "UPLOAD_STORAGE_NOT_CONFIGURED") {
+        return NextResponse.json({ error: "Storage upload belum dikonfigurasi di server." }, { status: 503 });
+      }
+
+      if (error.message === "UPLOAD_STORAGE_TIMEOUT") {
+        return NextResponse.json({ error: "Storage upload sedang lambat atau tidak merespons. Coba lagi sebentar lagi." }, { status: 503 });
+      }
+    }
+
     return NextResponse.json({ error: "Unggahan gagal. Coba lagi atau hubungi administrator." }, { status: 500 });
   }
 }

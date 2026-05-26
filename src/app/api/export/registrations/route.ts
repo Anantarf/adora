@@ -22,17 +22,23 @@ import {
   idLocale,
 } from "@/lib/export/registrations-report";
 
+const ALLOWED_EXPORT_FILTERS = new Set(["all", "daily", "monthly"]);
+
 export async function GET(request: Request) {
   try {
     const { default: ExcelJS } = await import("exceljs");
 
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
-      return new NextResponse("Unauthorized", { status: 401 });
+      return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
     }
 
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter") || "all";
+    if (!ALLOWED_EXPORT_FILTERS.has(filter)) {
+      return NextResponse.json({ error: "Filter export tidak valid." }, { status: 400 });
+    }
+
     const whereClause = buildRegistrationWhereClause(filter);
 
     const totalRegistrations = await prisma.registration.count({ where: whereClause });
@@ -185,6 +191,6 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     console.error("Export registrations error:", error);
-    return new NextResponse("Internal Server Error", { status: 500 });
+    return NextResponse.json({ error: "Export data pendaftar gagal. Coba lagi sebentar lagi." }, { status: 500 });
   }
 }

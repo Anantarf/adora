@@ -1,10 +1,11 @@
 "use client";
 import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { getPlayersAction, getPlayerDetailAction, addPlayerAction, updatePlayerAction, deletePlayerAction, addBatchPlayersAction, getAvailablePlayersAction, linkPlayerAction, unlinkPlayerAction } from "@/actions/players";
+import { getPlayersAction, getPlayersPageAction, getPlayerDetailAction, addPlayerAction, updatePlayerAction, deletePlayerAction, addBatchPlayersAction, getAvailablePlayersAction, linkPlayerAction, unlinkPlayerAction } from "@/actions/players";
 import { QUERY_KEYS } from "@/lib/constants";
 
 type PlayersList = Awaited<ReturnType<typeof getPlayersAction>>;
+type PlayersPage = Awaited<ReturnType<typeof getPlayersPageAction>>;
 type PlayerDetail = Awaited<ReturnType<typeof getPlayerDetailAction>>;
 type AddPlayerInput = Parameters<typeof addPlayerAction>[0];
 type UpdatePlayerInput = Parameters<typeof updatePlayerAction>[1];
@@ -21,6 +22,21 @@ export const usePlayers = (groupId?: string, searchQuery?: string, enabled = tru
   return useQuery<PlayersList>({
     queryKey: [...QUERY_KEYS.PLAYERS(groupId), searchQuery],
     queryFn: () => getPlayersAction(groupId, searchQuery),
+    staleTime: 1000 * 60 * 5,
+    enabled,
+  });
+};
+
+export const usePlayersPage = (
+  groupId?: string,
+  searchQuery?: string,
+  page = 1,
+  pageSize = 9,
+  enabled = true,
+) => {
+  return useQuery<PlayersPage>({
+    queryKey: [...QUERY_KEYS.PLAYERS(groupId), searchQuery, page, pageSize],
+    queryFn: () => getPlayersPageAction({ groupId, searchQuery, page, pageSize }),
     staleTime: 1000 * 60 * 5,
     enabled,
   });

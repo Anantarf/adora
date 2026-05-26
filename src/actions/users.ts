@@ -6,13 +6,40 @@ import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+
+const DEFAULT_USER_PAGE_SIZE = 10;
+const MAX_USER_PAGE_SIZE = 50;
+
+const userListArgsSchema = z.object({
+  role: z.enum(["PARENT", "ADMIN"]).default("PARENT"),
+  searchQuery: z.string().trim().optional(),
+  page: z.number().int().min(1).optional(),
+  pageSize: z.number().int().min(1).max(MAX_USER_PAGE_SIZE).optional(),
+});
+
+function buildUserListWhere(role: "PARENT" | "ADMIN", searchQuery?: string) {
+  return {
+    role,
+    isDeleted: false,
+    ...(searchQuery
+      ? {
+          OR: [
+            { name: { contains: searchQuery } },
+            { username: { contains: searchQuery } },
+            { email: { contains: searchQuery } },
+          ],
+        }
+      : {}),
+  };
+}
 
 // 1. List users (Admin only) - Focused on PARENT role by default
 export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
   await requireAdmin();
 
   const users = await prisma.user.findMany({
-    where: { role, isDeleted: false },
+    where: buildUserListWhere(role),
     select: {
       id: true,
       name: true,
@@ -33,6 +60,55 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
     if (b.username === "superadmin") return 1;
     return 0;
   });
+}
+
+export async function getUsersPageAction(input?: {
+  role?: "PARENT" | "ADMIN";
+  searchQuery?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+
+  const parsed = userListArgsSchema.parse(input ?? {});
+  const requestedPage = parsed.page ?? 1;
+  const pageSize = parsed.pageSize ?? DEFAULT_USER_PAGE_SIZE;
+  const where = buildUserListWhere(parsed.role, parsed.searchQuery);
+  const total = await prisma.user.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const skip = (page - 1) * pageSize;
+  const items = await prisma.user.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      username: true,
+      email: true,
+      role: true,
+      image: true,
+      _count: {
+        select: { player: { where: { isDeleted: false } } },
+      },
+    },
+    orderBy: [{ username: "asc" }],
+    skip,
+    take: pageSize,
+  });
+
+  const sortedItems = [...items].sort((a, b) => {
+    if (a.username === "superadmin") return -1;
+    if (b.username === "superadmin") return 1;
+    return 0;
+  });
+
+  return {
+    items: sortedItems,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
 }
 
 // 2. Create New User Account
@@ -86,6 +162,12 @@ export async function updateUserAction(
   const userId = session.user.id ?? null;
 
   const updated = await prisma.$transaction(async (tx) => {
+    const targetUser = await tx.user.findFirst({
+      where: { id, isDeleted: false },
+      select: { id: true, username: true, name: true, email: true, role: true },
+    });
+    if (!targetUser) throw new Error("Akun yang ingin diperbarui tidak ditemukan atau sudah tidak aktif.");
+
     if (data.username) {
       const usernameConflict = await tx.user.findFirst({ where: { username: data.username, id: { not: id } } });
       if (usernameConflict) throw new Error("Username sudah digunakan oleh akun lain.");
@@ -95,7 +177,7 @@ export async function updateUserAction(
       if (emailConflict) throw new Error("Email sudah terdaftar pada akun lain.");
     }
 
-    const before = await tx.user.findUnique({ where: { id }, select: { username: true, name: true, email: true } });
+    const before = { username: targetUser.username, name: targetUser.name, email: targetUser.email };
     const res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
     await createAuditLog(tx, "UPDATE", "user", id, userId, {
       before,
@@ -120,8 +202,13 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   }
   const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
-  const target = await prisma.user.findUnique({ where: { id }, select: { username: true } });
   await prisma.$transaction(async (tx) => {
+    const target = await tx.user.findFirst({
+      where: { id, isDeleted: false },
+      select: { username: true },
+    });
+    if (!target) throw new Error("Akun yang ingin direset tidak ditemukan atau sudah tidak aktif.");
+
     await tx.user.update({
       where: { id },
       data: { password: hashedPassword, mustChangePassword: true }, // Flag to force password change
@@ -147,16 +234,21 @@ export async function deleteUserAction(id: string) {
   }
 
   await prisma.$transaction(async (tx) => {
+    const activeTargetUser = await tx.user.findFirst({
+      where: { id, isDeleted: false },
+      select: { username: true, role: true },
+    });
+    if (!activeTargetUser) throw new Error("Akun yang ingin dihapus tidak ditemukan atau sudah tidak aktif.");
+
     const playerCount = await tx.player.count({
       where: { parentId: id, isDeleted: false },
     });
     if (playerCount > 0) {
       throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
     }
-    const target = await tx.user.findUnique({ where: { id }, select: { username: true, role: true } });
     await createAuditLog(tx, "DELETE", "user", id, userId, {
-      username: target?.username,
-      role: target?.role,
+      username: activeTargetUser.username,
+      role: activeTargetUser.role,
     });
     await tx.user.update({ where: { id }, data: { isDeleted: true } });
   });
@@ -181,6 +273,12 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
   const userId = session.user.id ?? null;
 
   const result = await prisma.$transaction(async (tx) => {
+    const currentUser = await tx.user.findFirst({
+      where: { id: userId!, isDeleted: false },
+      select: { id: true },
+    });
+    if (!currentUser) throw new Error("Akun Anda tidak lagi aktif.");
+
     if (data.email) {
       const emailConflict = await tx.user.findFirst({ where: { email: data.email, id: { not: userId! } } });
       if (emailConflict) throw new Error("Email tersebut sudah digunakan oleh akun lain.");
@@ -217,6 +315,12 @@ export async function changeForcedPasswordAction(newPassword: string) {
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
   await prisma.$transaction(async (tx) => {
+    const currentUser = await tx.user.findFirst({
+      where: { id: userId, isDeleted: false },
+      select: { id: true },
+    });
+    if (!currentUser) throw new Error("Akun Anda tidak lagi aktif.");
+
     await tx.user.update({
       where: { id: userId },
       data: { password: hashedPassword, mustChangePassword: false },

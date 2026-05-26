@@ -2,10 +2,14 @@
 
 import { prisma } from "@/lib/prisma";
 import { requireAuth, requireAdmin } from "@/lib/server-auth";
+import { ensureOwnedPlayer } from "@/lib/domain-guards";
 
 export async function getFamilyPlayersAction() {
   const session = await requireAuth();
   const userId = session.user.id;
+  if (session.user.role !== "PARENT") {
+    throw new Error("Akses hanya tersedia untuk akun orang tua.");
+  }
   if (!userId) throw new Error("ID pengguna tidak ditemukan di sesi.");
 
   return await prisma.player.findMany({
@@ -28,14 +32,14 @@ export async function getFamilyPlayersAction() {
 export async function getPlayerAttendanceAction(playerId: string) {
   const session = await requireAuth();
   const userId = session.user.id;
+  if (session.user.role !== "PARENT") {
+    throw new Error("Akses hanya tersedia untuk akun orang tua.");
+  }
   if (!userId) throw new Error("ID pengguna tidak ditemukan di sesi.");
 
-  // Verifikasi pemain ini memang milik orang tua yang login
-  const player = await prisma.player.findFirst({
-    where: { id: playerId, parentId: userId, isDeleted: false },
-    select: { id: true },
+  await prisma.$transaction(async (tx) => {
+    await ensureOwnedPlayer(tx, playerId, userId);
   });
-  if (!player) throw new Error("Pemain tidak ditemukan atau bukan milik akun ini.");
 
   return await prisma.attendance.findMany({
     where: { playerId },

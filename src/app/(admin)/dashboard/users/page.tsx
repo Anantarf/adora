@@ -1,9 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Users, Loader2 } from "lucide-react";
-import { useUsers, useDeleteUser, useResetPassword } from "@/hooks/use-users";
+import { useUsersPage, useDeleteUser, useResetPassword } from "@/hooks/use-users";
 import { UserAccountActionDialogs, type UserDialogState } from "@/components/features/users/UserAccountActionDialogs";
 import { UserAccountCard } from "@/components/features/users/UserAccountCard";
 import { UsersManagementHeader } from "@/components/features/users/UsersManagementHeader";
@@ -18,25 +18,16 @@ export default function UsersManagementPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const { data: users, isLoading } = useUsers(activeRole);
+  const normalizedSearch = searchTerm.trim();
+  const { data: usersPage, isLoading } = useUsersPage(activeRole, normalizedSearch, currentPage, ITEMS_PER_PAGE);
   
   const { mutateAsync: deleteUser } = useDeleteUser();
   const { mutateAsync: resetPassword } = useResetPassword();
 
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-
-  const filteredUsers = useMemo(() => {
-    if (!users) return [];
-    if (!normalizedSearch) return users;
-
-    return users.filter((user) => user.name?.toLowerCase().includes(normalizedSearch) || (user.username || "").toLowerCase().includes(normalizedSearch) || user.email?.toLowerCase().includes(normalizedSearch));
-  }, [users, normalizedSearch]);
-
-  const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-  const safeCurrentPage = totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
-  const paginatedUsers = useMemo(() => {
-    return filteredUsers.slice((safeCurrentPage - 1) * ITEMS_PER_PAGE, safeCurrentPage * ITEMS_PER_PAGE);
-  }, [filteredUsers, safeCurrentPage]);
+  const paginatedUsers = usersPage?.items ?? [];
+  const currentServerPage = usersPage?.page ?? currentPage;
+  const totalPages = usersPage?.totalPages ?? 1;
+  const totalAccounts = usersPage?.total ?? 0;
 
   const handleSearchTermChange = (term: string) => {
     setSearchTerm(term);
@@ -48,7 +39,6 @@ export default function UsersManagementPage() {
     setCurrentPage(1);
   };
 
-  const hasUsers = (users?.length ?? 0) > 0;
   const isSearchActive = normalizedSearch.length > 0;
   const isParent = activeRole === "PARENT";
 
@@ -72,7 +62,7 @@ export default function UsersManagementPage() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
-      <UsersManagementHeader searchTerm={searchTerm} onSearchTermChange={handleSearchTermChange} totalAccounts={filteredUsers.length} role={activeRole} onRoleChange={handleRoleChange} />
+      <UsersManagementHeader searchTerm={searchTerm} onSearchTermChange={handleSearchTermChange} totalAccounts={totalAccounts} role={activeRole} onRoleChange={handleRoleChange} />
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
@@ -80,12 +70,12 @@ export default function UsersManagementPage() {
             <Loader2 className="size-8 animate-spin text-primary" />
             <p className="text-micro text-muted-foreground animate-pulse">Memuat Data Akun...</p>
           </div>
-        ) : filteredUsers.length === 0 ? (
+        ) : totalAccounts === 0 ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
             <Users className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-medium text-muted-foreground">{hasUsers && isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}</p>
+            <p className="text-sm font-medium text-muted-foreground">{isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}</p>
             <p className="text-xs text-muted-foreground/75 text-center">
-              {hasUsers && isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
+              {isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
             </p>
           </div>
         ) : (
@@ -95,12 +85,12 @@ export default function UsersManagementPage() {
         )}
       </div>
 
-      {!isLoading && totalPages > 1 && <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+      {!isLoading && totalPages > 1 && <Pagination currentPage={currentServerPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
       <LinkedPlayersModal
         parentId={linkedPlayersParentId}
-        parentName={(linkedPlayersParentId ? filteredUsers.find((u) => u.id === linkedPlayersParentId)?.name || filteredUsers.find((u) => u.id === linkedPlayersParentId)?.username : undefined) ?? undefined}
+        parentName={(linkedPlayersParentId ? paginatedUsers.find((u) => u.id === linkedPlayersParentId)?.name || paginatedUsers.find((u) => u.id === linkedPlayersParentId)?.username : undefined) ?? undefined}
         onOpenChange={(open) => {
           if (!open) setLinkedPlayersParentId(null);
         }}

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Edit2, Trash2, Users, FolderPlus } from "lucide-react";
 import * as React from "react";
-import { usePlayers } from "@/hooks/use-players";
+import { usePlayersPage } from "@/hooks/use-players";
 import { type PlayerSummary } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
 import { useState, useMemo } from "react";
@@ -39,14 +39,19 @@ export default function PlayersPage() {
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
   
   const effectiveGroupId = selectedGroupId || (groups && groups.length > 0 ? groups[0].id : null);
-  const { data: players, isLoading: isPlayersLoading } = usePlayers(effectiveGroupId ?? "", debouncedSearch, !!effectiveGroupId);
+  const { data: playersPage, isLoading: isPlayersLoading } = usePlayersPage(
+    effectiveGroupId ?? "",
+    debouncedSearch,
+    currentPage,
+    ITEMS_PER_PAGE,
+    !!effectiveGroupId,
+  );
 
   const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === effectiveGroupId), [groups, effectiveGroupId]);
-  const filteredPlayers = useMemo(() => players || [], [players]);
-  const totalPages = Math.ceil(filteredPlayers.length / ITEMS_PER_PAGE);
-  const paginatedPlayers = useMemo(() => {
-    return filteredPlayers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-  }, [filteredPlayers, currentPage]);
+  const paginatedPlayers = playersPage?.items ?? [];
+  const currentServerPage = playersPage?.page ?? currentPage;
+  const totalPages = playersPage?.totalPages ?? 1;
+  const filteredPlayerCount = playersPage?.total ?? 0;
 
   const totalPlayers = useMemo(() => groups?.reduce((sum: number, g: Group) => sum + (g._count?.player || 0), 0) ?? 0, [groups]);
 
@@ -179,7 +184,7 @@ export default function PlayersPage() {
               </div>
             )}
 
-            {filteredPlayers.length === 0 ? (
+            {filteredPlayerCount === 0 ? (
               <div className="bg-card border border-dashed border-border/50 rounded-lg p-10 text-center flex flex-col items-center gap-3">
                 <Users className="size-8 text-muted-foreground/30" />
                 <p className="text-sm font-medium text-muted-foreground">{searchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}</p>
@@ -201,7 +206,7 @@ export default function PlayersPage() {
                   ))}
                 </div>
 
-                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} className="mt-6" />
+                <Pagination currentPage={currentServerPage} totalPages={totalPages} onPageChange={setCurrentPage} className="mt-6" />
               </>
             )}
           </motion.div>

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
+import { ensureActiveGroup, ensureActivePlayer, ensureOwnedPlayer } from "@/lib/domain-guards";
 // ─── Types ───────────────────────────────────────────
 export type CertificateRecord = {
   id: string;
@@ -45,6 +46,13 @@ export async function addCertificateAction(data: { title: string; fileUrl: strin
   }
 
   const cert = await prisma.$transaction(async (tx) => {
+    if (data.playerId) {
+      await ensureActivePlayer(tx, data.playerId);
+    }
+    if (data.groupId) {
+      await ensureActiveGroup(tx, data.groupId);
+    }
+
     const newCert = await tx.certificate.create({
       data: {
         title: data.title,
@@ -83,15 +91,14 @@ export async function getPlayerCertificatesAction(playerId: string) {
   const session = await requireAuth();
   const { role: userRole, id: userId } = session.user;
 
-  const player = await prisma.player.findFirst({
-    where: { id: playerId, isDeleted: false },
-  });
-
-  if (!player) return [];
-
-  // IDOR Protection: Parent can only view their own child's certificates
-  if (userRole === "PARENT" && player.parentId !== userId) {
-    throw new Error("Akses Terlarang: Anda tidak diizinkan melihat sertifikat anak dari keluarga lain.");
+  if (userRole === "PARENT") {
+    await prisma.$transaction(async (tx) => {
+      await ensureOwnedPlayer(tx, playerId, userId!);
+    });
+  } else {
+    await prisma.$transaction(async (tx) => {
+      await ensureActivePlayer(tx, playerId);
+    });
   }
 
   return await prisma.certificate.findMany({

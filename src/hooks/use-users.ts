@@ -1,16 +1,30 @@
 "use client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getUsersAction, createUserAction, updateUserAction, resetPasswordAction, deleteUserAction, updateSelfAction, getParentUsersAction } from "@/actions/users";
+import { getUsersAction, getUsersPageAction, createUserAction, updateUserAction, resetPasswordAction, deleteUserAction, updateSelfAction, getParentUsersAction } from "@/actions/users";
 import { QUERY_KEYS } from "@/lib/constants";
 import { toast } from "sonner";
 
 type UsersList = Awaited<ReturnType<typeof getUsersAction>>;
+type UsersPage = Awaited<ReturnType<typeof getUsersPageAction>>;
 
 
 export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
   return useQuery<UsersList>({
     queryKey: QUERY_KEYS.USERS(role),
     queryFn: () => getUsersAction(role),
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useUsersPage = (
+  role: "PARENT" | "ADMIN" = "PARENT",
+  searchQuery?: string,
+  page = 1,
+  pageSize = 10,
+) => {
+  return useQuery<UsersPage>({
+    queryKey: [...QUERY_KEYS.USERS(role), searchQuery, page, pageSize],
+    queryFn: () => getUsersPageAction({ role, searchQuery, page, pageSize }),
     staleTime: 1000 * 60 * 5,
   });
 };

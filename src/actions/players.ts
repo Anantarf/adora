@@ -7,6 +7,7 @@ import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import { z } from "zod";
 import { withSerializableTransaction } from "@/lib/db-concurrency";
+import { ensureActiveGroup, ensureActiveParentUser, ensureActivePlayer } from "@/lib/domain-guards";
 
 const batchPlayerSchema = z.object({
   name: z.string().trim().min(2),
@@ -30,6 +31,8 @@ const batchPlayerSchema = z.object({
 const batchPlayersInputSchema = z.array(batchPlayerSchema).min(1).max(1000);
 
 const BATCH_CHUNK_SIZE = 200;
+const DEFAULT_PLAYER_PAGE_SIZE = 9;
+const MAX_PLAYER_PAGE_SIZE = 50;
 
 const OPTIONAL_PLAYER_FIELDS = [
   "placeOfBirth", "gender", "weight", "height", "schoolOrigin",
@@ -38,17 +41,28 @@ const OPTIONAL_PLAYER_FIELDS = [
 ] as const;
 type OptionalPlayerField = (typeof OPTIONAL_PLAYER_FIELDS)[number];
 
+const playerListArgsSchema = z.object({
+  groupId: z.string().trim().optional(),
+  searchQuery: z.string().trim().optional(),
+  page: z.number().int().min(1).optional(),
+  pageSize: z.number().int().min(1).max(MAX_PLAYER_PAGE_SIZE).optional(),
+});
+
+function buildPlayerListWhere(groupId?: string, searchQuery?: string) {
+  return {
+    isDeleted: false,
+    ...(groupId && groupId !== "all" ? { groupId } : {}),
+    ...(searchQuery
+      ? { OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }] }
+      : {}),
+  };
+}
+
 // 1. Ambil semua pemain (Read)
 export async function getPlayersAction(groupId?: string, searchQuery?: string) {
   await requireAdmin();
   return await prisma.player.findMany({
-    where: {
-      isDeleted: false,
-      ...(groupId && groupId !== "all" ? { groupId } : {}),
-      ...(searchQuery
-        ? { OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }] }
-        : {}),
-    },
+    where: buildPlayerListWhere(groupId, searchQuery),
     select: {
       id: true,
       name: true,
@@ -58,6 +72,45 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
     },
     orderBy: { name: "asc" },
   });
+}
+
+export async function getPlayersPageAction(input?: {
+  groupId?: string;
+  searchQuery?: string;
+  page?: number;
+  pageSize?: number;
+}) {
+  await requireAdmin();
+
+  const parsed = playerListArgsSchema.parse(input ?? {});
+  const requestedPage = parsed.page ?? 1;
+  const pageSize = parsed.pageSize ?? DEFAULT_PLAYER_PAGE_SIZE;
+  const where = buildPlayerListWhere(parsed.groupId, parsed.searchQuery);
+  const total = await prisma.player.count({ where });
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(requestedPage, totalPages);
+  const skip = (page - 1) * pageSize;
+  const items = await prisma.player.findMany({
+    where,
+    select: {
+      id: true,
+      name: true,
+      schoolOrigin: true,
+      groupId: true,
+      group: { select: { id: true, name: true } },
+    },
+    orderBy: { name: "asc" },
+    skip,
+    take: pageSize,
+  });
+
+  return {
+    items,
+    total,
+    page,
+    pageSize,
+    totalPages,
+  };
 }
 
 export async function getPlayerDetailAction(id: string) {
@@ -115,6 +168,11 @@ export async function addPlayerAction(data: {
   const userId = session.user.id ?? null;
 
   const player = await prisma.$transaction(async (tx) => {
+    await ensureActiveGroup(tx, data.groupId);
+    if (data.parentId) {
+      await ensureActiveParentUser(tx, data.parentId);
+    }
+
     const optionalData = Object.fromEntries(
       OPTIONAL_PLAYER_FIELDS.map((k) => [k, (data[k as OptionalPlayerField] as string | undefined) || undefined])
     );
@@ -259,6 +317,14 @@ export async function updatePlayerAction(
   const userId = session.user.id ?? null;
 
   const updated = await prisma.$transaction(async (tx) => {
+    await ensureActivePlayer(tx, id);
+    if (data.groupId) {
+      await ensureActiveGroup(tx, data.groupId);
+    }
+    if (data.parentId) {
+      await ensureActiveParentUser(tx, data.parentId);
+    }
+
     const res = await tx.player.update({
       where: { id },
       data: {
@@ -308,11 +374,11 @@ export async function deletePlayerAction(id: string) {
   const userId = session.user.id ?? null;
 
   await withSerializableTransaction(async (tx) => {
-    const target = await tx.player.findUnique({ where: { id }, select: { name: true, groupId: true } });
+    const target = await ensureActivePlayer(tx, id);
     await tx.player.update({ where: { id }, data: { isDeleted: true } });
     await createAuditLog(tx, "DELETE", "player", id, userId, {
-      name: target?.name,
-      groupId: target?.groupId,
+      name: target.name,
+      groupId: target.groupId,
     });
   });
 
@@ -335,14 +401,15 @@ export async function linkPlayerAction(playerId: string, parentId: string) {
   const userId = session.user.id ?? null;
 
   await withSerializableTransaction(async (tx) => {
-    const target = await tx.player.findUnique({ where: { id: playerId }, select: { name: true, parentId: true } });
+    await ensureActiveParentUser(tx, parentId);
+    const target = await ensureActivePlayer(tx, playerId);
     const linked = await tx.player.updateMany({
       where: { id: playerId, parentId: null, isDeleted: false },
       data: { parentId },
     });
 
     if (linked.count !== 1) {
-      if (target?.parentId) {
+      if (target.parentId) {
         throw new Error("Pemain ini sudah dihubungkan ke akun lain.");
       }
 
@@ -350,7 +417,7 @@ export async function linkPlayerAction(playerId: string, parentId: string) {
     }
 
     await createAuditLog(tx, "UPDATE", "player_link", playerId, userId, {
-      message: `Pemain ${target?.name} dihubungkan ke parentId: ${parentId}`,
+      message: `Pemain ${target.name} dihubungkan ke parentId: ${parentId}`,
     });
   });
 
@@ -364,10 +431,10 @@ export async function unlinkPlayerAction(playerId: string) {
   const userId = session.user.id ?? null;
 
   await withSerializableTransaction(async (tx) => {
-    const target = await tx.player.findUnique({ where: { id: playerId }, select: { name: true } });
+    const target = await ensureActivePlayer(tx, playerId);
     await tx.player.update({ where: { id: playerId }, data: { parentId: null } });
     await createAuditLog(tx, "UPDATE", "player_unlink", playerId, userId, {
-      message: `Pemain ${target?.name} diputuskan hubungannya dari orang tuanya.`,
+      message: `Pemain ${target.name} diputuskan hubungannya dari orang tuanya.`,
     });
   });
 

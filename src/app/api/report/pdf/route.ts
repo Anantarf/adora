@@ -29,6 +29,8 @@ type SessionActor = {
   role?: string;
 };
 
+const ALLOWED_REPORT_ROLES = new Set(["ADMIN", "PARENT"]);
+
 type PlayerReportRecord = NonNullable<Awaited<ReturnType<typeof getPlayerReportRecord>>>;
 type ReportViewModel = {
   attendanceRateLabel: string;
@@ -526,13 +528,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    if (!actor.role || !ALLOWED_REPORT_ROLES.has(actor.role)) {
+      return NextResponse.json({ error: "Tidak diizinkan mengakses laporan ini." }, { status: 403 });
+    }
+
     const { searchParams } = new URL(req.url);
     const playerId = searchParams.get("playerId");
-    if (!playerId) {
+    if (!playerId || !playerId.trim()) {
       return NextResponse.json({ error: "playerId is required" }, { status: 400 });
     }
 
-    const player = await getPlayerReportRecord(playerId);
+    const player = await getPlayerReportRecord(playerId.trim());
     if (!player) {
       return NextResponse.json({ error: "Player not found" }, { status: 404 });
     }

@@ -6,11 +6,27 @@ import { revalidatePath } from "next/cache";
 import { ScheduleEvent } from "@/types/dashboard";
 import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
-import type { event_type } from "@prisma/client";
+import type { Prisma, event_type } from "@prisma/client";
+import { ensureActiveGroup, ensureActiveHomebase } from "@/lib/domain-guards";
 
 function parseEventDate(input: string): Date {
   // Preserve explicit time payloads; fallback to Jakarta midnight for date-only strings.
   return input.includes("T") ? new Date(input) : toJakartaDate(input);
+}
+
+async function validateEventRelations(
+  tx: Omit<Prisma.TransactionClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">,
+  groupIds?: string[],
+  homebaseId?: string,
+) {
+  if (homebaseId) {
+    await ensureActiveHomebase(tx, homebaseId);
+  }
+
+  const uniqueGroupIds = Array.from(new Set((groupIds ?? []).filter(Boolean)));
+  for (const groupId of uniqueGroupIds) {
+    await ensureActiveGroup(tx, groupId);
+  }
 }
 
 export async function getEventsAction() {
@@ -66,6 +82,8 @@ export async function createEventAction(data: { title: string; description?: str
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
+      await validateEventRelations(tx, data.groupIds, data.homebaseId);
+
       const ev = await tx.event.create({
         data: {
           title: data.title,
@@ -103,6 +121,8 @@ export async function updateEventAction(id: string, data: { title: string; descr
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
     await prisma.$transaction(async (tx) => {
+      await validateEventRelations(tx, data.groupIds, data.homebaseId);
+
       await tx.event.update({
         where: { id },
         data: {
