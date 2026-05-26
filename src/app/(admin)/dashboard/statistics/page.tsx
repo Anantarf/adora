@@ -9,7 +9,7 @@ import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
-import type { MetricsJson, Player } from "@/types/dashboard";
+import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
 import { toast } from "sonner";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -62,7 +62,7 @@ const PlayerStatRow = React.memo(
     selectedPeriod,
     settings,
   }: {
-    player: Player;
+    player: PlayerSummary;
     idx: number;
     stat?: {
       id: string;

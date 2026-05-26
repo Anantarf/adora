@@ -51,7 +51,16 @@ export async function getPendingRegistrations() {
   try {
     return await prisma.registration.findMany({
       where: { status: { in: ["PENDING", "REVIEWED"] } },
-      include: { homebase: { select: { name: true } } },
+      select: {
+        id: true,
+        createdAt: true,
+        playerName: true,
+        email: true,
+        phone: true,
+        ageGroup: true,
+        status: true,
+        homebase: { select: { name: true } },
+      },
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {

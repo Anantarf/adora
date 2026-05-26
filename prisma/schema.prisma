@@ -305,6 +305,23 @@ model rateLimitBucket {
   @@map("RateLimitBucket")
 }
 
+model webVitalEvent {
+  id             String   @id @default(cuid())
+  metricId       String?
+  name           String
+  value          Float
+  delta          Float
+  rating         String
+  navigationType String?
+  pathname       String
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt], map: "WebVitalEvent_createdAt_idx")
+  @@index([name, rating], map: "WebVitalEvent_name_rating_idx")
+  @@index([pathname], map: "WebVitalEvent_pathname_idx")
+  @@map("WebVitalEvent")
+}
+
 enum attendance_status {
   HADIR
   IZIN

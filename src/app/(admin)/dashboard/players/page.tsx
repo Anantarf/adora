@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Loader2, Search, Edit2, Trash2, Users, FolderPlus } from "lucide-react";
 import * as React from "react";
 import { usePlayers } from "@/hooks/use-players";
-import { type Player } from "@/types/dashboard";
+import { type PlayerSummary } from "@/types/dashboard";
 import { useGroups, type Group } from "@/hooks/use-groups";
 import { useState, useMemo } from "react";
 import { useDebounce } from "use-debounce";
@@ -23,9 +23,9 @@ type UIState =
   | { type: "add-group" }
   | { type: "edit-group"; payload: Group }
   | { type: "delete-group"; payload: Group }
-  | { type: "view-player"; payload: Player }
-  | { type: "edit-player"; payload: Player }
-  | { type: "delete-player"; payload: Player }
+  | { type: "view-player"; payload: PlayerSummary }
+  | { type: "edit-player"; payload: PlayerSummary }
+  | { type: "delete-player"; payload: Pick<PlayerSummary, "id" | "name"> }
   | null;
 
 export default function PlayersPage() {
@@ -60,7 +60,7 @@ export default function PlayersPage() {
       <AddGroupDialog externalOpen={uiState?.type === "add-group"} onExternalOpenChange={(open) => setUiState(open ? { type: "add-group" } : null)} hideTrigger />
       {uiState?.type === "edit-group" && <EditGroupDialog group={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
       {uiState?.type === "delete-group" && <DeleteGroupConfirm group={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
-      {uiState?.type === "view-player" && <ViewPlayerDialog player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} onDelete={() => setUiState({ type: "delete-player", payload: uiState.payload })} />}
+      {uiState?.type === "view-player" && <ViewPlayerDialog key={uiState.payload.id} playerId={uiState.payload.id} open={true} onOpenChange={(open) => !open && setUiState(null)} onDelete={() => setUiState({ type: "delete-player", payload: { id: uiState.payload.id, name: uiState.payload.name } })} />}
       {uiState?.type === "delete-player" && <DeletePlayerConfirm player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />}
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 border-b border-border/50 pb-6 md:pb-8">
@@ -188,7 +188,7 @@ export default function PlayersPage() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {paginatedPlayers.map((player: Player) => (
+                  {paginatedPlayers.map((player: PlayerSummary) => (
                     <div key={player.id} className="bg-card border border-border/50 p-4 rounded-lg flex items-center hover:bg-muted/50 transition-colors cursor-pointer" onClick={() => setUiState({ type: "view-player", payload: player })}>
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="size-10 rounded-lg bg-muted flex items-center justify-center font-heading text-lg text-foreground/60 shrink-0">{player.name.charAt(0).toUpperCase()}</div>

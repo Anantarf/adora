@@ -49,11 +49,46 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
         ? { OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }] }
         : {}),
     },
-    include: {
+    select: {
+      id: true,
+      name: true,
+      schoolOrigin: true,
+      groupId: true,
       group: { select: { id: true, name: true } },
-      user: { select: { id: true, username: true } },
     },
     orderBy: { name: "asc" },
+  });
+}
+
+export async function getPlayerDetailAction(id: string) {
+  await requireAdmin();
+  return prisma.player.findUnique({
+    where: { id, isDeleted: false },
+    select: {
+      id: true,
+      name: true,
+      placeOfBirth: true,
+      gender: true,
+      weight: true,
+      height: true,
+      schoolOrigin: true,
+      address: true,
+      email: true,
+      phoneNumber: true,
+      medicalHistory: true,
+      parentName: true,
+      parentAddress: true,
+      parentPhoneNumber: true,
+      dateOfBirth: true,
+      groupId: true,
+      parentId: true,
+      group: {
+        select: { id: true, name: true },
+      },
+      user: {
+        select: { id: true, username: true },
+      },
+    },
   });
 }
 

@@ -5,7 +5,7 @@ import { useForm, type Path, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useSubmitStatistic } from "@/hooks/use-statistics";
-import type { Player, MetricsJson } from "@/types/dashboard";
+import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
 import { FLAT_METRIC_DEFS } from "@/lib/metrics";
 import { toast } from "sonner";
 
@@ -83,6 +83,7 @@ function getNestedError(errors: Record<string, unknown>, path: string): string |
 
 // ─── Dialog ───────────────────────────────────────────
 type ExistingStat = { id: string; metrics: MetricsJson; status: "Draft" | "Published" };
+type StatPlayer = Pick<PlayerSummary, "id" | "name" | "group">;
 
 export function AddStatDialog({
   player,
@@ -92,7 +93,7 @@ export function AddStatDialog({
   triggerClassName,
   alwaysShowLabel = false,
 }: {
-  player: Player;
+  player: StatPlayer;
   periodId?: string;
   isPeriodActive?: boolean;
   existingStat?: ExistingStat;

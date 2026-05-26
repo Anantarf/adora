@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { RegistrationActions } from "@/components/features/dashboard/RegistrationActions";
 import { Pagination } from "@/components/ui/pagination";
 import { sanitizePhone } from "@/lib/utils";
+import { toast } from "sonner";
 
 // Minimal type definition based on usage
 type RegistrationStatus = "PENDING" | "REVIEWED" | "COMPLETED";
@@ -40,8 +41,27 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
     return registrations.slice((clampedPage - 1) * ITEMS_PER_PAGE, clampedPage * ITEMS_PER_PAGE);
   }, [registrations, clampedPage]);
 
-  const handleExport = (filter: string) => {
-    window.open(`/api/export/registrations?filter=${filter}`, "_blank");
+  const handleExport = async (filter: string) => {
+    try {
+      const response = await fetch(`/api/export/registrations?filter=${filter}`);
+      if (!response.ok) {
+        const errorBody = (await response.json().catch(() => null)) as { error?: string } | null;
+        throw new Error(errorBody?.error || "Gagal mengekspor data pendaftar.");
+      }
+
+      const blob = await response.blob();
+      const contentDisposition = response.headers.get("Content-Disposition");
+      const fileNameMatch = contentDisposition?.match(/filename="(.+)"/);
+      const fileName = fileNameMatch?.[1] || `Data_Pendaftar_Adora_${filter}.xlsx`;
+      const objectUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = objectUrl;
+      anchor.download = fileName;
+      anchor.click();
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Gagal mengekspor data pendaftar.");
+    }
   };
 
   return (

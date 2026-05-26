@@ -157,16 +157,17 @@ export async function getStatsByPeriodAction(periodId: string) {
 
   const stats = await prisma.statistic.findMany({
     where: { periodId, player: { isDeleted: false } },
-    include: {
+    select: {
+      id: true,
+      status: true,
+      metricsJson: true,
       player: {
         select: {
           id: true,
-          name: true,
           groupId: true,
           group: { select: { id: true, name: true } },
         },
       },
-      period: { select: { id: true, name: true } },
     },
     orderBy: [{ player: { group: { name: "asc" } } }, { player: { name: "asc" } }],
   });

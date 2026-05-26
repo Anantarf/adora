@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { type Player } from "@/types/dashboard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2, Link2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useUpdatePlayer } from "@/hooks/use-players";
+import { usePlayerDetail, useUpdatePlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 
 import { toast } from "sonner";
@@ -15,36 +15,34 @@ import { playerSchema, playerToFormValues, type PlayerFormValues } from "@/lib/v
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
 
 interface ViewPlayerDialogProps {
-  player: Player;
+  playerId: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDelete: () => void;
 }
 
-export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewPlayerDialogProps) {
+export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: ViewPlayerDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
+  const { data: player, isLoading: isPlayerLoading } = usePlayerDetail(playerId, open);
 
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
   const { register, handleSubmit, control, setValue, formState: { errors }, reset } = useForm<PlayerFormValues>({
     resolver: zodResolver(playerSchema),
-    defaultValues: playerToFormValues(player),
+    defaultValues: player ? playerToFormValues(player as Player) : undefined,
   });
 
-  const [prevOpen, setPrevOpen] = useState(open);
-  const [prevPlayerId, setPrevPlayerId] = useState(player.id);
-
-  if (open !== prevOpen || player.id !== prevPlayerId) {
-    setPrevOpen(open);
-    setPrevPlayerId(player.id);
-    if (open) {
-      setIsEditing(false);
-      reset(playerToFormValues(player));
+  useEffect(() => {
+    if (!open || !player) {
+      return;
     }
-  }
+
+    reset(playerToFormValues(player as Player));
+  }, [open, playerId, player, reset]);
 
   const onSubmit = async (data: PlayerFormValues) => {
+    if (!player) return;
     try {
       await updatePlayer({ id: player.id, data: { ...data, parentId: data.parentId || null } });
       toast.success(`Profil ${player.name} berhasil diperbarui!`);
@@ -70,9 +68,9 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
       <DialogContent className="sm:max-w-3xl bg-card border-border/50 transition-all duration-base">
         <DialogHeader className="space-y-2.5">
           <DialogTitle className="text-lg font-heading tracking-wide text-foreground text-left">
-            {isEditing ? "Ubah Profil Pemain" : "Detail Pemain"}
+            {isEditing ? "Ubah Profil Pemain" : isPlayerLoading ? "Memuat Detail Pemain" : "Detail Pemain"}
           </DialogTitle>
-          {!isEditing && (
+          {!isEditing && player && (
             <dl className="rounded-lg border border-border/50 bg-background/40 divide-y divide-border/40">
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
                 <dt className="col-span-4 text-micro text-muted-foreground">Nama</dt>
@@ -89,6 +87,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
         </DialogHeader>
 
         {isEditing ? (
+          player ? (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 pt-1.5">
             <PlayerFormFields
               register={register}
@@ -108,7 +107,7 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
                 className="flex-1 h-10 font-semibold border-border/60"
                 onClick={() => {
                   setIsEditing(false);
-                  reset(playerToFormValues(player));
+                  reset(playerToFormValues(player as Player));
                 }}
               >
                 Batal
@@ -119,8 +118,19 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
               </Button>
             </div>
           </form>
+          ) : (
+            <div className="py-10 flex items-center justify-center text-muted-foreground">
+              <Loader2 className="size-5 animate-spin mr-2" /> Memuat form pemain...
+            </div>
+          )
         ) : (
           <>
+            {!player ? (
+              <div className="py-10 flex items-center justify-center text-muted-foreground">
+                <Loader2 className="size-5 animate-spin mr-2" /> Memuat detail pemain...
+              </div>
+            ) : (
+              <>
             <div className="py-1.5">
               <dl className="rounded-xl border border-border/50 bg-background/50 divide-y divide-border/40">
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
@@ -207,6 +217,8 @@ export function ViewPlayerDialog({ player, open, onOpenChange, onDelete }: ViewP
                 </Button>
               </div>
             </div>
+              </>
+            )}
           </>
         )}
       </DialogContent>

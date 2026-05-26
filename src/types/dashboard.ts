@@ -116,6 +116,17 @@ export interface Player {
   } | null;
 }
 
+export interface PlayerSummary {
+  id: string;
+  name: string;
+  schoolOrigin: string | null;
+  groupId: string | null;
+  group?: {
+    id: string;
+    name: string;
+  } | null;
+}
+
 export interface UserSession {
   user: {
     id: string;

@@ -1,10 +1,11 @@
 "use client";
 import { unwrapAction } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient, type QueryClient } from "@tanstack/react-query";
-import { getPlayersAction, addPlayerAction, updatePlayerAction, deletePlayerAction, addBatchPlayersAction, getAvailablePlayersAction, linkPlayerAction, unlinkPlayerAction } from "@/actions/players";
+import { getPlayersAction, getPlayerDetailAction, addPlayerAction, updatePlayerAction, deletePlayerAction, addBatchPlayersAction, getAvailablePlayersAction, linkPlayerAction, unlinkPlayerAction } from "@/actions/players";
 import { QUERY_KEYS } from "@/lib/constants";
 
 type PlayersList = Awaited<ReturnType<typeof getPlayersAction>>;
+type PlayerDetail = Awaited<ReturnType<typeof getPlayerDetailAction>>;
 type AddPlayerInput = Parameters<typeof addPlayerAction>[0];
 type UpdatePlayerInput = Parameters<typeof updatePlayerAction>[1];
 type DeletePlayerInput = Parameters<typeof deletePlayerAction>[0];
@@ -22,6 +23,15 @@ export const usePlayers = (groupId?: string, searchQuery?: string, enabled = tru
     queryFn: () => getPlayersAction(groupId, searchQuery),
     staleTime: 1000 * 60 * 5,
     enabled,
+  });
+};
+
+export const usePlayerDetail = (playerId: string | null, enabled = true) => {
+  return useQuery<PlayerDetail>({
+    queryKey: ["players", "detail", playerId],
+    queryFn: () => getPlayerDetailAction(playerId!),
+    staleTime: 1000 * 60 * 5,
+    enabled: enabled && !!playerId,
   });
 };
 

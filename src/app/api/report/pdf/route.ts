@@ -16,6 +16,7 @@ const CERTIFICATE_DATE_FORMAT: Intl.DateTimeFormatOptions = {
 };
 const MAX_STATISTICS = 6;
 const MAX_ATTENDANCE = 30;
+const MAX_CERTIFICATES = 12;
 
 type ReportMetricItem = {
   label: string;
@@ -355,9 +356,18 @@ async function getPlayerReportRecord(playerId: string) {
       },
       certificate: {
         orderBy: { uploadedAt: "desc" },
+        take: MAX_CERTIFICATES,
         select: {
           title: true,
           uploadedAt: true,
+        },
+      },
+      _count: {
+        select: {
+          certificate: true,
+          statistic: {
+            where: { status: "Published" },
+          },
         },
       },
     },
@@ -389,8 +399,8 @@ function buildReportViewModel(player: PlayerReportRecord): ReportViewModel {
     overallScoreLabel: overallScore,
     playerName: player.name,
     schoolOrigin: player.schoolOrigin || "-",
-    totalCertificates: player.certificate.length,
-    totalEvaluations: player.statistic.length,
+    totalCertificates: player._count.certificate,
+    totalEvaluations: player._count.statistic,
   };
 }
 

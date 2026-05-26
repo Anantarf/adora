@@ -11,6 +11,7 @@ export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
   return useQuery<UsersList>({
     queryKey: QUERY_KEYS.USERS(role),
     queryFn: () => getUsersAction(role),
+    staleTime: 1000 * 60 * 5,
   });
 };
 

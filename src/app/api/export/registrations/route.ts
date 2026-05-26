@@ -3,17 +3,24 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
-import { id as idLocale } from "date-fns/locale";
-
-const TEMPLATE_FONT = "Poppins";
-const BRAND_PRIMARY_DARK = "FFD84315";
-const BRAND_PRIMARY_SOFT = "FFFFF3E0";
-const BRAND_ORANGE = "FFF4B183";
-const BRAND_ORANGE_SOFT = "FFFFF4E8";
-const BRAND_WHITE = "FFFFFFFF";
-const BRAND_TEXT_DARK = "FF1F2937";
-const BRAND_BORDER = "FFD6D3D1";
-const BRAND_BORDER_SOFT = "FFE7E5E4";
+import {
+  BRAND_BORDER,
+  BRAND_BORDER_SOFT,
+  BRAND_ORANGE,
+  BRAND_ORANGE_SOFT,
+  BRAND_PRIMARY_DARK,
+  BRAND_PRIMARY_SOFT,
+  BRAND_TEXT_DARK,
+  BRAND_WHITE,
+  EXPORT_BATCH_SIZE,
+  MAX_EXPORT_ROWS,
+  TEMPLATE_FONT,
+  buildRegistrationExportFilename,
+  buildRegistrationSubtitle,
+  buildRegistrationWhereClause,
+  formatRegistrationDate,
+  idLocale,
+} from "@/lib/export/registrations-report";
 
 export async function GET(request: Request) {
   try {
@@ -26,35 +33,17 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter") || "all";
+    const whereClause = buildRegistrationWhereClause(filter);
 
-    let whereClause = {};
-    if (filter === "daily") {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      whereClause = {
-        createdAt: {
-          gte: today,
+    const totalRegistrations = await prisma.registration.count({ where: whereClause });
+    if (totalRegistrations > MAX_EXPORT_ROWS) {
+      return NextResponse.json(
+        {
+          error: `Jumlah data terlalu besar untuk diekspor sekaligus. Batasi filter hingga maksimal ${MAX_EXPORT_ROWS} baris.`,
         },
-      };
-    } else if (filter === "monthly") {
-      const today = new Date();
-      const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      whereClause = {
-        createdAt: {
-          gte: firstDayOfMonth,
-        },
-      };
+        { status: 413 },
+      );
     }
-
-    const registrations = await prisma.registration.findMany({
-      where: whereClause,
-      include: {
-        homebase: {
-          select: { name: true },
-        },
-      },
-      orderBy: { createdAt: "desc" },
-    });
 
     const workbook = new ExcelJS.Workbook();
     workbook.creator = "Adora Basketball";
@@ -96,9 +85,7 @@ export async function GET(request: Request) {
     dataSheet.mergeCells("A2:H2");
     const subtitleRow = dataSheet.getRow(2);
     subtitleRow.height = 26;
-    let subtitleText = "Semua Riwayat Pendaftar";
-    if (filter === "daily") subtitleText = "Pendaftar Hari Ini (" + format(new Date(), "dd MMMM yyyy", { locale: idLocale }) + ")";
-    if (filter === "monthly") subtitleText = "Pendaftar Bulan Ini (" + format(new Date(), "MMMM yyyy", { locale: idLocale }) + ")";
+    const subtitleText = buildRegistrationSubtitle(filter);
 
     subtitleRow.getCell(1).value = `Laporan Pendaftaran: ${subtitleText} | Diekstrak pada: ${format(new Date(), "dd MMM yyyy HH:mm", { locale: idLocale })}`;
     subtitleRow.getCell(1).font = { name: TEMPLATE_FONT, size: 10, color: { argb: BRAND_TEXT_DARK } };
@@ -122,20 +109,51 @@ export async function GET(request: Request) {
       };
     });
 
-    registrations.forEach((reg, idx) => {
-      dataSheet.addRow({
-        no: idx + 1,
-        date: format(new Date(reg.createdAt), "dd MMM yyyy, HH:mm", { locale: idLocale }),
-        name: reg.playerName,
-        phone: reg.phone,
-        email: reg.email || "-",
-        ageGroup: reg.ageGroup,
-        homebase: reg.homebase.name,
-        status: reg.status,
-      });
-    });
+    let cursorId: string | undefined;
+    let rowNumber = 0;
 
-    for (let i = 5; i < 5 + registrations.length; i++) {
+    while (true) {
+      const registrations = await prisma.registration.findMany({
+        where: whereClause,
+        orderBy: { id: "asc" },
+        take: EXPORT_BATCH_SIZE,
+        ...(cursorId ? { cursor: { id: cursorId }, skip: 1 } : {}),
+        select: {
+          id: true,
+          createdAt: true,
+          playerName: true,
+          phone: true,
+          email: true,
+          ageGroup: true,
+          status: true,
+          homebase: {
+            select: { name: true },
+          },
+        },
+      });
+
+      if (registrations.length === 0) {
+        break;
+      }
+
+      registrations.forEach((reg) => {
+        rowNumber += 1;
+        dataSheet.addRow({
+          no: rowNumber,
+          date: formatRegistrationDate(reg.createdAt),
+          name: reg.playerName,
+          phone: reg.phone,
+          email: reg.email || "-",
+          ageGroup: reg.ageGroup,
+          homebase: reg.homebase.name,
+          status: reg.status,
+        });
+      });
+
+      cursorId = registrations[registrations.length - 1]?.id;
+    }
+
+    for (let i = 5; i < 5 + rowNumber; i++) {
       const row = dataSheet.getRow(i);
       row.height = 23;
       row.eachCell((cell, colNumber) => {
@@ -156,11 +174,7 @@ export async function GET(request: Request) {
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-
-    let filename = "Data_Pendaftar_Adora";
-    if (filter === "daily") filename += "_Harian";
-    if (filter === "monthly") filename += "_Bulanan";
-    filename += `_${format(new Date(), "yyyy-MM-dd")}.xlsx`;
+    const filename = buildRegistrationExportFilename(filter);
 
     return new NextResponse(buffer, {
       status: 200,

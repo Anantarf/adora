@@ -1,13 +1,15 @@
 "use client";
 
 import { useDeletePlayer } from "@/hooks/use-players";
-import { type Player } from "@/types/dashboard";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Loader2, Trash2, ShieldAlert } from "lucide-react";
 
 interface DeletePlayerConfirmProps {
-  player: Player;
+  player: {
+    id: string;
+    name: string;
+  };
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
