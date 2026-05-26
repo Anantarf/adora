@@ -39,10 +39,10 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
   const rows: { label: string; value: string }[] = [
     { label: "Nama Pemain", value: playerName.toUpperCase() },
     { label: "Kelompok / Kelas", value: groupName.toUpperCase() },
-    { label: "Periode Evaluasi", value: periodName },
+    { label: "Periode Evaluasi", value: periodName.toUpperCase() },
   ];
 
-  if (schoolOrigin) rows.push({ label: "Sekolah Asal", value: schoolOrigin });
+  if (schoolOrigin) rows.push({ label: "Sekolah Asal", value: schoolOrigin.toUpperCase() });
   rows.push({ label: "Tanggal Cetak", value: printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) });
 
   const perCol = Math.ceil(rows.length / 2);
@@ -102,8 +102,10 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       [{ content: "Passing", rowSpan: 3, styles: { valign: "middle", halign: "center", fontStyle: "bold" } }, "Chest Pass", { content: metrics.passing.chestPass, styles: { halign: "center" } }, { content: passTotal, rowSpan: 3, styles: { valign: "middle", halign: "center", fontStyle: "bold", fontSize: 11 } }],
       ["Bounce Pass", { content: metrics.passing.bouncePass, styles: { halign: "center" } }],
       ["Overhead Pass", { content: metrics.passing.overheadPass, styles: { halign: "center" } }],
-      [{ content: "Lay Up", styles: { halign: "center", fontStyle: "bold" } }, "Lay Up", { content: metrics.layUp, styles: { halign: "center" } }, { content: metrics.layUp, styles: { halign: "center", fontStyle: "bold", fontSize: 11 } }],
-      [{ content: "Shooting", styles: { halign: "center", fontStyle: "bold" } }, "Shooting", { content: metrics.shooting, styles: { halign: "center" } }, { content: metrics.shooting, styles: { halign: "center", fontStyle: "bold", fontSize: 11 } }],
+      // Lay Up: category spans both cols (no sub-item distinction)
+      [{ content: "Lay Up", colSpan: 2, styles: { halign: "center", fontStyle: "bold" } }, { content: metrics.layUp, styles: { halign: "center" } }, { content: metrics.layUp, styles: { halign: "center", fontStyle: "bold", fontSize: 11 } }],
+      // Shooting: same
+      [{ content: "Shooting", colSpan: 2, styles: { halign: "center", fontStyle: "bold" } }, { content: metrics.shooting, styles: { halign: "center" } }, { content: metrics.shooting, styles: { halign: "center", fontStyle: "bold", fontSize: 11 } }],
     ],
     columnStyles: {
       0: { cellWidth: 35 },
@@ -139,7 +141,7 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
     },
   });
 
-  return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + 8;
+  return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + SECTION_GAP + 3;
 }
 
 // ─── Conclusion & Grades ──────────────────────────────────────────────────────
