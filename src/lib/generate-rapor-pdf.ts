@@ -64,6 +64,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
     if (fullPageBg) {
       doc.addImage(fullPageBg.data, fullPageBg.format, 0, 0, PAGE_W, PAGE_H);
     }
+    return (isPdfTemplate || fullPageBg) ? MARGIN + PDF_TEMPLATE_SKIP : MARGIN + 10;
   };
 
   const isPdfTemplate = assets?.headerUrl ? assets.headerUrl.split("?")[0].toLowerCase().endsWith(".pdf") : false;

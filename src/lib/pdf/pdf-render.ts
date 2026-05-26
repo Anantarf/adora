@@ -136,7 +136,7 @@ export function renderConclusionAndGrades(
   doc: jsPDF,
   y: number,
   info: { playerName: string; periodName: string; metrics: MetricsJson },
-  addNewPage: () => void,
+  addNewPage: () => number,
 ): number {
   const { playerName, periodName, metrics } = info;
   const score = averageScore(metrics);
@@ -157,8 +157,7 @@ export function renderConclusionAndGrades(
   const blockHeight = Math.max(noteHeight, gradeHeight);
 
   if (y + 4 + blockHeight > PAGE_H - 45) {
-    addNewPage();
-    y = MARGIN + 10;
+    y = addNewPage();
   }
 
   drawSectionTitle(doc, "KESIMPULAN PENILAIAN", y);
@@ -202,7 +201,7 @@ export function renderAchievements(
   doc: jsPDF,
   y: number,
   info: { attendanceRate?: number | null; certificates?: RaporData["certificates"] },
-  addNewPage: () => void,
+  addNewPage: () => number,
 ): number {
   const { attendanceRate, certificates } = info;
   const hasAttendance = typeof attendanceRate === "number";
@@ -225,8 +224,7 @@ export function renderAchievements(
   const panelHeight = 8 + attendanceHeight + certificateHeight;
 
   if (y + panelHeight > PAGE_H - 48) {
-    addNewPage();
-    y = MARGIN;
+    y = addNewPage();
   }
 
   drawSectionTitle(doc, "RINGKASAN PEMAIN", y);
@@ -270,7 +268,7 @@ export interface SignatureParam {
   printDate: Date;
 }
 
-export async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam, addNewPage: () => void): Promise<number> {
+export async function renderSignatureArea(doc: jsPDF, y: number, info: SignatureParam, addNewPage: () => number): Promise<number> {
   const { assets, signers, printDate } = info;
   const columnGap = 12;
   const columnWidth = (CONTENT_W - columnGap) / 2;
@@ -279,8 +277,7 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   const blockHeight = 34;
 
   if (y + blockHeight > PAGE_H - 18) {
-    addNewPage();
-    y = MARGIN;
+    y = addNewPage();
   }
 
   const dateStr = printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
