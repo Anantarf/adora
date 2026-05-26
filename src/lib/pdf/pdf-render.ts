@@ -54,7 +54,7 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
   rows.push(["Tanggal Cetak", printDate.toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })]);
 
   const perCol = Math.ceil(rows.length / 2);
-  const panelHeight = 28 + Math.max(0, rows.length - 4) * 6;
+  const panelHeight = 24 + Math.max(0, rows.length - 4) * 6;
   const labelWidth = 28;
   const colGap = 10;
   const colX = [MARGIN + 8, MARGIN + CONTENT_W / 2 + colGap / 2];
@@ -79,7 +79,7 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
 
 export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJson): number {
   drawSectionTitle(doc, "POIN PENILAIAN", y);
-  y += 3;
+  y += 2;
 
   const dribTotal = dribbleTotal(metrics.dribble);
   const passTotal = passingTotal(metrics.passing);
@@ -158,7 +158,7 @@ export function renderConclusionAndGrades(
 
   if (y + 4 + blockHeight > PAGE_H - 45) {
     addNewPage();
-    y = MARGIN;
+    y = MARGIN + 10;
   }
 
   drawSectionTitle(doc, "KESIMPULAN PENILAIAN", y);
@@ -193,7 +193,7 @@ export function renderConclusionAndGrades(
   doc.text(grade.letter, gradeX + rightWidth / 2, y + 21, { align: "center" });
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(`${grade.label} - ${score}`, gradeX + rightWidth / 2, y + 29, { align: "center" });
+  doc.text(grade.label, gradeX + rightWidth / 2, y + 29, { align: "center" });
 
   return y + blockHeight + SECTION_GAP;
 }

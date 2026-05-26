@@ -5,17 +5,23 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 // Track failed login attempts per IP — only increments on actual failures
 const loginFailures = new Map<string, { count: number; resetAt: number }>();
-const MAX_FAILURES = 5;
-const LOCKOUT_MS = 60 * 1000;
+const MAX_FAILURES = 10;
+const LOCKOUT_MS = 15 * 60 * 1000;
 
-function checkAndRecordFailure(ip: string, failed: boolean) {
+function checkFailureLimit(ip: string) {
+  const now = Date.now();
+  const record = loginFailures.get(ip);
+
+  if (record && record.resetAt > now && record.count >= MAX_FAILURES) {
+    const remainingMinutes = Math.ceil((record.resetAt - now) / 60000);
+    throw new Error(`Akun dikunci sementara karena terlalu banyak percobaan gagal. Coba lagi dalam ${remainingMinutes} menit.`);
+  }
+}
+
+function recordFailure(ip: string, failed: boolean) {
   const now = Date.now();
   const record = loginFailures.get(ip);
   const active = record && record.resetAt > now ? record : { count: 0, resetAt: now + LOCKOUT_MS };
-
-  if (active.count >= MAX_FAILURES) {
-    throw new Error("Terlalu banyak percobaan login yang gagal. Harap tunggu 1 menit.");
-  }
 
   if (failed) {
     loginFailures.set(ip, { count: active.count + 1, resetAt: active.resetAt });
@@ -50,14 +56,14 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          checkAndRecordFailure(ip, false); // cek limit dulu, belum catat failure
+          checkFailureLimit(ip); // Cek apakah IP sudah di-banned
 
           const user = await prisma.user.findUnique({
             where: { username: credentials.username },
           });
 
           if (!user || !user.password) {
-            checkAndRecordFailure(ip, true);
+            recordFailure(ip, true); // Catat gagal
             throw new Error("Identitas ditolak: Akun tidak ditemukan.");
           }
 
@@ -67,11 +73,11 @@ export const authOptions: NextAuthOptions = {
           );
 
           if (!isPasswordCorrect) {
-            checkAndRecordFailure(ip, true);
+            recordFailure(ip, true); // Catat gagal
             throw new Error("Identitas ditolak: Sandi tidak cocok.");
           }
 
-          checkAndRecordFailure(ip, false); // login sukses → hapus record failure
+          recordFailure(ip, false); // Login sukses → hapus riwayat gagal
           return {
             id: user.id,
             name: user.name,
