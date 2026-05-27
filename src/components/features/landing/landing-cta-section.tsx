@@ -37,8 +37,8 @@ export function LandingCtaSection() {
       </div>
 
       <div className="container relative z-10 mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-8 lg:gap-12">
-          <div className="flex flex-col items-start text-left lg:col-span-5">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-10">
+          <div className="flex flex-col items-start text-left">
             <FadeIn direction="up">
               <h2 className="mb-3 font-heading text-2xl font-black uppercase tracking-widest text-white italic drop-shadow-lg md:text-5xl leading-tight">
                 SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
@@ -82,7 +82,7 @@ export function LandingCtaSection() {
             </FadeIn>
           </div>
 
-          <div className="w-full lg:col-span-3">
+          <div className="w-full">
             <FadeIn direction="up">
               <div className="group relative">
                 <div className="absolute inset-0 translate-x-2 translate-y-2 rounded-card bg-brand-yellow transition-transform duration-300 group-hover:translate-x-4 group-hover:translate-y-4" />
