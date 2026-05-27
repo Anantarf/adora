@@ -78,7 +78,7 @@ function buildAlertKey(input: OperationalAlertInput) {
 }
 
 function buildAlertPayload(input: OperationalAlertInput) {
-  return {
+  const payload = {
     app: "ADORA BBC",
     env: process.env.NODE_ENV ?? "unknown",
     occurredAt: (input.createdAt ?? new Date()).toISOString(),
@@ -91,6 +91,34 @@ function buildAlertPayload(input: OperationalAlertInput) {
     metadata: input.metadata ?? null,
     appUrl: process.env.NEXTAUTH_URL ?? process.env.SMOKE_BASE_URL ?? null,
   };
+
+  return payload;
+}
+
+function buildWebhookPayload(webhookUrl: string, input: OperationalAlertInput) {
+  const payload = buildAlertPayload(input);
+
+  if (webhookUrl.includes("discord.com/api/webhooks") || webhookUrl.includes("discordapp.com/api/webhooks")) {
+    return {
+      username: "ADORA BBC Ops",
+      content: `[${payload.severity}] ${payload.source}: ${payload.message}`,
+      embeds: [
+        {
+          title: "Operational Alert",
+          color: payload.severity === "ERROR" ? 13_107_720 : 16_692_480,
+          fields: [
+            { name: "Environment", value: payload.env, inline: true },
+            { name: "Source", value: payload.source, inline: true },
+            { name: "Status", value: String(payload.statusCode ?? "-"), inline: true },
+            { name: "Fingerprint", value: payload.fingerprint ?? "-", inline: false },
+          ],
+          timestamp: payload.occurredAt,
+        },
+      ],
+    };
+  }
+
+  return payload;
 }
 
 export async function dispatchOperationalAlert(input: OperationalAlertInput) {
@@ -116,7 +144,7 @@ export async function dispatchOperationalAlert(input: OperationalAlertInput) {
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify(buildAlertPayload(input)),
+        body: JSON.stringify(buildWebhookPayload(config.webhookUrl, input)),
         signal: controller.signal,
       });
 
