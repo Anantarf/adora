@@ -1,26 +1,8 @@
 import Link from "next/link";
-import { ArrowRight, Handshake, School, Trophy, Users } from "lucide-react";
+import { ArrowRight, Handshake } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 import { REGISTRATION_STEPS } from "@/lib/constants/landing";
 import { CONTACT } from "@/lib/constants/contact";
-
-const SCHOOL_PARTNERSHIP_POINTS = [
-  {
-    icon: School,
-    title: "Program Sekolah",
-    desc: "Sinergi ekskul, talent scouting, dan pembinaan terarah untuk siswa potensial.",
-  },
-  {
-    icon: Users,
-    title: "Klinik Dan Seleksi",
-    desc: "Sesi coaching clinic, training camp, atau seleksi awal bersama tim Adora.",
-  },
-  {
-    icon: Trophy,
-    title: "Akses Kompetisi",
-    desc: "Jalur lanjutan menuju turnamen pelajar dan pembinaan klub yang lebih kompetitif.",
-  },
-];
 
 export function LandingCtaSection() {
   return (
@@ -37,8 +19,8 @@ export function LandingCtaSection() {
       </div>
 
       <div className="container relative z-10 mx-auto px-4 md:px-6">
-        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-2 lg:gap-10">
-          <div className="flex flex-col items-start text-left">
+        <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-10 lg:gap-10">
+          <div className="flex flex-col items-start text-left lg:col-span-7">
             <FadeIn direction="up">
               <h2 className="mb-3 font-heading text-2xl font-black uppercase tracking-widest text-white italic drop-shadow-lg md:text-5xl leading-tight">
                 SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
@@ -82,7 +64,7 @@ export function LandingCtaSection() {
             </FadeIn>
           </div>
 
-          <div className="w-full">
+          <div className="w-full lg:col-span-3">
             <FadeIn direction="up">
               <div className="group relative">
                 <div className="absolute inset-0 translate-x-2 translate-y-2 rounded-card bg-brand-yellow transition-transform duration-300 group-hover:translate-x-4 group-hover:translate-y-4" />
@@ -91,7 +73,7 @@ export function LandingCtaSection() {
                   <div className="pointer-events-none absolute inset-0 pattern-halftone opacity-10" />
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-28 bg-linear-to-b from-brand-orange/20 to-transparent" />
 
-                  <div className="relative z-10 flex flex-col gap-6 p-6 md:p-8">
+                  <div className="relative z-10 flex flex-col gap-5 p-6 md:p-8">
                     <div className="flex items-start justify-between gap-4">
                       <div className="inline-flex skew-box border-2 border-black bg-brand-orange px-3 py-1 shadow-[3px_3px_0px_#000]">
                         <span className="unskew-content block font-heading text-[10px] font-black uppercase tracking-[0.2em] text-black italic">
@@ -112,20 +94,6 @@ export function LandingCtaSection() {
                       <p className="max-w-sm text-sm font-medium leading-relaxed text-white/75">
                         Untuk sekolah yang ingin punya jalur pembinaan basket yang lebih serius, rapi, dan terhubung langsung ke ekosistem kompetisi Adora.
                       </p>
-                    </div>
-
-                    <div className="grid gap-3">
-                      {SCHOOL_PARTNERSHIP_POINTS.map(({ icon: Icon, title, desc }) => (
-                        <div key={title} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/30 px-4 py-3 transition-colors group-hover:border-white/15">
-                          <div className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-yellow text-black">
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <div>
-                            <p className="font-heading text-xs font-black uppercase tracking-widest text-white italic">{title}</p>
-                            <p className="mt-1 text-xs font-medium leading-relaxed text-white/60">{desc}</p>
-                          </div>
-                        </div>
-                      ))}
                     </div>
 
                     <a
