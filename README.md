@@ -80,6 +80,8 @@ Variable yang dipakai:
 - `ALERT_WEBHOOK_URL`: webhook opsional untuk alert observability eksternal
 - `ALERT_MIN_SEVERITY`: batas minimum severity alert (`WARN` atau `ERROR`)
 - `ALERT_COOLDOWN_MS`: cooldown deduplikasi alert agar webhook tidak spam
+- `RESTORE_REHEARSAL_DATABASE_URL`: database non-production untuk latihan restore
+- `RESTORE_REHEARSAL_CONFIRM`: konfirmasi eksplisit untuk restore rehearsal destruktif pada target non-production
 - `E2E_ADMIN_USERNAME` dan `E2E_ADMIN_PASSWORD`: opsional, untuk menyalakan E2E login admin pada environment seeded
 - `E2E_PARENT_USERNAME` dan `E2E_PARENT_PASSWORD`: opsional, untuk menyalakan E2E login parent pada environment seeded
 
@@ -114,6 +116,8 @@ npm run start
 npm run lint
 npm run release:check
 npm run smoke:check
+npm run ops:alert-check
+npm run ops:backup-rehearsal
 npm run test:integration
 npm run test:critical
 npm run test:e2e

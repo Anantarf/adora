@@ -144,6 +144,7 @@ Semua gate berikut lulus setelah perubahan:
 Catatan:
 
 - `npm run smoke:check` disiapkan untuk environment yang sudah running dan punya base URL yang bisa diakses, jadi script ini bukan gate build lokal murni.
+- Jika health endpoint mengembalikan `401`, samakan `HEALTH_CHECK_TOKEN` di deployment production dengan token yang dipakai operator.
 
 ## Judgement Setelah Phase 5
 

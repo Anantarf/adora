@@ -20,6 +20,8 @@ Dokumentasi internal proyek disimpan di folder ini agar keputusan teknis, evalua
   Ringkasan must-pass suite, tagging E2E kritikal, auto web server Playwright, dan baseline regression gate sebelum push atau deploy.
 - [Phase 7 Battle-Tested Hardening](./PHASE_7_BATTLE_TESTED_HARDENING.md)
   Ringkasan alert eksternal, authenticated critical E2E, limiter shared di proxy, dan penguatan runbook operasional.
+- [Phase 8 Operational Proof](./PHASE_8_OPERATIONAL_PROOF.md)
+  Ringkasan smoke production, alert provider check, backup rehearsal gate, dan gap operasional yang masih harus dibuktikan.
 - [Backup And Restore](./BACKUP_AND_RESTORE.md)
   Runbook minimum untuk logical backup, restore rehearsal, dan verifikasi pasca-pemulihan database.
 - [Alerting And Incident Response](./ALERTING_AND_INCIDENT_RESPONSE.md)

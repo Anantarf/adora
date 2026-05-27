@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { normalizeBaseUrl } from "@/lib/release-safety";
 
 type CheckResult = {

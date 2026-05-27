@@ -56,6 +56,8 @@ export function getRequiredProductionEnvStatus(env: NodeJS.ProcessEnv): ReleaseE
     "ALERT_WEBHOOK_URL",
     "ALERT_MIN_SEVERITY",
     "ALERT_COOLDOWN_MS",
+    "RESTORE_REHEARSAL_DATABASE_URL",
+    "RESTORE_REHEARSAL_CONFIRM",
   ] as const;
 
   for (const key of recommendedKeys) {

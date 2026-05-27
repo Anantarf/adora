@@ -29,6 +29,7 @@ Untuk baseline production yang aman:
 - `ALERT_MIN_SEVERITY="ERROR"`
 - `ALERT_COOLDOWN_MS="300000"`
 - health endpoint dipantau dari uptime monitor eksternal
+- jalankan `npm run ops:alert-check` setelah `ALERT_WEBHOOK_URL` diisi untuk membuktikan provider menerima alert
 
 Kalau tim sudah siap menerima warning operasional lebih ramai:
 
@@ -49,6 +50,18 @@ Webhook alert membawa data berikut:
 - fingerprint
 - metadata
 - app URL
+
+## Verifikasi Provider
+
+Gunakan:
+
+```bash
+npm run ops:alert-check
+```
+
+Gate ini mengirim synthetic alert ke `ALERT_WEBHOOK_URL`.
+Jika provider menerima request, script akan lulus.
+Jika URL belum diisi atau provider menolak request, script akan gagal.
 
 ## Cara Membaca Sinyal
 

@@ -29,6 +29,8 @@ describe("Phase 5 Release Safety Helpers", () => {
       "ALERT_WEBHOOK_URL",
       "ALERT_MIN_SEVERITY",
       "ALERT_COOLDOWN_MS",
+      "RESTORE_REHEARSAL_DATABASE_URL",
+      "RESTORE_REHEARSAL_CONFIRM",
     ]);
   });
 

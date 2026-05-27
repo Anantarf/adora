@@ -36,6 +36,19 @@ Hindari memakai `DATABASE_URL` pooler untuk operasi dump/restore berat.
 
 ## Contoh Backup Logical
 
+Gate repo yang bisa dijalankan:
+
+```bash
+npm run ops:backup-rehearsal
+```
+
+Script ini akan:
+
+- memastikan `pg_dump` dan `pg_restore` tersedia
+- membuat backup schema-only ke `output/backups/`
+- membaca ulang dump dengan `pg_restore --list`
+- menjalankan restore ke target non-production jika `RESTORE_REHEARSAL_DATABASE_URL` dan konfirmasi eksplisit diisi
+
 Dengan `pg_dump`:
 
 ```powershell
@@ -51,6 +64,11 @@ pg_dump --dbname="$env:DIRECT_URL" --format=plain --file="backup-adora-$(Get-Dat
 ## Contoh Restore Rehearsal
 
 Buat database target non-production, lalu jalankan:
+
+```env
+RESTORE_REHEARSAL_DATABASE_URL="postgresql://user:password@host:5432/postgres"
+RESTORE_REHEARSAL_CONFIRM="I_UNDERSTAND_THIS_TARGET_WILL_BE_CLEANED"
+```
 
 ```powershell
 pg_restore --clean --if-exists --no-owner --dbname="postgresql://user:password@host:5432/postgres" "backup-adora-20260527-120000.dump"
