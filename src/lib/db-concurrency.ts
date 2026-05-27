@@ -29,5 +29,5 @@ export async function withSerializableTransaction<T>(
 }
 
 export async function acquireAdvisoryLock(tx: Prisma.TransactionClient, key: string) {
-  await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`;
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${key}))`;
 }

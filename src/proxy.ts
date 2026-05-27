@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { LRUCache } from "lru-cache";
+import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
 const MAX_API_REQUESTS_PER_MINUTE = 120;
-
-const apiRateLimit = new LRUCache<string, number>({
-  max: 500,
-  ttl: RATE_LIMIT_WINDOW_MS,
-  ttlAutopurge: true,
-});
+const API_RATE_LIMIT_NAMESPACE = "proxy-api";
 
 function getClientIp(request: NextRequest): string {
   const forwardedFor = request.headers.get("x-forwarded-for");
@@ -49,13 +44,30 @@ export default async function proxy(request: NextRequest) {
 
   const ip = getClientIp(request);
   const isApiRoute = pathname.startsWith("/api/");
+  const shouldSkipSharedApiLimit =
+    pathname === "/api/analytics/web-vitals" ||
+    pathname === "/api/health/db" ||
+    pathname === "/api/health/observability";
 
   // --- 0. RATE LIMITING ---
-  if (isApiRoute) {
-    const count = (apiRateLimit.get(ip) ?? 0) + 1;
-    apiRateLimit.set(ip, count);
-    if (count > MAX_API_REQUESTS_PER_MINUTE) {
-      return new NextResponse("Rate limit terlampaui.", { status: 429 });
+  if (isApiRoute && !shouldSkipSharedApiLimit) {
+    try {
+      const limitResult = await consumeFixedWindowLimit(
+        API_RATE_LIMIT_NAMESPACE,
+        ip,
+        MAX_API_REQUESTS_PER_MINUTE,
+        RATE_LIMIT_WINDOW_MS,
+      );
+
+      if (!limitResult.allowed) {
+        return new NextResponse("Rate limit terlampaui.", { status: 429 });
+      }
+    } catch (error) {
+      console.error("[PROXY_RATE_LIMIT_ERROR]", {
+        ip,
+        pathname,
+        error,
+      });
     }
   }
 

@@ -26,6 +26,9 @@ describe("Phase 5 Release Safety Helpers", () => {
       "HEALTH_CHECK_TOKEN",
       "PRISMA_SLOW_QUERY_THRESHOLD_MS",
       "SMOKE_BASE_URL",
+      "ALERT_WEBHOOK_URL",
+      "ALERT_MIN_SEVERITY",
+      "ALERT_COOLDOWN_MS",
     ]);
   });
 
@@ -48,6 +51,22 @@ describe("Phase 5 Release Safety Helpers", () => {
 
     expect(result.warnings).toContain(
       "NEXTAUTH_URL masih mengarah ke localhost padahal NODE_ENV=production.",
+    );
+  });
+
+  test("memberi warning jika ALERT_WEBHOOK_URL bukan URL absolute", () => {
+    const result = getRequiredProductionEnvStatus({
+      DATABASE_URL: "postgresql://example",
+      DIRECT_URL: "postgresql://direct-example",
+      NEXTAUTH_SECRET: "secret",
+      NEXTAUTH_URL: "https://adora.example.com",
+      SUPABASE_URL: "https://project.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-role",
+      ALERT_WEBHOOK_URL: "invalid-url",
+    });
+
+    expect(result.warnings).toContain(
+      "ALERT_WEBHOOK_URL ada tetapi bukan absolute URL yang valid.",
     );
   });
 });

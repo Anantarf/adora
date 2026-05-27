@@ -1,5 +1,6 @@
 import { Prisma, operational_severity } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { dispatchOperationalAlert } from "@/lib/operational-alerts";
 
 const MAX_SOURCE_LENGTH = 80;
 const MAX_MESSAGE_LENGTH = 255;
@@ -44,7 +45,7 @@ function buildFingerprint(source: string, message: string, statusCode?: number) 
 
 export async function recordOperationalEvent(input: RecordOperationalEventInput) {
   try {
-    await prisma.operationalEvent.create({
+    const event = await prisma.operationalEvent.create({
       data: {
         severity: input.severity,
         source: clampText(input.source, MAX_SOURCE_LENGTH),
@@ -57,6 +58,17 @@ export async function recordOperationalEvent(input: RecordOperationalEventInput)
         ),
         metadata: input.metadata ?? Prisma.JsonNull,
       },
+    });
+
+    await dispatchOperationalAlert({
+      severity: event.severity,
+      source: event.source,
+      message: event.message,
+      statusCode: event.statusCode ?? undefined,
+      durationMs: event.durationMs ?? undefined,
+      fingerprint: event.fingerprint,
+      metadata: event.metadata,
+      createdAt: event.createdAt,
     });
   } catch (persistError) {
     console.error("[OBSERVABILITY_PERSIST_ERROR]", {

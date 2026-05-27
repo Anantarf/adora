@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { defineConfig, devices } from '@playwright/test';
 
 /**
@@ -37,6 +38,10 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   webServer: {
     command: 'npm run start',
+    env: {
+      NEXTAUTH_URL: 'http://localhost:3000',
+      NODE_ENV: 'production',
+    },
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

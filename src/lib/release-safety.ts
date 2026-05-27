@@ -53,6 +53,9 @@ export function getRequiredProductionEnvStatus(env: NodeJS.ProcessEnv): ReleaseE
     "HEALTH_CHECK_TOKEN",
     "PRISMA_SLOW_QUERY_THRESHOLD_MS",
     "SMOKE_BASE_URL",
+    "ALERT_WEBHOOK_URL",
+    "ALERT_MIN_SEVERITY",
+    "ALERT_COOLDOWN_MS",
   ] as const;
 
   for (const key of recommendedKeys) {
@@ -75,6 +78,13 @@ export function getRequiredProductionEnvStatus(env: NodeJS.ProcessEnv): ReleaseE
   const normalizedSmokeUrl = normalizeBaseUrl(env.SMOKE_BASE_URL);
   if (env.SMOKE_BASE_URL?.trim() && !normalizedSmokeUrl) {
     warnings.push("SMOKE_BASE_URL ada tetapi bukan absolute URL yang valid.");
+  }
+
+  if (env.ALERT_WEBHOOK_URL?.trim()) {
+    const normalizedAlertUrl = normalizeBaseUrl(env.ALERT_WEBHOOK_URL);
+    if (!normalizedAlertUrl) {
+      warnings.push("ALERT_WEBHOOK_URL ada tetapi bukan absolute URL yang valid.");
+    }
   }
 
   return { missingRequired, missingRecommended, present, warnings };

@@ -18,6 +18,12 @@ Dokumentasi internal proyek disimpan di folder ini agar keputusan teknis, evalua
   Ringkasan guard env production, smoke test pasca-deploy, checklist release/rollback, dan cleanup warning build yang mengganggu sinyal produksi.
 - [Phase 6 Regression Resistance](./PHASE_6_REGRESSION_RESISTANCE.md)
   Ringkasan must-pass suite, tagging E2E kritikal, auto web server Playwright, dan baseline regression gate sebelum push atau deploy.
+- [Phase 7 Battle-Tested Hardening](./PHASE_7_BATTLE_TESTED_HARDENING.md)
+  Ringkasan alert eksternal, authenticated critical E2E, limiter shared di proxy, dan penguatan runbook operasional.
+- [Backup And Restore](./BACKUP_AND_RESTORE.md)
+  Runbook minimum untuk logical backup, restore rehearsal, dan verifikasi pasca-pemulihan database.
+- [Alerting And Incident Response](./ALERTING_AND_INCIDENT_RESPONSE.md)
+  Panduan memakai operational events, webhook alert, dan health endpoint sebagai response baseline saat incident.
 
 ## Aturan Singkat
 

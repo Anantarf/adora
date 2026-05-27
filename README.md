@@ -77,6 +77,11 @@ Variable yang dipakai:
 - `HEALTH_CHECK_TOKEN`: token untuk endpoint health check
 - `PRISMA_SLOW_QUERY_THRESHOLD_MS`: threshold slow query observability dalam milidetik
 - `SMOKE_BASE_URL`: URL yang dipakai smoke test, untuk production gunakan `https://adorabbc.com`
+- `ALERT_WEBHOOK_URL`: webhook opsional untuk alert observability eksternal
+- `ALERT_MIN_SEVERITY`: batas minimum severity alert (`WARN` atau `ERROR`)
+- `ALERT_COOLDOWN_MS`: cooldown deduplikasi alert agar webhook tidak spam
+- `E2E_ADMIN_USERNAME` dan `E2E_ADMIN_PASSWORD`: opsional, untuk menyalakan E2E login admin pada environment seeded
+- `E2E_PARENT_USERNAME` dan `E2E_PARENT_PASSWORD`: opsional, untuk menyalakan E2E login parent pada environment seeded
 
 ### Setup Database
 
@@ -107,7 +112,10 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run release:check
+npm run smoke:check
 npm run test:integration
+npm run test:critical
 npm run test:e2e
 npm run seed
 npm run repair:group-meta:dry
