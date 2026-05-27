@@ -72,8 +72,11 @@ Variable yang dipakai:
 - `NEXT_PUBLIC_SUPABASE_URL`: URL publik Supabase
 - `SUPABASE_SERVICE_ROLE_KEY`: service role key untuk upload asset
 - `NEXTAUTH_SECRET`: secret NextAuth
-- `NEXTAUTH_URL`: base URL aplikasi
+- `NEXTAUTH_URL`: base URL aplikasi, untuk production gunakan `https://adorabbc.com`
 - `DEFAULT_RESET_PASSWORD`: password default reset akun
+- `HEALTH_CHECK_TOKEN`: token untuk endpoint health check
+- `PRISMA_SLOW_QUERY_THRESHOLD_MS`: threshold slow query observability dalam milidetik
+- `SMOKE_BASE_URL`: URL yang dipakai smoke test, untuk production gunakan `https://adorabbc.com`
 
 ### Setup Database
 

@@ -32,9 +32,13 @@ Perubahan di [src/lib/release-safety.ts](../src/lib/release-safety.ts) dan [scri
   - `DIRECT_URL`
   - `NEXTAUTH_SECRET`
   - `NEXTAUTH_URL`
-  - `SUPABASE_URL`
+  - `SUPABASE_URL` atau `NEXT_PUBLIC_SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY`
+- variabel operasional tambahan sekarang dilaporkan sebagai `recommended`, bukan blocker:
+  - `DEFAULT_RESET_PASSWORD`
   - `HEALTH_CHECK_TOKEN`
+  - `PRISMA_SLOW_QUERY_THRESHOLD_MS`
+  - `SMOKE_BASE_URL`
 
 Kenapa penting:
 
@@ -56,6 +60,7 @@ Perubahan di [scripts/smoke-check.ts](../scripts/smoke-check.ts) dan [package.js
 Input utama:
 
 - `SMOKE_BASE_URL` atau fallback ke `NEXTAUTH_URL`
+- untuk production ADORA BBC, base URL yang dipakai adalah `https://adorabbc.com`
 - `HEALTH_CHECK_TOKEN`
 
 Kenapa penting:
@@ -70,6 +75,7 @@ Perubahan di [.env.example](../.env.example):
 - ditambahkan `HEALTH_CHECK_TOKEN`
 - ditambahkan `PRISMA_SLOW_QUERY_THRESHOLD_MS`
 - ditambahkan `SMOKE_BASE_URL`
+- contoh production sekarang memakai domain `https://adorabbc.com`
 
 Kenapa penting:
 
