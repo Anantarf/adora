@@ -4,7 +4,16 @@ import { prisma } from "@/lib/prisma";
 const SERIALIZABLE_RETRY_LIMIT = 3;
 
 function isRetryableTransactionError(error: unknown) {
-  return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034";
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2034") {
+    return true;
+  }
+
+  if (error instanceof Error) {
+    const cause = (error as Error & { cause?: { originalCode?: string; kind?: string } }).cause;
+    return cause?.originalCode === "40001" || cause?.kind === "TransactionWriteConflict";
+  }
+
+  return false;
 }
 
 export async function withSerializableTransaction<T>(
