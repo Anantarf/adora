@@ -67,20 +67,20 @@ export function AddPeriodDialog() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
             <div className="flex flex-col gap-1.5">
-              <label className="text-micro text-muted-foreground">Nama Periode</label>
-              <Input placeholder="Contoh: Semester 1 2025" {...register("name")} />
+              <label htmlFor="period-name" className="text-micro text-muted-foreground">Nama Periode</label>
+              <Input id="period-name" placeholder="Contoh: Semester 1 2025" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label className="text-micro text-muted-foreground">Tanggal Mulai</label>
-                <Input type="date" {...register("startDate")} />
+                <label htmlFor="period-startDate" className="text-micro text-muted-foreground">Tanggal Mulai</label>
+                <Input id="period-startDate" type="date" {...register("startDate")} />
                 {errors.startDate && <p className="text-xs text-destructive">{errors.startDate.message}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-micro text-muted-foreground">Tanggal Selesai</label>
-                <Input type="date" {...register("endDate")} />
+                <label htmlFor="period-endDate" className="text-micro text-muted-foreground">Tanggal Selesai</label>
+                <Input id="period-endDate" type="date" {...register("endDate")} />
                 {errors.endDate && <p className="text-xs text-destructive">{errors.endDate.message}</p>}
               </div>
             </div>

@@ -33,10 +33,11 @@ export function PlayerFormFields({
       {/* STEP 1: Data Diri Dasar & Fisik */}
       <div className={`grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5 ${step === 1 ? "block animate-in fade-in-0 duration-base" : "hidden"}`}>
         <div className="space-y-2 md:col-span-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-name" className="text-micro text-muted-foreground">
             Nama Lengkap <span className="text-destructive">*</span>
           </label>
           <Input 
+            id="field-player-name"
             {...register("name", {
               onChange: (e) => {
                 const val = e.target.value.replace(/[^a-zA-Z\s.'-]/g, "");
@@ -51,15 +52,15 @@ export function PlayerFormFields({
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-dateOfBirth" className="text-micro text-muted-foreground">
             Tanggal Lahir <span className="text-destructive">*</span>
           </label>
-          <Input type="date" {...register("dateOfBirth")} className={`${inputClassName} w-full scheme-dark [&::-webkit-calendar-picker-indicator]:invert`} />
+          <Input id="field-player-dateOfBirth" type="date" {...register("dateOfBirth")} className={`${inputClassName} w-full scheme-dark [&::-webkit-calendar-picker-indicator]:invert`} />
           {errors.dateOfBirth && <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-groupId" className="text-micro text-muted-foreground">
             Kelompok <span className="text-destructive">*</span>
           </label>
           <Controller
@@ -67,7 +68,7 @@ export function PlayerFormFields({
             name="groupId"
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
-                <SelectTrigger className={`w-full ${inputClassName}`}>
+                <SelectTrigger id="field-player-groupId" className={`w-full ${inputClassName}`}>
                   <SelectValue>
                     {groups?.find((g: Group) => g.id === field.value)?.name || 
                      (isGroupsLoading ? "Memuat..." : 
@@ -88,14 +89,14 @@ export function PlayerFormFields({
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-placeOfBirth" className="text-micro text-muted-foreground">
             Tempat Lahir <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("placeOfBirth")} placeholder="Contoh: Depok" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-placeOfBirth" {...register("placeOfBirth")} placeholder="Contoh: Depok" className={`w-full ${inputClassName}`} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-gender" className="text-micro text-muted-foreground">
             Jenis Kelamin <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
           <Controller
@@ -103,7 +104,7 @@ export function PlayerFormFields({
             name="gender"
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value || ""}>
-                <SelectTrigger className={`w-full ${inputClassName}`}>
+                <SelectTrigger id="field-player-gender" className={`w-full ${inputClassName}`}>
                   <SelectValue placeholder="Pilih Jenis Kelamin" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -116,49 +117,50 @@ export function PlayerFormFields({
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-weight" className="text-micro text-muted-foreground">
             Berat Badan <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("weight")} placeholder="Contoh: 28 Kg" className={inputClassName} />
+          <Input id="field-player-weight" {...register("weight")} placeholder="Contoh: 28 Kg" className={inputClassName} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-height" className="text-micro text-muted-foreground">
             Tinggi Badan <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("height")} placeholder="Contoh: 125 CM" className={inputClassName} />
+          <Input id="field-player-height" {...register("height")} placeholder="Contoh: 125 CM" className={inputClassName} />
         </div>
       </div>
 
       {/* STEP 2: Kontak, Edukasi, Orang Tua, dan Medis */}
       <div className={`grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5 ${step === 2 ? "block animate-in slide-in-from-right-4 duration-base" : "hidden"}`}>
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-schoolOrigin" className="text-micro text-muted-foreground">
             Asal Sekolah <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("schoolOrigin")} placeholder="Contoh: SDN Gandul 2" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-schoolOrigin" {...register("schoolOrigin")} placeholder="Contoh: SDN Gandul 2" className={`w-full ${inputClassName}`} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-medicalHistory" className="text-micro text-muted-foreground">
             Riwayat Penyakit Bawaan <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("medicalHistory")} placeholder="Contoh: Asma" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-medicalHistory" {...register("medicalHistory")} placeholder="Contoh: Asma" className={`w-full ${inputClassName}`} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-email" className="text-micro text-muted-foreground">
             Email Peserta <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input type="email" {...register("email")} placeholder="Contoh: nama@email.com" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-email" type="email" {...register("email")} placeholder="Contoh: nama@email.com" className={`w-full ${inputClassName}`} />
           {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-phoneNumber" className="text-micro text-muted-foreground">
             No. Telepon <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
           <Input 
+            id="field-player-phoneNumber"
             type="tel" 
             {...register("phoneNumber", {
               onChange: (e) => {
@@ -174,17 +176,18 @@ export function PlayerFormFields({
 
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-parentName" className="text-micro text-muted-foreground">
             Nama Orang Tua <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("parentName")} placeholder="Contoh: Ibu Suryani" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-parentName" {...register("parentName")} placeholder="Contoh: Ibu Suryani" className={`w-full ${inputClassName}`} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-parentPhoneNumber" className="text-micro text-muted-foreground">
             No. Telp. Orang Tua <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
           <Input 
+            id="field-player-parentPhoneNumber"
             type="tel" 
             {...register("parentPhoneNumber", {
               onChange: (e) => {
@@ -199,17 +202,17 @@ export function PlayerFormFields({
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-address" className="text-micro text-muted-foreground">
             Alamat Rumah <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("address")} placeholder="Contoh: Jl. Melati No. 10" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-address" {...register("address")} placeholder="Contoh: Jl. Melati No. 10" className={`w-full ${inputClassName}`} />
         </div>
 
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-parentAddress" className="text-micro text-muted-foreground">
             Alamat Orang Tua <span className="text-muted-foreground font-normal normal-case tracking-normal">(Opsional)</span>
           </label>
-          <Input {...register("parentAddress")} placeholder="Contoh: Gandul, Cinere" className={`w-full ${inputClassName}`} />
+          <Input id="field-player-parentAddress" {...register("parentAddress")} placeholder="Contoh: Gandul, Cinere" className={`w-full ${inputClassName}`} />
         </div>
       </div>
     </>

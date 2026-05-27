@@ -12,6 +12,7 @@ import { FLAT_METRIC_DEFS, flattenMetrics, overallScore, averageScore } from "@/
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ParentRadarChart } from "./components/ParentRadarChart";
 import { ParentProgressionChart } from "./components/ParentProgressionChart";
@@ -69,8 +70,18 @@ export default function ParentDashboard() {
 
   if (familyLoading) {
     return (
-      <div className="flex w-full items-center justify-center p-20 gap-3 text-primary font-semibold">
-        <Loader2 className="animate-spin size-6" /> Memverifikasi Profil Keluarga...
+      <div className="flex flex-col gap-6 md:gap-8 w-full animate-pulse p-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 border-b border-border pb-6 md:pb-8">
+          <div className="space-y-2">
+            <Skeleton className="h-8 w-64 bg-muted/60" />
+            <Skeleton className="h-4 w-96 bg-muted/40" />
+          </div>
+          <Skeleton className="h-11 w-48 bg-muted/50 rounded-lg" />
+        </div>
+        <div className="flex w-full items-center justify-center py-20 gap-3 text-primary/70 font-semibold">
+          <Loader2 className="animate-spin size-6 text-primary" />
+          <span>Memverifikasi Profil Keluarga...</span>
+        </div>
       </div>
     );
   }
@@ -170,8 +181,62 @@ export default function ParentDashboard() {
       </div>
 
       {statsLoading ? (
-        <div className="flex w-full items-center justify-center p-20 gap-3 text-primary font-semibold">
-          <Loader2 className="animate-spin size-6" /> Memuat Data Rapor {activeChild.name}...
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full animate-pulse">
+          {/* Skor Terkini Skeleton */}
+          <Card className="border-border/50 bg-card overflow-hidden shadow-sm">
+            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4 flex flex-row items-center justify-between">
+              <div className="space-y-2">
+                <Skeleton className="h-5 w-32 bg-muted/60" />
+                <Skeleton className="h-3.5 w-24 bg-muted/40" />
+              </div>
+              <Skeleton className="h-12 w-12 rounded bg-muted/50" />
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <div key={i} className="rounded-lg bg-muted/30 border border-border/40 p-3 text-center flex flex-col justify-center min-h-20 gap-2">
+                    <Skeleton className="h-3 w-16 mx-auto bg-muted/40" />
+                    <Skeleton className="h-6 w-10 mx-auto bg-muted/50" />
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Radar Chart Skeleton */}
+          <Card className="border-border/50 bg-card p-6 flex flex-col items-center justify-center min-h-80 gap-4">
+            <Skeleton className="h-5 w-40 bg-muted/50 self-start" />
+            <Skeleton className="size-56 rounded-full bg-muted/40" />
+          </Card>
+
+          {/* Progression Chart Skeleton */}
+          <Card className="border-border/50 bg-card p-6 flex flex-col gap-4 min-h-80">
+            <Skeleton className="h-5 w-48 bg-muted/50" />
+            <Skeleton className="h-44 w-full bg-muted/30 rounded" />
+          </Card>
+
+          {/* Attendance Summary Skeleton */}
+          <Card className="border-border/50 bg-card p-6 flex flex-col gap-4 min-h-80">
+            <Skeleton className="h-5 w-40 bg-muted/50" />
+            <div className="flex flex-col gap-3">
+              <Skeleton className="h-10 w-full bg-muted/40 rounded-lg" />
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <Skeleton key={i} className="h-16 bg-muted/30 rounded-lg" />
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* Coach Notes Skeleton */}
+          <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
+            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+              <Skeleton className="h-5 w-40 bg-muted/50" />
+            </CardHeader>
+            <CardContent className="p-6">
+              <Skeleton className="h-20 w-full bg-muted/30 rounded-xl" />
+            </CardContent>
+          </Card>
         </div>
       ) : !stats?.length ? (
         <div className="p-12 border border-dashed border-border rounded-2xl bg-card/50 text-center flex flex-col items-center gap-4">

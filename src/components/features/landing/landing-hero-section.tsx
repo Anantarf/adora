@@ -27,7 +27,7 @@ export function LandingHeroSection({ registrationYearText }: LandingHeroSectionP
       <div className="relative z-20 container mx-auto px-4 flex flex-col items-center text-center">
         <FadeIn delay={0.1} direction="up">
           <div className="inline-block skew-box bg-brand-yellow px-4 py-1.5 md:px-8 md:py-3 mb-6 md:mb-8 border-b-4 border-r-4 border-black shadow-lg mx-2">
-            <span className="unskew-content block font-heading font-black uppercase text-black text-[9px] sm:text-xs md:text-sm tracking-widest md:tracking-[0.2em] pr-1 md:pr-2">NOW OPEN REGISTRATION {registrationYearText}</span>
+            <span className="unskew-content block font-heading font-black uppercase text-black text-[10px] sm:text-xs md:text-sm tracking-[0.15em] sm:tracking-widest md:tracking-[0.2em] pr-1 md:pr-2">NOW OPEN REGISTRATION {registrationYearText}</span>
           </div>
         </FadeIn>
 

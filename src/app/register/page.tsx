@@ -3,7 +3,7 @@
 import { useState, useMemo, Suspense, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { CheckCircle2, MessageCircle, AlertTriangle } from "lucide-react";
 import { HomebaseSelector } from "@/components/homebase-selector";
 import { submitRegistration } from "@/actions/register";
 import { PROGRAMS } from "@/lib/constants/programs";
@@ -181,10 +181,11 @@ function RegisterContent() {
                     {/* Text inputs dari config */}
                     {FORM_FIELDS.map(({ key, type, label, required, placeholder, autoComplete, inputMode, sanitize }) => (
                       <div key={key}>
-                        <label className="block font-bold text-white/80 uppercase tracking-widest text-xs mb-2">
+                        <label htmlFor={`field-${key}`} className="block font-bold text-white/80 uppercase tracking-widest text-xs mb-2">
                           {label} {required && <span className="text-brand-orange">*</span>}
                         </label>
                         <input
+                          id={`field-${key}`}
                           type={type}
                           value={form[key]}
                           disabled={isSubmitted}
@@ -202,10 +203,10 @@ function RegisterContent() {
                     ))}
 
                     {/* Program (Cards) */}
-                    <div className="pt-3">
-                      <label className="block font-bold text-white/80 uppercase tracking-widest text-[10px] mb-3">
+                    <fieldset className="pt-3">
+                      <legend className="block font-bold text-white/80 uppercase tracking-widest text-[10px] mb-3">
                         PILIH KELOMPOK USIA <span className="text-brand-orange">*</span>
-                      </label>
+                      </legend>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {PROGRAMS.map(({ label, ages, desc }) => {
                           const isSelected = form.ageGroup === label;
@@ -230,7 +231,7 @@ function RegisterContent() {
                           );
                         })}
                       </div>
-                    </div>
+                    </fieldset>
 
                     {isSubmitted ? (
                       <div className="bg-green-500/10 border-2 border-green-500/50 rounded-2xl p-8 text-center space-y-6 mt-10 animate-in zoom-in-95 duration-500">
@@ -260,7 +261,7 @@ function RegisterContent() {
                       <div className="pt-8">
                         {error && (
                           <div className="bg-red-500/20 border-l-4 border-red-500 px-5 py-4 mb-6 text-red-100 text-sm font-bold flex items-center gap-3">
-                            <span className="text-red-500 text-xl">⚠️</span> {error}
+                            <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" /> {error}
                           </div>
                         )}
 

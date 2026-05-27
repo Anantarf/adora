@@ -76,7 +76,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                     <div className="absolute inset-0 p-5 lg:p-6 flex flex-col justify-end z-20">
                       {homebase.description && (
                         <div className="mb-2 inline-block bg-brand-orange border-2 border-black text-black px-2.5 py-0.5 rounded self-start shadow-[3px_3px_0px_#000] -rotate-2">
-                          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest">📍 {homebase.description}</p>
+                          <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1"><MapPin className="w-2.5 h-2.5 shrink-0" /> {homebase.description}</p>
                         </div>
                       )}
 

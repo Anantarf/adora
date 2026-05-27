@@ -191,6 +191,13 @@ input[type="number"] {
   html {
     @apply font-sans;
   }
+
+  /* Explicit focus-visible ring for keyboard navigation */
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 }
 @layer utilities {
   .glass-card {
@@ -386,4 +393,21 @@ input:-webkit-autofill:active {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Reduced Motion ────────────────────────────────────────────────────── */
+/* Disable all CSS animations/transitions for users who prefer reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }

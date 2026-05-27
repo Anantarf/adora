@@ -3,10 +3,12 @@
 import { useMemo, useState, useEffect } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Loader2, Search, CalendarDays } from "lucide-react";
+import { Search, CalendarDays } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import type { getEventsWithAttendanceAction } from "@/actions/schedule";
 import { getEventConfig } from "@/lib/config/events";
@@ -62,9 +64,24 @@ export function AttendanceCardView() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="size-5 animate-spin" />
-        <span className="ml-2">Memuat agenda...</span>
+      <div className="flex flex-col gap-6">
+        {/* Search skeleton */}
+        <Skeleton className="h-11 w-full rounded-xl" />
+        {/* Month label skeleton */}
+        <Skeleton className="h-6 w-32 rounded" />
+        {/* Event card skeletons */}
+        <div className="space-y-2">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="h-16 rounded-xl border border-border/50 bg-card p-3.5 flex items-center gap-3">
+              <Skeleton className="size-12 rounded-lg shrink-0" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+              <Skeleton className="h-6 w-20 rounded-md" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -73,12 +90,13 @@ export function AttendanceCardView() {
     <div className="flex flex-col gap-6">
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
-        <input
+        <Input
           type="text"
           placeholder="Cari Agenda atau Nama Kelompok..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/50 bg-background/50 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm font-medium"
+          aria-label="Cari agenda atau nama kelompok"
+          className="h-11 pl-10 bg-background/50"
         />
       </div>
 

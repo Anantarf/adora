@@ -60,8 +60,25 @@ export function HomebaseSelector({
     if (match) onSelectRef.current(match.id, match.name);
   }, [homebases]);
 
-  if (loading)
-    return <div className="animate-pulse text-muted-foreground">Memuat homebase...</div>;
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2].map((i) => (
+          <div
+            key={i}
+            className="p-5 md:p-6 border-2 border-white/5 bg-black/20 rounded-2xl animate-pulse flex flex-col gap-4 min-h-[160px]"
+          >
+            <div className="h-7 w-2/3 bg-white/10 rounded-lg" />
+            <div className="space-y-2">
+              <div className="h-4 w-1/3 bg-white/5 rounded-md" />
+              <div className="h-4 w-full bg-white/5 rounded-sm" />
+              <div className="h-4 w-5/6 bg-white/5 rounded-sm" />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   if (homebases.length === 0)
     return <div className="text-destructive">Belum ada homebase tersedia</div>;
@@ -73,6 +90,7 @@ export function HomebaseSelector({
         return (
           <button
             key={homebase.id}
+            type="button"
             onClick={() => !disabled && onSelect(homebase.id, homebase.name)}
             disabled={disabled}
             className={`p-5 md:p-6 border-2 rounded-2xl transition-all duration-300 text-left relative overflow-hidden flex flex-col ${

@@ -46,7 +46,7 @@ export function LandingCtaSection() {
               </span>
             </Link>
             <div className="mt-5 md:mt-6 flex flex-col items-center gap-1">
-              <p className="text-white/40 text-[9px] font-bold uppercase tracking-widest">Kuota terbatas untuk setiap kelompok usia</p>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Kuota terbatas untuk setiap kelompok usia</p>
               <div className="w-12 h-1 bg-brand-orange/40 rounded-full"></div>
             </div>
           </div>

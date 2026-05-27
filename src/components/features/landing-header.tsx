@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Menu, X } from "lucide-react";
 import { NAV_LINKS } from "@/lib/constants/navigation";
 
@@ -18,6 +18,24 @@ function InstagramIcon({ className }: { className?: string }) {
 
 export function LandingHeader() {
   const [open, setOpen] = useState(false);
+
+  const closeDrawer = useCallback(() => setOpen(false), []);
+
+  // Escape key closes drawer
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeDrawer();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, closeDrawer]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   return (
     <>
@@ -49,23 +67,43 @@ export function LandingHeader() {
             >
               <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">PORTAL LOGIN</span>
             </Link>
-            <button className="md:hidden w-10 h-10 flex items-center justify-center text-white/70 hover:text-white transition-colors" onClick={() => setOpen(true)} aria-label="Buka menu navigasi">
+            <button
+              className="md:hidden min-w-11 min-h-11 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+              onClick={() => setOpen(true)}
+              aria-label="Buka menu navigasi"
+              aria-expanded={open}
+              aria-controls="mobile-nav-drawer"
+            >
               <Menu className="w-5 h-5" />
             </button>
           </div>
         </div>
       </header>
 
-      {/* Mobile drawer overlay - Outside header to avoid filter inheritance */}
-      <div className={`fixed inset-0 z-60 md:hidden transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} onClick={() => setOpen(false)} aria-hidden="true">
+      {/* Mobile drawer overlay */}
+      <div
+        className={`fixed inset-0 z-60 md:hidden transition-opacity duration-300 ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={closeDrawer}
+        aria-hidden="true"
+      >
         <div className="absolute inset-0 bg-black/80" />
       </div>
 
-      {/* Mobile drawer - Solid Black Background */}
-      <div className={`fixed top-0 right-0 h-full w-52 bg-black border-l-4 border-brand-orange z-70 md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}>
-        <div className="flex items-center justify-between h-12 px-4 border-b border-white/10">
+      {/* Mobile drawer */}
+      <div
+        id="mobile-nav-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu navigasi"
+        className={`fixed top-0 right-0 h-full w-52 bg-black border-l-4 border-brand-orange z-70 md:hidden flex flex-col shadow-2xl transition-transform duration-500 ease-in-out ${open ? "translate-x-0" : "translate-x-full"}`}
+      >
+        <div className="flex items-center justify-between h-14 px-4 border-b border-white/10">
           <span className="font-heading font-black italic text-xs tracking-widest uppercase text-brand-yellow">MENU</span>
-          <button onClick={() => setOpen(false)} aria-label="Tutup menu" className="text-white/70 hover:text-white transition-colors">
+          <button
+            onClick={closeDrawer}
+            aria-label="Tutup menu"
+            className="min-w-11 min-h-11 flex items-center justify-center text-white/70 hover:text-white transition-colors"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -75,8 +113,8 @@ export function LandingHeader() {
             <a
               key={href}
               href={href}
-              onClick={() => setOpen(false)}
-              className="font-heading font-black italic uppercase tracking-[0.2em] text-xs text-white hover:text-brand-yellow py-2.5 transition-all flex items-center justify-between group"
+              onClick={closeDrawer}
+              className="font-heading font-black italic uppercase tracking-[0.2em] text-xs text-white hover:text-brand-yellow py-2.5 transition-all flex items-center justify-between group min-h-11"
             >
               {label}
               <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange text-[10px]">→</span>

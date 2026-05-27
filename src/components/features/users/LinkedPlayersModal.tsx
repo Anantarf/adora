@@ -79,6 +79,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
               <input
                 type="text"
                 placeholder="Cari nama pemain..."
+                aria-label="Cari nama pemain untuk ditautkan"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full h-10 px-3 text-sm rounded-lg bg-background border border-border/50 focus:outline-none focus:border-primary/50 transition-colors"

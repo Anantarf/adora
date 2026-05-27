@@ -163,13 +163,13 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
               <table className="w-full text-sm text-left">
                 <thead className="text-[10px] text-muted-foreground uppercase bg-muted/50 font-bold tracking-widest">
                   <tr>
-                    <th className="px-4 py-3 rounded-l-lg w-10 text-center">No</th>
-                    <th className="px-4 py-3">Tanggal</th>
-                    <th className="px-4 py-3">Nama Pemain</th>
-                    <th className="px-4 py-3">WhatsApp</th>
-                    <th className="px-4 py-3">Kelompok Usia</th>
-                    <th className="px-4 py-3">Lokasi Latihan</th>
-                    <th className="px-4 py-3 rounded-r-lg text-right">Aksi</th>
+                    <th scope="col" className="px-4 py-3 rounded-l-lg w-10 text-center">No</th>
+                    <th scope="col" className="px-4 py-3">Tanggal</th>
+                    <th scope="col" className="px-4 py-3">Nama Pemain</th>
+                    <th scope="col" className="px-4 py-3">WhatsApp</th>
+                    <th scope="col" className="px-4 py-3">Kelompok Usia</th>
+                    <th scope="col" className="px-4 py-3">Lokasi Latihan</th>
+                    <th scope="col" className="px-4 py-3 rounded-r-lg text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">

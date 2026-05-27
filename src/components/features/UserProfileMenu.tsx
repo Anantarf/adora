@@ -71,14 +71,14 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">Sandi Baru</label>
-            <Input {...register("newPassword")} type="password" placeholder="Minimal 6 karakter" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            <label htmlFor="change-newPassword" className="text-micro text-muted-foreground ml-1">Sandi Baru</label>
+            <Input id="change-newPassword" {...register("newPassword")} type="password" placeholder="Minimal 6 karakter" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.newPassword && <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.newPassword.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">Konfirmasi Sandi</label>
-            <Input {...register("confirmPassword")} type="password" placeholder="Ulangi sandi baru" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            <label htmlFor="change-confirmPassword" className="text-micro text-muted-foreground ml-1">Konfirmasi Sandi</label>
+            <Input id="change-confirmPassword" {...register("confirmPassword")} type="password" placeholder="Ulangi sandi baru" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.confirmPassword && <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.confirmPassword.message}</p>}
           </div>
 

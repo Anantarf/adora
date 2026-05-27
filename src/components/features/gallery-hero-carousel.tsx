@@ -22,6 +22,11 @@ export function GalleryHeroCarousel() {
   );
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+      if (mediaQuery.matches) return; // Skip automatic rotation if reduced-motion is requested
+    }
+
     const timer = setInterval(() => {
       goTo((current + 1) % GALLERY_SLIDES.length);
     }, 4500);
@@ -65,6 +70,7 @@ export function GalleryHeroCarousel() {
       {/* Controls */}
       <div className="relative z-20 flex items-center justify-between px-4 py-3 bg-black/30 backdrop-blur-sm">
         <button
+          type="button"
           onClick={() => goTo((current - 1 + GALLERY_SLIDES.length) % GALLERY_SLIDES.length)}
           className="w-12 h-12 -ml-1.5 md:ml-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
           aria-label="Slide sebelumnya"
@@ -75,13 +81,24 @@ export function GalleryHeroCarousel() {
         {/* Dots */}
         <div className="flex gap-2">
           {GALLERY_SLIDES.map((_, idx) => (
-            <button key={idx} onClick={() => goTo(idx)} className="p-2 -m-2 group min-w-12 min-h-12 flex items-center justify-center" aria-label={`Slide ${idx + 1}`}>
+            <button
+              key={idx}
+              type="button"
+              onClick={() => goTo(idx)}
+              className="p-2 -m-2 group min-w-12 min-h-12 flex items-center justify-center"
+              aria-label={`Slide ${idx + 1}`}
+            >
               <span className={`block h-1.5 rounded-full transition-all duration-400 ${idx === current ? "bg-brand-yellow w-5" : "bg-white/30 w-1.5 group-hover:bg-white/50"}`} />
             </button>
           ))}
         </div>
 
-        <button onClick={() => goTo((current + 1) % GALLERY_SLIDES.length)} className="w-12 h-12 -mr-1.5 md:mr-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors" aria-label="Slide berikutnya">
+        <button
+          type="button"
+          onClick={() => goTo((current + 1) % GALLERY_SLIDES.length)}
+          className="w-12 h-12 -mr-1.5 md:mr-0 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          aria-label="Slide berikutnya"
+        >
           <ChevronRight className="w-5 h-5 text-white" />
         </button>
       </div>

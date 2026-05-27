@@ -8,6 +8,7 @@ import { RecentRegistrations } from "@/components/features/dashboard/RecentRegis
 import { UpcomingAgenda } from "@/components/features/dashboard/UpcomingAgenda";
 import { AtRiskPlayers } from "@/components/features/dashboard/AtRiskPlayers";
 import { formatFullDate, getJakartaToday } from "@/lib/date-utils";
+import { Hand } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
@@ -24,7 +25,7 @@ export default function AdminDashboardPage() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 md:gap-4 border-b border-border/50 pb-5 md:pb-6">
           <div>
             <p className="text-micro text-muted-foreground/50">Selamat Datang,</p>
-            <h1 className="font-heading text-xl md:text-4xl text-foreground tracking-widest uppercase">{displayName} 👋</h1>
+            <h1 className="font-heading text-xl md:text-4xl text-foreground tracking-widest uppercase flex items-center gap-3">{displayName} <Hand className="size-6 md:size-8 text-primary inline-block" /></h1>
             <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">Pantau kondisi klub secara menyeluruh dari halaman ini.</p>
           </div>
           <p className="text-xs md:text-sm font-semibold text-muted-foreground/75 shrink-0">{todayLabel}</p>

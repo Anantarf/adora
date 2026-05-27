@@ -6,6 +6,8 @@ Dokumentasi internal proyek disimpan di folder ini agar keputusan teknis, evalua
 
 - [Production Judgment](./PRODUCTION_JUDGMENT.md)
   Penilaian jujur terhadap kesiapan production proyek, red flags yang masih mungkin tersembunyi, dan checklist kerja bareng agentic AI.
+- [UI Judgment](./UI_JUDGMENT.md)
+  Penilaian jujur terhadap kualitas UI/UX, visual identity, responsiveness, accessibility, dan roadmap polish halaman publik maupun portal internal.
 - [Phase 1 Reliability](./PHASE_1_RELIABILITY.md)
   Ringkasan eksekusi Phase 1 untuk hardening failure path, termasuk perubahan teknis, test baru, dan sisa risiko.
 - [Phase 2 Data And Auth](./PHASE_2_DATA_AND_AUTH.md)

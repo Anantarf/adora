@@ -94,12 +94,14 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
 
             <div className="flex gap-2 pt-1">
               <button
+                type="button"
                 onClick={() => { onEdit(event); onClose(); }}
                 className="flex-1 py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-primary/10 border border-primary/30 rounded-xl hover:bg-primary/20 transition-colors text-primary flex items-center justify-center gap-2"
               >
                 <Pencil className="size-3" /> Ubah
               </button>
               <button
+                type="button"
                 onClick={onClose}
                 className="flex-1 py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-white/60"
               >

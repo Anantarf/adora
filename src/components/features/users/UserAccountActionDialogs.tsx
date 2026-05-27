@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export type UserDialogState = { type: "delete"; targetId: string } | { type: "reset"; targetId: string } | null;
@@ -10,12 +10,23 @@ type UserAccountActionDialogsProps = {
   onOpenChange: (open: boolean) => void;
   onConfirmDelete: () => Promise<void>;
   onConfirmReset: () => Promise<void>;
+  isDeleting?: boolean;
+  isResetting?: boolean;
 };
 
-export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelete, onConfirmReset }: UserAccountActionDialogsProps) {
+export function UserAccountActionDialogs({
+  uiState,
+  onOpenChange,
+  onConfirmDelete,
+  onConfirmReset,
+  isDeleting = false,
+  isResetting = false,
+}: UserAccountActionDialogsProps) {
+  const isPending = isDeleting || isResetting;
+
   return (
     <>
-      <AlertDialog open={uiState?.type === "delete"} onOpenChange={onOpenChange}>
+      <AlertDialog open={uiState?.type === "delete"} onOpenChange={(val) => !isPending && onOpenChange(val)}>
         <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest text-destructive">Hapus Akun Pengguna?</AlertDialogTitle>
@@ -29,15 +40,28 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
             </div>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6">
-            <AlertDialogCancel className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmDelete} className="h-11 px-8 bg-destructive text-white hover:bg-destructive/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm">
+            <AlertDialogCancel
+              disabled={isPending}
+              className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10"
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                onConfirmDelete();
+              }}
+              disabled={isPending}
+              className="h-11 px-8 bg-destructive text-white hover:bg-destructive/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+            >
+              {isDeleting ? <Loader2 className="size-3.5 animate-spin mr-1" /> : null}
               Hapus Akun
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      <AlertDialog open={uiState?.type === "reset"} onOpenChange={onOpenChange}>
+      <AlertDialog open={uiState?.type === "reset"} onOpenChange={(val) => !isPending && onOpenChange(val)}>
         <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
             <div className="size-16 rounded-full bg-muted border-2 border-border/50 flex items-center justify-center mb-4">
@@ -52,8 +76,21 @@ export function UserAccountActionDialogs({ uiState, onOpenChange, onConfirmDelet
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-6 border-t border-border/10 pt-4">
-            <AlertDialogCancel className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10">Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={onConfirmReset} className="h-11 px-8 bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm">
+            <AlertDialogCancel
+              disabled={isPending}
+              className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10"
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                onConfirmReset();
+              }}
+              disabled={isPending}
+              className="h-11 px-8 bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+            >
+              {isResetting ? <Loader2 className="size-3.5 animate-spin mr-1" /> : null}
               Atur Ulang Kata Sandi
             </AlertDialogAction>
           </AlertDialogFooter>

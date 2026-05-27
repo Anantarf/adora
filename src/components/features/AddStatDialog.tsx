@@ -45,9 +45,10 @@ const PASSING_DEFAULTS = { chestPass: 0, bouncePass: 0, overheadPass: 0 };
 const DEFAULT_METRICS: StatForm = { dribble: DRIBBLE_DEFAULTS, passing: PASSING_DEFAULTS, layUp: 0, shooting: 0, notes: "" };
 
 // ─── ScoreField Component ─────────────────────────────
-function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...props }: { label: string; error?: string; max?: number | string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "max">) {
+function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, name, ...props }: { label: string; error?: string; max?: number | string; name?: string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "max">) {
   const max = Number(rawMax);
   const maxDigits = max.toString().length;
+  const fieldId = `score-field-${name?.replace(/\./g, "-")}`;
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value.length > maxDigits) e.target.value = e.target.value.slice(0, maxDigits);
     if (Number(e.target.value) > max) e.target.value = max.toString();
@@ -55,8 +56,10 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, ...
   };
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-micro text-muted-foreground">{label}</label>
+      <label htmlFor={fieldId} className="text-micro text-muted-foreground">{label}</label>
       <Input
+        id={fieldId}
+        name={name}
         type="number"
         min={0}
         max={max}

@@ -17,13 +17,14 @@ interface LoginPasswordFieldProps extends LoginFieldProps {
 export function LoginUsernameField({ label, placeholder, registration, errorMessage, disabled }: LoginFieldProps) {
   return (
     <div className="space-y-2">
-      <label className="text-micro text-white/70 ml-1">{label}</label>
+      <label htmlFor="field-username" className="text-micro text-white/70 ml-1">{label}</label>
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
           <User className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
         </div>
         <input
           {...registration}
+          id="field-username"
           type="text"
           disabled={disabled}
           autoComplete="username"
@@ -45,13 +46,14 @@ export function LoginUsernameField({ label, placeholder, registration, errorMess
 export function LoginPasswordField({ label, placeholder, registration, errorMessage, disabled, showPassword, onTogglePassword }: LoginPasswordFieldProps) {
   return (
     <div className="space-y-2">
-      <label className="text-micro text-white/70 ml-1">{label}</label>
+      <label htmlFor="field-password" className="text-micro text-white/70 ml-1">{label}</label>
       <div className="relative group">
         <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
           <Lock className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
         </div>
         <input
           {...registration}
+          id="field-password"
           type={showPassword ? "text" : "password"}
           disabled={disabled}
           autoComplete="current-password"

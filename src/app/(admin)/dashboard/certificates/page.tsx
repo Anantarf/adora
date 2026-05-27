@@ -5,6 +5,7 @@ import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "l
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -97,8 +98,70 @@ export default function CertificatesPage() {
 
       {/* ── Loading State ── */}
       {isLoading && (
-        <div className="flex items-center justify-center gap-2 py-16 text-primary font-bold text-xs uppercase tracking-widest">
-          <Loader2 className="size-4 animate-spin" /> Memuat sertifikat...
+        <div className="flex flex-col gap-4">
+          {/* Mobile Card Skeletons */}
+          <div className="md:hidden flex flex-col gap-3 animate-pulse">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="rounded-xl border border-border/50 bg-card p-4 flex flex-col gap-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2 flex-1">
+                    <Skeleton className="size-4 rounded-full bg-muted/60" />
+                    <Skeleton className="h-4 w-3/4 bg-muted/60" />
+                  </div>
+                  <Skeleton className="h-3 w-6 bg-muted/40" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-6 w-24 bg-muted/40" />
+                  <Skeleton className="h-4 w-20 bg-muted/40" />
+                </div>
+                <div className="flex gap-2 pt-2 border-t border-border/40">
+                  <Skeleton className="h-9 flex-1 bg-muted/50 rounded-lg" />
+                  <Skeleton className="h-9 w-9 bg-muted/50 rounded-lg" />
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Desktop Table Skeletons */}
+          <div className="hidden md:block rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm overflow-x-auto">
+            <Table className="min-w-150">
+              <TableHeader className="bg-muted/30">
+                <TableRow className="hover:bg-transparent border-b border-border/50">
+                  <TableHead className="w-10 text-center text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">No</TableHead>
+                  <TableHead className="text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Judul Sertifikat</TableHead>
+                  <TableHead className="w-44 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Ditujukan Kepada</TableHead>
+                  <TableHead className="w-36 text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Tanggal Unggah</TableHead>
+                  <TableHead className="w-28 text-right text-[10px] uppercase font-semibold tracking-widest text-muted-foreground">Aksi</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <TableRow key={i} className="animate-pulse">
+                    <TableCell className="text-center w-10">
+                      <Skeleton className="h-4 w-4 mx-auto bg-muted/50" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Skeleton className="size-4 bg-muted/60" />
+                        <Skeleton className="h-4 w-48 bg-muted/60" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-44">
+                      <Skeleton className="h-6 w-28 bg-muted/40" />
+                    </TableCell>
+                    <TableCell className="w-36">
+                      <Skeleton className="h-4 w-24 bg-muted/40" />
+                    </TableCell>
+                    <TableCell className="w-28 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Skeleton className="h-8 w-12 bg-muted/50" />
+                        <Skeleton className="h-8 w-8 bg-muted/50" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
 

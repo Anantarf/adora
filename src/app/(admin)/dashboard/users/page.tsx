@@ -9,6 +9,7 @@ import { UserAccountCard } from "@/components/features/users/UserAccountCard";
 import { UsersManagementHeader } from "@/components/features/users/UsersManagementHeader";
 import { LinkedPlayersModal } from "@/components/features/users/LinkedPlayersModal";
 import { Pagination } from "@/components/ui/pagination";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,8 +22,8 @@ export default function UsersManagementPage() {
   const normalizedSearch = searchTerm.trim();
   const { data: usersPage, isLoading } = useUsersPage(activeRole, normalizedSearch, currentPage, ITEMS_PER_PAGE);
   
-  const { mutateAsync: deleteUser } = useDeleteUser();
-  const { mutateAsync: resetPassword } = useResetPassword();
+  const { mutateAsync: deleteUser, isPending: isDeleting } = useDeleteUser();
+  const { mutateAsync: resetPassword, isPending: isResetting } = useResetPassword();
 
   const paginatedUsers = usersPage?.items ?? [];
   const currentServerPage = usersPage?.page ?? currentPage;
@@ -46,14 +47,22 @@ export default function UsersManagementPage() {
 
   const handleDeleteConfirm = async () => {
     if (!activeTargetId) return;
-    await deleteUser(activeTargetId);
-    setUiState(null);
+    try {
+      await deleteUser(activeTargetId);
+      setUiState(null);
+    } catch {
+      // Error is caught by mutation toast, just reset uiState in case
+    }
   };
 
   const handleResetConfirm = async () => {
     if (!activeTargetId) return;
-    await resetPassword({ id: activeTargetId });
-    setUiState(null);
+    try {
+      await resetPassword({ id: activeTargetId });
+      setUiState(null);
+    } catch {
+      // Error is caught by mutation toast, just reset uiState in case
+    }
   };
 
   const handleDialogOpenChange = (open: boolean) => {
@@ -66,9 +75,23 @@ export default function UsersManagementPage() {
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-border/50 bg-card">
-            <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-micro text-muted-foreground animate-pulse">Memuat Data Akun...</p>
+          <div className="space-y-2 animate-pulse">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-border/50 bg-card gap-3">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  <Skeleton className="size-8 rounded-full shrink-0 bg-muted/50" />
+                  <div className="flex items-center gap-2 min-w-0 flex-wrap flex-1">
+                    <Skeleton className="h-4 w-32 bg-muted/50" />
+                    <Skeleton className="h-4 w-16 bg-muted/40" />
+                    <Skeleton className="h-5 w-20 rounded bg-muted/40" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <Skeleton className="h-7 w-20 rounded-lg bg-muted/40" />
+                  <Skeleton className="h-7 w-7 rounded-lg bg-muted/40" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : totalAccounts === 0 ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
@@ -87,7 +110,7 @@ export default function UsersManagementPage() {
 
       {!isLoading && totalPages > 1 && <Pagination currentPage={currentServerPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
-      <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} />
+      <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} isDeleting={isDeleting} isResetting={isResetting} />
       <LinkedPlayersModal
         parentId={linkedPlayersParentId}
         parentName={(linkedPlayersParentId ? paginatedUsers.find((u) => u.id === linkedPlayersParentId)?.name || paginatedUsers.find((u) => u.id === linkedPlayersParentId)?.username : undefined) ?? undefined}

@@ -30,23 +30,7 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
   }
 
   return (
-    <>
-      <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: rgba(234, 179, 8, 0.2);
-          border-radius: 10px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: rgba(234, 179, 8, 0.4);
-        }
-      `}</style>
-      <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
+    <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
         <div className="p-4 md:p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
           <div>
             <h2 className="font-heading text-lg tracking-wider text-foreground flex items-center gap-2">
@@ -109,6 +93,5 @@ export function RecentRegistrations({ registrations, isLoading }: RegistrationPr
           </div>
         )}
       </div>
-    </>
   );
 }

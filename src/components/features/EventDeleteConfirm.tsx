@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Trash2, AlertTriangle, CalendarOff } from "lucide-react";
+import { Trash2, AlertTriangle, CalendarOff, Loader2 } from "lucide-react";
 import { useDeleteEvent } from "@/hooks/use-schedule";
 import { toast } from "sonner";
 
@@ -11,7 +11,7 @@ interface EventDeleteConfirmProps {
 }
 
 export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProps) {
-  const { mutateAsync: deleteEvent } = useDeleteEvent();
+  const { mutateAsync: deleteEvent, isPending } = useDeleteEvent();
 
   const handleConfirm = async () => {
     if (!targetId) return;
@@ -25,7 +25,7 @@ export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProp
   };
 
   return (
-    <AlertDialog open={!!targetId} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <AlertDialog open={!!targetId} onOpenChange={(open) => { if (!open && !isPending) onClose(); }}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">
@@ -54,12 +54,16 @@ export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProp
         </div>
 
         <AlertDialogFooter className="sm:flex-row flex-col gap-2 sm:gap-0">
-          <AlertDialogCancel className="sm:mr-2 h-11 font-bold uppercase tracking-widest text-xs border-border/50">Batal</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-11 font-bold uppercase tracking-widest text-xs border-border/50">Batal</AlertDialogCancel>
           <AlertDialogAction
             className="h-11 font-bold tracking-widest uppercase text-xs"
-            onClick={handleConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              handleConfirm();
+            }}
+            disabled={isPending}
           >
-            <Trash2 className="size-4 mr-2" /> Hapus Permanen
+            {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <Trash2 className="size-4 mr-2" />} Hapus Permanen
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

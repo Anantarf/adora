@@ -11,6 +11,7 @@ import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
 import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
 import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -370,10 +371,33 @@ export default function StatisticsPage() {
       {selectedPeriodId && (
         <div className="md:hidden space-y-4">
           {(playersLoading || statsLoading) && (
-            <div className="rounded-xl border border-border/50 bg-card p-6 text-center">
-              <div className="flex items-center justify-center gap-2 text-primary font-bold">
-                <Loader2 className="size-5 animate-spin" /> Memuat data penilaian...
-              </div>
+            <div className="space-y-4 animate-pulse">
+              {[1, 2].map((gIdx) => (
+                <div key={gIdx} className="rounded-xl border border-border/50 bg-card overflow-hidden shadow-sm">
+                  <div className="px-4 py-2.5 border-b border-border/50 bg-muted/20">
+                    <Skeleton className="h-4 w-32 bg-muted/60" />
+                  </div>
+                  <div className="divide-y divide-border/40 p-4 space-y-4">
+                    {[1, 2].map((pIdx) => (
+                      <div key={pIdx} className="space-y-3 pt-3 first:pt-0">
+                        <div className="flex items-center justify-between">
+                          <Skeleton className="h-4 w-40 bg-muted/50" />
+                          <Skeleton className="h-3 w-12 bg-muted/40" />
+                        </div>
+                        <div className="flex gap-2 pb-2">
+                          {[1, 2, 3, 4].map((mIdx) => (
+                            <Skeleton key={mIdx} className="h-10 w-20 rounded-md shrink-0 bg-muted/40" />
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Skeleton className="h-10 rounded-md bg-muted/40" />
+                          <Skeleton className="h-10 rounded-md bg-muted/40" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
@@ -525,13 +549,35 @@ export default function StatisticsPage() {
             </TableHeader>
             <TableBody>
               {(playersLoading || statsLoading) && (
-                <TableRow>
-                  <TableCell colSpan={FLAT_METRIC_DEFS.length + 5} className="h-24 text-center">
-                    <div className="flex items-center justify-center gap-2 text-primary font-bold">
-                      <Loader2 className="size-5 animate-spin" /> Memuat data penilaian...
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <TableRow key={i} className="animate-pulse">
+                      <TableCell className="text-center w-12 sticky left-0 bg-card z-20">
+                        <Skeleton className="h-4 w-4 mx-auto bg-muted/50" />
+                      </TableCell>
+                      <TableCell className="min-w-40 max-w-50 sticky left-12 bg-card z-20">
+                        <Skeleton className="h-4 w-32 bg-muted/50" />
+                      </TableCell>
+                      {FLAT_METRIC_DEFS.map((def) => (
+                        <TableCell key={def.key} className="text-center">
+                          <Skeleton className="h-4 w-6 mx-auto bg-muted/40" />
+                        </TableCell>
+                      ))}
+                      <TableCell className="text-center">
+                        <Skeleton className="h-5 w-10 mx-auto rounded bg-muted/40" />
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Skeleton className="h-5 w-16 mx-auto rounded bg-muted/40" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Skeleton className="h-7 w-7 rounded bg-muted/40" />
+                          <Skeleton className="h-7 w-7 rounded bg-muted/40" />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </>
               )}
               {!playersLoading && !statsLoading && playersByGroup.length === 0 && (
                 <TableRow>

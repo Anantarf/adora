@@ -93,27 +93,27 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">Nama Lengkap</label>
-            <Input {...register("name")} placeholder="Contoh: Budi Santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            <label htmlFor="user-name" className="text-micro text-muted-foreground ml-1">Nama Lengkap</label>
+            <Input id="user-name" {...register("name")} placeholder="Contoh: Budi Santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.name && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">Username Login</label>
-            <Input {...register("username")} placeholder="Contoh: budi_santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            <label htmlFor="user-username" className="text-micro text-muted-foreground ml-1">Username Login</label>
+            <Input id="user-username" {...register("username")} placeholder="Contoh: budi_santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.username && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.username.message}</p>}
           </div>
 
 
 
           <div className="space-y-1.5">
-            <label className="text-micro text-muted-foreground ml-1">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
+            <label htmlFor="user-password" className="text-micro text-muted-foreground ml-1">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
             {isParent ? (
               <div onClick={() => toast.info("Kata sandi awal orang tua mengikuti pengaturan default sistem.")} className="cursor-not-allowed">
-                <Input value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />
+                <Input id="user-password" value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />
               </div>
             ) : (
-              <Input {...register("password")} type="text" className="h-11 bg-background/50 font-mono rounded-xl border-border/50 focus-visible:ring-primary/50" />
+              <Input id="user-password" {...register("password")} type="text" className="h-11 bg-background/50 font-mono rounded-xl border-border/50 focus-visible:ring-primary/50" />
             )}
             <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-1">
               {isParent ? "*Sandi default diatur secara aman oleh sistem. Beritahu orang tua untuk segera menggantinya setelah login." : "*Admin dapat membuat password mereka sendiri di sini."}

@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Search, Edit2, Trash2, Users, FolderPlus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import * as React from "react";
 import { usePlayersPage } from "@/hooks/use-players";
 import { type PlayerSummary } from "@/types/dashboard";
@@ -130,12 +131,16 @@ export default function PlayersPage() {
         <div className="relative overflow-hidden pb-2">
           <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-background to-transparent sm:hidden" />
           <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-linear-to-l from-background to-transparent sm:hidden" />
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pr-2">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide pr-2" role="tablist" aria-label="Kelompok Latihan">
             {groups?.map((group: Group) => {
               const isActive = effectiveGroupId === group.id;
               return (
                 <button
                   key={group.id}
+                  id={`tab-${group.id}`}
+                  role="tab"
+                  aria-selected={isActive ? "true" : "false"}
+                  aria-controls={`panel-${group.id}`}
                   onClick={() => {
                     setSelectedGroupId(group.id);
                     setSearchQuery("");
@@ -157,11 +162,40 @@ export default function PlayersPage() {
       {/* Content */}
       <AnimatePresence mode="wait">
         {!effectiveGroupId ? null : isPlayersLoading ? (
-          <div key="loading" className="flex items-center justify-center gap-2 p-10 text-primary font-bold text-xs uppercase tracking-widest">
-            <Loader2 className="size-5 animate-spin" /> Memuat pemain...
+          <div key="loading" className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-muted/20 border border-border/50 rounded-lg p-4 animate-pulse">
+              <div className="flex flex-col gap-2 flex-1">
+                <Skeleton className="h-6 w-48 bg-muted/60" />
+                <Skeleton className="h-4 w-32 bg-muted/40" />
+              </div>
+              <div className="flex gap-2 w-full sm:w-auto shrink-0">
+                <Skeleton className="h-9 w-20 rounded-lg bg-muted/50" />
+                <Skeleton className="h-9 w-20 rounded-lg bg-muted/50" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+                <div key={i} className="bg-card border border-border/50 p-4 rounded-lg flex items-center gap-3">
+                  <Skeleton className="size-10 rounded-lg shrink-0 bg-muted/50" />
+                  <div className="flex flex-col gap-2 flex-1">
+                    <Skeleton className="h-4 w-3/4 bg-muted/50" />
+                    <Skeleton className="h-3 w-1/2 bg-muted/40" />
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         ) : (
-          <motion.div key={effectiveGroupId} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex flex-col gap-4">
+          <motion.div
+            key={effectiveGroupId}
+            id={`panel-${effectiveGroupId}`}
+            role="tabpanel"
+            aria-labelledby={`tab-${effectiveGroupId}`}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col gap-4"
+          >
             {selectedGroup && (
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <div className="flex flex-col">
