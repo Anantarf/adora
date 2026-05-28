@@ -30,7 +30,7 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon" className="border-r border-border/50 bg-background">
+    <Sidebar variant="sidebar" collapsible="icon" className="z-40 border-r border-border/50 bg-background">
       <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2">
         <SidebarMenu>
           <SidebarMenuItem>

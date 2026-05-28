@@ -24,9 +24,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <ForcePasswordGate>
-      <SidebarProvider>
+      <SidebarProvider className="min-h-dvh overflow-x-clip bg-background">
         <AdminSidebar />
-        <SidebarInset className="flex relative w-full flex-col min-h-dvh bg-background selection:bg-primary/20">
+        <SidebarInset className="relative flex min-h-dvh min-w-0 w-full flex-col overflow-x-clip bg-background selection:bg-primary/20">
           <header className="flex h-15 w-full shrink-0 items-center justify-between border-b border-border/60 px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-all relative">
             <div className="flex items-center gap-2 z-10">
               <SidebarTrigger className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-all rounded-md" />
@@ -41,12 +41,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
             <div className="w-9 h-9" />
           </header>
-          <div className="w-full flex-1 mx-auto max-w-375 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
-            <div className="w-full animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">{children}</div>
+          <div className="mx-auto flex w-full min-w-0 flex-1 overflow-x-hidden max-w-375 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
+            <div className="w-full min-w-0 animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">{children}</div>
           </div>
 
           {/* Footer for consistency */}
-          <footer className="py-6 text-center border-t border-border/60 bg-background/50 mt-auto">
+          <footer className="mt-auto w-full min-w-0 border-t border-border/60 bg-background/50 py-6 text-center">
             <p className="text-xs font-medium text-muted-foreground">&copy; {new Date().getFullYear()} Adora Basketball Club. All rights reserved.</p>
           </footer>
         </SidebarInset>
