@@ -176,8 +176,7 @@ function Sidebar({
 
   if (collapsible === "none") {
     return (
-      <div className="peer hidden text-sidebar-foreground md:block" data-slot="sidebar" data-side={side} data-variant={variant}>
-        <div data-slot="sidebar-gap" className="relative hidden w-(--sidebar-width) shrink-0 bg-transparent md:block" />
+      <div className="peer hidden w-(--sidebar-width) shrink-0 text-sidebar-foreground md:block" data-slot="sidebar" data-side={side} data-variant={variant}>
         <div
           data-slot="sidebar-container"
           data-side={side}
