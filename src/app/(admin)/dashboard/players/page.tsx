@@ -120,7 +120,7 @@ export default function PlayersPage() {
           <Button variant="outline" size="xl" onClick={() => setUiState({ type: "add-group" })} className="hidden sm:flex">
             <FolderPlus className="size-4" /> Tambah Kelompok
           </Button>
-          <AddPlayerDialog />
+          <AddPlayerDialog defaultGroupId={effectiveGroupId ?? undefined} defaultGroupName={selectedGroup?.name} />
         </div>
       </div>
 

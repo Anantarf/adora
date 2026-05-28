@@ -58,7 +58,7 @@ export function AdminSidebar() {
                   <SidebarMenuButton
                     tooltip={item.title}
                     isActive={isActive(item.url)}
-                    className="h-10 px-3 gap-3 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-base data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:shadow-md"
+                    className="h-10 px-3 gap-3 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-base data-active:bg-primary data-active:text-primary-foreground data-active:shadow-md"
                     render={<Link href={`/dashboard${item.url === "/dashboard" ? "" : item.url}`} />}
                   >
                     <item.icon className="size-4.5" />

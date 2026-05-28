@@ -97,7 +97,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
               setValue={setValue}
               groups={groups}
               isGroupsLoading={isGroupsLoading}
-
+              step="all"
               inputClassName="h-10 bg-background/50"
             />
 

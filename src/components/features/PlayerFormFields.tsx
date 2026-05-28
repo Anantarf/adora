@@ -19,7 +19,8 @@ interface PlayerFormFieldsProps {
   groups: Group[] | undefined;
   isGroupsLoading?: boolean;
   inputClassName?: string;
-  step?: number;
+  step?: number | "all";
+  groupFieldHint?: string;
 }
 
 async function uploadAsset(file: File, assetKey: string) {
@@ -54,6 +55,7 @@ function UploadField({
   assetKey: string;
 }) {
   const [isUploading, setIsUploading] = useState(false);
+  const previewLabel = value ? "Ganti file" : "Unggah";
 
   return (
     <div className="space-y-2">
@@ -68,7 +70,7 @@ function UploadField({
             <span className="text-[10px] text-muted-foreground">PNG atau JPG, maksimal 2MB.</span>
           </div>
         </div>
-        <span className="rounded-lg bg-primary/10 px-3 py-1 text-micro text-primary">Unggah</span>
+        <span className="rounded-lg bg-primary/10 px-3 py-1 text-micro text-primary">{previewLabel}</span>
         <input
           type="file"
           accept="image/png,image/jpeg"
@@ -92,9 +94,14 @@ function UploadField({
         />
       </label>
       {value ? (
-        <a href={value} target="_blank" rel="noreferrer" className="inline-flex text-[11px] font-medium text-primary hover:underline">
-          Lihat file terunggah
-        </a>
+        <div className="space-y-2">
+          <div className="overflow-hidden rounded-xl border border-border/50 bg-background/50 p-2">
+            <img src={value} alt={label} className="h-28 w-full rounded-lg object-contain bg-background/60" />
+          </div>
+          <a href={value} target="_blank" rel="noreferrer" className="inline-flex text-[11px] font-medium text-primary hover:underline">
+            Lihat file terunggah
+          </a>
+        </div>
       ) : null}
       {error ? <p className="text-destructive text-xs">{error}</p> : null}
     </div>
@@ -109,7 +116,8 @@ export function PlayerFormFields({
   groups,
   isGroupsLoading,
   inputClassName = "h-11 rounded-xl bg-background/40",
-  step = 1,
+  step = "all",
+  groupFieldHint,
 }: PlayerFormFieldsProps) {
   const dateOfBirth = useWatch({ control, name: "dateOfBirth" });
   const hasMedicalCondition = useWatch({ control, name: "hasMedicalCondition" });
@@ -121,9 +129,15 @@ export function PlayerFormFields({
     return age === null ? "-" : `${age} tahun`;
   }, [dateOfBirth]);
 
+  const showStep = (targetStep: number) => step === "all" || step === targetStep;
+
   return (
     <>
-      <div className={`space-y-5 ${step === 1 ? "block animate-in fade-in-0 duration-base" : "hidden"}`}>
+      <div className={`space-y-5 ${showStep(1) ? "block" : "hidden"} ${step === 1 ? "animate-in fade-in-0 duration-base" : ""}`}>
+        <div className="space-y-1">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">Data Pribadi</p>
+          <p className="text-xs text-muted-foreground">Isi profil utama calon anggota sebelum lanjut ke kontak dan dokumen.</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
           <div className="space-y-2">
             <label htmlFor="field-player-firstName" className="text-micro text-muted-foreground">
@@ -186,6 +200,7 @@ export function PlayerFormFields({
               )}
             />
             {errors.groupId && <p className="text-destructive text-xs">{errors.groupId.message}</p>}
+            {groupFieldHint ? <p className="text-[11px] text-muted-foreground">{groupFieldHint}</p> : null}
           </div>
 
           <div className="space-y-2">
@@ -241,11 +256,15 @@ export function PlayerFormFields({
         </div>
       </div>
 
-      <div className={`space-y-5 ${step === 2 ? "block animate-in slide-in-from-right-4 duration-base" : "hidden"}`}>
+      <div className={`space-y-5 ${showStep(2) ? "block" : "hidden"} ${step === 2 ? "animate-in slide-in-from-right-4 duration-base" : ""}`}>
+        <div className="space-y-1">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">Kontak dan Alamat</p>
+          <p className="text-xs text-muted-foreground">Alamat rumah utama wajib diisi. Detail tambahan dan alamat KTP/KK bisa dilengkapi bila perlu.</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
           <div className="space-y-2 md:col-span-2">
             <label htmlFor="field-player-addressLine1" className="text-micro text-muted-foreground">
-              Address Line 1 <span className="text-destructive">*</span>
+              Alamat Rumah <span className="text-destructive">*</span>
             </label>
             <Input id="field-player-addressLine1" {...register("addressLine1")} placeholder="Jalan, nomor rumah, RT/RW" className={inputClassName} />
             {errors.addressLine1 && <p className="text-destructive text-xs">{errors.addressLine1.message}</p>}
@@ -253,9 +272,10 @@ export function PlayerFormFields({
 
           <div className="space-y-2 md:col-span-2">
             <label htmlFor="field-player-addressLine2" className="text-micro text-muted-foreground">
-              Address Line 2
+              Detail Alamat Tambahan
             </label>
             <Input id="field-player-addressLine2" {...register("addressLine2")} placeholder="Patokan, blok, atau catatan tambahan (opsional)" className={inputClassName} />
+            <p className="text-[11px] text-muted-foreground">Opsional. Boleh dikosongkan jika tidak ada.</p>
           </div>
 
           <div className="space-y-2">
@@ -295,6 +315,7 @@ export function PlayerFormFields({
             </label>
             <Input id="field-player-phoneNumber" type="tel" {...register("phoneNumber")} placeholder="Boleh nomor pemain atau orang tua" className={inputClassName} />
             {errors.phoneNumber && <p className="text-destructive text-xs">{errors.phoneNumber.message}</p>}
+            <p className="text-[11px] text-muted-foreground">Jika anak belum punya nomor sendiri, isi dengan nomor orang tua.</p>
           </div>
 
           <div className="space-y-2">
@@ -335,7 +356,11 @@ export function PlayerFormFields({
         </div>
       </div>
 
-      <div className={`space-y-5 ${step === 3 ? "block animate-in slide-in-from-right-4 duration-base" : "hidden"}`}>
+      <div className={`space-y-5 ${showStep(3) ? "block" : "hidden"} ${step === 3 ? "animate-in slide-in-from-right-4 duration-base" : ""}`}>
+        <div className="space-y-1">
+          <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">Data Pendukung dan Medis</p>
+          <p className="text-xs text-muted-foreground">Lengkapi riwayat kesehatan dan unggah dokumen pendukung sebelum menyimpan data pemain.</p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
           <div className="space-y-2">
             <label className="text-micro text-muted-foreground">
