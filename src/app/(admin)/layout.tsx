@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <AdminSidebar />
         <SidebarInset className="relative flex min-h-dvh min-w-0 w-full flex-col overflow-x-clip bg-background selection:bg-primary/20">
           <header className="flex h-15 w-full shrink-0 items-center justify-between border-b border-border/60 px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-all relative">
-            <div className="flex items-center gap-2 z-10">
+            <div className="z-10 flex items-center gap-2 md:hidden">
               <SidebarTrigger className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-all rounded-md" />
             </div>
 
@@ -39,7 +39,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               </h1>
             </div>
 
-            <div className="w-9 h-9" />
+            <div className="h-9 w-9 md:hidden" />
           </header>
           <div className="mx-auto flex w-full min-w-0 flex-1 overflow-x-hidden max-w-375 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
             <div className="w-full min-w-0 animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">{children}</div>

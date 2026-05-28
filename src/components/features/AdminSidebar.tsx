@@ -30,15 +30,15 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="icon" className="z-40 border-r border-border/50 bg-background">
-      <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-2">
+    <Sidebar variant="sidebar" collapsible="none" className="z-40 bg-background">
+      <SidebarHeader className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default">
-              <div className="flex aspect-square size-10 items-center justify-center group-data-[collapsible=icon]:size-8">
+              <div className="flex aspect-square size-10 items-center justify-center">
                 <Image src="/logo-new.svg" alt="Adora BBC" width={40} height={40} className="w-auto h-auto object-contain" priority />
               </div>
-              <div className="flex flex-col justify-center overflow-hidden group-data-[collapsible=icon]:hidden ml-1">
+              <div className="ml-1 flex flex-col justify-center overflow-hidden">
                 <span className="font-heading text-lg tracking-widest uppercase text-foreground leading-none mt-0.5">
                   ADORA <span className="text-primary">BBC</span>
                 </span>
@@ -71,7 +71,7 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-3 group-data-[collapsible=icon]:p-2 border-t border-border/50 flex flex-col gap-1">
+      <SidebarFooter className="border-t border-border/50 p-3 flex flex-col gap-1">
         <UserProfileMenu variant="sidebar" />
         <SidebarMenu>
           <SidebarMenuItem>
@@ -81,7 +81,7 @@ export function AdminSidebar() {
               tooltip="Keluar"
             >
               <LogOut className="size-4.5" />
-              <span className="tracking-wide flex-1 group-data-[collapsible=icon]:hidden">Keluar</span>
+              <span className="tracking-wide flex-1">Keluar</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
