@@ -5,20 +5,32 @@ import { prisma as originalPrisma } from "@/lib/prisma";
 import { getObservabilitySnapshotAction } from "@/actions/observability";
 
 const prisma = originalPrisma as unknown as DeepMockProxy<PrismaClient>;
+const operationalGroupBy = prisma.operationalEvent.groupBy as unknown as {
+  mockReset: () => void;
+  mockResolvedValueOnce: (value: unknown) => void;
+};
+const operationalFindMany = prisma.operationalEvent.findMany as unknown as {
+  mockReset: () => void;
+  mockResolvedValueOnce: (value: unknown) => void;
+};
+const webVitalGroupBy = prisma.webVitalEvent.groupBy as unknown as {
+  mockReset: () => void;
+  mockResolvedValueOnce: (value: unknown) => void;
+};
 
 describe("Phase 4 Observability Snapshot", () => {
   beforeEach(() => {
-    prisma.operationalEvent.groupBy.mockReset();
-    prisma.operationalEvent.findMany.mockReset();
-    prisma.webVitalEvent.groupBy.mockReset();
+    operationalGroupBy.mockReset();
+    operationalFindMany.mockReset();
+    webVitalGroupBy.mockReset();
   });
 
   test("menggabungkan ringkasan event operasional dan web vitals buruk", async () => {
-    prisma.operationalEvent.groupBy.mockResolvedValueOnce([
+    operationalGroupBy.mockResolvedValueOnce([
       { source: "upload-api", severity: "ERROR", _count: { _all: 2 } },
       { source: "auth", severity: "WARN", _count: { _all: 3 } },
     ] as never);
-    prisma.operationalEvent.findMany.mockResolvedValueOnce([
+    operationalFindMany.mockResolvedValueOnce([
       {
         id: "evt-1",
         severity: "ERROR",
@@ -29,7 +41,7 @@ describe("Phase 4 Observability Snapshot", () => {
         createdAt: new Date("2025-05-27T03:00:00.000Z"),
       },
     ] as never);
-    prisma.webVitalEvent.groupBy.mockResolvedValueOnce([
+    webVitalGroupBy.mockResolvedValueOnce([
       { name: "LCP", rating: "poor", _count: { _all: 4 } },
       { name: "INP", rating: "needs-improvement", _count: { _all: 1 } },
     ] as never);
@@ -69,9 +81,9 @@ describe("Phase 4 Observability Snapshot", () => {
   });
 
   test("membatasi jendela snapshot minimal 1 jam dan maksimal 168 jam", async () => {
-    prisma.operationalEvent.groupBy.mockResolvedValueOnce([] as never);
-    prisma.operationalEvent.findMany.mockResolvedValueOnce([] as never);
-    prisma.webVitalEvent.groupBy.mockResolvedValueOnce([] as never);
+    operationalGroupBy.mockResolvedValueOnce([] as never);
+    operationalFindMany.mockResolvedValueOnce([] as never);
+    webVitalGroupBy.mockResolvedValueOnce([] as never);
 
     const result = await getObservabilitySnapshotAction({ windowHours: 999 });
 

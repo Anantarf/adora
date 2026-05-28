@@ -10,6 +10,7 @@ describe("Phase 5 Release Safety Helpers", () => {
       NEXTAUTH_URL: "https://adora.example.com",
       NEXT_PUBLIC_SUPABASE_URL: "https://project.supabase.co",
       SUPABASE_SERVICE_ROLE_KEY: "service-role",
+      NODE_ENV: "development",
     });
 
     expect(result.present).toEqual([
@@ -65,6 +66,7 @@ describe("Phase 5 Release Safety Helpers", () => {
       SUPABASE_URL: "https://project.supabase.co",
       SUPABASE_SERVICE_ROLE_KEY: "service-role",
       ALERT_WEBHOOK_URL: "invalid-url",
+      NODE_ENV: "development",
     });
 
     expect(result.warnings).toContain(

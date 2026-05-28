@@ -29,6 +29,7 @@ describe("Operational alert helpers", () => {
       ALERT_WEBHOOK_URL: "https://hooks.example.com/adora",
       ALERT_MIN_SEVERITY: "WARN",
       ALERT_COOLDOWN_MS: "120000",
+      NODE_ENV: "development",
     });
 
     expect(config).toEqual({

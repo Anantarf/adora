@@ -1,27 +1,8 @@
 import type { Metadata } from "next";
-import { Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers/query-provider";
 import { WebVitals } from "@/components/analytics/web-vitals";
 import { Toaster } from "sonner";
-
-// Body Font Base
-const poppins = Poppins({
-  variable: "--font-sans",
-  weight: ["400", "500", "600", "700", "800"],
-  subsets: ["latin"],
-  display: "swap",
-  fallback: ["system-ui", "sans-serif"],
-});
-
-// Title Heading Font
-const montserrat = Montserrat({
-  variable: "--font-heading",
-  weight: ["600", "700", "800", "900"],
-  subsets: ["latin"],
-  display: "swap",
-  fallback: ["system-ui", "sans-serif"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://adorabbc.com"),
@@ -61,8 +42,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const fontVars = {
+    "--font-sans": '"Poppins", "Segoe UI", system-ui, sans-serif',
+    "--font-heading": '"Montserrat", "Arial Narrow", "Segoe UI", sans-serif',
+  } as React.CSSProperties;
+
   return (
-    <html lang="id" className={`${poppins.variable} ${montserrat.variable} dark scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="id" className="dark scroll-smooth" data-scroll-behavior="smooth" suppressHydrationWarning style={fontVars}>
       <body className={`antialiased min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground`}>
         <WebVitals />
         <Providers>
