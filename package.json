@@ -13,6 +13,8 @@
     "release:check": "tsx scripts/release-check.ts",
     "smoke:check": "tsx scripts/smoke-check.ts",
     "ops:alert-check": "tsx scripts/alert-check.ts",
+    "ops:observability-check": "tsx scripts/check-observability-alerts.ts",
+    "validate-secrets": "tsx scripts/validate-secrets.ts",
     "ops:backup-rehearsal": "tsx scripts/backup-rehearsal-check.ts",
     "seed": "tsx prisma/seed.ts",
     "repair:group-meta:dry": "tsx prisma/repair-group-meta.ts --dry-run",

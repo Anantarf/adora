@@ -1,5 +1,6 @@
 import { getPublicHomebases } from "@/actions/homebase";
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { HomebaseSection } from "@/components/features/homebase-section";
 import { GallerySection } from "@/components/features/gallery-section";
 import { LandingHeader } from "@/components/features/landing-header";
@@ -74,9 +75,11 @@ export default async function LandingPage() {
     },
   };
 
+  const nonce = (await headers()).get("x-csp-nonce") ?? undefined;
+
   return (
     <main className="min-h-screen bg-page-dark text-white relative overflow-x-hidden pt-18">
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script nonce={nonce} type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <LandingHeader />
       <LandingHeroSection registrationYearText={registrationYearText} />
       <LandingProgramsSection />

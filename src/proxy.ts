@@ -20,7 +20,7 @@ function getClientIp(request: NextRequest): string {
 // sehingga CSP tetap lebih ketat tanpa memerlukan nonce setup di layout.
 const CSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https://*.supabase.co",
   "connect-src 'self' ws: wss: https://*.supabase.co",
@@ -44,20 +44,12 @@ export default async function proxy(request: NextRequest) {
 
   const ip = getClientIp(request);
   const isApiRoute = pathname.startsWith("/api/");
-  const shouldSkipSharedApiLimit =
-    pathname === "/api/analytics/web-vitals" ||
-    pathname === "/api/health/db" ||
-    pathname === "/api/health/observability";
+  const shouldSkipSharedApiLimit = pathname === "/api/health/db" || pathname === "/api/health/observability";
 
   // --- 0. RATE LIMITING ---
   if (isApiRoute && !shouldSkipSharedApiLimit) {
     try {
-      const limitResult = await consumeFixedWindowLimit(
-        API_RATE_LIMIT_NAMESPACE,
-        ip,
-        MAX_API_REQUESTS_PER_MINUTE,
-        RATE_LIMIT_WINDOW_MS,
-      );
+      const limitResult = await consumeFixedWindowLimit(API_RATE_LIMIT_NAMESPACE, ip, MAX_API_REQUESTS_PER_MINUTE, RATE_LIMIT_WINDOW_MS);
 
       if (!limitResult.allowed) {
         return new NextResponse("Rate limit terlampaui.", { status: 429 });
@@ -74,14 +66,36 @@ export default async function proxy(request: NextRequest) {
   const response = NextResponse.next();
 
   // --- 1. SECURITY HEADERS ---
-  response.headers.set("X-Frame-Options", "DENY");
-  response.headers.set("X-Content-Type-Options", "nosniff");
-  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  response.headers.set("X-XSS-Protection", "1; mode=block");
-  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  response.headers.set("Content-Security-Policy", CSP);
+  // Generate per-request CSP nonce and inject into the forwarded request headers
+  const nonce = crypto.randomUUID().replace(/-/g, "");
+
+  // Inject nonce into the request so server components/layouts can read it
+  const forwardedRequestHeaders = new Headers(request.headers);
+  forwardedRequestHeaders.set("x-csp-nonce", nonce);
+
+  // Build a CSP that allows scripts/styles only when the correct nonce is present
+  const dynamicCsp = [
+    "default-src 'self'",
+    `script-src 'self' 'nonce-${nonce}'`,
+    `style-src 'self' 'nonce-${nonce}'`,
+    "img-src 'self' data: blob: https://*.supabase.co",
+    "connect-src 'self' ws: wss: https://*.supabase.co",
+    "font-src 'self'",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+
+  const securedResponse = NextResponse.next({ request: { headers: forwardedRequestHeaders } });
+  securedResponse.headers.set("X-Frame-Options", "DENY");
+  securedResponse.headers.set("X-Content-Type-Options", "nosniff");
+  securedResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  securedResponse.headers.set("X-XSS-Protection", "1; mode=block");
+  securedResponse.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  securedResponse.headers.set("Content-Security-Policy", dynamicCsp);
   if (process.env.NODE_ENV === "production") {
-    response.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    securedResponse.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   }
 
   // --- 2. CORS ---
@@ -89,25 +103,21 @@ export default async function proxy(request: NextRequest) {
   const host = request.headers.get("host");
   const isCrossOrigin = (() => {
     if (!origin || !host) return false;
-    try { return new URL(origin).hostname !== host.split(":")[0]; }
-    catch { return true; }
+    try {
+      return new URL(origin).hostname !== host.split(":")[0];
+    } catch {
+      return true;
+    }
   })();
   if (isCrossOrigin) {
     const isReadOnly = request.method === "GET" || request.method === "HEAD";
     if (!isReadOnly) {
-      return new NextResponse(
-        JSON.stringify({ error: "Akses lintas asal (CORS) tidak diizinkan." }),
-        { status: 403, headers: { "Content-Type": "application/json" } }
-      );
+      return new NextResponse(JSON.stringify({ error: "Akses lintas asal (CORS) tidak diizinkan." }), { status: 403, headers: { "Content-Type": "application/json" } });
     }
   }
 
   // --- 3. ROLE-BASED ACCESS CONTROL ---
-  const isProtectedRoute =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/parent") ||
-    pathname.startsWith("/api/admin") ||
-    pathname.startsWith("/api/parent");
+  const isProtectedRoute = pathname.startsWith("/dashboard") || pathname.startsWith("/parent") || pathname.startsWith("/api/admin") || pathname.startsWith("/api/parent");
 
   if (isProtectedRoute) {
     const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
@@ -130,11 +140,9 @@ export default async function proxy(request: NextRequest) {
     response.headers.set("Expires", "0");
   }
 
-  return response;
+  return securedResponse;
 }
 
 export const config = {
-  matcher: [
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|css|js|map|txt|xml|woff|woff2)$).*)",
-  ],
+  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|css|js|map|txt|xml|woff|woff2)$).*)"],
 };
