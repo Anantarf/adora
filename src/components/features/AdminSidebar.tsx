@@ -1,12 +1,13 @@
 "use client";
 
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarFooter, SidebarRail, useSidebar } from "@/components/ui/sidebar";
 import { LayoutDashboard, Users, CheckSquare, FileBadge, LineChart, ShieldAlert, Layers, CalendarDays, LogOut, UserPlus, Settings } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { UserProfileMenu } from "./UserProfileMenu";
 import { signOut } from "next-auth/react";
+import { cn } from "@/lib/utils";
 
 const navItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
@@ -23,6 +24,8 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const isActive = (url: string) => {
     const full = `/dashboard${url === "/dashboard" ? "" : url}`;
@@ -30,16 +33,16 @@ export function AdminSidebar() {
   };
 
   return (
-    <Sidebar variant="sidebar" collapsible="none" className="z-40 bg-background">
-      <SidebarHeader className="p-4">
+    <Sidebar variant="sidebar" collapsible="icon" className="z-40 bg-background">
+      <SidebarHeader className={cn("transition-all duration-300", isCollapsed ? "px-2 py-4" : "p-4")}>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton size="lg" className="hover:bg-transparent cursor-default">
-              <div className="flex aspect-square size-10 items-center justify-center">
-                <Image src="/logo-new.svg" alt="Adora BBC" width={40} height={40} className="w-auto h-auto object-contain" priority />
+            <SidebarMenuButton size="lg" className={cn("hover:bg-transparent cursor-default flex", isCollapsed ? "justify-center" : "justify-start")}>
+              <div className={cn("flex aspect-square items-center justify-center transition-all duration-300", isCollapsed ? "size-8" : "size-10")}>
+                <Image src="/logo-new.svg" alt="Adora BBC" width={isCollapsed ? 32 : 40} height={isCollapsed ? 32 : 40} className="w-auto h-auto object-contain" priority />
               </div>
-              <div className="ml-1 flex flex-col justify-center overflow-hidden">
-                <span className="font-heading text-lg tracking-widest uppercase text-foreground leading-none mt-0.5">
+              <div className={cn("flex flex-col justify-center overflow-hidden transition-all duration-300", isCollapsed ? "w-0 opacity-0 pointer-events-none ml-0" : "w-auto opacity-100 ml-1")}>
+                <span className="font-heading text-lg tracking-widest uppercase text-foreground leading-none mt-0.5 whitespace-nowrap">
                   ADORA <span className="text-primary">BBC</span>
                 </span>
               </div>
@@ -61,8 +64,11 @@ export function AdminSidebar() {
                     className="h-10 px-3 gap-3 rounded-xl hover:bg-primary/10 hover:text-primary transition-all duration-base data-active:bg-primary data-active:text-primary-foreground data-active:shadow-md"
                     render={<Link href={`/dashboard${item.url === "/dashboard" ? "" : item.url}`} />}
                   >
-                    <item.icon className="size-4.5" />
-                    <span className="font-semibold tracking-wide flex-1">{item.title}</span>
+                    <item.icon className="size-4.5 shrink-0" />
+                    <span className={cn(
+                      "font-semibold tracking-wide flex-1 transition-all duration-300 whitespace-nowrap overflow-hidden",
+                      isCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-auto opacity-100"
+                    )}>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -71,7 +77,7 @@ export function AdminSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/50 p-3 flex flex-col gap-1">
+      <SidebarFooter className={cn("border-t border-border/50 flex flex-col gap-1 transition-all duration-300", isCollapsed ? "px-2 py-3" : "p-3")}>
         <UserProfileMenu variant="sidebar" />
         <SidebarMenu>
           <SidebarMenuItem>
@@ -80,12 +86,17 @@ export function AdminSidebar() {
               className="h-10 px-3 gap-3 rounded-xl hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-base font-bold"
               tooltip="Keluar"
             >
-              <LogOut className="size-4.5" />
-              <span className="tracking-wide flex-1">Keluar</span>
+              <LogOut className="size-4.5 shrink-0" />
+              <span className={cn(
+                "tracking-wide flex-1 transition-all duration-300 whitespace-nowrap overflow-hidden",
+                isCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-auto opacity-100"
+              )}>Keluar</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   );
 }
+

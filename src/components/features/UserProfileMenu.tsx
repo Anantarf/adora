@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 const changePasswordSchema = z
   .object({
@@ -94,6 +96,8 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
 export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "sidebar" }) {
   const { data: session } = useSession();
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
 
   const username = session?.user?.username || "ADMIN";
   const initials = username.slice(0, 2).toUpperCase();
@@ -102,13 +106,20 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
     return (
       <>
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex w-full items-center gap-3 px-3 py-2 rounded-xl hover:bg-primary/10 hover:text-primary transition-all text-left outline-none group">
+          <DropdownMenuTrigger className={cn(
+            "flex items-center rounded-xl hover:bg-primary/10 hover:text-primary transition-all text-left outline-none group",
+            isCollapsed ? "size-8 justify-center mx-auto" : "w-full gap-3 px-3 py-2"
+          )}>
             <div className="size-8 rounded-full bg-muted border border-border/50 flex items-center justify-center text-foreground/70 font-black text-[10px] tracking-widest shrink-0 group-hover:bg-muted/80 transition-colors">{initials}</div>
-            <div className="flex flex-col flex-1 min-w-0 leading-none group-data-[collapsible=icon]:hidden">
-              <span className="text-sm font-bold text-foreground truncate">{username}</span>
-              <span className="text-micro text-muted-foreground/75 mt-0.5">Pengaturan Akun</span>
-            </div>
-            <ChevronUp className="size-4 text-muted-foreground/50 group-hover:text-primary group-data-[collapsible=icon]:hidden shrink-0" />
+            {!isCollapsed && (
+              <div className="flex flex-col flex-1 min-w-0 leading-none transition-all duration-300">
+                <span className="text-sm font-bold text-foreground truncate">{username}</span>
+                <span className="text-micro text-muted-foreground/75 mt-0.5">Pengaturan Akun</span>
+              </div>
+            )}
+            {!isCollapsed && (
+              <ChevronUp className="size-4 text-muted-foreground/50 group-hover:text-primary shrink-0" />
+            )}
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" side="right" className="w-56 bg-card border-border/50 rounded-xl shadow-xl ml-2">
             <DropdownMenuGroup>

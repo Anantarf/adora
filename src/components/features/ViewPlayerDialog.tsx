@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2, Link2, ImageIcon, PenLine } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { usePlayerDetail, useUpdatePlayer } from "@/hooks/use-players";
+import { usePlayerDetail, useUpdatePlayer, type PlayerDetailData } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 
 import { toast } from "sonner";
@@ -22,30 +22,62 @@ interface ViewPlayerDialogProps {
   onDelete: () => void;
 }
 
+function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <section className="space-y-3 rounded-xl border border-border/50 bg-background/50 p-4">
+      <div className="border-b border-border/40 pb-2">
+        <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">{title}</h3>
+      </div>
+      <dl className="divide-y divide-border/40">{children}</dl>
+    </section>
+  );
+}
+
+function DetailRow({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: React.ReactNode;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <div className="grid grid-cols-12 items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
+      <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
+        {icon}
+        {label}
+      </dt>
+      <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{value}</dd>
+    </div>
+  );
+}
+
 export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: ViewPlayerDialogProps) {
   const [isEditing, setIsEditing] = useState(false);
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
   const { data: player, isLoading: isPlayerLoading } = usePlayerDetail(playerId, open);
+  const resolvedPlayer = (player as unknown as Player) ?? null;
 
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
   const { register, handleSubmit, control, setValue, formState: { errors }, reset } = useForm<PlayerFormValues>({
     resolver: zodResolver(playerSchema),
-    defaultValues: player ? playerToFormValues(player as Player) : undefined,
+    defaultValues: resolvedPlayer ? playerToFormValues(resolvedPlayer) : undefined,
   });
 
   useEffect(() => {
-    if (!open || !player) {
+    if (!open || !resolvedPlayer) {
       return;
     }
 
-    reset(playerToFormValues(player as Player));
-  }, [open, playerId, player, reset]);
+    reset(playerToFormValues(resolvedPlayer));
+  }, [open, playerId, resolvedPlayer, reset]);
 
   const onSubmit = async (data: PlayerFormValues) => {
-    if (!player) return;
+    if (!resolvedPlayer) return;
     try {
-      await updatePlayer({ id: player.id, data: { ...data, parentId: data.parentId || null } });
+      await updatePlayer({ id: resolvedPlayer.id, data: { ...data, parentId: data.parentId || null } });
       toast.success(`Profil ${buildPlayerFullName(data.firstName, data.lastName)} berhasil diperbarui!`);
       reset(data);
       setIsEditing(false);
@@ -71,16 +103,16 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
           <DialogTitle className="text-lg font-heading tracking-wide text-foreground text-left">
             {isEditing ? "Ubah Profil Pemain" : isPlayerLoading ? "Memuat Detail Pemain" : "Detail Pemain"}
           </DialogTitle>
-          {!isEditing && player && (
+          {!isEditing && resolvedPlayer && (
             <dl className="rounded-lg border border-border/50 bg-background/40 divide-y divide-border/40">
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
                 <dt className="col-span-4 text-micro text-muted-foreground">Nama</dt>
-                <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{buildPlayerFullName(player.firstName, player.lastName) || player.name}</dd>
+                <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{buildPlayerFullName(resolvedPlayer.firstName, resolvedPlayer.lastName) || resolvedPlayer.name}</dd>
               </div>
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
                 <dt className="col-span-4 text-micro text-muted-foreground">Kelompok</dt>
                 <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                  {player.group ? player.group.name : "Belum masuk kelompok"}
+                  {resolvedPlayer.group ? resolvedPlayer.group.name : "Belum masuk kelompok"}
                 </dd>
               </div>
             </dl>
@@ -88,7 +120,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
         </DialogHeader>
 
         {isEditing ? (
-          player ? (
+          resolvedPlayer ? (
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 pt-1.5">
             <PlayerFormFields
               register={register}
@@ -108,7 +140,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                 className="flex-1 h-10 font-semibold border-border/60"
                 onClick={() => {
                   setIsEditing(false);
-                  reset(playerToFormValues(player as Player));
+                  reset(playerToFormValues(resolvedPlayer as Player));
                 }}
               >
                 Batal
@@ -126,125 +158,83 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
           )
         ) : (
           <>
-            {!player ? (
+            {!resolvedPlayer ? (
               <div className="py-10 flex items-center justify-center text-muted-foreground">
                 <Loader2 className="size-5 animate-spin mr-2" /> Memuat detail pemain...
               </div>
             ) : (
               <>
             <div className="py-1.5">
-              <dl className="rounded-xl border border-border/50 bg-background/50 divide-y divide-border/40">
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
-                    <Calendar className="size-3.5" /> Tgl Lahir
-                  </dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {player.dateOfBirth ? new Date(player.dateOfBirth).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Umur</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {calculateAgeFromDate(player.dateOfBirth) === null ? "-" : `${calculateAgeFromDate(player.dateOfBirth)} tahun`}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Tempat Lahir</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.placeOfBirth || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Jenis Kelamin</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.gender || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Agama</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.religion || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Berat/Tinggi</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {player.weight || "-"} / {player.height || "-"}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
-                    <MapPin className="size-3.5" /> Asal Sekolah
-                  </dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.schoolOrigin || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Alamat Rumah</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {[player.addressLine1 || player.address, player.addressLine2, player.city, player.province, player.postalCode].filter(Boolean).join(", ") || "-"}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Alamat KTP/KK</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.ktpAddress || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Email</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.email || "-"}</dd>
-                </div>
-                {player.phoneNumber && (
-                  <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                    <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
-                      <Phone className="size-3.5" /> No. Telf
-                    </dt>
-                    <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.phoneNumber}</dd>
-                  </div>
-                )}
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Instagram</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.instagram || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Nama Orang Tua</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {player.parentName || "-"}
-                    {player.user && (
-                      <span className="ml-2 inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-primary/30 bg-primary/10 text-primary text-[10px] font-bold tracking-wide leading-none">
-                        <Link2 className="size-2.5" />
-                        {player.user.username ?? player.user.id}
-                      </span>
-                    )}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">No. Telf. Orang Tua</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.parentPhoneNumber || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Alamat Orang Tua</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.parentAddress || "-"}</dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Riwayat Penyakit</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {player.hasMedicalCondition ? player.medicalConditionDetail || player.medicalHistory || "-" : "Tidak ada"}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Pas Foto</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {player.photoUrl ? (
-                      <a href={player.photoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-                        <ImageIcon className="size-3.5" /> Lihat Pas Foto
-                      </a>
-                    ) : "-"}
-                  </dd>
-                </div>
-                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
-                  <dt className="col-span-4 text-micro text-muted-foreground">Tanda Tangan</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                    {player.signatureUrl ? (
-                      <a href={player.signatureUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-                        <PenLine className="size-3.5" /> Lihat Tanda Tangan
-                      </a>
-                    ) : "-"}
-                  </dd>
-                </div>
-              </dl>
+              <div className="space-y-4">
+                <DetailSection title="Data Pribadi">
+                  <DetailRow
+                    label="Tgl Lahir"
+                    icon={<Calendar className="size-3.5" />}
+                    value={resolvedPlayer.dateOfBirth ? new Date(resolvedPlayer.dateOfBirth).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
+                  />
+                  <DetailRow label="Umur" value={calculateAgeFromDate(resolvedPlayer.dateOfBirth) === null ? "-" : `${calculateAgeFromDate(resolvedPlayer.dateOfBirth)} tahun`} />
+                  <DetailRow label="Tempat Lahir" value={resolvedPlayer.placeOfBirth || "-"} />
+                  <DetailRow label="Jenis Kelamin" value={resolvedPlayer.gender || "-"} />
+                  <DetailRow label="Agama" value={resolvedPlayer.religion || "-"} />
+                  <DetailRow label="Berat/Tinggi" value={`${resolvedPlayer.weight || "-"} / ${resolvedPlayer.height || "-"}`} />
+                  <DetailRow label="Asal Sekolah" icon={<MapPin className="size-3.5" />} value={resolvedPlayer.schoolOrigin || "-"} />
+                </DetailSection>
+
+                <DetailSection title="Kontak dan Alamat">
+                  <DetailRow
+                    label="Alamat Rumah"
+                    value={[resolvedPlayer.addressLine1 || resolvedPlayer.address, resolvedPlayer.addressLine2, resolvedPlayer.city, resolvedPlayer.province, resolvedPlayer.postalCode].filter(Boolean).join(", ") || "-"}
+                  />
+                  <DetailRow label="Alamat KTP/KK" value={resolvedPlayer.ktpAddress || "-"} />
+                  <DetailRow label="Email" value={resolvedPlayer.email || "-"} />
+                  <DetailRow label="No. Telf" icon={<Phone className="size-3.5" />} value={resolvedPlayer.phoneNumber || "-"} />
+                  <DetailRow label="Instagram" value={resolvedPlayer.instagram || "-"} />
+                  <DetailRow
+                    label="Nama Orang Tua"
+                    value={
+                      <>
+                        {resolvedPlayer.parentName || "-"}
+                        {resolvedPlayer.user && (
+                          <span className="ml-2 inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold leading-none tracking-wide text-primary">
+                            <Link2 className="size-2.5" />
+                            {resolvedPlayer.user.username ?? resolvedPlayer.user.id}
+                          </span>
+                        )}
+                      </>
+                    }
+                  />
+                  <DetailRow label="No. Telf. Orang Tua" value={resolvedPlayer.parentPhoneNumber || "-"} />
+                  <DetailRow label="Alamat Orang Tua" value={resolvedPlayer.parentAddress || "-"} />
+                </DetailSection>
+
+                <DetailSection title="Medis dan Dokumen">
+                  <DetailRow label="Riwayat Penyakit" value={resolvedPlayer.hasMedicalCondition ? resolvedPlayer.medicalConditionDetail || resolvedPlayer.medicalHistory || "-" : "Tidak ada"} />
+                  <DetailRow
+                    label="Pas Foto"
+                    value={
+                      resolvedPlayer.photoUrl ? (
+                        <a href={resolvedPlayer.photoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+                          <ImageIcon className="size-3.5" /> Lihat Pas Foto
+                        </a>
+                      ) : (
+                        "-"
+                      )
+                    }
+                  />
+                  <DetailRow
+                    label="Tanda Tangan"
+                    value={
+                      resolvedPlayer.signatureUrl ? (
+                        <a href={resolvedPlayer.signatureUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+                          <PenLine className="size-3.5" /> Lihat Tanda Tangan
+                        </a>
+                      ) : (
+                        "-"
+                      )
+                    }
+                  />
+                </DetailSection>
+              </div>
             </div>
 
             <div className="pt-3 border-t border-border/50 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-1.5">

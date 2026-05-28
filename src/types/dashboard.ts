@@ -141,6 +141,13 @@ export interface PlayerSummary {
     id: string;
     name: string;
   } | null;
+  gender?: string | null;
+  dateOfBirth?: Date | string | null;
+  phoneNumber?: string | null;
+  hasMedicalCondition?: boolean;
+  medicalConditionDetail?: string | null;
+  photoUrl?: string | null;
+  signatureUrl?: string | null;
 }
 
 export interface UserSession {

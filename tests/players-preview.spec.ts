@@ -17,24 +17,35 @@ test.describe("Players Admin Preview", () => {
     await page.goto("/dashboard/players", { waitUntil: "domcontentloaded" });
 
     await expect(page.getByRole("heading", { name: /Kelompok Latihan/i })).toBeVisible({ timeout: 15_000 });
-    await expect(page.getByText(/Kelola data pemain dan kelompok latihan/i)).toBeVisible();
+    await expect(page.getByText(/Kelola data pembagian kelas latihan dan database pemain/i)).toBeVisible();
+    await expect(page.getByRole("heading", { name: /Daftar Kelompok/i })).toBeVisible();
 
-    await page.getByRole("button", { name: /Tambah Kelompok/i }).first().click();
+    await page.getByRole("button", { name: /\+ Kelompok/i }).first().click();
     await expect(page.getByText(/Tambah Kelompok Latihan/i)).toBeVisible();
+    await expect(page.getByText(/Buat kelompok baru berdasarkan usia atau sekolah/i)).toBeVisible();
     await expect(page.getByRole("button", { name: /Sekolah/i })).toBeVisible();
     await expect(page.getByRole("button", { name: /Kelompok Umur/i })).toBeVisible();
     await page.keyboard.press("Escape");
 
+    // Pilih kelompok latihan pertama di daftar kiri agar detail & tombol "Tambah Pemain" muncul
+    const firstGroupButton = page.locator("button:has-text('PEMAIN')").first();
+    await expect(firstGroupButton).toBeVisible({ timeout: 10_000 });
+    await firstGroupButton.click();
+
     await page.getByRole("button", { name: /Tambah Pemain/i }).click();
     await expect(page.getByText(/Registrasi Pemain Baru/i)).toBeVisible();
+    await expect(page.getByText(/Langkah 1 dari 3/i)).toBeVisible();
+    await expect(page.getByText(/Data Pribadi/i)).toBeVisible();
     await expect(page.getByLabel(/Nama Depan/i)).toBeVisible();
     await expect(page.getByLabel(/Tanggal Lahir/i)).toBeVisible();
 
-    await page.getByRole("button", { name: "2" }).click();
-    await expect(page.getByLabel(/Address Line 1/i)).toBeVisible();
+    await page.getByRole("button", { name: /Lanjut/i }).click();
+    await expect(page.getByText(/Kontak dan Alamat/i)).toBeVisible();
+    await expect(page.getByLabel(/Alamat Rumah/i)).toBeVisible();
     await expect(page.getByLabel(/Kota/i)).toBeVisible();
 
-    await page.getByRole("button", { name: "3" }).click();
+    await page.getByRole("button", { name: /Lanjut/i }).click();
+    await expect(page.getByText(/Data Pendukung dan Medis/i)).toBeVisible();
     await expect(page.getByText(/Riwayat Penyakit Bawaan/i)).toBeVisible();
     await expect(page.getByText(/Pas Foto/i)).toBeVisible();
     await expect(page.getByText(/Tanda Tangan Elektronik/i)).toBeVisible();

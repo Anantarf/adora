@@ -7,6 +7,7 @@ import { QUERY_KEYS } from "@/lib/constants";
 type PlayersList = Awaited<ReturnType<typeof getPlayersAction>>;
 type PlayersPage = Awaited<ReturnType<typeof getPlayersPageAction>>;
 type PlayerDetail = Awaited<ReturnType<typeof getPlayerDetailAction>>;
+export type PlayerDetailData = NonNullable<PlayerDetail>;
 type AddPlayerInput = Parameters<typeof addPlayerAction>[0];
 type UpdatePlayerInput = Parameters<typeof updatePlayerAction>[1];
 type DeletePlayerInput = Parameters<typeof deletePlayerAction>[0];

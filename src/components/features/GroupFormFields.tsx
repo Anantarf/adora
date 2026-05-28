@@ -26,9 +26,26 @@ interface GroupFormFieldsProps {
   setSchoolLevel: (v: string) => void;
   homebases: { id: string; name: string }[];
   checkboxIdSuffix?: string;
+  targetKuError?: string;
+  schoolLevelError?: string;
 }
 
-export function GroupFormFields({ register, errors, watch, setValue, category, setCategory, targetKu, setTargetKu, schoolLevel, setSchoolLevel, homebases, checkboxIdSuffix = "" }: GroupFormFieldsProps) {
+export function GroupFormFields({
+  register,
+  errors,
+  watch,
+  setValue,
+  category,
+  setCategory,
+  targetKu,
+  setTargetKu,
+  schoolLevel,
+  setSchoolLevel,
+  homebases,
+  checkboxIdSuffix = "",
+  targetKuError,
+  schoolLevelError,
+}: GroupFormFieldsProps) {
   const isKu = category === "KELOMPOK_UMUR";
   const isSchool = category === "SEKOLAH";
 
@@ -72,18 +89,21 @@ export function GroupFormFields({ register, errors, watch, setValue, category, s
         {isKu && (
           <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
             <label htmlFor={`group_targetKu${checkboxIdSuffix}`} className="text-micro text-muted-foreground">
-              Batas Umur
+              Batas Umur <span className="text-destructive">*</span>
             </label>
             <div className="flex items-center gap-2">
               <Input id={`group_targetKu${checkboxIdSuffix}`} type="text" pattern="\d*" maxLength={2} value={targetKu} onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))} placeholder="16" className="h-10 w-16 text-center text-sm font-medium" />
               <span className="text-xs font-semibold text-muted-foreground">Tahun</span>
             </div>
+            {targetKuError ? <p className="text-destructive text-xs">{targetKuError}</p> : null}
           </div>
         )}
 
         {isSchool && (
           <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
-            <label className="text-micro text-muted-foreground">Tingkat Sekolah</label>
+            <label className="text-micro text-muted-foreground">
+              Tingkat Sekolah <span className="text-destructive">*</span>
+            </label>
             <Select value={schoolLevel} onValueChange={(val: string | null) => setSchoolLevel(val || "")}>
               <SelectTrigger className="h-10 w-full font-medium">
                 <SelectValue placeholder="Pilih Tingkat Sekolah" />
@@ -96,6 +116,7 @@ export function GroupFormFields({ register, errors, watch, setValue, category, s
                 ))}
               </SelectContent>
             </Select>
+            {schoolLevelError ? <p className="text-destructive text-xs">{schoolLevelError}</p> : null}
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,6 +10,7 @@ import type { Group } from "@/hooks/use-groups";
 import { calculateAgeFromDate } from "@/lib/player-profile";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface PlayerFormFieldsProps {
   register: UseFormRegister<PlayerFormValues>;
@@ -47,12 +48,14 @@ function UploadField({
   onUploaded,
   error,
   assetKey,
+  required = false,
 }: {
   label: string;
   value?: string;
   onUploaded: (url: string) => void;
   error?: string;
   assetKey: string;
+  required?: boolean;
 }) {
   const [isUploading, setIsUploading] = useState(false);
   const previewLabel = value ? "Ganti file" : "Unggah";
@@ -60,7 +63,7 @@ function UploadField({
   return (
     <div className="space-y-2">
       <label className="text-micro text-muted-foreground">
-        {label} <span className="text-destructive">*</span>
+        {label} {required && <span className="text-destructive">*</span>}
       </label>
       <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-border/50 bg-background/40 px-4 py-3 transition-colors hover:border-primary/40 hover:bg-primary/5">
         <div className="flex items-center gap-3">
@@ -124,10 +127,38 @@ export function PlayerFormFields({
   const photoUrl = useWatch({ control, name: "photoUrl" });
   const signatureUrl = useWatch({ control, name: "signatureUrl" });
 
-  const ageLabel = useMemo(() => {
-    const age = calculateAgeFromDate(dateOfBirth);
-    return age === null ? "-" : `${age} tahun`;
+  const playerAge = useMemo(() => {
+    return calculateAgeFromDate(dateOfBirth);
   }, [dateOfBirth]);
+
+  const ageLabel = useMemo(() => {
+    return playerAge === null ? "-" : `${playerAge} tahun`;
+  }, [playerAge]);
+
+  const [sameKtpAddress, setSameKtpAddress] = useState(false);
+  const [sameParentAddress, setSameParentAddress] = useState(false);
+
+  const addressLine1 = useWatch({ control, name: "addressLine1" });
+  const addressLine2 = useWatch({ control, name: "addressLine2" });
+  const city = useWatch({ control, name: "city" });
+  const province = useWatch({ control, name: "province" });
+  const postalCode = useWatch({ control, name: "postalCode" });
+
+  const fullAddress = useMemo(() => {
+    return [addressLine1, addressLine2, city, province, postalCode].filter(Boolean).join(", ");
+  }, [addressLine1, addressLine2, city, province, postalCode]);
+
+  useEffect(() => {
+    if (sameKtpAddress) {
+      setValue("ktpAddress", fullAddress, { shouldDirty: true, shouldValidate: true });
+    }
+  }, [sameKtpAddress, fullAddress, setValue]);
+
+  useEffect(() => {
+    if (sameParentAddress) {
+      setValue("parentAddress", fullAddress, { shouldDirty: true, shouldValidate: true });
+    }
+  }, [sameParentAddress, fullAddress, setValue]);
 
   const showStep = (targetStep: number) => step === "all" || step === targetStep;
 
@@ -229,21 +260,50 @@ export function PlayerFormFields({
             <label htmlFor="field-player-religion" className="text-micro text-muted-foreground">
               Agama
             </label>
-            <Input id="field-player-religion" {...register("religion")} placeholder="Contoh: Islam" className={inputClassName} />
+            <Controller
+              control={control}
+              name="religion"
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} value={field.value || ""}>
+                  <SelectTrigger id="field-player-religion" className={`w-full ${inputClassName}`}>
+                    <SelectValue placeholder="Pilih Agama" />
+                  </SelectTrigger>
+                  <SelectContent className="rounded-xl">
+                    <SelectItem value="Islam">Islam</SelectItem>
+                    <SelectItem value="Kristen Protestan">Kristen Protestan</SelectItem>
+                    <SelectItem value="Katolik">Katolik</SelectItem>
+                    <SelectItem value="Hindu">Hindu</SelectItem>
+                    <SelectItem value="Buddha">Buddha</SelectItem>
+                    <SelectItem value="Khonghucu">Khonghucu</SelectItem>
+                    <SelectItem value="Lainnya">Lainnya</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </div>
 
           <div className="space-y-2">
             <label htmlFor="field-player-weight" className="text-micro text-muted-foreground">
               Berat Badan
             </label>
-            <Input id="field-player-weight" {...register("weight")} placeholder="Contoh: 28 kg" className={inputClassName} />
+            <div className="relative">
+              <Input id="field-player-weight" {...register("weight")} placeholder="Contoh: 28" className={`${inputClassName} pr-10`} />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-xs font-bold text-muted-foreground/70">
+                kg
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
             <label htmlFor="field-player-height" className="text-micro text-muted-foreground">
               Tinggi Badan
             </label>
-            <Input id="field-player-height" {...register("height")} placeholder="Contoh: 125 cm" className={inputClassName} />
+            <div className="relative">
+              <Input id="field-player-height" {...register("height")} placeholder="Contoh: 125" className={`${inputClassName} pr-10`} />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-xs font-bold text-muted-foreground/70">
+                cm
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2 md:col-span-2">
@@ -302,18 +362,11 @@ export function PlayerFormFields({
             {errors.postalCode && <p className="text-destructive text-xs">{errors.postalCode.message}</p>}
           </div>
 
-          <div className="space-y-2 md:col-span-2">
-            <label htmlFor="field-player-ktpAddress" className="text-micro text-muted-foreground">
-              Alamat Sesuai KTP/KK
-            </label>
-            <Textarea id="field-player-ktpAddress" {...register("ktpAddress")} placeholder="Isi jika berbeda dengan alamat domisili saat ini" className="min-h-22 resize-none bg-background/40" />
-          </div>
-
           <div className="space-y-2">
             <label htmlFor="field-player-phoneNumber" className="text-micro text-muted-foreground">
               Nomor Telepon <span className="text-destructive">*</span>
             </label>
-            <Input id="field-player-phoneNumber" type="tel" {...register("phoneNumber")} placeholder="Boleh nomor pemain atau orang tua" className={inputClassName} />
+            <Input id="field-player-phoneNumber" type="tel" {...register("phoneNumber")} placeholder="Contoh: 081234567890" className={inputClassName} />
             {errors.phoneNumber && <p className="text-destructive text-xs">{errors.phoneNumber.message}</p>}
             <p className="text-[11px] text-muted-foreground">Jika anak belum punya nomor sendiri, isi dengan nomor orang tua.</p>
           </div>
@@ -333,25 +386,68 @@ export function PlayerFormFields({
             <Input id="field-player-instagram" {...register("instagram")} placeholder="Contoh: @adora_player" className={inputClassName} />
           </div>
 
+          <div className="space-y-2 md:col-span-2">
+            <div className="flex items-center justify-between">
+              <label htmlFor="field-player-ktpAddress" className="text-micro text-muted-foreground">
+                Alamat Sesuai KTP/KK
+              </label>
+              <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={sameKtpAddress}
+                  onChange={(e) => setSameKtpAddress(e.target.checked)}
+                  className="appearance-none size-4 rounded-md border border-border bg-background/50 checked:bg-primary checked:border-primary cursor-pointer transition-all flex items-center justify-center after:content-['✓'] after:text-primary-foreground after:text-[10px] after:font-black after:hidden checked:after:block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                />
+                Sama dengan alamat domisili
+              </label>
+            </div>
+            <Textarea 
+              id="field-player-ktpAddress" 
+              {...register("ktpAddress")} 
+              readOnly={sameKtpAddress}
+              placeholder={sameKtpAddress ? "Sama dengan alamat domisili" : "Isi jika berbeda dengan alamat domisili saat ini"} 
+              className={`min-h-22 rounded-xl resize-none bg-background/40 ${sameKtpAddress ? "opacity-60 cursor-not-allowed bg-muted/20" : ""}`} 
+            />
+          </div>
+
           <div className="space-y-2">
             <label htmlFor="field-player-parentName" className="text-micro text-muted-foreground">
-              Nama Orang Tua
+              Nama Orang Tua {playerAge !== null && playerAge < 18 && <span className="text-destructive">*</span>}
             </label>
             <Input id="field-player-parentName" {...register("parentName")} placeholder="Contoh: Ibu Suryani" className={inputClassName} />
+            {errors.parentName && <p className="text-destructive text-xs">{errors.parentName.message}</p>}
           </div>
 
           <div className="space-y-2">
             <label htmlFor="field-player-parentPhoneNumber" className="text-micro text-muted-foreground">
-              Nomor Telepon Orang Tua
+              Nomor Telepon Orang Tua {playerAge !== null && playerAge < 18 && <span className="text-destructive">*</span>}
             </label>
             <Input id="field-player-parentPhoneNumber" type="tel" {...register("parentPhoneNumber")} placeholder="Contoh: 081234567890" className={inputClassName} />
+            {errors.parentPhoneNumber && <p className="text-destructive text-xs">{errors.parentPhoneNumber.message}</p>}
           </div>
 
           <div className="space-y-2 md:col-span-2">
-            <label htmlFor="field-player-parentAddress" className="text-micro text-muted-foreground">
-              Alamat Orang Tua
-            </label>
-            <Textarea id="field-player-parentAddress" {...register("parentAddress")} placeholder="Alamat orang tua/wali" className="min-h-22 resize-none bg-background/40" />
+            <div className="flex items-center justify-between">
+              <label htmlFor="field-player-parentAddress" className="text-micro text-muted-foreground">
+                Alamat Orang Tua
+              </label>
+              <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={sameParentAddress}
+                  onChange={(e) => setSameParentAddress(e.target.checked)}
+                  className="appearance-none size-4 rounded-md border border-border bg-background/50 checked:bg-primary checked:border-primary cursor-pointer transition-all flex items-center justify-center after:content-['✓'] after:text-primary-foreground after:text-[10px] after:font-black after:hidden checked:after:block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
+                />
+                Sama dengan alamat domisili
+              </label>
+            </div>
+            <Textarea 
+              id="field-player-parentAddress" 
+              {...register("parentAddress")} 
+              readOnly={sameParentAddress}
+              placeholder={sameParentAddress ? "Sama dengan alamat domisili" : "Alamat orang tua/wali"} 
+              className={`min-h-22 rounded-xl resize-none bg-background/40 ${sameParentAddress ? "opacity-60 cursor-not-allowed bg-muted/20" : ""}`} 
+            />
           </div>
         </div>
       </div>
@@ -370,24 +466,35 @@ export function PlayerFormFields({
               control={control}
               name="hasMedicalCondition"
               render={({ field }) => (
-                <Select
-                  onValueChange={(value) => {
-                    const boolValue = value === "YA";
-                    field.onChange(boolValue);
-                    if (!boolValue) {
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      field.onChange(false);
                       setValue("medicalConditionDetail", "", { shouldDirty: true, shouldValidate: true });
-                    }
-                  }}
-                  value={field.value ? "YA" : "TIDAK"}
-                >
-                  <SelectTrigger className={`w-full ${inputClassName}`}>
-                    <SelectValue placeholder="Pilih status" />
-                  </SelectTrigger>
-                  <SelectContent className="rounded-xl">
-                    <SelectItem value="TIDAK">Tidak</SelectItem>
-                    <SelectItem value="YA">Ya</SelectItem>
-                  </SelectContent>
-                </Select>
+                    }}
+                    className={cn(
+                      "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all",
+                      !field.value
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border/50 bg-background/20 text-muted-foreground hover:border-border"
+                    )}
+                  >
+                    Tidak
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => field.onChange(true)}
+                    className={cn(
+                      "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all",
+                      field.value
+                        ? "border-primary bg-primary/10 text-foreground"
+                        : "border-border/50 bg-background/20 text-muted-foreground hover:border-border"
+                    )}
+                  >
+                    Ya
+                  </button>
+                </div>
               )}
             />
           </div>
@@ -401,7 +508,7 @@ export function PlayerFormFields({
               {...register("medicalConditionDetail")}
               disabled={!hasMedicalCondition}
               placeholder={hasMedicalCondition ? "Contoh: Asma ringan" : "Aktif jika memilih Ya"}
-              className="min-h-22 resize-none bg-background/40 disabled:opacity-60"
+              className="min-h-22 rounded-xl resize-none bg-background/40 disabled:opacity-60"
             />
             {errors.medicalConditionDetail && <p className="text-destructive text-xs">{errors.medicalConditionDetail.message}</p>}
           </div>

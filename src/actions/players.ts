@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { type PlayerSummary } from "@/types/dashboard";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
@@ -82,7 +83,13 @@ export async function getPlayersPageAction(input?: {
   searchQuery?: string;
   page?: number;
   pageSize?: number;
-}) {
+}): Promise<{
+  items: PlayerSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}> {
   await requireAdmin();
 
   const parsed = playerListArgsSchema.parse(input ?? {});
@@ -103,6 +110,13 @@ export async function getPlayersPageAction(input?: {
       schoolOrigin: true,
       groupId: true,
       group: { select: { id: true, name: true } },
+      gender: true,
+      dateOfBirth: true,
+      phoneNumber: true,
+      hasMedicalCondition: true,
+      medicalConditionDetail: true,
+      photoUrl: true,
+      signatureUrl: true,
     },
     orderBy: { name: "asc" },
     skip,
@@ -450,8 +464,14 @@ export async function deletePlayerAction(id: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  await withSerializableTransaction(async (tx) => {
-    const target = await ensureActivePlayer(tx, id);
+  await prisma.$transaction(async (tx) => {
+    const target = await tx.player.findUnique({
+      where: { id, isDeleted: false },
+      select: { name: true, groupId: true },
+    });
+    if (!target) {
+      throw new Error("Pemain tidak ditemukan atau sudah dihapus.");
+    }
     await tx.player.update({ where: { id }, data: { isDeleted: true } });
     await createAuditLog(tx, "DELETE", "player", id, userId, {
       name: target.name,

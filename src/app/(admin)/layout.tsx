@@ -28,7 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <AdminSidebar />
         <SidebarInset className="relative flex min-h-dvh min-w-0 w-full flex-col bg-background selection:bg-primary/20">
           <header className="flex h-15 w-full shrink-0 items-center justify-between border-b border-border/60 px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-all relative">
-            <div className="z-10 flex items-center gap-2 md:hidden">
+            <div className="z-10 flex items-center gap-2">
               <SidebarTrigger className="h-9 w-9 hover:bg-primary/10 hover:text-primary transition-all rounded-md" />
             </div>
 

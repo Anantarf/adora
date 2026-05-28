@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,17 +35,50 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
   const [category, setCategory] = useState<GroupCategory>(group.category ?? initialParsed.category ?? "KELOMPOK_UMUR");
   const [targetKu, setTargetKu] = useState(group.targetKu ? String(group.targetKu) : initialParsed.targetKu ? String(initialParsed.targetKu) : "");
   const [schoolLevel, setSchoolLevel] = useState(group.schoolLevel || initialParsed.schoolLevel || "");
+  const [targetKuError, setTargetKuError] = useState("");
+  const [schoolLevelError, setSchoolLevelError] = useState("");
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<GroupForm>({
     resolver: zodResolver(groupSchema),
     defaultValues: { name: group.name, homebaseId: group.homebase?.id ?? undefined },
   });
 
+  useEffect(() => {
+    if (category === "KELOMPOK_UMUR") {
+      setSchoolLevelError("");
+    } else {
+      setTargetKuError("");
+    }
+  }, [category]);
 
+  useEffect(() => {
+    if (targetKu) {
+      setTargetKuError("");
+    }
+  }, [targetKu]);
+
+  useEffect(() => {
+    if (schoolLevel) {
+      setSchoolLevelError("");
+    }
+  }, [schoolLevel]);
 
   const onSubmit = async (data: GroupForm) => {
-    if (category === "KELOMPOK_UMUR" && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
-    if (category === "SEKOLAH" && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
+    let hasInlineError = false;
+
+    if (category === "KELOMPOK_UMUR" && !targetKu) {
+      setTargetKuError("Batas umur wajib diisi untuk kategori Kelompok Umur.");
+      hasInlineError = true;
+    }
+
+    if (category === "SEKOLAH" && !schoolLevel) {
+      setSchoolLevelError("Tingkat sekolah wajib dipilih.");
+      hasInlineError = true;
+    }
+
+    if (hasInlineError) {
+      return;
+    }
 
     try {
       await updateGroup({
@@ -91,6 +124,8 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             setSchoolLevel={setSchoolLevel}
             homebases={homebases}
             checkboxIdSuffix="_edit"
+            targetKuError={targetKuError}
+            schoolLevelError={schoolLevelError}
           />
 
           <div className="pt-4 flex w-full justify-end gap-3">

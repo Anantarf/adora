@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -35,6 +35,8 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
   const [category, setCategory] = useState<GroupCategory>("KELOMPOK_UMUR");
   const [targetKu, setTargetKu] = useState("");
   const [schoolLevel, setSchoolLevel] = useState("");
+  const [targetKuError, setTargetKuError] = useState("");
+  const [schoolLevelError, setSchoolLevelError] = useState("");
 
   const { mutateAsync: addGroup, isPending } = useAddGroup();
   const { data: homebases = [] } = useHomebases();
@@ -43,9 +45,51 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
     resolver: zodResolver(groupSchema),
   });
 
+  const resetDialogState = () => {
+    reset();
+    setCategory("KELOMPOK_UMUR");
+    setTargetKu("");
+    setSchoolLevel("");
+    setTargetKuError("");
+    setSchoolLevelError("");
+  };
+
+  useEffect(() => {
+    if (category === "KELOMPOK_UMUR") {
+      setSchoolLevelError("");
+    } else {
+      setTargetKuError("");
+    }
+  }, [category]);
+
+  useEffect(() => {
+    if (targetKu) {
+      setTargetKuError("");
+    }
+  }, [targetKu]);
+
+  useEffect(() => {
+    if (schoolLevel) {
+      setSchoolLevelError("");
+    }
+  }, [schoolLevel]);
+
   const onSubmit = async (data: GroupForm) => {
-    if (category === "KELOMPOK_UMUR" && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
-    if (category === "SEKOLAH" && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
+    let hasInlineError = false;
+
+    if (category === "KELOMPOK_UMUR" && !targetKu) {
+      setTargetKuError("Batas umur wajib diisi untuk kategori Kelompok Umur.");
+      hasInlineError = true;
+    }
+
+    if (category === "SEKOLAH" && !schoolLevel) {
+      setSchoolLevelError("Tingkat sekolah wajib dipilih.");
+      hasInlineError = true;
+    }
+
+    if (hasInlineError) {
+      return;
+    }
 
     try {
       await addGroup({
@@ -55,8 +99,7 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
         schoolLevel: category === "SEKOLAH" && schoolLevel ? schoolLevel : undefined,
       });
 
-      reset();
-      setCategory("KELOMPOK_UMUR"); setTargetKu(""); setSchoolLevel("");
+      resetDialogState();
       setOpen(false);
       toast.success("Kelompok baru berhasil ditambahkan!");
     } catch {
@@ -64,8 +107,15 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
     }
   };
 
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      resetDialogState();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {!hideTrigger && (
         <DialogTrigger
           render={
@@ -95,6 +145,8 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
             schoolLevel={schoolLevel}
             setSchoolLevel={setSchoolLevel}
             homebases={homebases}
+            targetKuError={targetKuError}
+            schoolLevelError={schoolLevelError}
           />
 
           <div className="pt-4 flex w-full justify-end">

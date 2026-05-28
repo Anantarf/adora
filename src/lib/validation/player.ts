@@ -7,7 +7,7 @@ const optionalEmail = z.string().email("Format email tidak valid").optional().or
 
 export const playerSchema = z
   .object({
-    firstName: z.string().trim().min(2, "Nama depan minimal 2 karakter"),
+    firstName: z.string().trim().min(1, "Nama depan wajib diisi"),
     lastName: z.string().trim().optional(),
     dateOfBirth: z.string().nonempty("Tanggal lahir wajib diisi"),
     placeOfBirth: optionalText,
@@ -15,15 +15,15 @@ export const playerSchema = z
     religion: optionalText,
     weight: optionalText,
     height: optionalText,
-    schoolOrigin: z.string().trim().min(2, "Asal sekolah wajib diisi"),
-    addressLine1: z.string().trim().min(3, "Alamat rumah wajib diisi"),
+    schoolOrigin: z.string().trim().min(1, "Asal sekolah wajib diisi"),
+    addressLine1: z.string().trim().min(1, "Alamat rumah wajib diisi"),
     addressLine2: optionalText,
-    city: z.string().trim().min(2, "Kota wajib diisi"),
-    province: z.string().trim().min(2, "Provinsi wajib diisi"),
-    postalCode: z.string().trim().min(4, "Kode pos wajib diisi"),
+    city: z.string().trim().min(1, "Kota wajib diisi"),
+    province: z.string().trim().min(1, "Provinsi wajib diisi"),
+    postalCode: z.string().trim().min(1, "Kode pos wajib diisi"),
     ktpAddress: optionalText,
     email: optionalEmail,
-    phoneNumber: z.string().trim().min(8, "Nomor telepon wajib diisi"),
+    phoneNumber: z.string().trim().min(1, "Nomor telepon wajib diisi"),
     instagram: optionalText,
     hasMedicalCondition: z.boolean().default(false),
     medicalConditionDetail: optionalText,
@@ -32,8 +32,8 @@ export const playerSchema = z
     parentPhoneNumber: optionalText,
     groupId: z.string().nonempty("Kelompok wajib dipilih"),
     parentId: z.string().optional(),
-    photoUrl: z.string().trim().min(1, "Pas foto wajib diunggah"),
-    signatureUrl: z.string().trim().min(1, "Tanda tangan wajib diunggah"),
+    photoUrl: z.string().trim().optional().or(z.literal("")),
+    signatureUrl: z.string().trim().optional().or(z.literal("")),
   })
   .superRefine((data, ctx) => {
     if (data.hasMedicalCondition && !data.medicalConditionDetail?.trim()) {
@@ -43,38 +43,62 @@ export const playerSchema = z
         path: ["medicalConditionDetail"],
       });
     }
+
+    if (data.dateOfBirth) {
+      const dob = new Date(data.dateOfBirth);
+      if (!isNaN(dob.getTime())) {
+        const today = new Date();
+        let age = today.getFullYear() - dob.getFullYear();
+        const monthDiff = today.getMonth() - dob.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+          age--;
+        }
+        if (age < 18) {
+          if (!data.parentName?.trim()) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Nama orang tua wajib diisi untuk pemain di bawah 18 tahun.",
+              path: ["parentName"],
+            });
+          }
+          if (!data.parentPhoneNumber?.trim()) {
+            ctx.addIssue({
+              code: "custom",
+              message: "Nomor telepon orang tua wajib diisi untuk pemain di bawah 18 tahun.",
+              path: ["parentPhoneNumber"],
+            });
+          }
+        }
+      }
+    }
   });
 
 export type PlayerFormValues = z.input<typeof playerSchema>;
 
 export function playerToFormValues(player: Player): PlayerFormValues {
-  return {
-    firstName: player.firstName || "",
-    lastName: player.lastName || "",
-    dateOfBirth: player.dateOfBirth ? toYYYYMMDD(player.dateOfBirth) : "",
-    placeOfBirth: player.placeOfBirth || "",
-    gender: player.gender || "",
-    religion: player.religion || "",
-    weight: player.weight || "",
-    height: player.height || "",
-    schoolOrigin: player.schoolOrigin || "",
-    addressLine1: player.addressLine1 || player.address || "",
-    addressLine2: player.addressLine2 || "",
-    city: player.city || "",
-    province: player.province || "",
-    postalCode: player.postalCode || "",
-    ktpAddress: player.ktpAddress || "",
-    email: player.email || "",
-    phoneNumber: player.phoneNumber || "",
-    instagram: player.instagram || "",
-    hasMedicalCondition: player.hasMedicalCondition || false,
-    medicalConditionDetail: player.medicalConditionDetail || player.medicalHistory || "",
-    parentName: player.parentName || "",
-    parentAddress: player.parentAddress || "",
-    parentPhoneNumber: player.parentPhoneNumber || "",
-    groupId: player.groupId || "",
-    parentId: player.parentId || "",
-    photoUrl: player.photoUrl || "",
-    signatureUrl: player.signatureUrl || "",
+  const defaults: PlayerFormValues = {
+    firstName: "", lastName: "", dateOfBirth: "", placeOfBirth: "", gender: "",
+    religion: "", weight: "", height: "", schoolOrigin: "", addressLine1: "",
+    addressLine2: "", city: "", province: "", postalCode: "", ktpAddress: "",
+    email: "", phoneNumber: "", instagram: "", hasMedicalCondition: false,
+    medicalConditionDetail: "", parentName: "", parentAddress: "", parentPhoneNumber: "",
+    groupId: "", parentId: "", photoUrl: "", signatureUrl: ""
   };
+
+  const form = { ...defaults } as Record<string, any>;
+  for (const key of Object.keys(defaults)) {
+    const val = (player as any)[key];
+    if (val !== undefined && val !== null) {
+      form[key] = val;
+    }
+  }
+
+  // Terapkan penyesuaian khusus / fallback untuk kompatibilitas data lama
+  form.addressLine1 = player.addressLine1 || player.address || "";
+  form.medicalConditionDetail = player.medicalConditionDetail || player.medicalHistory || "";
+  if (player.dateOfBirth) {
+    form.dateOfBirth = toYYYYMMDD(player.dateOfBirth);
+  }
+
+  return form as PlayerFormValues;
 }
