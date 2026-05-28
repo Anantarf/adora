@@ -90,18 +90,32 @@ export interface AttendanceStats {
 export interface Player {
   id: string;
   name: string;
+  firstName: string;
+  lastName: string;
   placeOfBirth?: string | null;
   gender?: string | null;
+  religion?: string | null;
   weight?: string | null;
   height?: string | null;
   schoolOrigin: string | null;
   address?: string | null;
+  addressLine1?: string | null;
+  addressLine2?: string | null;
+  city?: string | null;
+  province?: string | null;
+  postalCode?: string | null;
+  ktpAddress?: string | null;
   email?: string | null;
   phoneNumber: string | null;
   medicalHistory?: string | null;
+  hasMedicalCondition?: boolean;
+  medicalConditionDetail?: string | null;
+  instagram?: string | null;
   parentName?: string | null;
   parentAddress?: string | null;
   parentPhoneNumber?: string | null;
+  photoUrl?: string | null;
+  signatureUrl?: string | null;
   dateOfBirth: Date | string;
   groupId: string | null;
   parentId: string | null;
@@ -119,6 +133,8 @@ export interface Player {
 export interface PlayerSummary {
   id: string;
   name: string;
+  firstName: string;
+  lastName: string;
   schoolOrigin: string | null;
   groupId: string | null;
   group?: {

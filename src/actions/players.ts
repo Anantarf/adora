@@ -8,6 +8,7 @@ import { createAuditLog } from "./audit";
 import { z } from "zod";
 import { withSerializableTransaction } from "@/lib/db-concurrency";
 import { ensureActiveGroup, ensureActiveParentUser, ensureActivePlayer } from "@/lib/domain-guards";
+import { buildPlayerFullName, splitPlayerName } from "@/lib/player-profile";
 
 const batchPlayerSchema = z.object({
   name: z.string().trim().min(2),
@@ -34,13 +35,6 @@ const BATCH_CHUNK_SIZE = 200;
 const DEFAULT_PLAYER_PAGE_SIZE = 9;
 const MAX_PLAYER_PAGE_SIZE = 50;
 
-const OPTIONAL_PLAYER_FIELDS = [
-  "placeOfBirth", "gender", "weight", "height", "schoolOrigin",
-  "address", "email", "phoneNumber", "medicalHistory",
-  "parentName", "parentAddress", "parentPhoneNumber", "parentId",
-] as const;
-type OptionalPlayerField = (typeof OPTIONAL_PLAYER_FIELDS)[number];
-
 const playerListArgsSchema = z.object({
   groupId: z.string().trim().optional(),
   searchQuery: z.string().trim().optional(),
@@ -53,7 +47,14 @@ function buildPlayerListWhere(groupId?: string, searchQuery?: string) {
     isDeleted: false,
     ...(groupId && groupId !== "all" ? { groupId } : {}),
     ...(searchQuery
-      ? { OR: [{ name: { contains: searchQuery } }, { schoolOrigin: { contains: searchQuery } }] }
+      ? {
+          OR: [
+            { name: { contains: searchQuery } },
+            { firstName: { contains: searchQuery } },
+            { lastName: { contains: searchQuery } },
+            { schoolOrigin: { contains: searchQuery } },
+          ],
+        }
       : {}),
   };
 }
@@ -66,6 +67,8 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
     select: {
       id: true,
       name: true,
+      firstName: true,
+      lastName: true,
       schoolOrigin: true,
       groupId: true,
       group: { select: { id: true, name: true } },
@@ -95,6 +98,8 @@ export async function getPlayersPageAction(input?: {
     select: {
       id: true,
       name: true,
+      firstName: true,
+      lastName: true,
       schoolOrigin: true,
       groupId: true,
       group: { select: { id: true, name: true } },
@@ -120,18 +125,32 @@ export async function getPlayerDetailAction(id: string) {
     select: {
       id: true,
       name: true,
+      firstName: true,
+      lastName: true,
       placeOfBirth: true,
       gender: true,
+      religion: true,
       weight: true,
       height: true,
       schoolOrigin: true,
       address: true,
+      addressLine1: true,
+      addressLine2: true,
+      city: true,
+      province: true,
+      postalCode: true,
+      ktpAddress: true,
       email: true,
       phoneNumber: true,
       medicalHistory: true,
+      hasMedicalCondition: true,
+      medicalConditionDetail: true,
+      instagram: true,
       parentName: true,
       parentAddress: true,
       parentPhoneNumber: true,
+      photoUrl: true,
+      signatureUrl: true,
       dateOfBirth: true,
       groupId: true,
       parentId: true,
@@ -147,20 +166,31 @@ export async function getPlayerDetailAction(id: string) {
 
 // 2. Tambah pemain baru (Create)
 export async function addPlayerAction(data: {
-  name: string;
+  firstName: string;
+  lastName?: string;
   dateOfBirth: string;
   placeOfBirth?: string;
   gender?: string;
+  religion?: string;
   weight?: string;
   height?: string;
   schoolOrigin?: string;
-  address?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  province?: string;
+  postalCode?: string;
+  ktpAddress?: string;
   email?: string;
   phoneNumber?: string;
-  medicalHistory?: string;
+  instagram?: string;
+  hasMedicalCondition?: boolean;
+  medicalConditionDetail?: string;
   parentName?: string;
   parentAddress?: string;
   parentPhoneNumber?: string;
+  photoUrl?: string;
+  signatureUrl?: string;
   groupId: string;
   parentId?: string;
 }) {
@@ -173,20 +203,44 @@ export async function addPlayerAction(data: {
       await ensureActiveParentUser(tx, data.parentId);
     }
 
-    const optionalData = Object.fromEntries(
-      OPTIONAL_PLAYER_FIELDS.map((k) => [k, (data[k as OptionalPlayerField] as string | undefined) || undefined])
-    );
+    const fullName = buildPlayerFullName(data.firstName, data.lastName) || data.firstName.trim();
     const p = await tx.player.create({
       data: {
-        name: data.name,
+        name: fullName,
+        firstName: data.firstName.trim(),
+        lastName: data.lastName?.trim() || "",
         dateOfBirth: toJakartaDate(data.dateOfBirth),
         groupId: data.groupId,
-        ...optionalData,
+        placeOfBirth: data.placeOfBirth?.trim() || undefined,
+        gender: data.gender?.trim() || undefined,
+        religion: data.religion?.trim() || undefined,
+        weight: data.weight?.trim() || undefined,
+        height: data.height?.trim() || undefined,
+        schoolOrigin: data.schoolOrigin?.trim() || undefined,
+        address: data.addressLine1?.trim() || undefined,
+        addressLine1: data.addressLine1?.trim() || undefined,
+        addressLine2: data.addressLine2?.trim() || undefined,
+        city: data.city?.trim() || undefined,
+        province: data.province?.trim() || undefined,
+        postalCode: data.postalCode?.trim() || undefined,
+        ktpAddress: data.ktpAddress?.trim() || undefined,
+        email: data.email?.trim() || undefined,
+        phoneNumber: data.phoneNumber?.trim() || undefined,
+        medicalHistory: data.hasMedicalCondition ? data.medicalConditionDetail?.trim() || undefined : undefined,
+        hasMedicalCondition: Boolean(data.hasMedicalCondition),
+        medicalConditionDetail: data.hasMedicalCondition ? data.medicalConditionDetail?.trim() || undefined : undefined,
+        instagram: data.instagram?.trim() || undefined,
+        parentName: data.parentName?.trim() || undefined,
+        parentAddress: data.parentAddress?.trim() || undefined,
+        parentPhoneNumber: data.parentPhoneNumber?.trim() || undefined,
+        photoUrl: data.photoUrl?.trim() || undefined,
+        signatureUrl: data.signatureUrl?.trim() || undefined,
+        parentId: data.parentId?.trim() || undefined,
         updatedAt: new Date(),
       },
     });
     await createAuditLog(tx, "CREATE", "player", p.id, userId, {
-      name: p.name,
+      name: fullName,
       groupId: p.groupId,
       dateOfBirth: p.dateOfBirth,
     });
@@ -259,25 +313,33 @@ export async function addBatchPlayersAction(
     throw new Error(`Ada parentId tidak ditemukan: ${invalidParentIds.slice(0, 5).join(", ")}`);
   }
 
-  const formattedData = dedupedPayload.map((row) => ({
-    name: row.name.trim(),
-    dateOfBirth: toJakartaDate(row.dateOfBirth),
-    placeOfBirth: row.placeOfBirth?.trim() || undefined,
-    gender: row.gender?.trim() || undefined,
-    weight: row.weight?.trim() || undefined,
-    height: row.height?.trim() || undefined,
-    schoolOrigin: row.schoolOrigin?.trim() || undefined,
-    address: row.address?.trim() || undefined,
-    email: row.email?.trim() || undefined,
-    phoneNumber: row.phoneNumber?.trim() || undefined,
-    medicalHistory: row.medicalHistory?.trim() || undefined,
-    parentName: row.parentName?.trim() || undefined,
-    parentAddress: row.parentAddress?.trim() || undefined,
-    parentPhoneNumber: row.parentPhoneNumber?.trim() || undefined,
-    groupId: row.groupId,
-    parentId: row.parentId?.trim() || undefined,
-    updatedAt: new Date(),
-  }));
+  const formattedData = dedupedPayload.map((row) => {
+    const splitName = splitPlayerName(row.name);
+    return {
+      name: row.name.trim(),
+      firstName: splitName.firstName,
+      lastName: splitName.lastName,
+      dateOfBirth: toJakartaDate(row.dateOfBirth),
+      placeOfBirth: row.placeOfBirth?.trim() || undefined,
+      gender: row.gender?.trim() || undefined,
+      weight: row.weight?.trim() || undefined,
+      height: row.height?.trim() || undefined,
+      schoolOrigin: row.schoolOrigin?.trim() || undefined,
+      address: row.address?.trim() || undefined,
+      addressLine1: row.address?.trim() || undefined,
+      email: row.email?.trim() || undefined,
+      phoneNumber: row.phoneNumber?.trim() || undefined,
+      medicalHistory: row.medicalHistory?.trim() || undefined,
+      hasMedicalCondition: Boolean(row.medicalHistory?.trim()),
+      medicalConditionDetail: row.medicalHistory?.trim() || undefined,
+      parentName: row.parentName?.trim() || undefined,
+      parentAddress: row.parentAddress?.trim() || undefined,
+      parentPhoneNumber: row.parentPhoneNumber?.trim() || undefined,
+      groupId: row.groupId,
+      parentId: row.parentId?.trim() || undefined,
+      updatedAt: new Date(),
+    };
+  });
 
   const chunks = Array.from(
     { length: Math.ceil(formattedData.length / BATCH_CHUNK_SIZE) },
@@ -306,11 +368,12 @@ export async function addBatchPlayersAction(
 export async function updatePlayerAction(
   id: string,
   data: {
-    name?: string; dateOfBirth?: string; placeOfBirth?: string; gender?: string;
-    weight?: string; height?: string; schoolOrigin?: string; address?: string;
-    email?: string; phoneNumber?: string; medicalHistory?: string;
+    firstName?: string; lastName?: string; dateOfBirth?: string; placeOfBirth?: string; gender?: string;
+    religion?: string; weight?: string; height?: string; schoolOrigin?: string; addressLine1?: string;
+    addressLine2?: string; city?: string; province?: string; postalCode?: string; ktpAddress?: string;
+    email?: string; phoneNumber?: string; instagram?: string; hasMedicalCondition?: boolean; medicalConditionDetail?: string;
     parentName?: string; parentAddress?: string; parentPhoneNumber?: string; groupId?: string;
-    parentId?: string | null;
+    parentId?: string | null; photoUrl?: string; signatureUrl?: string;
   },
 ) {
   const session = await requireAdmin();
@@ -328,27 +391,41 @@ export async function updatePlayerAction(
     const res = await tx.player.update({
       where: { id },
       data: {
-        name: data.name,
+        name: buildPlayerFullName(data.firstName, data.lastName) || undefined,
+        firstName: data.firstName,
+        lastName: data.lastName ?? undefined,
         dateOfBirth: data.dateOfBirth ? toJakartaDate(data.dateOfBirth) : undefined,
         placeOfBirth: data.placeOfBirth,
         gender: data.gender,
+        religion: data.religion,
         weight: data.weight,
         height: data.height,
         schoolOrigin: data.schoolOrigin,
-        address: data.address,
+        address: data.addressLine1,
+        addressLine1: data.addressLine1,
+        addressLine2: data.addressLine2,
+        city: data.city,
+        province: data.province,
+        postalCode: data.postalCode,
+        ktpAddress: data.ktpAddress,
         email: data.email,
         phoneNumber: data.phoneNumber,
-        medicalHistory: data.medicalHistory,
+        medicalHistory: data.hasMedicalCondition ? data.medicalConditionDetail : null,
+        hasMedicalCondition: data.hasMedicalCondition,
+        medicalConditionDetail: data.hasMedicalCondition ? data.medicalConditionDetail : null,
+        instagram: data.instagram,
         parentName: data.parentName,
         parentAddress: data.parentAddress,
         parentPhoneNumber: data.parentPhoneNumber,
+        photoUrl: data.photoUrl,
+        signatureUrl: data.signatureUrl,
         groupId: data.groupId,
         ...(data.parentId !== undefined ? { parentId: data.parentId } : {}),
         updatedAt: new Date(),
       },
     });
     await createAuditLog(tx, "UPDATE", "player", res.id, userId, {
-      before: { name: data.name, groupId: data.groupId, parentId: data.parentId },
+      before: { name: buildPlayerFullName(data.firstName, data.lastName), groupId: data.groupId, parentId: data.parentId },
       after: { name: res.name, groupId: res.groupId, parentId: res.parentId },
     });
     return res;

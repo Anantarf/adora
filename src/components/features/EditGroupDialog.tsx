@@ -7,7 +7,7 @@ import { z } from "zod";
 import { useUpdateGroup, type Group } from "@/hooks/use-groups";
 import { useHomebases } from "@/hooks/use-homebases";
 import { toast } from "sonner";
-import { buildGroupDescriptionPayload, parseGroupMetaDescription } from "@/lib/group-meta";
+import { parseGroupMetaDescription, type GroupCategory } from "@/lib/group-meta";
 import { GroupFormFields } from "@/components/features/GroupFormFields";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +16,6 @@ import { Edit2, Loader2 } from "lucide-react";
 
 const groupSchema = z.object({
   name: z.string().min(2, "Nama Kelompok minimal 2 karakter"),
-  description: z.string().optional(),
   homebaseId: z.string().optional(),
 });
 
@@ -33,28 +32,32 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
   const { data: homebases = [] } = useHomebases();
 
   const initialParsed = parseGroupMetaDescription(group.description);
-  const [isKu, setIsKu] = useState(typeof initialParsed.targetKu === "number");
-  const [targetKu, setTargetKu] = useState(initialParsed.targetKu ? String(initialParsed.targetKu) : "");
-  const [isSchool, setIsSchool] = useState(typeof initialParsed.schoolLevel === "string");
-  const [schoolLevel, setSchoolLevel] = useState(initialParsed.schoolLevel || "");
+  const [category, setCategory] = useState<GroupCategory>(group.category ?? initialParsed.category ?? "KELOMPOK_UMUR");
+  const [targetKu, setTargetKu] = useState(group.targetKu ? String(group.targetKu) : initialParsed.targetKu ? String(initialParsed.targetKu) : "");
+  const [schoolLevel, setSchoolLevel] = useState(group.schoolLevel || initialParsed.schoolLevel || "");
 
   const { register, handleSubmit, setValue, watch, formState: { errors } } = useForm<GroupForm>({
     resolver: zodResolver(groupSchema),
-    defaultValues: { name: group.name, description: group.description || "", homebaseId: group.homebase?.id },
+    defaultValues: { name: group.name, homebaseId: group.homebase?.id ?? undefined },
   });
 
 
 
   const onSubmit = async (data: GroupForm) => {
-    if (isKu && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
-    if (isSchool && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
+    if (category === "KELOMPOK_UMUR" && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
+    if (category === "SEKOLAH" && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
 
     try {
-      const descPayload = buildGroupDescriptionPayload({
-        targetKu: isKu && targetKu ? parseInt(targetKu, 10) : undefined,
-        schoolLevel: isSchool && schoolLevel ? schoolLevel : undefined,
+      await updateGroup({
+        id: group.id,
+        data: {
+          name: data.name,
+          category,
+          targetKu: category === "KELOMPOK_UMUR" && targetKu ? parseInt(targetKu, 10) : null,
+          schoolLevel: category === "SEKOLAH" && schoolLevel ? schoolLevel : null,
+          homebaseId: data.homebaseId || null,
+        },
       });
-      await updateGroup({ id: group.id, data: { name: data.name, description: descPayload, homebaseId: data.homebaseId || null } });
       toast.success(`${group.name} berhasil diperbarui!`);
       onOpenChange(false);
     } catch {
@@ -80,12 +83,10 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             errors={errors}
             watch={watch}
             setValue={setValue}
-            isKu={isKu}
-            setIsKu={setIsKu}
+            category={category}
+            setCategory={setCategory}
             targetKu={targetKu}
             setTargetKu={setTargetKu}
-            isSchool={isSchool}
-            setIsSchool={setIsSchool}
             schoolLevel={schoolLevel}
             setSchoolLevel={setSchoolLevel}
             homebases={homebases}

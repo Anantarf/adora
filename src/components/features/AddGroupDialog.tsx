@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAddGroup } from "@/hooks/use-groups";
 import { useHomebases } from "@/hooks/use-homebases";
-import { buildGroupDescriptionPayload } from "@/lib/group-meta";
+import type { GroupCategory } from "@/lib/group-meta";
 import { toast } from "sonner";
 import { GroupFormFields } from "@/components/features/GroupFormFields";
 
@@ -16,7 +16,6 @@ import { Plus, Loader2 } from "lucide-react";
 
 const groupSchema = z.object({
   name: z.string().min(2, "Nama Kelompok minimal 2 karakter"),
-  description: z.string().optional(),
   homebaseId: z.string().optional(),
 });
 
@@ -33,9 +32,8 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
   const open = externalOpen ?? internalOpen;
   const setOpen = onExternalOpenChange ?? setInternalOpen;
 
-  const [isKu, setIsKu] = useState(false);
+  const [category, setCategory] = useState<GroupCategory>("KELOMPOK_UMUR");
   const [targetKu, setTargetKu] = useState("");
-  const [isSchool, setIsSchool] = useState(false);
   const [schoolLevel, setSchoolLevel] = useState("");
 
   const { mutateAsync: addGroup, isPending } = useAddGroup();
@@ -46,19 +44,19 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
   });
 
   const onSubmit = async (data: GroupForm) => {
-    if (isKu && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
-    if (isSchool && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
+    if (category === "KELOMPOK_UMUR" && !targetKu) { toast.error("Batas umur wajib diisi untuk kategori Kelompok Umur."); return; }
+    if (category === "SEKOLAH" && !schoolLevel) { toast.error("Tingkat sekolah wajib dipilih."); return; }
 
     try {
-      const descPayload = buildGroupDescriptionPayload({
-        targetKu: isKu && targetKu ? parseInt(targetKu, 10) : undefined,
-        schoolLevel: isSchool && schoolLevel ? schoolLevel : undefined,
+      await addGroup({
+        ...data,
+        category,
+        targetKu: category === "KELOMPOK_UMUR" && targetKu ? parseInt(targetKu, 10) : undefined,
+        schoolLevel: category === "SEKOLAH" && schoolLevel ? schoolLevel : undefined,
       });
 
-      await addGroup({ ...data, description: descPayload });
-
       reset();
-      setIsKu(false); setTargetKu(""); setIsSchool(false); setSchoolLevel("");
+      setCategory("KELOMPOK_UMUR"); setTargetKu(""); setSchoolLevel("");
       setOpen(false);
       toast.success("Kelompok baru berhasil ditambahkan!");
     } catch {
@@ -90,12 +88,10 @@ export function AddGroupDialog({ externalOpen, onExternalOpenChange, hideTrigger
             errors={errors}
             watch={watch}
             setValue={setValue}
-            isKu={isKu}
-            setIsKu={setIsKu}
+            category={category}
+            setCategory={setCategory}
             targetKu={targetKu}
             setTargetKu={setTargetKu}
-            isSchool={isSchool}
-            setIsSchool={setIsSchool}
             schoolLevel={schoolLevel}
             setSchoolLevel={setSchoolLevel}
             homebases={homebases}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { type Player } from "@/types/dashboard";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2, Link2 } from "lucide-react";
+import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2, Link2, ImageIcon, PenLine } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { usePlayerDetail, useUpdatePlayer } from "@/hooks/use-players";
@@ -13,6 +13,7 @@ import { useGroups } from "@/hooks/use-groups";
 import { toast } from "sonner";
 import { playerSchema, playerToFormValues, type PlayerFormValues } from "@/lib/validation/player";
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
+import { buildPlayerFullName, calculateAgeFromDate } from "@/lib/player-profile";
 
 interface ViewPlayerDialogProps {
   playerId: string;
@@ -45,7 +46,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
     if (!player) return;
     try {
       await updatePlayer({ id: player.id, data: { ...data, parentId: data.parentId || null } });
-      toast.success(`Profil ${player.name} berhasil diperbarui!`);
+      toast.success(`Profil ${buildPlayerFullName(data.firstName, data.lastName)} berhasil diperbarui!`);
       reset(data);
       setIsEditing(false);
     } catch (error) {
@@ -74,7 +75,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
             <dl className="rounded-lg border border-border/50 bg-background/40 divide-y divide-border/40">
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
                 <dt className="col-span-4 text-micro text-muted-foreground">Nama</dt>
-                <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.name}</dd>
+                <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{buildPlayerFullName(player.firstName, player.lastName) || player.name}</dd>
               </div>
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
                 <dt className="col-span-4 text-micro text-muted-foreground">Kelompok</dt>
@@ -142,12 +143,22 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                   </dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
+                  <dt className="col-span-4 text-micro text-muted-foreground">Umur</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {calculateAgeFromDate(player.dateOfBirth) === null ? "-" : `${calculateAgeFromDate(player.dateOfBirth)} tahun`}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Tempat Lahir</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.placeOfBirth || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Jenis Kelamin</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.gender || "-"}</dd>
+                </div>
+                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
+                  <dt className="col-span-4 text-micro text-muted-foreground">Agama</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.religion || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Berat/Tinggi</dt>
@@ -163,7 +174,13 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Alamat Rumah</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.address || "-"}</dd>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {[player.addressLine1 || player.address, player.addressLine2, player.city, player.province, player.postalCode].filter(Boolean).join(", ") || "-"}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
+                  <dt className="col-span-4 text-micro text-muted-foreground">Alamat KTP/KK</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.ktpAddress || "-"}</dd>
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Email</dt>
@@ -177,6 +194,10 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                     <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.phoneNumber}</dd>
                   </div>
                 )}
+                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
+                  <dt className="col-span-4 text-micro text-muted-foreground">Instagram</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.instagram || "-"}</dd>
+                </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Nama Orang Tua</dt>
                   <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
@@ -199,7 +220,29 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                 </div>
                 <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
                   <dt className="col-span-4 text-micro text-muted-foreground">Riwayat Penyakit</dt>
-                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{player.medicalHistory || "-"}</dd>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {player.hasMedicalCondition ? player.medicalConditionDetail || player.medicalHistory || "-" : "Tidak ada"}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
+                  <dt className="col-span-4 text-micro text-muted-foreground">Pas Foto</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {player.photoUrl ? (
+                      <a href={player.photoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+                        <ImageIcon className="size-3.5" /> Lihat Pas Foto
+                      </a>
+                    ) : "-"}
+                  </dd>
+                </div>
+                <div className="grid grid-cols-12 items-start gap-2.5 px-4 py-2.5">
+                  <dt className="col-span-4 text-micro text-muted-foreground">Tanda Tangan</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {player.signatureUrl ? (
+                      <a href={player.signatureUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
+                        <PenLine className="size-3.5" /> Lihat Tanda Tangan
+                      </a>
+                    ) : "-"}
+                  </dd>
                 </div>
               </dl>
             </div>

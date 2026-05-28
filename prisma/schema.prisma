@@ -125,6 +125,9 @@ model eventGroup {
 model group {
   id          String        @id @default(cuid())
   name        String        @unique(map: "Group_name_key")
+  category    group_category @default(KELOMPOK_UMUR)
+  targetKu    Int?
+  schoolLevel String?
   description String?       
   homebaseId  String?
   createdAt   DateTime      @default(now())
@@ -142,20 +145,33 @@ model group {
 model player {
   id                  String        @id @default(cuid())
   name                String
+  firstName           String
+  lastName            String        @default("")
   dateOfBirth         DateTime
   placeOfBirth        String?
   gender              String?
+  religion            String?
   weight              String?
   height              String?
   schoolOrigin        String?
   address             String?
+  addressLine1        String?
+  addressLine2        String?
+  city                String?
+  province            String?
+  postalCode          String?
+  ktpAddress          String?
   email               String?
   phoneNumber         String?
   medicalHistory      String?       
+  hasMedicalCondition Boolean       @default(false)
+  medicalConditionDetail String?
+  instagram           String?
   parentName          String?
   parentAddress       String?
   parentPhoneNumber   String?
   photoUrl            String?
+  signatureUrl        String?
   isDeleted           Boolean       @default(false)
   groupId             String?
   parentId            String?
@@ -369,6 +385,11 @@ enum registration_status {
   PENDING
   REVIEWED
   COMPLETED
+}
+
+enum group_category {
+  SEKOLAH
+  KELOMPOK_UMUR
 }
 
 enum operational_severity {

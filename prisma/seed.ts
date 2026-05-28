@@ -75,7 +75,8 @@ async function main() {
   const groupU12 = await prisma.group.create({
     data: {
       name: "KU-12 Elite",
-      description: "Kelompok inti untuk pemain usia 12 tahun.",
+      category: "KELOMPOK_UMUR",
+      targetKu: 12,
       homebaseId: hbPusat.id,
     },
   });
@@ -110,10 +111,16 @@ async function main() {
   const parentPlayer = await prisma.player.create({
     data: {
       name: "Arya Pratama",
+      firstName: "Arya",
+      lastName: "Pratama",
       dateOfBirth: new Date("2014-08-15T00:00:00.000Z"),
       gender: "Laki-laki",
       schoolOrigin: "SD Sukamaju",
       phoneNumber: "081299998888",
+      addressLine1: "Jl. Contoh No. 10",
+      city: "Depok",
+      province: "Jawa Barat",
+      postalCode: "16514",
       parentName: "Bunda Arya",
       parentPhoneNumber: "081277771111",
       groupId: groupU12.id,

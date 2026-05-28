@@ -30,7 +30,39 @@ export function AddPlayerDialog() {
     setValue,
     formState: { errors },
     reset,
-  } = useForm<PlayerFormValues>({ resolver: zodResolver(playerSchema), mode: "onChange" });
+  } = useForm<PlayerFormValues>({
+    resolver: zodResolver(playerSchema),
+    mode: "onChange",
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      dateOfBirth: "",
+      placeOfBirth: "",
+      gender: "",
+      religion: "",
+      weight: "",
+      height: "",
+      schoolOrigin: "",
+      addressLine1: "",
+      addressLine2: "",
+      city: "",
+      province: "",
+      postalCode: "",
+      ktpAddress: "",
+      email: "",
+      phoneNumber: "",
+      instagram: "",
+      hasMedicalCondition: false,
+      medicalConditionDetail: "",
+      parentName: "",
+      parentAddress: "",
+      parentPhoneNumber: "",
+      groupId: "",
+      parentId: "",
+      photoUrl: "",
+      signatureUrl: "",
+    },
+  });
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {
@@ -100,7 +132,7 @@ export function AddPlayerDialog() {
 
             <div className="mt-2 pt-4 border-t border-border/50 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex gap-2 w-full sm:w-auto justify-center sm:justify-start">
-                {[1, 2].map((s) => (
+                {[1, 2, 3].map((s) => (
                   <button
                     key={s}
                     type="button"

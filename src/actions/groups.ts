@@ -5,10 +5,11 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
+import { parseGroupMetaDescription, normalizeGroupMeta, type GroupCategory } from "@/lib/group-meta";
 export async function getGroupsAction() {
   try {
     await requireAdmin();
-    return await prisma.group.findMany({
+    const groups = await prisma.group.findMany({
       orderBy: { name: "asc" },
       include: {
         homebase: { select: { id: true, name: true } },
@@ -19,26 +20,51 @@ export async function getGroupsAction() {
         },
       },
     });
+
+    return groups.map((group) => {
+      const legacyMeta = parseGroupMetaDescription(group.description);
+      return {
+        ...group,
+        category: group.category ?? legacyMeta.category ?? "KELOMPOK_UMUR",
+        targetKu: group.targetKu ?? legacyMeta.targetKu ?? null,
+        schoolLevel: group.schoolLevel ?? legacyMeta.schoolLevel ?? null,
+      };
+    });
   } catch (error) {
     console.error("Error fetching groups:", error);
     throw new Error("Gagal mengambil daftar grup");
   }
 }
 
-export async function addGroupAction(data: { name: string; description?: string; homebaseId?: string | null }) {
+export async function addGroupAction(data: {
+  name: string;
+  category: GroupCategory;
+  targetKu?: number | null;
+  schoolLevel?: string | null;
+  homebaseId?: string | null;
+}) {
   try {
     const session = await requireAdmin();
+    const normalizedMeta = normalizeGroupMeta({
+      category: data.category,
+      targetKu: data.targetKu ?? undefined,
+      schoolLevel: data.schoolLevel ?? undefined,
+    });
     const group = await prisma.$transaction(async (tx) => {
       const g = await tx.group.create({
         data: {
           name: data.name,
-          description: data.description || null,
+          category: normalizedMeta.category,
+          targetKu: normalizedMeta.targetKu ?? null,
+          schoolLevel: normalizedMeta.schoolLevel ?? null,
+          description: null,
           homebaseId: data.homebaseId || null,
         },
       });
 
       await createAuditLog(tx, "CREATE", "Group", g.id, session.user.id, {
         name: g.name,
+        category: g.category,
         homebaseId: g.homebaseId,
       });
       return g;
@@ -52,18 +78,38 @@ export async function addGroupAction(data: { name: string; description?: string;
   }
 }
 
-export async function updateGroupAction(id: string, data: { name?: string; description?: string; homebaseId?: string | null }) {
+export async function updateGroupAction(id: string, data: {
+  name?: string;
+  category?: GroupCategory;
+  targetKu?: number | null;
+  schoolLevel?: string | null;
+  homebaseId?: string | null;
+}) {
   try {
     const session = await requireAdmin();
+    const normalizedMeta = normalizeGroupMeta({
+      category: data.category,
+      targetKu: data.targetKu ?? undefined,
+      schoolLevel: data.schoolLevel ?? undefined,
+    });
     const updated = await prisma.$transaction(async (tx) => {
       const g = await tx.group.update({
         where: { id },
-        data: buildUpdateData(data),
+        data: buildUpdateData({
+          name: data.name,
+          category: normalizedMeta.category,
+          targetKu: normalizedMeta.targetKu ?? null,
+          schoolLevel: normalizedMeta.schoolLevel ?? null,
+          description: null,
+          homebaseId: data.homebaseId,
+        }),
       });
 
       await createAuditLog(tx, "UPDATE", "Group", g.id, session.user.id, {
         name: g.name,
-        description: g.description,
+        category: g.category,
+        targetKu: g.targetKu,
+        schoolLevel: g.schoolLevel,
         homebaseId: g.homebaseId,
       });
       return g;

@@ -16,9 +16,10 @@ import { AddGroupDialog } from "@/components/features/AddGroupDialog";
 import { EditGroupDialog } from "@/components/features/EditGroupDialog";
 import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
 import { ViewPlayerDialog } from "@/components/features/ViewPlayerDialog";
-import { getGroupDisplayDescription } from "@/lib/group-meta";
+import { getGroupCategoryLabel, getGroupDisplayDescription } from "@/lib/group-meta";
 import { Pagination } from "@/components/ui/pagination";
 import { motion, AnimatePresence } from "framer-motion";
+import { buildPlayerFullName } from "@/lib/player-profile";
 
 type UIState =
   | { type: "add-group" }
@@ -30,6 +31,7 @@ type UIState =
   | null;
 
 export default function PlayersPage() {
+  const [selectedCategory, setSelectedCategory] = useState<"SEKOLAH" | "KELOMPOK_UMUR">("SEKOLAH");
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebounce(searchQuery, 300);
@@ -38,8 +40,15 @@ export default function PlayersPage() {
   const ITEMS_PER_PAGE = 9;
 
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
-  
-  const effectiveGroupId = selectedGroupId || (groups && groups.length > 0 ? groups[0].id : null);
+
+  const availableCategories = useMemo(() => Array.from(new Set((groups ?? []).map((group) => group.category))), [groups]);
+  const groupsInCategory = useMemo(
+    () => (groups ?? []).filter((group) => group.category === selectedCategory),
+    [groups, selectedCategory],
+  );
+  const effectiveGroupId = groupsInCategory.some((group) => group.id === selectedGroupId)
+    ? selectedGroupId
+    : groupsInCategory[0]?.id ?? null;
   const { data: playersPage, isLoading: isPlayersLoading } = usePlayersPage(
     effectiveGroupId ?? "",
     debouncedSearch,
@@ -59,6 +68,12 @@ export default function PlayersPage() {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [selectedGroupId, debouncedSearch]);
+
+  React.useEffect(() => {
+    if (!availableCategories.includes(selectedCategory) && availableCategories.length > 0) {
+      setSelectedCategory(availableCategories[0] as "SEKOLAH" | "KELOMPOK_UMUR");
+    }
+  }, [availableCategories, selectedCategory]);
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
@@ -109,7 +124,7 @@ export default function PlayersPage() {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Category Tabs */}
       {isGroupsLoading ? (
         <div className="flex gap-2">
           {[1, 2, 3].map((i) => (
@@ -128,33 +143,75 @@ export default function PlayersPage() {
           </Button>
         </div>
       ) : (
-        <div className="relative overflow-hidden pb-2">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-6 bg-linear-to-r from-background to-transparent sm:hidden" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-6 bg-linear-to-l from-background to-transparent sm:hidden" />
-          <div className="flex gap-2 overflow-x-auto scrollbar-hide pr-2" role="tablist" aria-label="Kelompok Latihan">
-            {groups?.map((group: Group) => {
-              const isActive = effectiveGroupId === group.id;
-              return (
-                <button
-                  key={group.id}
-                  id={`tab-${group.id}`}
-                  role="tab"
-                  aria-selected={isActive ? "true" : "false"}
-                  aria-controls={`panel-${group.id}`}
-                  onClick={() => {
-                    setSelectedGroupId(group.id);
-                    setSearchQuery("");
-                    setCurrentPage(1);
-                  }}
-                  className={`shrink-0 flex items-center gap-2 px-4 py-2 rounded-lg font-bold text-xs uppercase tracking-widest transition-colors ${
-                    isActive ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
-                  }`}
-                >
-                  {group.name}
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? "bg-black/20" : "bg-background/50"}`}>{group._count?.player ?? 0}</span>
-                </button>
-              );
-            })}
+        <div className="space-y-4">
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Kategori Kelompok Latihan">
+            {(["SEKOLAH", "KELOMPOK_UMUR"] as const)
+              .filter((category) => availableCategories.includes(category))
+              .map((category) => {
+                const active = selectedCategory === category;
+                const count = groups?.filter((group) => group.category === category).length ?? 0;
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setSelectedGroupId(null);
+                      setSearchQuery("");
+                    }}
+                    className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
+                      active ? "bg-primary text-primary-foreground" : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                    }`}
+                  >
+                    {getGroupCategoryLabel(category)}
+                    <span className={`rounded-full px-1.5 py-0.5 text-[10px] ${active ? "bg-black/20" : "bg-background/50"}`}>{count}</span>
+                  </button>
+                );
+              })}
+          </div>
+
+          <div className="rounded-xl border border-border/50 bg-card/70 p-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <p className="text-micro uppercase tracking-[0.24em] text-muted-foreground">Folder {getGroupCategoryLabel(selectedCategory)}</p>
+                <p className="text-xs text-muted-foreground/80">Pilih folder kelompok untuk melihat isi pemainnya.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" role="tablist" aria-label="Kelompok Latihan">
+              {groupsInCategory.map((group: Group) => {
+                const isActive = effectiveGroupId === group.id;
+                return (
+                  <button
+                    key={group.id}
+                    id={`tab-${group.id}`}
+                    role="tab"
+                    aria-selected={isActive ? "true" : "false"}
+                    aria-controls={`panel-${group.id}`}
+                    onClick={() => {
+                      setSelectedGroupId(group.id);
+                      setSearchQuery("");
+                      setCurrentPage(1);
+                    }}
+                    className={`rounded-xl border px-4 py-3 text-left transition-colors ${
+                      isActive ? "border-primary bg-primary/8 text-foreground" : "border-border/40 bg-background/30 text-muted-foreground hover:border-primary/35"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <span className="font-heading text-sm uppercase tracking-wider">{group.name}</span>
+                      <span className="rounded-full bg-background/60 px-2 py-0.5 text-[10px] font-bold">{group._count?.player ?? 0}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                      {getGroupDisplayDescription({
+                        category: group.category,
+                        targetKu: group.targetKu,
+                        schoolLevel: group.schoolLevel,
+                        description: group.description,
+                      }) || getGroupCategoryLabel(group.category)}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -200,7 +257,14 @@ export default function PlayersPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 bg-primary/5 border border-primary/20 rounded-lg p-4">
                 <div className="flex flex-col">
                   <h2 className="font-heading text-lg sm:text-xl uppercase tracking-widest text-foreground">{selectedGroup?.name}</h2>
-                  <p className="text-xs text-muted-foreground">{getGroupDisplayDescription(selectedGroup?.description ?? null) || "Kelompok Latihan"}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {getGroupCategoryLabel(selectedGroup.category)} · {getGroupDisplayDescription({
+                      category: selectedGroup.category,
+                      targetKu: selectedGroup.targetKu,
+                      schoolLevel: selectedGroup.schoolLevel,
+                      description: selectedGroup.description,
+                    }) || "Kelompok Latihan"}
+                  </p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto">
                   <Button size="sm" variant="outline" className="h-9 px-3 font-semibold text-xs flex-1 sm:flex-none" onClick={() => setUiState({ type: "edit-group", payload: selectedGroup as Group })}>
@@ -232,7 +296,7 @@ export default function PlayersPage() {
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="size-10 rounded-lg bg-muted flex items-center justify-center font-heading text-lg text-foreground/60 shrink-0">{player.name.charAt(0).toUpperCase()}</div>
                         <div className="flex flex-col min-w-0 gap-0.5">
-                          <h4 className="font-heading tracking-wide text-sm text-foreground truncate">{player.name}</h4>
+                          <h4 className="font-heading tracking-wide text-sm text-foreground truncate">{buildPlayerFullName(player.firstName, player.lastName) || player.name}</h4>
                           <span className="text-[10px] font-medium tracking-wider uppercase text-muted-foreground truncate">{player.group?.name || "Tanpa Kelompok"}</span>
                         </div>
                       </div>

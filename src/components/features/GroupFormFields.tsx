@@ -3,6 +3,7 @@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { FieldErrors, UseFormRegister, UseFormSetValue, UseFormWatch } from "react-hook-form";
+import type { GroupCategory } from "@/lib/group-meta";
 
 const SCHOOL_LEVELS = ["TK/RA", "SD/MI", "SMP/MTS", "SMA/MA"] as const;
 
@@ -17,19 +18,20 @@ interface GroupFormFieldsProps {
   errors: FieldErrors<GroupFormValues>;
   watch: UseFormWatch<GroupFormValues>;
   setValue: UseFormSetValue<GroupFormValues>;
-  isKu: boolean;
-  setIsKu: (v: boolean) => void;
+  category: GroupCategory;
+  setCategory: (v: GroupCategory) => void;
   targetKu: string;
   setTargetKu: (v: string) => void;
-  isSchool: boolean;
-  setIsSchool: (v: boolean) => void;
   schoolLevel: string;
   setSchoolLevel: (v: string) => void;
   homebases: { id: string; name: string }[];
   checkboxIdSuffix?: string;
 }
 
-export function GroupFormFields({ register, errors, watch, setValue, isKu, setIsKu, targetKu, setTargetKu, isSchool, setIsSchool, schoolLevel, setSchoolLevel, homebases, checkboxIdSuffix = "" }: GroupFormFieldsProps) {
+export function GroupFormFields({ register, errors, watch, setValue, category, setCategory, targetKu, setTargetKu, schoolLevel, setSchoolLevel, homebases, checkboxIdSuffix = "" }: GroupFormFieldsProps) {
+  const isKu = category === "KELOMPOK_UMUR";
+  const isSchool = category === "SEKOLAH";
+
   return (
     <>
       <div className="space-y-2">
@@ -42,65 +44,60 @@ export function GroupFormFields({ register, errors, watch, setValue, isKu, setIs
       </div>
 
       <div className="space-y-4 pt-2 pb-2 border-t border-border/30">
-        <div className="flex flex-wrap items-center gap-3 pt-3">
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id={`isUsia${checkboxIdSuffix}`}
-              checked={isKu}
-              onChange={(e) => {
-                setIsKu(e.target.checked);
-                if (e.target.checked) setIsSchool(false);
-              }}
-              className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
-            />
-            <label htmlFor={`isUsia${checkboxIdSuffix}`} className="text-micro text-muted-foreground cursor-pointer whitespace-nowrap">
-              Kelompok Umur
-            </label>
+        <div className="space-y-2 pt-3">
+          <label className="text-micro text-muted-foreground">Kategori Kelompok</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {([
+              { value: "SEKOLAH", label: "Sekolah", desc: "Kelompok berdasarkan tingkat sekolah" },
+              { value: "KELOMPOK_UMUR", label: "Kelompok Umur", desc: "Kelompok berdasarkan batas usia" },
+            ] as const).map((option) => {
+              const active = category === option.value;
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setCategory(option.value)}
+                  className={`rounded-xl border px-3 py-3 text-left transition-colors ${
+                    active ? "border-primary bg-primary/8 text-foreground" : "border-border/50 bg-background/30 text-muted-foreground hover:border-primary/40"
+                  }`}
+                >
+                  <span className="block text-xs font-bold uppercase tracking-widest">{option.label}</span>
+                  <span className="mt-1 block text-[11px] leading-relaxed">{option.desc}</span>
+                </button>
+              );
+            })}
           </div>
+        </div>
 
-          {isKu && (
-            <div className="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200">
-              <Input type="text" pattern="\d*" maxLength={2} value={targetKu} onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))} placeholder="16" className="h-9 w-12 text-center text-sm font-medium" />
+        {isKu && (
+          <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
+            <label htmlFor={`group_targetKu${checkboxIdSuffix}`} className="text-micro text-muted-foreground">
+              Batas Umur
+            </label>
+            <div className="flex items-center gap-2">
+              <Input id={`group_targetKu${checkboxIdSuffix}`} type="text" pattern="\d*" maxLength={2} value={targetKu} onChange={(e) => setTargetKu(e.target.value.replace(/\D/g, ""))} placeholder="16" className="h-10 w-16 text-center text-sm font-medium" />
               <span className="text-xs font-semibold text-muted-foreground">Tahun</span>
             </div>
-          )}
-        </div>
-
-        <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id={`isSekolah${checkboxIdSuffix}`}
-              checked={isSchool}
-              onChange={(e) => {
-                setIsSchool(e.target.checked);
-                if (e.target.checked) setIsKu(false);
-              }}
-              className="size-4 cursor-pointer rounded accent-primary bg-background border-border"
-            />
-            <label htmlFor={`isSekolah${checkboxIdSuffix}`} className="text-micro text-muted-foreground cursor-pointer whitespace-nowrap">
-              Sekolah
-            </label>
           </div>
+        )}
 
-          {isSchool && (
-            <div className="animate-in fade-in zoom-in-95 duration-200">
-              <Select value={schoolLevel} onValueChange={(val: string | null) => setSchoolLevel(val || "")}>
-                <SelectTrigger className="h-9 w-full sm:w-48 font-medium">
-                  <SelectValue placeholder="Pilih Tingkat Sekolah" />
-                </SelectTrigger>
-                <SelectContent>
-                  {SCHOOL_LEVELS.map((level) => (
-                    <SelectItem key={level} value={level}>
-                      {level}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
+        {isSchool && (
+          <div className="space-y-2 animate-in fade-in zoom-in-95 duration-200">
+            <label className="text-micro text-muted-foreground">Tingkat Sekolah</label>
+            <Select value={schoolLevel} onValueChange={(val: string | null) => setSchoolLevel(val || "")}>
+              <SelectTrigger className="h-10 w-full font-medium">
+                <SelectValue placeholder="Pilih Tingkat Sekolah" />
+              </SelectTrigger>
+              <SelectContent>
+                {SCHOOL_LEVELS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {level}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {homebases.length > 0 && (

@@ -9,6 +9,9 @@ type UpdateGroupInput = Parameters<typeof updateGroupAction>[1];
 export type Group = {
   id: string;
   name: string;
+  category: "SEKOLAH" | "KELOMPOK_UMUR";
+  targetKu: number | null;
+  schoolLevel: string | null;
   description: string | null;
   homebaseId: string | null;
   homebase: { id: string; name: string } | null;

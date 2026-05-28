@@ -44,7 +44,17 @@ describe('Players Batch Upload Action', () => {
 
     // Mock Prisma untuk melegitimasi groupId
     prisma.group.findMany.mockResolvedValue([
-      { id: 'valid-group-1', name: 'Group 1', createdAt: new Date(), updatedAt: new Date(), description: null, homebaseId: null }
+      {
+        id: 'valid-group-1',
+        name: 'Group 1',
+        category: 'KELOMPOK_UMUR',
+        targetKu: 12,
+        schoolLevel: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        description: null,
+        homebaseId: null,
+      }
     ]);
     prisma.user.findMany.mockResolvedValue([]);
 
