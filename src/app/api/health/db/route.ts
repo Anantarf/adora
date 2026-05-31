@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 
-const HEALTH_RATE_LIMIT = 60;
-const HEALTH_WINDOW_MS = 60_000;
 const REQUIRED_TOKEN = process.env.HEALTH_CHECK_TOKEN || "";
-const HEALTH_RATE_LIMIT_NAMESPACE = "health-db";
 
 function getClientIp(req: Request): string {
   return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
@@ -16,23 +12,6 @@ export async function GET(req: Request) {
   const token = req.headers.get("x-health-token") ?? "";
   if (REQUIRED_TOKEN === "" || token !== REQUIRED_TOKEN) {
     return NextResponse.json({ error: "Unauthorized health check" }, { status: 401 });
-  }
-
-  const rateLimitResult = await consumeFixedWindowLimit(
-    HEALTH_RATE_LIMIT_NAMESPACE,
-    getClientIp(req),
-    HEALTH_RATE_LIMIT,
-    HEALTH_WINDOW_MS,
-  );
-
-  if (!rateLimitResult.allowed) {
-    await recordOperationalWarning({
-      source: "health-db",
-      message: "Health check rate limit exceeded",
-      statusCode: 429,
-      metadata: { ip: getClientIp(req), count: rateLimitResult.count },
-    });
-    return NextResponse.json({ error: "Too many health checks" }, { status: 429 });
   }
 
   try {

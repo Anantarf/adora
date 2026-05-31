@@ -6,42 +6,13 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
-import { z } from "zod";
 import { withSerializableTransaction } from "@/lib/db-concurrency";
 import { ensureActiveGroup, ensureActiveParentUser, ensureActivePlayer } from "@/lib/domain-guards";
 import { buildPlayerFullName, splitPlayerName } from "@/lib/player-profile";
-
-const batchPlayerSchema = z.object({
-  name: z.string().trim().min(2),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  placeOfBirth: z.string().trim().optional(),
-  gender: z.string().trim().optional(),
-  weight: z.string().trim().optional(),
-  height: z.string().trim().optional(),
-  schoolOrigin: z.string().trim().optional(),
-  address: z.string().trim().optional(),
-  email: z.string().trim().optional(),
-  phoneNumber: z.string().trim().optional(),
-  medicalHistory: z.string().trim().optional(),
-  parentName: z.string().trim().optional(),
-  parentAddress: z.string().trim().optional(),
-  parentPhoneNumber: z.string().trim().optional(),
-  groupId: z.string().trim().min(1),
-  parentId: z.string().trim().optional(),
-});
-
-const batchPlayersInputSchema = z.array(batchPlayerSchema).min(1).max(1000);
+import { batchPlayersInputSchema, playerListArgsSchema, DEFAULT_PLAYER_PAGE_SIZE } from "@/lib/validation/player";
 
 const BATCH_CHUNK_SIZE = 200;
-const DEFAULT_PLAYER_PAGE_SIZE = 9;
-const MAX_PLAYER_PAGE_SIZE = 50;
 
-const playerListArgsSchema = z.object({
-  groupId: z.string().trim().optional(),
-  searchQuery: z.string().trim().optional(),
-  page: z.number().int().min(1).optional(),
-  pageSize: z.number().int().min(1).max(MAX_PLAYER_PAGE_SIZE).optional(),
-});
 
 function buildPlayerListWhere(groupId?: string, searchQuery?: string) {
   return {

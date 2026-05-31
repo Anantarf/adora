@@ -68,9 +68,9 @@ Variable yang dipakai:
 
 - `DATABASE_URL`: koneksi aplikasi/runtime
 - `DIRECT_URL`: koneksi direct untuk Prisma CLI dan migration
-- `SUPABASE_URL`: URL project Supabase
+- `SUPABASE_URL`: URL project Supabase untuk server-side, wajib di production
 - `NEXT_PUBLIC_SUPABASE_URL`: URL publik Supabase
-- `SUPABASE_SERVICE_ROLE_KEY`: service role key untuk upload asset
+- `SUPABASE_SERVICE_ROLE_KEY`: service role key untuk upload asset, hanya dipakai di server dan tidak boleh dibagikan ke client
 - `NEXTAUTH_SECRET`: secret NextAuth
 - `NEXTAUTH_URL`: base URL aplikasi, untuk production gunakan `https://adorabbc.com`
 - `DEFAULT_RESET_PASSWORD`: password default reset akun
@@ -84,6 +84,13 @@ Variable yang dipakai:
 - `RESTORE_REHEARSAL_CONFIRM`: konfirmasi eksplisit untuk restore rehearsal destruktif pada target non-production
 - `E2E_ADMIN_USERNAME` dan `E2E_ADMIN_PASSWORD`: opsional, untuk menyalakan E2E login admin pada environment seeded
 - `E2E_PARENT_USERNAME` dan `E2E_PARENT_PASSWORD`: opsional, untuk menyalakan E2E login parent pada environment seeded
+
+Catatan Supabase:
+
+- untuk server production, `SUPABASE_URL` harus diisi secara eksplisit
+- file upload disimpan ke bucket private `uploads` dan dilayani lewat route internal `/api/storage/uploads/...`
+- bila file yang diupload bersifat sensitif, ini sudah lebih aman daripada public bucket karena URL aplikasi yang disimpan tidak membuka bucket langsung
+- keputusan ACL dan pembagian akses file ada di [docs/SUPABASE_STORAGE_AND_ACL.md](docs/SUPABASE_STORAGE_AND_ACL.md)
 
 ### Setup Database
 

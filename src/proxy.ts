@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
-import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
-
-const RATE_LIMIT_WINDOW_MS = 60 * 1000;
-const MAX_API_REQUESTS_PER_MINUTE = 120;
-const API_RATE_LIMIT_NAMESPACE = "proxy-api";
-
-function getClientIp(request: NextRequest): string {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  const realIp = request.headers.get("x-real-ip");
-  const cfIp = request.headers.get("cf-connecting-ip");
-  if (forwardedFor) return forwardedFor.split(",")[0]?.trim() || "127.0.0.1";
-  return realIp ?? cfIp ?? "127.0.0.1";
-}
 
 // unsafe-inline dipertahankan untuk kompatibilitas Next.js hydration.
 // strict-dynamic membuat browser modern mengabaikan unsafe-inline secara otomatis,
@@ -42,26 +29,7 @@ export default async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const ip = getClientIp(request);
   const isApiRoute = pathname.startsWith("/api/");
-  const shouldSkipSharedApiLimit = pathname === "/api/health/db" || pathname === "/api/health/observability";
-
-  // --- 0. RATE LIMITING ---
-  if (isApiRoute && !shouldSkipSharedApiLimit) {
-    try {
-      const limitResult = await consumeFixedWindowLimit(API_RATE_LIMIT_NAMESPACE, ip, MAX_API_REQUESTS_PER_MINUTE, RATE_LIMIT_WINDOW_MS);
-
-      if (!limitResult.allowed) {
-        return new NextResponse("Rate limit terlampaui.", { status: 429 });
-      }
-    } catch (error) {
-      console.error("[PROXY_RATE_LIMIT_ERROR]", {
-        ip,
-        pathname,
-        error,
-      });
-    }
-  }
 
   const response = NextResponse.next();
 

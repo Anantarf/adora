@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireAuth } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
-import { ensureActiveGroup, ensureActivePlayer, ensureOwnedPlayer } from "@/lib/domain-guards";
+import { ensureActivePlayer, ensureOwnedPlayer } from "@/lib/domain-guards";
 // ─── Types ───────────────────────────────────────────
 export type CertificateRecord = {
   id: string;
@@ -12,9 +12,7 @@ export type CertificateRecord = {
   fileUrl: string;
   uploadedAt: Date;
   playerId: string | null;
-  groupId: string | null;
   player: { id: string; name: string } | null;
-  group: { id: string; name: string } | null;
 };
 
 // 1. List all certificates (Admin)
@@ -24,41 +22,27 @@ export async function getCertificatesAction(): Promise<CertificateRecord[]> {
   return await prisma.certificate.findMany({
     include: {
       player: { select: { id: true, name: true } },
-      group: { select: { id: true, name: true } },
     },
     orderBy: { uploadedAt: "desc" },
   });
 }
 
 // 2. Create certificate (Admin)
-export async function addCertificateAction(data: { title: string; fileUrl: string; playerId?: string; groupId?: string }) {
+export async function addCertificateAction(data: { title: string; fileUrl: string; playerId?: string }) {
   await requireAdmin();
 
-  const hasPlayerTarget = Boolean(data.playerId);
-  const hasGroupTarget = Boolean(data.groupId);
-
-  // Valid combinations:
-  // - Umum (tanpa target)
-  // - Khusus pemain (playerId)
-  // - Khusus kelompok (groupId)
-  if (hasPlayerTarget && hasGroupTarget) {
-    throw new Error("Sertifikat hanya boleh ditujukan ke satu target: pemain atau kelompok.");
+  if (!data.playerId?.trim()) {
+    throw new Error("Sertifikat wajib ditujukan ke pemain tertentu.");
   }
 
   const cert = await prisma.$transaction(async (tx) => {
-    if (data.playerId) {
-      await ensureActivePlayer(tx, data.playerId);
-    }
-    if (data.groupId) {
-      await ensureActiveGroup(tx, data.groupId);
-    }
+    await ensureActivePlayer(tx, data.playerId);
 
     const newCert = await tx.certificate.create({
       data: {
         title: data.title,
         fileUrl: data.fileUrl,
-        playerId: data.playerId || null,
-        groupId: data.groupId || null,
+        playerId: data.playerId,
       },
     });
 

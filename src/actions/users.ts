@@ -6,17 +6,8 @@ import { createAuditLog } from "./audit";
 import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import { userListArgsSchema, DEFAULT_USER_PAGE_SIZE } from "@/lib/validation/user";
 
-const DEFAULT_USER_PAGE_SIZE = 10;
-const MAX_USER_PAGE_SIZE = 50;
-
-const userListArgsSchema = z.object({
-  role: z.enum(["PARENT", "ADMIN"]).default("PARENT"),
-  searchQuery: z.string().trim().optional(),
-  page: z.number().int().min(1).optional(),
-  pageSize: z.number().int().min(1).max(MAX_USER_PAGE_SIZE).optional(),
-});
 
 function buildUserListWhere(role: "PARENT" | "ADMIN", searchQuery?: string) {
   return {

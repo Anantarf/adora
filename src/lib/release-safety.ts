@@ -29,8 +29,8 @@ export function getRequiredProductionEnvStatus(env: NodeJS.ProcessEnv): ReleaseE
       values: ["NEXTAUTH_URL"],
     },
     {
-      label: "SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL",
-      values: ["SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_URL"],
+      label: "SUPABASE_URL",
+      values: ["SUPABASE_URL"],
     },
     {
       label: "SUPABASE_SERVICE_ROLE_KEY",
@@ -75,6 +75,16 @@ export function getRequiredProductionEnvStatus(env: NodeJS.ProcessEnv): ReleaseE
 
   if (env.NODE_ENV === "production" && normalizedNextAuthUrl?.includes("localhost")) {
     warnings.push("NEXTAUTH_URL masih mengarah ke localhost padahal NODE_ENV=production.");
+  }
+
+  const normalizedSupabaseUrl = normalizeBaseUrl(env.SUPABASE_URL);
+  const normalizedPublicSupabaseUrl = normalizeBaseUrl(env.NEXT_PUBLIC_SUPABASE_URL);
+  if (normalizedSupabaseUrl && normalizedPublicSupabaseUrl && normalizedSupabaseUrl !== normalizedPublicSupabaseUrl) {
+    warnings.push("SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_URL berbeda. Samakan nilainya untuk menghindari konfigurasi server/client yang tidak konsisten.");
+  }
+
+  if (env.NODE_ENV === "production" && !normalizedSupabaseUrl && normalizedPublicSupabaseUrl) {
+    warnings.push("SUPABASE_URL belum diisi. Untuk server production, set SUPABASE_URL secara eksplisit meskipun NEXT_PUBLIC_SUPABASE_URL sudah ada.");
   }
 
   const normalizedSmokeUrl = normalizeBaseUrl(env.SMOKE_BASE_URL);

@@ -17,7 +17,7 @@ export const useAddCertificate = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { title: string; fileUrl: string; playerId?: string; groupId?: string }) => addCertificateAction(data),
+    mutationFn: (data: { title: string; fileUrl: string; playerId?: string }) => addCertificateAction(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CERTIFICATES });
     },

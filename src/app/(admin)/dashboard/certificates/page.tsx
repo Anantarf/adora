@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileBadge, Loader2, Trash2, ExternalLink, Users, User, Search } from "lucide-react";
+import { FileBadge, Loader2, Trash2, ExternalLink, User, Search } from "lucide-react";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
 import { toast } from "sonner";
@@ -23,7 +23,7 @@ export default function CertificatesPage() {
     if (!certificates) return [];
     if (!searchQuery.trim()) return certificates;
     const q = searchQuery.toLowerCase();
-    return certificates.filter((cert) => cert.title.toLowerCase().includes(q) || cert.player?.name.toLowerCase().includes(q) || cert.group?.name.toLowerCase().includes(q));
+    return certificates.filter((cert) => cert.title.toLowerCase().includes(q) || cert.player?.name.toLowerCase().includes(q));
   }, [certificates, searchQuery]);
 
   const totalPages = Math.ceil(filteredCertificates.length / ITEMS_PER_PAGE);
@@ -61,7 +61,7 @@ export default function CertificatesPage() {
         <AlertDialogHeader>
           <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Hapus Sertifikat?</AlertDialogTitle>
           <AlertDialogDescription className="text-destructive font-semibold">Sertifikat &quot;{cert.title}&quot; akan dihapus permanen dan tidak dapat dikembalikan.</AlertDialogDescription>
-          <p className="text-amber-500/80 text-xs mt-1">Pemain atau kelompok yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi dari portal.</p>
+          <p className="text-amber-500/80 text-xs mt-1">Pemain yang menerima sertifikat ini tidak akan bisa mengaksesnya lagi dari portal.</p>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -79,7 +79,7 @@ export default function CertificatesPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 border-b border-border/50 pb-6 md:pb-8">
         <div>
           <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Manajemen Sertifikat</h1>
-          <p className="text-muted-foreground text-sm font-medium tracking-wide">Unggah, kelola, dan tetapkan sertifikat prestasi digital kepada pemain atau kelompok.</p>
+          <p className="text-muted-foreground text-sm font-medium tracking-wide">Unggah, kelola, dan tetapkan sertifikat prestasi digital kepada pemain.</p>
         </div>
         <AddCertificateDialog />
       </div>
@@ -89,7 +89,7 @@ export default function CertificatesPage() {
         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground z-10" />
         <input
           type="text"
-          placeholder="Cari Judul, Nama Pemain, atau Kelompok..."
+          placeholder="Cari judul atau nama pemain..."
           value={searchQuery}
           onChange={handleSearchChange}
           className="w-full h-11 pl-10 pr-4 rounded-xl border border-border/50 bg-background/50 focus:outline-none focus:ring-1 focus:ring-primary/50 text-sm font-medium transition-all"
@@ -196,11 +196,6 @@ export default function CertificatesPage() {
                       <User className="size-3" />
                       {cert.player.name}
                     </span>
-                  ) : cert.group ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
-                      <Users className="size-3" />
-                      {cert.group.name}
-                    </span>
                   ) : (
                     <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>
                   )}
@@ -251,11 +246,6 @@ export default function CertificatesPage() {
                         <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
                           <User className="size-3" />
                           {cert.player.name}
-                        </span>
-                      ) : cert.group ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-2 py-1 text-xs font-semibold text-emerald-400 border border-emerald-500/20">
-                          <Users className="size-3" />
-                          {cert.group.name}
                         </span>
                       ) : (
                         <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>

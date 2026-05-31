@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -43,25 +43,28 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
     defaultValues: { name: group.name, homebaseId: group.homebase?.id ?? undefined },
   });
 
-  useEffect(() => {
-    if (category === "KELOMPOK_UMUR") {
+  const handleCategoryChange = (val: GroupCategory) => {
+    setCategory(val);
+    if (val === "KELOMPOK_UMUR") {
       setSchoolLevelError("");
     } else {
       setTargetKuError("");
     }
-  }, [category]);
+  };
 
-  useEffect(() => {
-    if (targetKu) {
+  const handleTargetKuChange = (val: string) => {
+    setTargetKu(val);
+    if (val) {
       setTargetKuError("");
     }
-  }, [targetKu]);
+  };
 
-  useEffect(() => {
-    if (schoolLevel) {
+  const handleSchoolLevelChange = (val: string) => {
+    setSchoolLevel(val);
+    if (val) {
       setSchoolLevelError("");
     }
-  }, [schoolLevel]);
+  };
 
   const onSubmit = async (data: GroupForm) => {
     let hasInlineError = false;
@@ -117,11 +120,11 @@ export function EditGroupDialog({ group, open, onOpenChange }: EditGroupDialogPr
             watch={watch}
             setValue={setValue}
             category={category}
-            setCategory={setCategory}
+            setCategory={handleCategoryChange}
             targetKu={targetKu}
-            setTargetKu={setTargetKu}
+            setTargetKu={handleTargetKuChange}
             schoolLevel={schoolLevel}
-            setSchoolLevel={setSchoolLevel}
+            setSchoolLevel={handleSchoolLevelChange}
             homebases={homebases}
             checkboxIdSuffix="_edit"
             targetKuError={targetKuError}

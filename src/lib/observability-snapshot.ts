@@ -1,6 +1,15 @@
 import { prisma } from "@/lib/prisma";
 import { getObservationWindowStart } from "@/lib/observability";
 
+const OBSERVABILITY_CACHE_TTL_MS = 5 * 60 * 1000;
+
+type CachedSnapshotEntry = {
+  expiresAt: number;
+  value: Promise<ObservabilitySnapshot> | ObservabilitySnapshot;
+};
+
+const snapshotCache = new Map<number, CachedSnapshotEntry>();
+
 export type ObservabilitySnapshot = {
   windowHours: number;
   since: Date;
@@ -68,12 +77,8 @@ export async function getObservabilitySnapshot(windowHours = 24): Promise<Observ
     }),
   ]);
 
-  const errorEvents = eventCounts
-    .filter((row) => row.severity === "ERROR")
-    .reduce((sum, row) => sum + row._count._all, 0);
-  const warnEvents = eventCounts
-    .filter((row) => row.severity === "WARN")
-    .reduce((sum, row) => sum + row._count._all, 0);
+  const errorEvents = eventCounts.filter((row) => row.severity === "ERROR").reduce((sum, row) => sum + row._count._all, 0);
+  const warnEvents = eventCounts.filter((row) => row.severity === "WARN").reduce((sum, row) => sum + row._count._all, 0);
   const badWebVitals = webVitalCounts.reduce((sum, row) => sum + row._count._all, 0);
 
   return {
@@ -96,4 +101,32 @@ export async function getObservabilitySnapshot(windowHours = 24): Promise<Observ
       count: row._count._all,
     })),
   };
+}
+
+export async function getCachedObservabilitySnapshot(windowHours = 24): Promise<ObservabilitySnapshot> {
+  const now = Date.now();
+  const cached = snapshotCache.get(windowHours);
+
+  if (cached && cached.expiresAt > now) {
+    return cached.value;
+  }
+
+  const pending = getObservabilitySnapshot(windowHours);
+  snapshotCache.set(windowHours, {
+    expiresAt: now + OBSERVABILITY_CACHE_TTL_MS,
+    value: pending,
+  });
+
+  try {
+    const resolved = await pending;
+    snapshotCache.set(windowHours, {
+      expiresAt: now + OBSERVABILITY_CACHE_TTL_MS,
+      value: resolved,
+    });
+
+    return resolved;
+  } catch (error) {
+    snapshotCache.delete(windowHours);
+    throw error;
+  }
 }

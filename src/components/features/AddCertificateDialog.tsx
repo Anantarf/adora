@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useAddCertificate } from "@/hooks/use-certificates";
-import { useGroups } from "@/hooks/use-groups";
 import { usePlayers } from "@/hooks/use-players";
 import { toast } from "sonner";
 import { FileBadge, Loader2, Plus } from "lucide-react";
@@ -12,16 +11,12 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-type AssignMode = "player" | "group";
-
 export function AddCertificateDialog() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [fileUrl, setFileUrl] = useState("");
-  const [mode, setMode] = useState<AssignMode>("player");
   const [selectedId, setSelectedId] = useState("");
 
-  const { data: groups } = useGroups();
   const { data: players } = usePlayers("all");
   const addCert = useAddCertificate();
 
@@ -33,8 +28,7 @@ export function AddCertificateDialog() {
       await addCert.mutateAsync({
         title: title.trim(),
         fileUrl: fileUrl.trim(),
-        ...(mode === "player" && selectedId ? { playerId: selectedId } : {}),
-        ...(mode === "group" && selectedId ? { groupId: selectedId } : {}),
+        ...(selectedId ? { playerId: selectedId } : {}),
       });
       toast.success("Sertifikat berhasil ditambahkan!");
       setTitle("");
@@ -60,7 +54,7 @@ export function AddCertificateDialog() {
           <DialogTitle className="font-heading text-xl uppercase tracking-wider flex items-center gap-2">
             <FileBadge className="size-5 text-primary" /> Unggah Sertifikat
           </DialogTitle>
-          <DialogDescription className="text-xs">Tambah sertifikat prestasi untuk pemain atau seluruh kelompok.</DialogDescription>
+          <DialogDescription className="text-xs">Tambah sertifikat prestasi untuk pemain.</DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-2">
           {/* Certificate Title */}
@@ -72,49 +66,28 @@ export function AddCertificateDialog() {
           {/* File URL */}
           <div className="flex flex-col gap-1.5">
             <label className="text-micro text-muted-foreground">URL File Sertifikat</label>
-            <Input placeholder="https://drive.google.com/... atau /uploads/cert-001.pdf" value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
+            <Input
+              placeholder="https://drive.google.com/... atau /api/storage/uploads/cert-001.pdf"
+              value={fileUrl}
+              onChange={(e) => setFileUrl(e.target.value)}
+              className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
+            />
             <p className="text-[10px] text-muted-foreground/70">Gunakan tautan publik — di Google Drive: klik kanan file → Bagikan → &quot;Siapa saja yang memiliki tautan&quot; → Salin tautan.</p>
           </div>
 
-          {/* Assignment Mode */}
+          {/* Player Selection */}
           <div className="flex flex-col gap-1.5">
-            <label className="text-micro text-muted-foreground">Diberikan Kepada</label>
-            <Select
-              value={mode}
-              onValueChange={(v: string | null) => {
-                setMode((v || "player") as AssignMode);
-                setSelectedId("");
-              }}
-            >
-              <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="player">Pemain Individual</SelectItem>
-                <SelectItem value="group">Seluruh Kelompok Latihan</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Dynamic Target Selection */}
-          <div className="flex flex-col gap-1.5">
-            <label className="text-micro text-muted-foreground">{mode === "player" ? "Pilih Pemain" : "Pilih Kelompok"}</label>
+            <label className="text-micro text-muted-foreground">Pilih Pemain</label>
             <Select value={selectedId} onValueChange={(v: string | null) => setSelectedId(v || "")}>
               <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder={mode === "player" ? "Cari nama pemain..." : "Pilih kelompok..."} />
+                <SelectValue placeholder="Cari nama pemain..." />
               </SelectTrigger>
               <SelectContent>
-                {mode === "player"
-                  ? players?.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>
-                        {p.name} {p.group ? `• ${p.group.name}` : ""}
-                      </SelectItem>
-                    ))
-                  : groups?.map((g) => (
-                      <SelectItem key={g.id} value={g.id}>
-                        {g.name}
-                      </SelectItem>
-                    ))}
+                {players?.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name} {p.group ? `• ${p.group.name}` : ""}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

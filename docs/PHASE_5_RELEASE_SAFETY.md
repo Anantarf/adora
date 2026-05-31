@@ -32,8 +32,9 @@ Perubahan di [src/lib/release-safety.ts](../src/lib/release-safety.ts) dan [scri
   - `DIRECT_URL`
   - `NEXTAUTH_SECRET`
   - `NEXTAUTH_URL`
-  - `SUPABASE_URL` atau `NEXT_PUBLIC_SUPABASE_URL`
+  - `SUPABASE_URL`
   - `SUPABASE_SERVICE_ROLE_KEY`
+- sekarang ada warning jika `SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_URL` berbeda, dan production wajib punya `SUPABASE_URL` server-side yang eksplisit
 - variabel operasional tambahan sekarang dilaporkan sebagai `recommended`, bukan blocker:
   - `DEFAULT_RESET_PASSWORD`
   - `HEALTH_CHECK_TOKEN`

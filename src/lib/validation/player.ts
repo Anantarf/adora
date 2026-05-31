@@ -85,9 +85,9 @@ export function playerToFormValues(player: Player): PlayerFormValues {
     groupId: "", parentId: "", photoUrl: "", signatureUrl: ""
   };
 
-  const form = { ...defaults } as Record<string, any>;
+  const form = { ...defaults } as Record<string, unknown>;
   for (const key of Object.keys(defaults)) {
-    const val = (player as any)[key];
+    const val = (player as unknown as Record<string, unknown>)[key];
     if (val !== undefined && val !== null) {
       form[key] = val;
     }
@@ -100,5 +100,38 @@ export function playerToFormValues(player: Player): PlayerFormValues {
     form.dateOfBirth = toYYYYMMDD(player.dateOfBirth);
   }
 
-  return form as PlayerFormValues;
+  return form as unknown as PlayerFormValues;
 }
+
+export const batchPlayerSchema = z.object({
+  name: z.string().trim().min(2),
+  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  placeOfBirth: z.string().trim().optional(),
+  gender: z.string().trim().optional(),
+  weight: z.string().trim().optional(),
+  height: z.string().trim().optional(),
+  schoolOrigin: z.string().trim().optional(),
+  address: z.string().trim().optional(),
+  email: z.string().trim().optional(),
+  phoneNumber: z.string().trim().optional(),
+  medicalHistory: z.string().trim().optional(),
+  parentName: z.string().trim().optional(),
+  parentAddress: z.string().trim().optional(),
+  parentPhoneNumber: z.string().trim().optional(),
+  groupId: z.string().trim().min(1),
+  parentId: z.string().trim().optional(),
+});
+
+export const batchPlayersInputSchema = z.array(batchPlayerSchema).min(1).max(1000);
+
+export const MAX_PLAYER_PAGE_SIZE = 50;
+export const DEFAULT_PLAYER_PAGE_SIZE = 9;
+
+export const playerListArgsSchema = z.object({
+  groupId: z.string().trim().optional(),
+  searchQuery: z.string().trim().optional(),
+  page: z.number().int().min(1).optional(),
+  pageSize: z.number().int().min(1).max(MAX_PLAYER_PAGE_SIZE).optional(),
+});
+
+

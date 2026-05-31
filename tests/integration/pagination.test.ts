@@ -40,14 +40,28 @@ describe("Phase 3 Scale And Pagination", () => {
       where: {
         isDeleted: false,
         groupId: "group-a",
-        OR: [{ name: { contains: "player" } }, { schoolOrigin: { contains: "player" } }],
+        OR: [
+          { name: { contains: "player" } },
+          { firstName: { contains: "player" } },
+          { lastName: { contains: "player" } },
+          { schoolOrigin: { contains: "player" } },
+        ],
       },
       select: {
         id: true,
         name: true,
+        firstName: true,
+        lastName: true,
         schoolOrigin: true,
         groupId: true,
         group: { select: { id: true, name: true } },
+        gender: true,
+        dateOfBirth: true,
+        phoneNumber: true,
+        hasMedicalCondition: true,
+        medicalConditionDetail: true,
+        photoUrl: true,
+        signatureUrl: true,
       },
       orderBy: { name: "asc" },
       skip: 9,
@@ -57,7 +71,12 @@ describe("Phase 3 Scale And Pagination", () => {
       where: {
         isDeleted: false,
         groupId: "group-a",
-        OR: [{ name: { contains: "player" } }, { schoolOrigin: { contains: "player" } }],
+        OR: [
+          { name: { contains: "player" } },
+          { firstName: { contains: "player" } },
+          { lastName: { contains: "player" } },
+          { schoolOrigin: { contains: "player" } },
+        ],
       },
     });
     expect(result).toEqual({

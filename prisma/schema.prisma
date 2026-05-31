@@ -80,12 +80,10 @@ model certificate {
   fileUrl    String
   uploadedAt DateTime @default(now())
   playerId   String?
-  groupId    String?
-  group      group?   @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "Certificate_groupId_fkey")
   player     player?  @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Certificate_playerId_fkey")
 
-  @@index([groupId], map: "Certificate_groupId_idx")
   @@index([playerId], map: "Certificate_playerId_idx")
+  @@index([fileUrl], map: "Certificate_fileUrl_idx")
 }
 
 model event {
@@ -134,7 +132,6 @@ model group {
   updatedAt   DateTime      @updatedAt
 
   homebase    homebase?     @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Group_homebaseId_fkey")
-  certificate certificate[]
   eventGroups eventGroup[]
   player      player[]
 
@@ -190,6 +187,8 @@ model player {
   @@index([parentId], map: "Player_parentId_idx")
   @@index([preferredHomebaseId], map: "Player_preferred_homebaseId_idx")
   @@index([isDeleted], map: "Player_isDeleted_idx")
+  @@index([photoUrl], map: "Player_photoUrl_idx")
+  @@index([signatureUrl], map: "Player_signatureUrl_idx")
   @@unique([name, dateOfBirth, groupId], map: "Player_name_dateOfBirth_groupId_key")
   @@map("Player")
 }

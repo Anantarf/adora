@@ -13,15 +13,8 @@ describe("Phase 5 Release Safety Helpers", () => {
       NODE_ENV: "development",
     });
 
-    expect(result.present).toEqual([
-      "DATABASE_URL",
-      "DIRECT_URL",
-      "NEXTAUTH_SECRET",
-      "NEXTAUTH_URL",
-      "NEXT_PUBLIC_SUPABASE_URL",
-      "SUPABASE_SERVICE_ROLE_KEY",
-    ]);
-    expect(result.missingRequired).toEqual([]);
+    expect(result.present).toEqual(["DATABASE_URL", "DIRECT_URL", "NEXTAUTH_SECRET", "NEXTAUTH_URL", "SUPABASE_SERVICE_ROLE_KEY"]);
+    expect(result.missingRequired).toEqual(["SUPABASE_URL"]);
     expect(result.missingRecommended).toEqual([
       "DEFAULT_RESET_PASSWORD",
       "HEALTH_CHECK_TOKEN",
@@ -52,9 +45,7 @@ describe("Phase 5 Release Safety Helpers", () => {
       NODE_ENV: "production",
     });
 
-    expect(result.warnings).toContain(
-      "NEXTAUTH_URL masih mengarah ke localhost padahal NODE_ENV=production.",
-    );
+    expect(result.warnings).toContain("NEXTAUTH_URL masih mengarah ke localhost padahal NODE_ENV=production.");
   });
 
   test("memberi warning jika ALERT_WEBHOOK_URL bukan URL absolute", () => {
@@ -69,8 +60,36 @@ describe("Phase 5 Release Safety Helpers", () => {
       NODE_ENV: "development",
     });
 
-    expect(result.warnings).toContain(
-      "ALERT_WEBHOOK_URL ada tetapi bukan absolute URL yang valid.",
-    );
+    expect(result.warnings).toContain("ALERT_WEBHOOK_URL ada tetapi bukan absolute URL yang valid.");
+  });
+
+  test("memberi warning jika SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_URL tidak konsisten", () => {
+    const result = getRequiredProductionEnvStatus({
+      DATABASE_URL: "postgresql://example",
+      DIRECT_URL: "postgresql://direct-example",
+      NEXTAUTH_SECRET: "secret",
+      NEXTAUTH_URL: "https://adora.example.com",
+      SUPABASE_URL: "https://server.supabase.co",
+      NEXT_PUBLIC_SUPABASE_URL: "https://public.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-role",
+      NODE_ENV: "production",
+    });
+
+    expect(result.warnings).toContain("SUPABASE_URL dan NEXT_PUBLIC_SUPABASE_URL berbeda. Samakan nilainya untuk menghindari konfigurasi server/client yang tidak konsisten.");
+  });
+
+  test("memberi warning jika production hanya punya NEXT_PUBLIC_SUPABASE_URL", () => {
+    const result = getRequiredProductionEnvStatus({
+      DATABASE_URL: "postgresql://example",
+      DIRECT_URL: "postgresql://direct-example",
+      NEXTAUTH_SECRET: "secret",
+      NEXTAUTH_URL: "https://adora.example.com",
+      NEXT_PUBLIC_SUPABASE_URL: "https://public.supabase.co",
+      SUPABASE_SERVICE_ROLE_KEY: "service-role",
+      NODE_ENV: "production",
+    });
+
+    expect(result.warnings).toContain("SUPABASE_URL belum diisi. Untuk server production, set SUPABASE_URL secara eksplisit meskipun NEXT_PUBLIC_SUPABASE_URL sudah ada.");
+    expect(result.missingRequired).toContain("SUPABASE_URL");
   });
 });

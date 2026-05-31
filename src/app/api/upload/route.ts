@@ -5,6 +5,7 @@ import { createClient } from "@supabase/supabase-js";
 import { fileTypeFromBuffer } from "file-type";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
+import { buildPrivateStorageUrl, getPrivateUploadBucket } from "@/lib/supabase-storage";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 const RATE_LIMIT = 30;
@@ -23,9 +24,18 @@ function getClientIp(req: NextRequest): string {
   return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
 }
 
+function getSupabaseUrl() {
+  const serverUrl = process.env.SUPABASE_URL?.trim();
+  if (serverUrl) {
+    return serverUrl;
+  }
+
+  return "";
+}
+
 function getSupabaseClient() {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "";
+  const supabaseUrl = getSupabaseUrl();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || "";
 
   if (!supabaseUrl || !serviceRoleKey) {
     throw new Error("UPLOAD_STORAGE_NOT_CONFIGURED");
@@ -61,13 +71,13 @@ async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutCod
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
+
+  if (!session?.user || session.user.role !== "ADMIN") {
+    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+  }
+
   const ip = getClientIp(req);
-  const rateLimitResult = await consumeFixedWindowLimit(
-    UPLOAD_RATE_LIMIT_NAMESPACE,
-    ip,
-    RATE_LIMIT,
-    RATE_LIMIT_WINDOW_MS,
-  );
+  const rateLimitResult = await consumeFixedWindowLimit(UPLOAD_RATE_LIMIT_NAMESPACE, ip, RATE_LIMIT, RATE_LIMIT_WINDOW_MS);
 
   if (!rateLimitResult.allowed) {
     await recordOperationalWarning({
@@ -77,10 +87,6 @@ export async function POST(req: NextRequest) {
       metadata: { ip, count: rateLimitResult.count },
     });
     return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
-  }
-
-  if (!session?.user || session.user.role !== "ADMIN") {
-    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
   }
 
   try {
@@ -118,7 +124,7 @@ export async function POST(req: NextRequest) {
     const uniqueName = resolveUploadName(formData.get("assetKey"), ext);
     const supabase = getSupabaseClient();
     const { error } = await withTimeout(
-      supabase.storage.from("uploads").upload(uniqueName, buffer, {
+      supabase.storage.from(getPrivateUploadBucket()).upload(uniqueName, buffer, {
         contentType: file.type || expectedMime,
         cacheControl: "3600",
         upsert: true,
@@ -131,8 +137,7 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    const { data: publicUrlData } = supabase.storage.from("uploads").getPublicUrl(uniqueName);
-    return NextResponse.json({ url: publicUrlData.publicUrl });
+    return NextResponse.json({ url: buildPrivateStorageUrl(uniqueName) });
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "UPLOAD_STORAGE_NOT_CONFIGURED") {

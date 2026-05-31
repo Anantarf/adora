@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, test } from "vitest";
 import { prisma as originalPrisma } from "@/lib/prisma";
 import type { PrismaClient } from "@prisma/client";
 import type { DeepMockProxy } from "vitest-mock-extended";
-import { linkPlayerAction } from "@/actions/players";
+import { linkPlayerAction, addPlayerAction } from "@/actions/players";
 import { addCertificateAction } from "@/actions/certificates";
 
 const prisma = originalPrisma as unknown as DeepMockProxy<PrismaClient>;
@@ -38,13 +38,14 @@ describe("Phase 2 Auth And Invariant Guards", () => {
     ).rejects.toThrow("Pemain tidak ditemukan atau sudah dihapus.");
   });
 
-  test("menggagalkan sertifikat jika group target tidak ditemukan", async () => {
+  test("menggagalkan pembuatan pemain jika group target tidak ditemukan", async () => {
     prisma.group.findUnique.mockResolvedValue(null);
 
     await expect(
-      addCertificateAction({
-        title: "Best Team",
-        fileUrl: "https://example.com/file.pdf",
+      addPlayerAction({
+        firstName: "Ananta",
+        lastName: "Raihan",
+        dateOfBirth: "2010-01-01",
         groupId: "missing-group",
       }),
     ).rejects.toThrow("Kelompok latihan tidak ditemukan.");
