@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -9,6 +9,7 @@ import { EventInput } from "@fullcalendar/core";
 import { getEventConfig } from "@/lib/config/events";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { CalendarDays, Clock, MapPin, AlignLeft } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface CalendarViewProps {
   events: EventInput[];
@@ -31,19 +32,9 @@ const formatJakarta = (iso: string, options: Intl.DateTimeFormatOptions) => {
 };
 
 export function CalendarView({ events }: CalendarViewProps) {
+  const isMobile = useIsMobile();
   const [selectedEvent, setSelectedEvent] = useState<SelectedEvent | null>(null);
-  const [aspectRatio, setAspectRatio] = useState(2.2);
-
-  // Handle responsive aspect ratio
-  useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 768;
-      setAspectRatio(isMobile ? 0.8 : 2.2);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  const aspectRatio = useMemo(() => (isMobile ? 0.8 : 2.2), [isMobile]);
 
   return (
     <>

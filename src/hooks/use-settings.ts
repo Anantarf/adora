@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getClubSettingsAction, getReportSettingsAction, updateClubSettingAction } from "@/actions/settings";
 import { toast } from "sonner";
+import { toUserErrorMessage } from "@/lib/utils";
 
 export function useClubSettings() {
   return useQuery({
@@ -24,8 +25,8 @@ export function useUpdateClubSetting() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["club-settings"] });
     },
-    onError: (error: Error) => {
-      toast.error(error.message || "Gagal memperbarui pengaturan.");
+    onError: (error) => {
+      toast.error(toUserErrorMessage(error, "Gagal memperbarui pengaturan."));
     },
   });
 }

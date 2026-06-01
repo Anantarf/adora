@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/server-auth";
+import { requireSessionRole } from "@/lib/server-auth";
 import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
 import { AttendanceStatus } from "@/types/dashboard";
 import { MS_PER_DAY, ATTENDANCE_LOOKBACK_DAYS } from "@/lib/constants";
@@ -20,7 +20,7 @@ export type DashboardMetrics = {
 
 export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
   try {
-    await requireAdmin();
+    await requireSessionRole("ADMIN");
 
     const thirtyDaysAgo = new Date(getJakartaToday().getTime() - ATTENDANCE_LOOKBACK_DAYS * MS_PER_DAY);
 
@@ -132,7 +132,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
 
 export async function getAttendancesAction(date: string, groupId?: string) {
   try {
-    await requireAdmin();
+    await requireSessionRole("ADMIN");
     const targetDate = toJakartaDate(date);
 
     const where = {

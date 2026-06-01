@@ -1,22 +1,16 @@
-import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
-
-const REQUIRED_TOKEN = process.env.HEALTH_CHECK_TOKEN || "";
-
-function getClientIp(req: Request): string {
-  return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-}
+import { recordOperationalError } from "@/lib/observability";
+import { buildHealthErrorResponse, buildHealthOkResponse, requireHealthCheckToken } from "../_shared";
 
 export async function GET(req: Request) {
-  const token = req.headers.get("x-health-token") ?? "";
-  if (REQUIRED_TOKEN === "" || token !== REQUIRED_TOKEN) {
-    return NextResponse.json({ error: "Unauthorized health check" }, { status: 401 });
+  const unauthorizedResponse = requireHealthCheckToken(req, "db");
+  if (unauthorizedResponse) {
+    return unauthorizedResponse;
   }
 
   try {
     await prisma.$queryRaw`SELECT 1`;
-    return NextResponse.json({ ok: true, db: true });
+    return buildHealthOkResponse("db");
   } catch (error) {
     await recordOperationalError({
       source: "health-db",
@@ -24,6 +18,6 @@ export async function GET(req: Request) {
       error,
       statusCode: 503,
     });
-    return NextResponse.json({ ok: false, db: false }, { status: 503 });
+    return buildHealthErrorResponse("db");
   }
 }

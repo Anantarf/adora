@@ -31,37 +31,14 @@ export default async function proxy(request: NextRequest) {
 
   const isApiRoute = pathname.startsWith("/api/");
 
-  const response = NextResponse.next();
-
   // --- 1. SECURITY HEADERS ---
-  // Generate per-request CSP nonce and inject into the forwarded request headers
-  const nonce = crypto.randomUUID().replace(/-/g, "");
-
-  // Inject nonce into the request so server components/layouts can read it
-  const forwardedRequestHeaders = new Headers(request.headers);
-  forwardedRequestHeaders.set("x-csp-nonce", nonce);
-
-  // Build a CSP that allows scripts/styles only when the correct nonce is present
-  const dynamicCsp = [
-    "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}'`,
-    `style-src 'self' 'nonce-${nonce}'`,
-    "img-src 'self' data: blob: https://*.supabase.co",
-    "connect-src 'self' ws: wss: https://*.supabase.co",
-    "font-src 'self'",
-    "frame-src 'none'",
-    "object-src 'none'",
-    "base-uri 'self'",
-    "form-action 'self'",
-  ].join("; ");
-
-  const securedResponse = NextResponse.next({ request: { headers: forwardedRequestHeaders } });
+  const securedResponse = NextResponse.next();
   securedResponse.headers.set("X-Frame-Options", "DENY");
   securedResponse.headers.set("X-Content-Type-Options", "nosniff");
   securedResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   securedResponse.headers.set("X-XSS-Protection", "1; mode=block");
   securedResponse.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  securedResponse.headers.set("Content-Security-Policy", dynamicCsp);
+  securedResponse.headers.set("Content-Security-Policy", CSP);
   if (process.env.NODE_ENV === "production") {
     securedResponse.headers.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   }
@@ -103,9 +80,9 @@ export default async function proxy(request: NextRequest) {
     if (pathname.startsWith("/parent") && token.role !== "PARENT" && token.role !== "ADMIN") return handleUnauthorized("/login");
 
     // Anti-bfcache: paksa hit server agar logout benar-benar bekerja
-    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    response.headers.set("Pragma", "no-cache");
-    response.headers.set("Expires", "0");
+    securedResponse.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    securedResponse.headers.set("Pragma", "no-cache");
+    securedResponse.headers.set("Expires", "0");
   }
 
   return securedResponse;

@@ -15,6 +15,7 @@ import { playerSchema, playerToFormValues, type PlayerFormValues } from "@/lib/v
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
 import { buildPlayerFullName, calculateAgeFromDate } from "@/lib/player-profile";
 import { formatFullDate, normalizeDateInputToISO } from "@/lib/date-utils";
+import { toUserErrorMessage } from "@/lib/utils";
 
 interface ViewPlayerDialogProps {
   playerId: string;
@@ -90,11 +91,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
       reset(data);
       setIsEditing(false);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "";
-      const errorMsg = msg.includes("Prisma") || msg.includes("Unique constraint") 
-        ? "Terjadi kesalahan pada sistem. Silakan coba kembali." 
-        : msg;
-      toast.error(errorMsg || "Gagal memperbarui profil pemain.");
+      toast.error(toUserErrorMessage(error, "Gagal memperbarui profil pemain."));
     }
   };
 

@@ -7,7 +7,7 @@ import { Users, Info, MessageCircle, Download } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RegistrationActions } from "@/components/features/dashboard/RegistrationActions";
 import { Pagination } from "@/components/ui/pagination";
-import { sanitizePhone } from "@/lib/utils";
+import { sanitizePhone, toUserErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 
 // Minimal type definition based on usage
@@ -60,7 +60,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
       anchor.click();
       URL.revokeObjectURL(objectUrl);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal mengekspor data pendaftar.");
+      toast.error(toUserErrorMessage(error, "Gagal mengekspor data pendaftar."));
     }
   };
 

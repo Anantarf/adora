@@ -1,16 +1,15 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { requireAdmin } from "@/lib/server-auth";
 import { revalidatePath } from "next/cache";
-import { ScheduleEvent } from "@/types/dashboard";
-import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
-import { createAuditLog } from "./audit";
 import type { Prisma, event_type } from "@prisma/client";
+import { createAuditLog } from "./audit";
+import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { ensureActiveGroup, ensureActiveHomebase } from "@/lib/domain-guards";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { ScheduleEvent } from "@/types/dashboard";
 
 function parseEventDate(input: string): Date {
-  // Preserve explicit time payloads; fallback to Jakarta midnight for date-only strings.
   return input.includes("T") ? new Date(input) : toJakartaDate(input);
 }
 
@@ -31,7 +30,8 @@ async function validateEventRelations(
 
 export async function getEventsAction() {
   try {
-    await requireAdmin();
+    await requireSessionRole("ADMIN");
+
     const events = await prisma.event.findMany({
       orderBy: { date: "asc" },
       include: {
@@ -40,9 +40,10 @@ export async function getEventsAction() {
         },
       },
     });
-    return events.map((e) => ({
-      ...e,
-      groups: e.eventGroups.map((eg) => eg.group),
+
+    return events.map((event) => ({
+      ...event,
+      groups: event.eventGroups.map((eventGroup) => eventGroup.group),
     })) as ScheduleEvent[];
   } catch (error) {
     console.error("Error fetching events:", error);
@@ -81,10 +82,11 @@ export async function createEventAction(data: { title: string; description?: str
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
+
     await prisma.$transaction(async (tx) => {
       await validateEventRelations(tx, data.groupIds, data.homebaseId);
 
-      const ev = await tx.event.create({
+      const event = await tx.event.create({
         data: {
           title: data.title,
           description: data.description || null,
@@ -99,13 +101,13 @@ export async function createEventAction(data: { title: string; description?: str
       if (data.groupIds && data.groupIds.length > 0) {
         await tx.eventGroup.createMany({
           data: data.groupIds.map((groupId) => ({
-            eventId: ev.id,
+            eventId: event.id,
             groupId,
           })),
         });
       }
 
-      await createAuditLog(tx, "CREATE", "event", ev.id, userId);
+      await createAuditLog(tx, "CREATE", "event", event.id, userId);
     });
 
     revalidatePath("/dashboard", "layout");
@@ -120,6 +122,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
+
     await prisma.$transaction(async (tx) => {
       await validateEventRelations(tx, data.groupIds, data.homebaseId);
 
@@ -163,10 +166,12 @@ export async function deleteEventAction(id: string) {
   try {
     const session = await requireAdmin();
     const userId = session.user.id ?? null;
+
     await prisma.$transaction(async (tx) => {
       await tx.event.delete({ where: { id } });
       await createAuditLog(tx, "DELETE", "event", id, userId);
     });
+
     revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
@@ -177,7 +182,8 @@ export async function deleteEventAction(id: string) {
 
 export async function getEventsWithAttendanceAction() {
   try {
-    await requireAdmin();
+    await requireSessionRole("ADMIN");
+
     const events = await prisma.event.findMany({
       orderBy: { date: "desc" },
       include: {
@@ -190,19 +196,24 @@ export async function getEventsWithAttendanceAction() {
       },
     });
 
-    return events.map((e) => {
-      const stats = e.attendances.reduce(
+    return events.map((event) => {
+      const stats = event.attendances.reduce(
         (acc, { status }) => ({ ...acc, [status]: (acc[status as keyof typeof acc] ?? 0) + 1 }),
-        { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<string, number>
+        { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<string, number>,
       );
 
-      const attendanceMarkedAt = e.attendances.length > 0 ? e.attendances.reduce((latest, current) => (current.createdAt > latest ? current.createdAt : latest), e.attendances[0].createdAt) : null;
+      const attendanceMarkedAt = event.attendances.length > 0
+        ? event.attendances.reduce(
+            (latest, current) => (current.createdAt > latest ? current.createdAt : latest),
+            event.attendances[0].createdAt,
+          )
+        : null;
 
       return {
-        ...e,
-        groups: e.eventGroups.map((eg) => eg.group),
+        ...event,
+        groups: event.eventGroups.map((eventGroup) => eventGroup.group),
         stats,
-        isAttendanceSubmitted: e.attendances.length > 0,
+        isAttendanceSubmitted: event.attendances.length > 0,
         attendanceMarkedAt,
       };
     });
@@ -214,7 +225,8 @@ export async function getEventsWithAttendanceAction() {
 
 export async function getEventAttendanceDetailAction(eventId: string) {
   try {
-    await requireAdmin();
+    await requireSessionRole("ADMIN");
+
     const event = await prisma.event.findUnique({
       where: { id: eventId },
       include: {
@@ -230,37 +242,41 @@ export async function getEventAttendanceDetailAction(eventId: string) {
       },
     });
 
-    if (!event) throw new Error("Event tidak ditemukan");
+    if (!event) {
+      throw new Error("Event tidak ditemukan");
+    }
 
-    // Jika belum ada attendance, populate dengan daftar pemain dari group event tsb
     let allAttendances = event.attendances;
 
     if (event.attendances.length === 0 && event.eventGroups.length > 0) {
-      // Ambil pemain-pemain di group
-      const groupIds = event.eventGroups.map((eg) => eg.groupId);
+      const groupIds = event.eventGroups.map((eventGroup) => eventGroup.groupId);
       const players = await prisma.player.findMany({
         where: { groupId: { in: groupIds }, isDeleted: false },
         select: { id: true, name: true, schoolOrigin: true, group: { select: { name: true } } },
         orderBy: { name: "asc" },
       });
 
-      // Bikin fake attendance object untuk client
-      allAttendances = players.map((p) => ({
-        id: "draft-" + p.id,
+      allAttendances = players.map((player) => ({
+        id: `draft-${player.id}`,
         date: event.date,
         status: "HADIR" as const,
         note: null,
-        playerId: p.id,
+        playerId: player.id,
         eventId: event.id,
         createdAt: new Date(),
         updatedAt: new Date(),
-        player: { id: p.id, name: p.name, schoolOrigin: p.schoolOrigin, group: p.group },
+        player: {
+          id: player.id,
+          name: player.name,
+          schoolOrigin: player.schoolOrigin,
+          group: player.group,
+        },
       }));
     }
 
     return {
       ...event,
-      groups: event.eventGroups.map((eg) => eg.group),
+      groups: event.eventGroups.map((eventGroup) => eventGroup.group),
       attendances: allAttendances,
       isDraftAttendance: event.attendances.length === 0,
     };

@@ -1,20 +1,34 @@
 "use client";
-import * as React from "react"
+import * as React from "react";
 
-const MOBILE_BREAKPOINT = 768
+const MOBILE_BREAKPOINT = 768;
+const MOBILE_MEDIA_QUERY = `(max-width: ${MOBILE_BREAKPOINT - 1}px)`;
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
-
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+  const subscribe = React.useCallback((onStoreChange: () => void) => {
+    if (typeof window === "undefined") {
+      return () => {};
     }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
-  }, [])
 
-  return !!isMobile
+    const mediaQueryList = window.matchMedia(MOBILE_MEDIA_QUERY);
+    const handleChange = () => onStoreChange();
+
+    mediaQueryList.addEventListener("change", handleChange);
+    window.addEventListener("resize", handleChange);
+
+    return () => {
+      mediaQueryList.removeEventListener("change", handleChange);
+      window.removeEventListener("resize", handleChange);
+    };
+  }, []);
+
+  const getSnapshot = React.useCallback(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+  }, []);
+
+  return React.useSyncExternalStore(subscribe, getSnapshot, () => false);
 }

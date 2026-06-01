@@ -39,7 +39,7 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" className={cn("hover:bg-transparent cursor-default flex", isCollapsed ? "justify-center" : "justify-start")}>
               <div className={cn("flex aspect-square items-center justify-center transition-all duration-300", isCollapsed ? "size-8" : "size-10")}>
-                <Image src="/logo-new.svg" alt="Adora BBC" width={isCollapsed ? 32 : 40} height={isCollapsed ? 32 : 40} className="w-auto h-auto object-contain" priority />
+                <Image src="/logo-new.svg" alt="Adora BBC" width={isCollapsed ? 32 : 40} height={isCollapsed ? 32 : 40} className="w-auto h-auto object-contain" />
               </div>
               <div className={cn("flex flex-col justify-center overflow-hidden transition-all duration-300", isCollapsed ? "w-0 opacity-0 pointer-events-none ml-0" : "w-auto opacity-100 ml-1")}>
                 <span className="font-heading text-lg tracking-widest uppercase text-foreground leading-none mt-0.5 whitespace-nowrap">
@@ -99,4 +99,3 @@ export function AdminSidebar() {
     </Sidebar>
   );
 }
-

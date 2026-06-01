@@ -24,10 +24,8 @@ export default function AppError({
         Aplikasi Mengalami Error
       </h1>
       <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium mb-8">
-        Maaf, terjadi kesalahan saat merender tampilan aplikasi. Error:{" "}
-        <span className="text-destructive font-mono bg-destructive/5 px-2 py-1 rounded">
-          {error.message || "Unknown error"}
-        </span>
+        Maaf, terjadi kesalahan saat merender tampilan aplikasi. Silakan coba lagi.
+        Jika masalah berlanjut, hubungi admin.
       </p>
       <Button onClick={() => reset()} className="gap-2 font-bold uppercase tracking-widest">
         <RotateCcw className="size-4" /> Coba Lagi

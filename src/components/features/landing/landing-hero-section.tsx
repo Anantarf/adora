@@ -17,8 +17,7 @@ export function LandingHeroSection({ registrationYearText }: LandingHeroSectionP
           sizes="100vw"
           quality={40}
           className="object-cover object-center opacity-30 mix-blend-luminosity"
-          priority
-          fetchPriority="high"
+          preload
         />
         <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/80 to-brand-purple/40 mix-blend-multiply z-10" />
         <div className="absolute inset-0 pattern-halftone opacity-20 z-10" />

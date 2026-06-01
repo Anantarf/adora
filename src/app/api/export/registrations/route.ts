@@ -24,11 +24,27 @@ import {
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 
 const ALLOWED_EXPORT_FILTERS = new Set(["all", "daily", "monthly"]);
+const EXPORT_BUFFER_TIMEOUT_MS = 20_000;
+
+async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutCode: string) {
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timeoutHandle = setTimeout(() => reject(new Error(timeoutCode)), timeoutMs);
+      }),
+    ]);
+  } finally {
+    if (timeoutHandle) {
+      clearTimeout(timeoutHandle);
+    }
+  }
+}
 
 export async function GET(request: Request) {
   try {
-    const { default: ExcelJS } = await import("exceljs");
-
     const session = await getServerSession(authOptions);
     if (!session || session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
@@ -57,6 +73,8 @@ export async function GET(request: Request) {
         { status: 413 },
       );
     }
+
+    const { default: ExcelJS } = await import("exceljs");
 
     const workbook = new ExcelJS.Workbook();
     workbook.creator = "Adora Basketball";
@@ -186,7 +204,11 @@ export async function GET(request: Request) {
       });
     }
 
-    const buffer = await workbook.xlsx.writeBuffer();
+    const buffer = await withTimeout(
+      workbook.xlsx.writeBuffer(),
+      EXPORT_BUFFER_TIMEOUT_MS,
+      "EXPORT_WRITE_TIMEOUT",
+    );
     const filename = buildRegistrationExportFilename(filter);
 
     return new NextResponse(buffer, {
@@ -194,9 +216,21 @@ export async function GET(request: Request) {
       headers: {
         "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         "Content-Disposition": `attachment; filename="${filename}"`,
+        "Cache-Control": "private, no-store, max-age=0",
       },
     });
   } catch (error) {
+    if (error instanceof Error && error.message === "EXPORT_WRITE_TIMEOUT") {
+      await recordOperationalError({
+        source: "export-registrations",
+        message: "Export registrations workbook generation timed out",
+        error,
+        statusCode: 503,
+        durationMs: EXPORT_BUFFER_TIMEOUT_MS,
+      });
+      return NextResponse.json({ error: "Export sedang terlalu berat. Coba lagi sebentar lagi." }, { status: 503 });
+    }
+
     await recordOperationalError({
       source: "export-registrations",
       message: "Export registrations request failed",

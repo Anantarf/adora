@@ -1,15 +1,12 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireAuth, requireAdmin } from "@/lib/server-auth";
+import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 import { ensureOwnedPlayer } from "@/lib/domain-guards";
 
 export async function getFamilyPlayersAction() {
-  const session = await requireAuth();
+  const session = await requireSessionRole("PARENT");
   const userId = session.user.id;
-  if (session.user.role !== "PARENT") {
-    throw new Error("Akses hanya tersedia untuk akun orang tua.");
-  }
   if (!userId) throw new Error("ID pengguna tidak ditemukan di sesi.");
 
   return await prisma.player.findMany({
@@ -30,11 +27,8 @@ export async function getFamilyPlayersAction() {
   });
 }
 export async function getPlayerAttendanceAction(playerId: string) {
-  const session = await requireAuth();
+  const session = await requireSessionRole("PARENT");
   const userId = session.user.id;
-  if (session.user.role !== "PARENT") {
-    throw new Error("Akses hanya tersedia untuk akun orang tua.");
-  }
   if (!userId) throw new Error("ID pengguna tidak ditemukan di sesi.");
 
   await prisma.$transaction(async (tx) => {
@@ -52,7 +46,7 @@ export async function getPlayerAttendanceAction(playerId: string) {
 }
 
 export async function getParentsAction() {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
   return await prisma.user.findMany({
     where: { role: "PARENT", isDeleted: false },
     select: { id: true, name: true, username: true },

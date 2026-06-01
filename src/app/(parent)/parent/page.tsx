@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useMemo } from "react";
 import { Loader2, User, FileText, Activity } from "lucide-react";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
@@ -14,10 +15,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ParentRadarChart } from "./components/ParentRadarChart";
-import { ParentProgressionChart } from "./components/ParentProgressionChart";
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
 import { toast } from "sonner";
+
+const ParentRadarChart = dynamic(
+  () => import("./components/ParentRadarChart").then((mod) => mod.ParentRadarChart),
+  {
+    ssr: false,
+    loading: () => (
+      <Card className="border-border/50 bg-card p-6 flex min-h-80 flex-col items-center justify-center gap-4">
+        <Skeleton className="h-5 w-40 bg-muted/50 self-start" />
+        <Skeleton className="size-56 rounded-full bg-muted/40" />
+      </Card>
+    ),
+  },
+);
+
+const ParentProgressionChart = dynamic(
+  () => import("./components/ParentProgressionChart").then((mod) => mod.ParentProgressionChart),
+  {
+    ssr: false,
+    loading: () => (
+      <Card className="border-border/50 bg-card p-6 flex min-h-80 flex-col gap-4 lg:col-span-2">
+        <Skeleton className="h-5 w-48 bg-muted/50" />
+        <Skeleton className="h-44 w-full rounded bg-muted/30" />
+      </Card>
+    ),
+  },
+);
 
 export default function ParentDashboard() {
   const { data: children, isLoading: familyLoading } = useFamily();

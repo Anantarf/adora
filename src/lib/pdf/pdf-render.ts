@@ -4,6 +4,7 @@ import { PDFDocument } from "pdf-lib";
 import { averageScore, dribbleTotal, letterGrade, passingTotal } from "@/lib/metrics";
 import type { MetricsJson } from "@/types/dashboard";
 import { toast } from "sonner";
+import { toUserErrorMessage } from "@/lib/utils";
 import {
   PAGE_W, PAGE_H, MARGIN, CONTENT_W,
   SIG_BOX_H, STAMP_SIZE, SECTION_GAP,
@@ -426,7 +427,7 @@ export async function finalizePDF(doc: jsPDF, info: FinalizeParam) {
       return;
     } catch (error) {
       console.error("[PDF Gen] PDF overlay failed, fallback to standard", error);
-      toast.error(`Gagal menerapkan template latar belakang: ${error instanceof Error ? error.message : "Unknown error"}`);
+      toast.error(toUserErrorMessage(error, "Gagal menerapkan template latar belakang."));
     }
   }
 

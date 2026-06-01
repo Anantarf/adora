@@ -31,7 +31,6 @@ export function LandingProgramsSection() {
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       quality={50}
-                      priority={label === "KU‑8" || label === "KU‑12"}
                       className="object-cover transition-all duration-700 group-hover:scale-105 opacity-70 group-hover:opacity-100"
                     />
                   ) : (

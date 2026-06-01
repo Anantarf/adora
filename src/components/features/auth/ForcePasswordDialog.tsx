@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { changeForcedPasswordAction } from "@/actions/users";
+import { toUserErrorMessage } from "@/lib/utils";
 
 export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
   const { update } = useSession();
@@ -41,8 +42,9 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
       // Force NextAuth to refresh the JWT and session so mustChangePassword becomes false
       await update({ mustChangePassword: false });
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Gagal mengubah password.";
-      toast.error("Gagal", { description: msg });
+      toast.error("Gagal", {
+        description: toUserErrorMessage(error, "Gagal mengubah password."),
+      });
     } finally {
       setIsLoading(false);
     }

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireAuth } from "@/lib/server-auth";
+import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 
 const REPORT_SETTING_KEYS = [
@@ -15,13 +15,13 @@ const REPORT_SETTING_KEYS = [
 ] as const;
 
 export async function getClubSettingsAction() {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
   const settings = await prisma.clubSetting.findMany();
   return Object.fromEntries(settings.map((s) => [s.key, s.value]));
 }
 
 export async function getReportSettingsAction() {
-  await requireAuth();
+  await requireSessionRole();
 
   const settings = await prisma.clubSetting.findMany({
     where: {

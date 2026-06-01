@@ -43,6 +43,18 @@ function buildFingerprint(source: string, message: string, statusCode?: number) 
   return clampText(`${source}:${message}:${statusCode ?? "none"}`, MAX_FINGERPRINT_LENGTH);
 }
 
+function dispatchOperationalAlertInBackground(input: Parameters<typeof dispatchOperationalAlert>[0]) {
+  void Promise.resolve()
+    .then(() => dispatchOperationalAlert(input))
+    .catch((error) => {
+      console.error("[OBSERVABILITY_ALERT_DISPATCH_ERROR]", {
+        source: input.source,
+        message: input.message,
+        error,
+      });
+    });
+}
+
 export async function recordOperationalEvent(input: RecordOperationalEventInput) {
   try {
     const event = await prisma.operationalEvent.create({
@@ -60,7 +72,7 @@ export async function recordOperationalEvent(input: RecordOperationalEventInput)
       },
     });
 
-    await dispatchOperationalAlert({
+    dispatchOperationalAlertInBackground({
       severity: event.severity,
       source: event.source,
       message: event.message,

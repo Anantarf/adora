@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { toUserErrorMessage } from "@/lib/utils";
 
 interface LinkedPlayersModalProps {
   parentId: string | null;
@@ -38,7 +39,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
       await linkPlayer({ playerId, parentId });
       toast.success("Pemain berhasil ditautkan ke akun!");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal menautkan pemain.");
+      toast.error(toUserErrorMessage(error, "Gagal menautkan pemain."));
     }
   };
 
@@ -48,7 +49,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
       await unlinkPlayer({ playerId, parentId });
       toast.success("Tautan pemain berhasil dilepas.");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Gagal melepas tautan pemain.");
+      toast.error(toUserErrorMessage(error, "Gagal melepas tautan pemain."));
     }
   };
 

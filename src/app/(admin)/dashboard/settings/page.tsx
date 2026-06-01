@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { toUserErrorMessage } from "@/lib/utils";
 
 import { ASSET_KEYS, SIGNER_KEYS, getAssetPreviewMeta, type AssetKey } from "./constants";
 
@@ -121,9 +122,7 @@ export default function SettingsPage() {
       await updateSetting.mutateAsync({ key, value: data.url });
       toast.success(`${label} berhasil diunggah.`);
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Gagal mengunggah file.";
-      const errorMsg = msg?.includes("Prisma") || msg?.includes("Unique constraint") ? "Terjadi kesalahan pada sistem. Silakan coba kembali." : msg;
-      toast.error(errorMsg || "Gagal menyimpan pengaturan.");
+      toast.error(toUserErrorMessage(error, "Gagal menyimpan pengaturan."));
       console.error("[Upload Error]", error);
     } finally {
       setUploading((prev) => ({ ...prev, [key]: false }));

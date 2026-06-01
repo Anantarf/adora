@@ -1,13 +1,12 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireAuth } from "@/lib/server-auth";
-import { createAuditLog } from "./audit";
-import { buildUpdateData } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
-import { userListArgsSchema, DEFAULT_USER_PAGE_SIZE } from "@/lib/validation/user";
-
+import { createAuditLog } from "./audit";
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { buildUpdateData } from "@/lib/utils";
+import { DEFAULT_USER_PAGE_SIZE, userListArgsSchema } from "@/lib/validation/user";
 
 function buildUserListWhere(role: "PARENT" | "ADMIN", searchQuery?: string) {
   return {
@@ -25,9 +24,16 @@ function buildUserListWhere(role: "PARENT" | "ADMIN", searchQuery?: string) {
   };
 }
 
-// 1. List users (Admin only) - Focused on PARENT role by default
+function sortSuperadminFirst<T extends { username: string | null }>(items: T[]) {
+  return [...items].sort((a, b) => {
+    if (a.username === "superadmin") return -1;
+    if (b.username === "superadmin") return 1;
+    return 0;
+  });
+}
+
 export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
 
   const users = await prisma.user.findMany({
     where: buildUserListWhere(role),
@@ -45,12 +51,7 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
     orderBy: { username: "asc" },
   });
 
-  // Superadmin selalu di posisi paling atas
-  return users.sort((a, b) => {
-    if (a.username === "superadmin") return -1;
-    if (b.username === "superadmin") return 1;
-    return 0;
-  });
+  return sortSuperadminFirst(users);
 }
 
 export async function getUsersPageAction(input?: {
@@ -59,7 +60,7 @@ export async function getUsersPageAction(input?: {
   page?: number;
   pageSize?: number;
 }) {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
 
   const parsed = userListArgsSchema.parse(input ?? {});
   const requestedPage = parsed.page ?? 1;
@@ -69,6 +70,7 @@ export async function getUsersPageAction(input?: {
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const page = Math.min(requestedPage, totalPages);
   const skip = (page - 1) * pageSize;
+
   const items = await prisma.user.findMany({
     where,
     select: {
@@ -87,14 +89,8 @@ export async function getUsersPageAction(input?: {
     take: pageSize,
   });
 
-  const sortedItems = [...items].sort((a, b) => {
-    if (a.username === "superadmin") return -1;
-    if (b.username === "superadmin") return 1;
-    return 0;
-  });
-
   return {
-    items: sortedItems,
+    items: sortSuperadminFirst(items),
     total,
     page,
     pageSize,
@@ -102,7 +98,6 @@ export async function getUsersPageAction(input?: {
   };
 }
 
-// 2. Create New User Account
 export async function createUserAction(data: { username: string; name: string; email?: string; password?: string; role?: "PARENT" | "ADMIN" }) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
@@ -111,6 +106,7 @@ export async function createUserAction(data: { username: string; name: string; e
   if (existing) {
     throw new Error("Username sudah digunakan oleh akun lain.");
   }
+
   if (data.email) {
     const emailConflict = await prisma.user.findUnique({ where: { email: data.email } });
     if (emailConflict) throw new Error("Email sudah terdaftar pada akun lain.");
@@ -120,6 +116,7 @@ export async function createUserAction(data: { username: string; name: string; e
   if (!data.password && !defaultPassword) {
     throw new Error("Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment.");
   }
+
   const hashedPassword = await bcrypt.hash(data.password || defaultPassword!, 10);
 
   const user = await prisma.$transaction(async (tx) => {
@@ -130,13 +127,15 @@ export async function createUserAction(data: { username: string; name: string; e
         email: data.email || null,
         password: hashedPassword,
         role: data.role || "PARENT",
-        mustChangePassword: true, // Force password change on first login
+        mustChangePassword: true,
       },
     });
+
     await createAuditLog(tx, "CREATE", "user", newUser.id, userId, {
       username: newUser.username,
       role: newUser.role,
     });
+
     return newUser;
   });
 
@@ -144,7 +143,6 @@ export async function createUserAction(data: { username: string; name: string; e
   return user;
 }
 
-// 3. Update User Profile (Admin manual update)
 export async function updateUserAction(
   id: string,
   data: { name?: string; username?: string; email?: string },
@@ -163,6 +161,7 @@ export async function updateUserAction(
       const usernameConflict = await tx.user.findFirst({ where: { username: data.username, id: { not: id } } });
       if (usernameConflict) throw new Error("Username sudah digunakan oleh akun lain.");
     }
+
     if (data.email) {
       const emailConflict = await tx.user.findFirst({ where: { email: data.email, id: { not: id } } });
       if (emailConflict) throw new Error("Email sudah terdaftar pada akun lain.");
@@ -170,10 +169,12 @@ export async function updateUserAction(
 
     const before = { username: targetUser.username, name: targetUser.name, email: targetUser.email };
     const res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
+
     await createAuditLog(tx, "UPDATE", "user", id, userId, {
       before,
       after: { username: res.username, name: res.name, email: res.email },
     });
+
     return res;
   });
 
@@ -181,7 +182,6 @@ export async function updateUserAction(
   return updated;
 }
 
-// 4. Reset User Password (Admin bypass)
 export async function resetPasswordAction(id: string, newPassword?: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
@@ -191,6 +191,7 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   if (!passwordToHash) {
     throw new Error("Password harus disediakan atau set DEFAULT_RESET_PASSWORD di environment.");
   }
+
   const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
   await prisma.$transaction(async (tx) => {
@@ -202,10 +203,11 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
 
     await tx.user.update({
       where: { id },
-      data: { password: hashedPassword, mustChangePassword: true }, // Flag to force password change
+      data: { password: hashedPassword, mustChangePassword: true },
     });
+
     await createAuditLog(tx, "RESET_PASSWORD", "user", id, userId, {
-      username: target?.username,
+      username: target.username,
       resetTo: newPassword ? "custom" : "default",
     });
   });
@@ -214,7 +216,6 @@ export async function resetPasswordAction(id: string, newPassword?: string) {
   return { message: "Password berhasil direset." };
 }
 
-// 5. Delete User (Account Termination) — Hardened with Restrict Check
 export async function deleteUserAction(id: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
@@ -237,10 +238,12 @@ export async function deleteUserAction(id: string) {
     if (playerCount > 0) {
       throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
     }
+
     await createAuditLog(tx, "DELETE", "user", id, userId, {
       username: activeTargetUser.username,
       role: activeTargetUser.role,
     });
+
     await tx.user.update({ where: { id }, data: { isDeleted: true } });
   });
 
@@ -248,9 +251,9 @@ export async function deleteUserAction(id: string) {
   return { success: true as const };
 }
 
-// 6. List parent accounts (lightweight, for selectors)
 export async function getParentUsersAction() {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
+
   return prisma.user.findMany({
     where: { role: "PARENT", isDeleted: false },
     select: { id: true, username: true, name: true },
@@ -258,9 +261,8 @@ export async function getParentUsersAction() {
   });
 }
 
-// 7. Update SELF (Member/Parent updating their own data)
 export async function updateSelfAction(data: { name?: string; email?: string; password?: string }) {
-  const session = await requireAuth();
+  const session = await requireSessionRole();
   const userId = session.user.id ?? null;
 
   const result = await prisma.$transaction(async (tx) => {
@@ -279,13 +281,18 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
       ...(data.name ? { name: data.name } : {}),
       ...(data.email !== undefined ? { email: data.email || null } : {}),
     };
-    if (data.password) updateData.password = await bcrypt.hash(data.password, 10);
+
+    if (data.password) {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
 
     const res = await tx.user.update({ where: { id: userId! }, data: updateData });
+
     await createAuditLog(tx, "UPDATE_SELF", "user", userId!, userId, {
       changedFields: data.password ? ["password"] : [],
-      message: data.password ? "Pengguna mengubah kata sandi mereka sendiri." : "Pengguna memperbarui profil mereka sendiri."
+      message: data.password ? "Pengguna mengubah kata sandi mereka sendiri." : "Pengguna memperbarui profil mereka sendiri.",
     });
+
     return res;
   });
 
@@ -293,9 +300,8 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
   return result;
 }
 
-// 8. Complete Forced Password Change (self — after admin reset)
 export async function changeForcedPasswordAction(newPassword: string) {
-  const session = await requireAuth();
+  const session = await requireSessionRole();
   const userId = session.user.id;
   if (!userId) throw new Error("Tidak terautentikasi.");
 
@@ -316,6 +322,7 @@ export async function changeForcedPasswordAction(newPassword: string) {
       where: { id: userId },
       data: { password: hashedPassword, mustChangePassword: false },
     });
+
     await createAuditLog(tx, "CHANGE_FORCED_PASSWORD", "user", userId, userId, {
       message: "Pengguna menyelesaikan pergantian password wajib.",
     });

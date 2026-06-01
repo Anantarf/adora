@@ -12,20 +12,20 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log the error to the console automatically
     console.error("Terjadi Fatal Error di Aplikasi:", error);
   }, [error]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-background text-center">
-      <div className="size-20 rounded-full bg-destructive/10 flex items-center justify-center mb-6 border border-destructive/20 shadow-sm">
+      <div className="mb-6 flex size-20 items-center justify-center rounded-full border border-destructive/20 bg-destructive/10 shadow-sm">
         <AlertTriangle className="size-10 text-destructive" />
       </div>
-      <h1 className="text-3xl font-heading font-black uppercase tracking-widest text-foreground mb-4">
+      <h1 className="mb-4 text-3xl font-heading font-black uppercase tracking-widest text-foreground">
         Terjadi Kesalahan Sistem
       </h1>
-      <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium mb-8">
-        Maaf, terjadi masalah saat memuat halaman ini. Coba muat ulang — jika masalah berlanjut, hubungi Admin.
+      <p className="mb-8 max-w-md text-sm font-medium leading-relaxed text-muted-foreground">
+        Maaf, terjadi masalah saat memuat halaman ini. Coba muat ulang. Jika masalah
+        berlanjut, hubungi admin.
       </p>
       <Button onClick={() => reset()} className="gap-2 font-bold uppercase tracking-widest">
         <RotateCcw className="size-4" /> Muat Ulang Halaman

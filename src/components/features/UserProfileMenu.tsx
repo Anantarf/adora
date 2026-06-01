@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useSidebar } from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+import { cn, toUserErrorMessage } from "@/lib/utils";
 
 const changePasswordSchema = z
   .object({
@@ -44,11 +44,7 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
         reset();
         onClose();
       } catch (e: unknown) {
-        const msg = e instanceof Error ? e.message : "Gagal memperbarui kata sandi.";
-        const errorMsg = msg?.includes("Prisma") || msg?.includes("Unique constraint")
-          ? "Terjadi kesalahan pada sistem. Silakan coba kembali." 
-          : msg;
-        toast.error(errorMsg || "Gagal memperbarui profil.");
+        toast.error(toUserErrorMessage(e, "Gagal memperbarui kata sandi."));
       }
     });
   };

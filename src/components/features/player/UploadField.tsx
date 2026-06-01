@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { toUserErrorMessage } from "@/lib/utils";
 
 interface UploadFieldProps {
   label: string;
@@ -80,9 +81,7 @@ export function UploadField({
               onUploaded(url);
               toast.success(`${label} berhasil diunggah.`);
             } catch (error) {
-              toast.error(
-                error instanceof Error ? error.message : "Upload gagal."
-              );
+              toast.error(toUserErrorMessage(error, "Upload gagal."));
             } finally {
               setIsUploading(false);
               event.target.value = "";

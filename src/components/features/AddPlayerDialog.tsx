@@ -11,6 +11,7 @@ import { BatchPlayerUpload } from "@/components/features/BatchPlayerUpload";
 import { playerSchema, type PlayerFormValues } from "@/lib/validation/player";
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
 import { normalizeDateInputToISO } from "@/lib/date-utils";
+import { toUserErrorMessage } from "@/lib/utils";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
@@ -110,8 +111,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
       reset(defaultValues);
       toast.success("Pemain baru berhasil didaftarkan!");
     } catch (error) {
-      const msg = error instanceof Error ? error.message : "Terjadi kesalahan tak dikenal.";
-      toast.error("Gagal mendaftarkan pemain: " + msg);
+      toast.error(toUserErrorMessage(error, "Gagal mendaftarkan pemain."));
     }
   };
 

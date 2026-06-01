@@ -14,6 +14,8 @@ type CachedSignedUrl = {
   url: string;
 };
 
+// Best-effort micro-cache for short bursts on a single instance.
+// Correctness must never depend on this because Vercel instances are ephemeral.
 const signedUrlCache = new Map<string, CachedSignedUrl>();
 
 function getSupabaseClient() {
@@ -63,6 +65,16 @@ function setCachedSignedUrl(bucket: string, objectKey: string, url: string) {
   signedUrlCache.set(getSignedUrlCacheKey(bucket, objectKey), {
     expiresAt: Date.now() + SIGNED_URL_CACHE_TTL_MS,
     url,
+  });
+}
+
+function buildSignedUrlRedirect(url: string, cacheStatus: "HIT" | "MISS") {
+  return NextResponse.redirect(url, {
+    headers: {
+      "Cache-Control": "private, no-store, max-age=0",
+      Vary: "Cookie",
+      "X-Storage-Proxy-Cache": cacheStatus,
+    },
   });
 }
 
@@ -125,7 +137,7 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
 
     const cachedUrl = getCachedSignedUrl(getPrivateUploadBucket(), objectKey);
     if (cachedUrl) {
-      return NextResponse.redirect(cachedUrl);
+      return buildSignedUrlRedirect(cachedUrl, "HIT");
     }
 
     const supabase = getSupabaseClient();
@@ -136,7 +148,7 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
     }
 
     setCachedSignedUrl(getPrivateUploadBucket(), objectKey, data.signedUrl);
-    return NextResponse.redirect(data.signedUrl);
+    return buildSignedUrlRedirect(data.signedUrl, "MISS");
   } catch (error) {
     if (error instanceof Error && error.message === "STORAGE_PROXY_NOT_CONFIGURED") {
       return NextResponse.json({ error: "Storage proxy belum dikonfigurasi." }, { status: 503 });

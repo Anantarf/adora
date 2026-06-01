@@ -6,6 +6,7 @@ import { useAddBatchPlayers } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 import { ACCEPTED_EXCEL_FILE_FORMATS, XLSX_MIME_TYPE, buildTemplateWorkbook, isSupportedExcelFile, normalizeAndValidateRows, readWorksheetRows, type RawCsvRow, type UploadRowError } from "@/components/features/batch-upload/excel-utils";
 import { downloadBlobFile } from "@/components/features/batch-upload/download-file";
+import { toUserErrorMessage } from "@/lib/utils";
 
 type PreviewStats = { total: number; valid: number; invalid: number } | null;
 
@@ -64,10 +65,7 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
   };
 
   const notifyError = (message: string) => {
-    const errorMsg = message.includes("Prisma") || message.includes("Unique constraint")
-      ? "Terjadi kesalahan pada sistem. Silakan coba kembali." 
-      : message;
-    toast.error(errorMsg || "Gagal melakukan proses ini.");
+    toast.error(toUserErrorMessage(message, "Gagal melakukan proses ini."));
   };
 
   const downloadTemplateExcel = async () => {
@@ -79,8 +77,7 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
       });
       downloadBlobFile(blob, "template-upload-pemain.xlsx");
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Terjadi kesalahan saat membuat template.";
-      toast.error(`Gagal membuat template: ${message}`);
+      toast.error(toUserErrorMessage(error, "Gagal membuat template Excel."));
     }
   };
 
@@ -150,8 +147,7 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
       toast.success(duplicateOrSkippedCount > 0 ? `Upload selesai. Masuk: ${insertedCount}, dilewati: ${duplicateOrSkippedCount}.` : `Berhasil! ${insertedCount} pemain berhasil diunggah.`);
       onDone();
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Silakan cek lagi isi file Anda.";
-      toast.error("Gagal menyimpan data: " + message);
+      toast.error(toUserErrorMessage(error, "Gagal menyimpan data batch pemain."));
     } finally {
       resetProcessingState();
     }
@@ -186,8 +182,7 @@ export function useBatchPlayerUpload(onDone: () => void): UseBatchPlayerUploadRe
       const rows = readWorksheetRows(firstSheet);
       await processPayload(rows);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "File tidak bisa dibaca.";
-      toast.error("Gagal membaca file Excel: " + message);
+      toast.error(toUserErrorMessage(error, "Gagal membaca file Excel."));
       resetProcessingState();
     }
   };

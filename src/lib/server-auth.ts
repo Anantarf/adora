@@ -2,8 +2,24 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-async function getActiveSessionUser(expectedRole?: "ADMIN" | "PARENT") {
+type SupportedRole = "ADMIN" | "PARENT";
+
+async function getSessionRole(expectedRole?: SupportedRole) {
   const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    return null;
+  }
+
+  if (expectedRole && session.user.role !== expectedRole) {
+    return null;
+  }
+
+  return session;
+}
+
+async function getActiveSessionUser(expectedRole?: SupportedRole) {
+  const session = await getSessionRole(expectedRole);
   const sessionUserId = session?.user?.id;
   if (!sessionUserId) {
     return null;
@@ -41,6 +57,26 @@ async function getActiveSessionUser(expectedRole?: "ADMIN" | "PARENT") {
   };
 }
 
+export async function requireSessionRole(expectedRole?: SupportedRole) {
+  const session = await getSessionRole(expectedRole);
+
+  if (!session?.user?.id) {
+    throw new Error("Sesi tidak valid. Silakan login kembali.");
+  }
+
+  return session;
+}
+
+export async function requireActiveUser(expectedRole?: SupportedRole) {
+  const session = await getActiveSessionUser(expectedRole);
+
+  if (!session?.user?.id) {
+    throw new Error("Sesi tidak valid. Silakan login kembali.");
+  }
+
+  return session;
+}
+
 export async function requireAdmin() {
   const session = await getActiveSessionUser("ADMIN");
 
@@ -52,7 +88,5 @@ export async function requireAdmin() {
 }
 
 export async function requireAuth() {
-  const session = await getActiveSessionUser();
-  if (!session?.user?.id) throw new Error("Sesi tidak valid. Silakan login kembali.");
-  return session;
+  return requireActiveUser();
 }

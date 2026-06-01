@@ -1,12 +1,12 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
-import { requireAdmin } from "@/lib/server-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { DEFAULT_AUDIT_PAGE_SIZE } from "@/lib/constants";
-// ─── Types ───────────────────────────────────────────
+import { prisma } from "@/lib/prisma";
+import { requireSessionRole } from "@/lib/server-auth";
+
 export type AuditLogRecord = {
   id: string;
   action: string;
@@ -18,14 +18,12 @@ export type AuditLogRecord = {
   user: { id: string; name: string | null; username: string | null } | null;
 };
 
-// 1. List audit logs (Admin only) — paginated via cursor
 export async function getAuditLogsAction(options?: { take?: number; cursor?: string }): Promise<{ logs: AuditLogRecord[]; nextCursor: string | null }> {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
 
   const take = options?.take || DEFAULT_AUDIT_PAGE_SIZE;
-
   const logs = await prisma.auditlog.findMany({
-    take: take + 1, // Take one extra to check for next page
+    take: take + 1,
     ...(options?.cursor ? { cursor: { id: options.cursor }, skip: 1 } : {}),
     include: {
       user: { select: { id: true, name: true, username: true } },
@@ -50,7 +48,6 @@ export async function createAuditLog(
   userId?: string | null,
   details?: Prisma.InputJsonValue,
 ) {
-  // Use provided userId, or fetch from session if not provided (fallback)
   let resolvedUserId = userId;
   if (resolvedUserId === undefined) {
     const session = await getServerSession(authOptions);
@@ -68,10 +65,7 @@ export async function createAuditLog(
       },
     });
   } catch (error) {
-    // We don't want audit log failures to crash the main transaction in production,
-    // but we should log them for monitoring.
     console.error("[AUDIT_LOG_ERROR]:", error);
     return null;
   }
 }
-

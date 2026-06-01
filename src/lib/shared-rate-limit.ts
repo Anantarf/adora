@@ -1,5 +1,5 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { acquireAdvisoryLock, withSerializableTransaction } from "@/lib/db-concurrency";
 
 type BucketState = {
   count: number;
@@ -26,49 +26,42 @@ export async function clearBucket(namespace: string, key: string) {
   });
 }
 
+type BucketRow = {
+  count: bigint | number;
+  resetAt: Date;
+};
+
 export async function incrementBucket(namespace: string, key: string, windowMs: number): Promise<BucketState> {
-  return withSerializableTransaction(async (tx) => {
-    await acquireAdvisoryLock(tx, `rate-limit:${namespace}:${key}`);
+  const now = new Date();
+  const resetAt = new Date(now.getTime() + windowMs);
+  const bucketId = crypto.randomUUID();
 
-    const now = new Date();
-    const existing = await tx.rateLimitBucket.findUnique({
-      where: {
-        namespace_key: { namespace, key },
-      },
-    });
+  const rows = await prisma.$queryRaw<BucketRow[]>(Prisma.sql`
+    INSERT INTO "RateLimitBucket" ("id", "namespace", "key", "count", "resetAt", "createdAt", "updatedAt")
+    VALUES (${bucketId}, ${namespace}, ${key}, 1, ${resetAt}, NOW(), NOW())
+    ON CONFLICT ("namespace", "key")
+    DO UPDATE SET
+      "count" = CASE
+        WHEN "RateLimitBucket"."resetAt" <= ${now} THEN 1
+        ELSE "RateLimitBucket"."count" + 1
+      END,
+      "resetAt" = CASE
+        WHEN "RateLimitBucket"."resetAt" <= ${now} THEN ${resetAt}
+        ELSE "RateLimitBucket"."resetAt"
+      END,
+      "updatedAt" = NOW()
+    RETURNING "count", "resetAt"
+  `);
 
-    if (!existing || existing.resetAt.getTime() <= now.getTime()) {
-      const resetAt = new Date(now.getTime() + windowMs);
-      const bucket = await tx.rateLimitBucket.upsert({
-        where: {
-          namespace_key: { namespace, key },
-        },
-        update: {
-          count: 1,
-          resetAt,
-        },
-        create: {
-          namespace,
-          key,
-          count: 1,
-          resetAt,
-        },
-      });
+  const row = rows[0];
+  if (!row) {
+    throw new Error("Failed to increment rate limit bucket.");
+  }
 
-      return { count: bucket.count, resetAt: bucket.resetAt };
-    }
-
-    const bucket = await tx.rateLimitBucket.update({
-      where: {
-        namespace_key: { namespace, key },
-      },
-      data: {
-        count: { increment: 1 },
-      },
-    });
-
-    return { count: bucket.count, resetAt: bucket.resetAt };
-  });
+  return {
+    count: typeof row.count === "bigint" ? Number(row.count) : row.count,
+    resetAt: row.resetAt,
+  };
 }
 
 export async function consumeFixedWindowLimit(

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireAuth } from "@/lib/server-auth";
+import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 import { createAuditLog } from "./audit";
@@ -191,7 +191,7 @@ export async function submitStatisticAction(data: { playerId: string; periodId: 
 }
 
 export async function getStatsByPeriodAction(periodId: string) {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
 
   const stats = await prisma.statistic.findMany({
     where: { periodId, player: { isDeleted: false } },
@@ -214,7 +214,7 @@ export async function getStatsByPeriodAction(periodId: string) {
 }
 
 export async function getStatHistoryAction(statisticId: string) {
-  await requireAdmin();
+  await requireSessionRole("ADMIN");
 
   const history = await prisma.statisticHistory.findMany({
     where: { statisticId },
@@ -226,7 +226,7 @@ export async function getStatHistoryAction(statisticId: string) {
 }
 
 export async function getPlayerStatsAction(playerId: string) {
-  const session = await requireAuth();
+  const session = await requireSessionRole();
   const { role: userRole, id: userId } = session.user;
   if (userRole !== "PARENT" && userRole !== "ADMIN") {
     throw new Error("Akses ke evaluasi pemain tidak diizinkan untuk role ini.");
