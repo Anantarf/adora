@@ -36,7 +36,7 @@ export function PersonalDataFields({
   errors,
   groups,
   isGroupsLoading,
-  inputClassName = "h-11 rounded-xl bg-background/40",
+  inputClassName = "h-11 rounded-xl bg-background/55 hover:bg-background/75 focus:bg-background border border-border/50 focus:border-primary/80 focus:ring-4 focus:ring-primary/10 transition-all",
   groupFieldHint,
 }: PersonalDataFieldsProps) {
   const dateOfBirth = useWatch({ control, name: "dateOfBirth" });
@@ -58,8 +58,8 @@ export function PersonalDataFields({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
         {/* Nama Depan */}
         <div className="space-y-2">
-          <label htmlFor="field-player-firstName" className="text-micro text-muted-foreground">
-            Nama Depan <span className="text-destructive">*</span>
+          <label htmlFor="field-player-firstName" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Nama Depan <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-firstName"
@@ -68,13 +68,13 @@ export function PersonalDataFields({
             className={inputClassName}
           />
           {errors.firstName && (
-            <p className="text-destructive text-xs">{errors.firstName.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.firstName.message}</p>
           )}
         </div>
 
         {/* Nama Belakang */}
         <div className="space-y-2">
-          <label htmlFor="field-player-lastName" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-lastName" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Nama Belakang
           </label>
           <Input
@@ -87,7 +87,7 @@ export function PersonalDataFields({
 
         {/* Tempat Lahir */}
         <div className="space-y-2">
-          <label htmlFor="field-player-placeOfBirth" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-placeOfBirth" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Tempat Lahir
           </label>
           <Input
@@ -100,8 +100,8 @@ export function PersonalDataFields({
 
         {/* Tanggal Lahir */}
         <div className="space-y-2">
-          <label htmlFor="field-player-dateOfBirth" className="text-micro text-muted-foreground">
-            Tanggal Lahir <span className="text-destructive">*</span>
+          <label htmlFor="field-player-dateOfBirth" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Tanggal Lahir <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-dateOfBirth"
@@ -110,25 +110,22 @@ export function PersonalDataFields({
             className={`${inputClassName} w-full scheme-dark [&::-webkit-calendar-picker-indicator]:invert`}
           />
           {errors.dateOfBirth && (
-            <p className="text-destructive text-xs">{errors.dateOfBirth.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.dateOfBirth.message}</p>
           )}
         </div>
 
         {/* Umur (read-only) — dipasangkan sejajar Tanggal Lahir */}
         <div className="space-y-2">
-          <label htmlFor="field-player-age" className="text-micro text-muted-foreground">Umur</label>
-          <Input
-            id="field-player-age"
-            value={ageLabel}
-            readOnly
-            className={`${inputClassName} text-muted-foreground`}
-          />
+          <label className="text-xs font-semibold text-muted-foreground/90 tracking-wide">Umur</label>
+          <div className="h-11 rounded-xl border border-dashed border-border/80 bg-muted/15 flex items-center px-4 transition-colors select-none">
+            <span className="text-sm font-semibold text-primary/95">{ageLabel}</span>
+          </div>
         </div>
 
         {/* Kelompok Latihan */}
         <div className="space-y-2">
-          <label htmlFor="field-player-groupId" className="text-micro text-muted-foreground">
-            Kelompok Latihan <span className="text-destructive">*</span>
+          <label htmlFor="field-player-groupId" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Kelompok Latihan <span className="text-primary font-bold">*</span>
           </label>
           <Controller
             control={control}
@@ -156,17 +153,22 @@ export function PersonalDataFields({
             )}
           />
           {errors.groupId && (
-            <p className="text-destructive text-xs">{errors.groupId.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.groupId.message}</p>
           )}
           {groupFieldHint ? (
-            <p className="text-[11px] text-muted-foreground">{groupFieldHint}</p>
+            <div className="flex items-start gap-1.5 rounded-xl border border-primary/20 bg-primary/5 p-2.5 text-[11px] text-muted-foreground mt-1 leading-normal transition-all duration-300">
+              <svg className="size-3.5 text-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>{groupFieldHint}</span>
+            </div>
           ) : null}
         </div>
 
         {/* Jenis Kelamin */}
         <div className="space-y-2">
-          <label htmlFor="field-player-gender" className="text-micro text-muted-foreground">
-            Jenis Kelamin <span className="text-destructive">*</span>
+          <label htmlFor="field-player-gender" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Jenis Kelamin <span className="text-primary font-bold">*</span>
           </label>
           <Controller
             control={control}
@@ -187,13 +189,13 @@ export function PersonalDataFields({
             )}
           />
           {errors.gender && (
-            <p className="text-destructive text-xs">{errors.gender.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.gender.message}</p>
           )}
         </div>
 
         {/* Agama */}
         <div className="space-y-2">
-          <label htmlFor="field-player-religion" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-religion" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Agama
           </label>
           <Controller
@@ -218,7 +220,7 @@ export function PersonalDataFields({
 
         {/* Berat Badan */}
         <div className="space-y-2">
-          <label htmlFor="field-player-weight" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-weight" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Berat Badan
           </label>
           <div className="relative">
@@ -236,7 +238,7 @@ export function PersonalDataFields({
 
         {/* Tinggi Badan */}
         <div className="space-y-2">
-          <label htmlFor="field-player-height" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-height" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Tinggi Badan
           </label>
           <div className="relative">
@@ -254,8 +256,8 @@ export function PersonalDataFields({
 
         {/* Asal Sekolah */}
         <div className="space-y-2 md:col-span-2">
-          <label htmlFor="field-player-schoolOrigin" className="text-micro text-muted-foreground">
-            Asal Sekolah <span className="text-destructive">*</span>
+          <label htmlFor="field-player-schoolOrigin" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Asal Sekolah <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-schoolOrigin"
@@ -264,7 +266,7 @@ export function PersonalDataFields({
             className={`w-full ${inputClassName}`}
           />
           {errors.schoolOrigin && (
-            <p className="text-destructive text-xs">{errors.schoolOrigin.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.schoolOrigin.message}</p>
           )}
         </div>
       </div>

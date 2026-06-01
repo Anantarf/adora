@@ -29,12 +29,12 @@ function SameAddressCheckbox({
   label: string;
 }) {
   return (
-    <label className="flex items-center gap-1.5 text-xs text-muted-foreground cursor-pointer select-none">
+    <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer select-none transition-colors">
       <input
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        className="appearance-none size-4 rounded-md border border-border bg-background/50 checked:bg-primary checked:border-primary cursor-pointer transition-all flex items-center justify-center after:content-['✓'] after:text-primary-foreground after:text-[10px] after:font-black after:hidden checked:after:block focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary/50"
+        className="appearance-none size-4 rounded-md border border-border/70 bg-background/60 checked:bg-primary checked:border-primary cursor-pointer transition-all flex items-center justify-center after:content-['✓'] after:text-primary-foreground after:text-[10px] after:font-bold after:hidden checked:after:block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
       />
       {label}
     </label>
@@ -46,7 +46,7 @@ export function ContactAddressFields({
   control,
   errors,
   setValue,
-  inputClassName = "h-11 rounded-xl bg-background/40",
+  inputClassName = "h-11 rounded-xl bg-background/55 hover:bg-background/75 focus:bg-background border border-border/50 focus:border-primary/80 focus:ring-4 focus:ring-primary/10 transition-all",
 }: ContactAddressFieldsProps) {
   const [sameKtpAddress, setSameKtpAddress] = useState(false);
   const [sameParentAddress, setSameParentAddress] = useState(false);
@@ -79,6 +79,8 @@ export function ContactAddressFields({
     }
   }, [sameParentAddress, fullAddress, setValue]);
 
+  const textareaClassName = "min-h-22 rounded-xl resize-none border border-border/50 bg-background/55 hover:bg-background/75 focus:bg-background focus:border-primary/80 focus:ring-4 focus:ring-primary/10 transition-all p-3 text-sm";
+
   return (
     <>
       <div className="space-y-1">
@@ -91,8 +93,8 @@ export function ContactAddressFields({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
         {/* Alamat Rumah */}
         <div className="space-y-2 md:col-span-2">
-          <label htmlFor="field-player-addressLine1" className="text-micro text-muted-foreground">
-            Alamat Rumah <span className="text-destructive">*</span>
+          <label htmlFor="field-player-addressLine1" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Alamat Rumah <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-addressLine1"
@@ -101,13 +103,13 @@ export function ContactAddressFields({
             className={inputClassName}
           />
           {errors.addressLine1 && (
-            <p className="text-destructive text-xs">{errors.addressLine1.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.addressLine1.message}</p>
           )}
         </div>
 
         {/* Detail Alamat Tambahan */}
         <div className="space-y-2 md:col-span-2">
-          <label htmlFor="field-player-addressLine2" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-addressLine2" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Detail Alamat Tambahan
           </label>
           <Input
@@ -121,8 +123,8 @@ export function ContactAddressFields({
 
         {/* Kota */}
         <div className="space-y-2">
-          <label htmlFor="field-player-city" className="text-micro text-muted-foreground">
-            Kota <span className="text-destructive">*</span>
+          <label htmlFor="field-player-city" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Kota <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-city"
@@ -130,13 +132,15 @@ export function ContactAddressFields({
             placeholder="Contoh: Depok"
             className={inputClassName}
           />
-          {errors.city && <p className="text-destructive text-xs">{errors.city.message}</p>}
+          {errors.city && (
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.city.message}</p>
+          )}
         </div>
 
         {/* Provinsi */}
         <div className="space-y-2">
-          <label htmlFor="field-player-province" className="text-micro text-muted-foreground">
-            Provinsi <span className="text-destructive">*</span>
+          <label htmlFor="field-player-province" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Provinsi <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-province"
@@ -145,14 +149,14 @@ export function ContactAddressFields({
             className={inputClassName}
           />
           {errors.province && (
-            <p className="text-destructive text-xs">{errors.province.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.province.message}</p>
           )}
         </div>
 
         {/* Kode Pos */}
         <div className="space-y-2">
-          <label htmlFor="field-player-postalCode" className="text-micro text-muted-foreground">
-            Kode Pos <span className="text-destructive">*</span>
+          <label htmlFor="field-player-postalCode" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Kode Pos <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-postalCode"
@@ -161,14 +165,14 @@ export function ContactAddressFields({
             className={inputClassName}
           />
           {errors.postalCode && (
-            <p className="text-destructive text-xs">{errors.postalCode.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.postalCode.message}</p>
           )}
         </div>
 
         {/* Nomor Telepon */}
         <div className="space-y-2">
-          <label htmlFor="field-player-phoneNumber" className="text-micro text-muted-foreground">
-            Nomor Telepon <span className="text-destructive">*</span>
+          <label htmlFor="field-player-phoneNumber" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Nomor Telepon <span className="text-primary font-bold">*</span>
           </label>
           <Input
             id="field-player-phoneNumber"
@@ -178,7 +182,7 @@ export function ContactAddressFields({
             className={inputClassName}
           />
           {errors.phoneNumber && (
-            <p className="text-destructive text-xs">{errors.phoneNumber.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.phoneNumber.message}</p>
           )}
           <p className="text-[11px] text-muted-foreground">
             Jika anak belum punya nomor sendiri, isi dengan nomor orang tua.
@@ -187,7 +191,7 @@ export function ContactAddressFields({
 
         {/* Email */}
         <div className="space-y-2">
-          <label htmlFor="field-player-email" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-email" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Email
           </label>
           <Input
@@ -197,12 +201,14 @@ export function ContactAddressFields({
             placeholder="Contoh: nama@email.com"
             className={inputClassName}
           />
-          {errors.email && <p className="text-destructive text-xs">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.email.message}</p>
+          )}
         </div>
 
         {/* Instagram */}
         <div className="space-y-2">
-          <label htmlFor="field-player-instagram" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-instagram" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Akun Instagram
           </label>
           <Input
@@ -216,7 +222,7 @@ export function ContactAddressFields({
         {/* Alamat KTP/KK */}
         <div className="space-y-2 md:col-span-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="field-player-ktpAddress" className="text-micro text-muted-foreground">
+            <label htmlFor="field-player-ktpAddress" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
               Alamat Sesuai KTP/KK
             </label>
             <SameAddressCheckbox
@@ -230,16 +236,16 @@ export function ContactAddressFields({
             {...register("ktpAddress")}
             readOnly={sameKtpAddress}
             placeholder={sameKtpAddress ? "Sama dengan alamat domisili" : "Isi jika berbeda dengan alamat domisili saat ini"}
-            className={`min-h-22 rounded-xl resize-none bg-background/40 ${sameKtpAddress ? "opacity-60 cursor-not-allowed bg-muted/20" : ""}`}
+            className={`${textareaClassName} ${sameKtpAddress ? "opacity-60 cursor-not-allowed bg-muted/15 border-dashed border-border/80" : ""}`}
           />
         </div>
 
         {/* Nama Orang Tua */}
         <div className="space-y-2">
-          <label htmlFor="field-player-parentName" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-parentName" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Nama Orang Tua{" "}
             {playerAge !== null && playerAge < 18 && (
-              <span className="text-destructive">*</span>
+              <span className="text-primary font-bold">*</span>
             )}
           </label>
           <Input
@@ -249,16 +255,16 @@ export function ContactAddressFields({
             className={inputClassName}
           />
           {errors.parentName && (
-            <p className="text-destructive text-xs">{errors.parentName.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.parentName.message}</p>
           )}
         </div>
 
         {/* Nomor Telepon Orang Tua */}
         <div className="space-y-2">
-          <label htmlFor="field-player-parentPhoneNumber" className="text-micro text-muted-foreground">
+          <label htmlFor="field-player-parentPhoneNumber" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
             Nomor Telepon Orang Tua{" "}
             {playerAge !== null && playerAge < 18 && (
-              <span className="text-destructive">*</span>
+              <span className="text-primary font-bold">*</span>
             )}
           </label>
           <Input
@@ -269,14 +275,14 @@ export function ContactAddressFields({
             className={inputClassName}
           />
           {errors.parentPhoneNumber && (
-            <p className="text-destructive text-xs">{errors.parentPhoneNumber.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.parentPhoneNumber.message}</p>
           )}
         </div>
 
         {/* Alamat Orang Tua */}
         <div className="space-y-2 md:col-span-2">
           <div className="flex items-center justify-between">
-            <label htmlFor="field-player-parentAddress" className="text-micro text-muted-foreground">
+            <label htmlFor="field-player-parentAddress" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
               Alamat Orang Tua
             </label>
             <SameAddressCheckbox
@@ -290,7 +296,7 @@ export function ContactAddressFields({
             {...register("parentAddress")}
             readOnly={sameParentAddress}
             placeholder={sameParentAddress ? "Sama dengan alamat domisili" : "Alamat orang tua/wali"}
-            className={`min-h-22 rounded-xl resize-none bg-background/40 ${sameParentAddress ? "opacity-60 cursor-not-allowed bg-muted/20" : ""}`}
+            className={`${textareaClassName} ${sameParentAddress ? "opacity-60 cursor-not-allowed bg-muted/15 border-dashed border-border/80" : ""}`}
           />
         </div>
       </div>

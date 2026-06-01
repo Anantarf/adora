@@ -210,31 +210,94 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 pt-4 relative overflow-hidden">
-              <div className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background/40 p-3">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">Langkah {step} dari 3</p>
-                    <p className="text-xs text-muted-foreground">{STEP_CONFIG[step - 1]?.label}</p>
+              {/* Premium Sleek Stepper */}
+              <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-background/40 p-4 shadow-xs">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary">
+                      Langkah {step} dari 3
+                    </span>
+                    <h4 className="text-sm font-bold text-foreground">
+                      {STEP_CONFIG[step - 1]?.label}
+                    </h4>
                   </div>
-                  {defaultGroupName ? <p className="text-right text-[11px] text-muted-foreground">Kelompok aktif: <span className="font-semibold text-foreground">{defaultGroupName}</span></p> : null}
+                  {defaultGroupName ? (
+                    <div className="rounded-lg bg-primary/10 px-2.5 py-1 border border-primary/10">
+                      <p className="text-[10px] text-muted-foreground font-medium">
+                        Kelompok: <span className="font-bold text-primary">{defaultGroupName}</span>
+                      </p>
+                    </div>
+                  ) : null}
                 </div>
-                <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-                  {STEP_CONFIG.map((item) => (
-                    <button
-                      key={item.id}
-                      type="button"
-                      disabled={item.id > step}
-                      onClick={() => void goToStep(item.id)}
-                      className={`rounded-xl border px-3 py-2 text-left transition-colors ${
-                        item.id === step
-                          ? "border-primary bg-primary/10 text-foreground"
-                          : "border-border/50 bg-card/60 text-muted-foreground hover:border-primary/35"
-                      } disabled:opacity-50 disabled:cursor-not-allowed`}
-                    >
-                      <span className="block text-[10px] font-bold uppercase tracking-[0.24em]">Step {item.id}</span>
-                      <span className="mt-1 block text-xs font-semibold">{item.label}</span>
-                    </button>
-                  ))}
+
+                {/* Progress Line and Circles */}
+                <div className="relative flex items-center justify-between px-6 py-2">
+                  {/* Connecting Line background */}
+                  <div className="absolute left-10 right-10 top-[22px] h-[2px] bg-border/40" />
+                  
+                  {/* Active Line Progress overlay */}
+                  <div 
+                    className="absolute left-10 top-[22px] h-[2px] bg-linear-to-r from-primary to-orange-500 transition-all duration-300 ease-in-out" 
+                    style={{
+                      width: `${((step - 1) / (STEP_CONFIG.length - 1)) * 100}%`,
+                      maxWidth: "calc(100% - 5rem)"
+                    }}
+                  />
+
+                  {STEP_CONFIG.map((item) => {
+                    const isActive = item.id === step;
+                    const isCompleted = item.id < step;
+                    
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        disabled={item.id > step}
+                        onClick={() => void goToStep(item.id)}
+                        className="relative z-10 flex flex-col items-center gap-1.5 focus:outline-none disabled:cursor-not-allowed"
+                      >
+                        {/* Circle */}
+                        <div
+                          className={`flex size-8 items-center justify-center rounded-full border text-xs font-bold transition-all duration-300 ${
+                            isActive
+                              ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-105"
+                              : isCompleted
+                                ? "border-primary bg-primary/10 text-primary"
+                                : "border-border/60 bg-card text-muted-foreground"
+                          } hover:border-primary/60`}
+                        >
+                          {isCompleted ? (
+                            <svg
+                              className="size-4 stroke-3"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M5 13l4 4L19 7"
+                              />
+                            </svg>
+                          ) : (
+                            item.id
+                          )}
+                        </div>
+                        {/* Caption */}
+                        <span
+                          className={`text-[10px] font-semibold tracking-wide transition-colors ${
+                            isActive
+                              ? "text-foreground font-bold"
+                              : isCompleted
+                                ? "text-primary/90"
+                                : "text-muted-foreground/60"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

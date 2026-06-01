@@ -37,7 +37,7 @@ export function MedicalDocsFields({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
         {/* Toggle Riwayat Penyakit Bawaan */}
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">Riwayat Penyakit Bawaan</label>
+          <label className="text-xs font-semibold text-muted-foreground/90 tracking-wide">Riwayat Penyakit Bawaan</label>
           <Controller
             control={control}
             name="hasMedicalCondition"
@@ -50,10 +50,10 @@ export function MedicalDocsFields({
                     setValue("medicalConditionDetail", "", { shouldDirty: true, shouldValidate: true });
                   }}
                   className={cn(
-                    "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all",
+                    "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all duration-300",
                     !field.value
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border/50 bg-background/20 text-muted-foreground hover:border-border",
+                      ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/5 scale-[1.02]"
+                      : "border-border/60 bg-background/30 text-muted-foreground hover:border-border",
                   )}
                 >
                   Tidak
@@ -62,10 +62,10 @@ export function MedicalDocsFields({
                   type="button"
                   onClick={() => field.onChange(true)}
                   className={cn(
-                    "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all",
+                    "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all duration-300",
                     field.value
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "border-border/50 bg-background/20 text-muted-foreground hover:border-border",
+                      ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/5 scale-[1.02]"
+                      : "border-border/60 bg-background/30 text-muted-foreground hover:border-border",
                   )}
                 >
                   Ya
@@ -77,18 +77,18 @@ export function MedicalDocsFields({
 
         {/* Detail Jenis Penyakit */}
         <div className="space-y-2 md:col-span-2">
-          <label htmlFor="field-player-medicalConditionDetail" className="text-micro text-muted-foreground">
-            Jenis Penyakit {hasMedicalCondition && <span className="text-destructive">*</span>}
+          <label htmlFor="field-player-medicalConditionDetail" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
+            Jenis Penyakit {hasMedicalCondition && <span className="text-primary font-bold">*</span>}
           </label>
           <Textarea
             id="field-player-medicalConditionDetail"
             {...register("medicalConditionDetail")}
             disabled={!hasMedicalCondition}
             placeholder={hasMedicalCondition ? "Contoh: Asma ringan" : "Aktif jika memilih Ya"}
-            className="min-h-22 rounded-xl resize-none bg-background/40 disabled:opacity-60"
+            className="min-h-22 rounded-xl resize-none border border-border/50 bg-background/55 hover:bg-background/75 focus:bg-background focus:border-primary/80 focus:ring-4 focus:ring-primary/10 transition-all p-3 text-sm disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-muted/10"
           />
           {errors.medicalConditionDetail && (
-            <p className="text-destructive text-xs">{errors.medicalConditionDetail.message}</p>
+            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.medicalConditionDetail.message}</p>
           )}
         </div>
 
