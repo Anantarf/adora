@@ -13,7 +13,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Pagination } from "@/components/ui/pagination";
 
 export default function CertificatesPage() {
-  const { data: certificates, isLoading } = useCertificates();
+  const { data: certificates, isLoading, isError, refetch } = useCertificates();
   const deleteCert = useDeleteCertificate();
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -83,6 +83,16 @@ export default function CertificatesPage() {
         </div>
         <AddCertificateDialog />
       </div>
+
+      {/* Error State */}
+      {!isLoading && isError && (
+        <div className="rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive flex items-center justify-between gap-3">
+          <span>Gagal memuat daftar sertifikat. Coba muat ulang.</span>
+          <button type="button" onClick={() => refetch()} className="text-[10px] px-3 py-1 rounded-lg font-bold uppercase tracking-widest border border-destructive/40 text-destructive hover:bg-destructive/10">
+            Muat Ulang
+          </button>
+        </div>
+      )}
 
       {/* Search Bar */}
       <div className="relative">
@@ -166,7 +176,7 @@ export default function CertificatesPage() {
       )}
 
       {/* ── Empty State ── */}
-      {!isLoading && filteredCertificates.length === 0 && (
+      {!isLoading && !isError && filteredCertificates.length === 0 && (
         <div className="rounded-xl border border-dashed border-border/50 flex flex-col items-center gap-2 py-16 text-center">
           <FileBadge className="size-10 text-muted-foreground/30 mb-2" />
           <p className="text-sm font-medium text-muted-foreground">{searchQuery ? "Hasil tidak ditemukan" : "Belum ada sertifikat"}</p>
@@ -174,7 +184,7 @@ export default function CertificatesPage() {
         </div>
       )}
 
-      {!isLoading && filteredCertificates.length > 0 && (
+      {!isLoading && !isError && filteredCertificates.length > 0 && (
         <>
           {/* ── Mobile Card View (< md) ── */}
           <div className="md:hidden flex flex-col gap-3">
@@ -191,14 +201,10 @@ export default function CertificatesPage() {
 
                 {/* Recipient + Date */}
                 <div className="flex flex-wrap gap-2 items-center">
-                  {cert.player ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
-                      <User className="size-3" />
-                      {cert.player.name}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>
-                  )}
+                  <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
+                    <User className="size-3" />
+                    {cert.player?.name ?? "-"}
+                  </span>
                   <span className="text-xs text-muted-foreground/75">{new Date(cert.uploadedAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}</span>
                 </div>
 
@@ -242,14 +248,10 @@ export default function CertificatesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {cert.player ? (
-                        <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
-                          <User className="size-3" />
-                          {cert.player.name}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground/50 italic">Tanpa Penerima</span>
-                      )}
+                      <span className="inline-flex items-center gap-1.5 rounded-md bg-secondary/10 px-2 py-1 text-xs font-semibold text-secondary border border-secondary/20">
+                        <User className="size-3" />
+                        {cert.player?.name ?? "-"}
+                      </span>
                     </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(cert.uploadedAt).toLocaleDateString("id-ID", {
@@ -275,7 +277,7 @@ export default function CertificatesPage() {
         </>
       )}
 
-      {!isLoading && totalPages > 1 && <Pagination currentPage={clampedPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
+      {!isLoading && !isError && totalPages > 1 && <Pagination currentPage={clampedPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
     </div>
   );
 }

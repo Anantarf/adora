@@ -12,7 +12,7 @@ import { Hand } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
-  const { data: metrics, isLoading } = useDashboardMetrics();
+  const { data: metrics, isLoading, isError, refetch } = useDashboardMetrics();
 
   const displayName = (session?.user?.username || "ADMIN").toUpperCase();
 
@@ -38,6 +38,14 @@ export default function AdminDashboardPage() {
       </FadeIn>
 
       {/* Metric Cards */}
+      {isError && (
+        <div className="rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive flex items-center justify-between gap-3">
+          <span>Gagal memuat metrik dashboard. Coba muat ulang.</span>
+          <button type="button" onClick={() => refetch()} className="text-[10px] px-3 py-1 rounded-lg font-bold uppercase tracking-widest border border-destructive/40 text-destructive hover:bg-destructive/10">
+            Muat Ulang
+          </button>
+        </div>
+      )}
       <FadeIn direction="none" delay={0.05}>
         <MetricCards metrics={metrics} isLoading={isLoading} />
       </FadeIn>

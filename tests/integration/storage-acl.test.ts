@@ -9,9 +9,8 @@ describe("Private storage ACL", () => {
       fileUrl: "/api/storage/uploads/certificate-001.pdf",
       lookup: {
         findPlayerAsset: async () => ({ id: "player-1" }),
-        findCertificate: async () => ({ id: "cert-1", playerId: "player-1", groupId: null }),
+        findCertificate: async () => ({ id: "cert-1", playerId: "player-1" }),
         isPlayerOwnedByParent: async () => false,
-        isParentPlayerInGroup: async () => false,
       },
     });
 
@@ -28,7 +27,6 @@ describe("Private storage ACL", () => {
         findPlayerAsset: async () => ({ id: "player-1" }),
         findCertificate: async () => null,
         isPlayerOwnedByParent: async () => false,
-        isParentPlayerInGroup: async () => false,
       },
     });
 
@@ -43,9 +41,8 @@ describe("Private storage ACL", () => {
       fileUrl: "/api/storage/uploads/certificate-002.pdf",
       lookup: {
         findPlayerAsset: async () => null,
-        findCertificate: async () => ({ id: "cert-2", playerId: "player-2", groupId: null }),
+        findCertificate: async () => ({ id: "cert-2", playerId: "player-2" }),
         isPlayerOwnedByParent: async (playerId, parentId) => playerId === "player-2" && parentId === "parent-1",
-        isParentPlayerInGroup: async () => false,
       },
     });
 

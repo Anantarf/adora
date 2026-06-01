@@ -14,6 +14,7 @@ export default function SettingsPage() {
   const { data: settings } = useClubSettings();
   const updateSetting = useUpdateClubSetting();
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
+  const [assetVersions, setAssetVersions] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
@@ -24,6 +25,11 @@ export default function SettingsPage() {
       setLocalValues(settings);
     }
   }, [settings]);
+
+  const getPreviewUrl = (key: AssetKey, url: string) => {
+    const version = assetVersions[key];
+    return version ? `${url}?v=${version}` : url;
+  };
 
   const handlePreviewPdf = async () => {
     setIsPreviewLoading(true);
@@ -110,14 +116,13 @@ export default function SettingsPage() {
       }
 
       setLocalValues((prev) => ({ ...prev, [key]: data.url }));
+      setAssetVersions((prev) => ({ ...prev, [key]: Date.now() }));
       setFailedImages((prev) => ({ ...prev, [key]: false }));
       await updateSetting.mutateAsync({ key, value: data.url });
       toast.success(`${label} berhasil diunggah.`);
     } catch (error) {
       const msg = error instanceof Error ? error.message : "Gagal mengunggah file.";
-      const errorMsg = msg?.includes("Prisma") || msg?.includes("Unique constraint")
-        ? "Terjadi kesalahan pada sistem. Silakan coba kembali."
-        : msg;
+      const errorMsg = msg?.includes("Prisma") || msg?.includes("Unique constraint") ? "Terjadi kesalahan pada sistem. Silakan coba kembali." : msg;
       toast.error(errorMsg || "Gagal menyimpan pengaturan.");
       console.error("[Upload Error]", error);
     } finally {
@@ -165,7 +170,9 @@ export default function SettingsPage() {
                 <div key={asset.key} className="flex flex-col gap-3 group">
                   <div className="flex flex-col gap-1">
                     <div className="flex items-center gap-2.5">
-                      <label htmlFor={`file-${asset.key}`} className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors cursor-pointer">{asset.label}</label>
+                      <label htmlFor={`file-${asset.key}`} className="text-xs font-bold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors cursor-pointer">
+                        {asset.label}
+                      </label>
                       <span className="text-[9px] font-bold text-amber-500/80 px-1.5 py-0.5 rounded bg-amber-500/10 uppercase tracking-wider select-none shrink-0">{asset.maxSizeLabel}</span>
                     </div>
                     <p className="text-[10px] text-muted-foreground leading-relaxed">{asset.description}</p>
@@ -189,16 +196,8 @@ export default function SettingsPage() {
                           className="flex items-center justify-between px-4 h-12 rounded-xl border border-dashed border-border/50 bg-background/50 cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all"
                         >
                           <div className="flex items-center gap-3">
-                            {uploading[asset.key] ? (
-                              <Loader2 className="size-4 animate-spin text-primary" />
-                            ) : assetUrl ? (
-                              <CheckCircle2 className="size-4 text-emerald-500" />
-                            ) : (
-                              <Upload className="size-4 text-muted-foreground" />
-                            )}
-                            <span className="text-xs font-medium text-muted-foreground truncate max-w-50">
-                              {uploading[asset.key] ? "Mengunggah..." : assetUrl ? "File sudah diunggah" : "Belum ada file dipilih"}
-                            </span>
+                            {uploading[asset.key] ? <Loader2 className="size-4 animate-spin text-primary" /> : assetUrl ? <CheckCircle2 className="size-4 text-emerald-500" /> : <Upload className="size-4 text-muted-foreground" />}
+                            <span className="text-xs font-medium text-muted-foreground truncate max-w-50">{uploading[asset.key] ? "Mengunggah..." : assetUrl ? "File sudah diunggah" : "Belum ada file dipilih"}</span>
                           </div>
                           <span className="text-micro text-primary px-3 py-1 rounded-lg bg-primary/10">Pilih File</span>
                         </label>
@@ -219,7 +218,7 @@ export default function SettingsPage() {
                               </div>
                             ) : (
                               <Image
-                                src={`${assetUrl}?t=${Date.now()}`}
+                                src={getPreviewUrl(asset.key, assetUrl)}
                                 alt={`Preview ${asset.label}`}
                                 width={48}
                                 height={48}
@@ -258,15 +257,11 @@ export default function SettingsPage() {
           <CardContent className="flex flex-col gap-6">
             {SIGNER_KEYS.map(({ key, label, placeholder }) => (
               <div key={key} className="flex flex-col gap-2">
-                <label htmlFor={`input-${key}`} className="text-xs font-bold uppercase tracking-widest text-foreground">{label}</label>
+                <label htmlFor={`input-${key}`} className="text-xs font-bold uppercase tracking-widest text-foreground">
+                  {label}
+                </label>
                 <div className="flex gap-3">
-                  <Input
-                    id={`input-${key}`}
-                    value={localValues[key] ?? ""}
-                    onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))}
-                    placeholder={placeholder}
-                    className="flex-1"
-                  />
+                  <Input id={`input-${key}`} value={localValues[key] ?? ""} onChange={(e) => setLocalValues((prev) => ({ ...prev, [key]: e.target.value }))} placeholder={placeholder} className="flex-1" />
                   <button
                     onClick={() => handleTextSave(key, label)}
                     disabled={saving[key]}
@@ -286,7 +281,8 @@ export default function SettingsPage() {
           <div className="flex flex-col gap-1">
             <p className="text-xs font-bold text-primary uppercase tracking-widest">Informasi Penting</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Aset yang belum diunggah tidak akan muncul di rapor PDF, dan bagian tersebut akan dikosongkan secara otomatis. Aset transparan seperti tanda tangan atau stempel bisa terlihat samar di thumbnail gelap, tetapi tetap dipakai saat rapor dicetak.
+              Aset yang belum diunggah tidak akan muncul di rapor PDF, dan bagian tersebut akan dikosongkan secara otomatis. Aset transparan seperti tanda tangan atau stempel bisa terlihat samar di thumbnail gelap, tetapi tetap dipakai saat
+              rapor dicetak.
             </p>
           </div>
         </div>

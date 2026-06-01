@@ -79,8 +79,8 @@ model certificate {
   title      String
   fileUrl    String
   uploadedAt DateTime @default(now())
-  playerId   String?
-  player     player?  @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Certificate_playerId_fkey")
+  playerId   String
+  player     player   @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Certificate_playerId_fkey")
 
   @@index([playerId], map: "Certificate_playerId_idx")
   @@index([fileUrl], map: "Certificate_fileUrl_idx")

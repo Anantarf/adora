@@ -2,7 +2,7 @@ export type StorageAclRole = "ADMIN" | "PARENT";
 
 export type StorageAclLookup = {
   findPlayerAsset(fileUrl: string): Promise<{ id: string } | null>;
-  findCertificate(fileUrl: string): Promise<{ id: string; playerId: string | null } | null>;
+  findCertificate(fileUrl: string): Promise<{ id: string; playerId: string } | null>;
   isPlayerOwnedByParent(playerId: string, parentId: string): Promise<boolean>;
 };
 
@@ -35,26 +35,18 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
     };
   }
 
-  if (certificate.playerId) {
-    const owned = await input.lookup.isPlayerOwnedByParent(certificate.playerId, input.userId);
-    if (!owned) {
-      return {
-        allowed: false,
-        statusCode: 403,
-        message: "File ini bukan milik akun parent ini.",
-      };
-    }
-
+  const owned = await input.lookup.isPlayerOwnedByParent(certificate.playerId, input.userId);
+  if (!owned) {
     return {
-      allowed: true,
-      statusCode: 200,
-      message: "allowed",
+      allowed: false,
+      statusCode: 403,
+      message: "File ini bukan milik akun parent ini.",
     };
   }
 
   return {
-    allowed: false,
-    statusCode: 404,
-    message: "File tidak ditemukan.",
+    allowed: true,
+    statusCode: 200,
+    message: "allowed",
   };
 }

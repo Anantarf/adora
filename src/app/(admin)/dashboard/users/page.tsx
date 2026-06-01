@@ -20,8 +20,8 @@ export default function UsersManagementPage() {
   const ITEMS_PER_PAGE = 10;
 
   const normalizedSearch = searchTerm.trim();
-  const { data: usersPage, isLoading } = useUsersPage(activeRole, normalizedSearch, currentPage, ITEMS_PER_PAGE);
-  
+  const { data: usersPage, isLoading, isError, refetch } = useUsersPage(activeRole, normalizedSearch, currentPage, ITEMS_PER_PAGE);
+
   const { mutateAsync: deleteUser, isPending: isDeleting } = useDeleteUser();
   const { mutateAsync: resetPassword, isPending: isResetting } = useResetPassword();
 
@@ -93,13 +93,19 @@ export default function UsersManagementPage() {
               </div>
             ))}
           </div>
+        ) : isError ? (
+          <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-destructive/40 bg-destructive/5 text-center">
+            <Users className="size-10 text-destructive/50" />
+            <p className="text-sm font-semibold text-destructive">Gagal memuat data akun.</p>
+            <button type="button" onClick={() => refetch()} className="text-[10px] px-4 py-2 rounded-lg font-bold uppercase tracking-widest border border-destructive/40 text-destructive hover:bg-destructive/10">
+              Muat Ulang
+            </button>
+          </div>
         ) : totalAccounts === 0 ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
             <Users className="size-10 text-muted-foreground/30" />
             <p className="text-sm font-medium text-muted-foreground">{isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}</p>
-            <p className="text-xs text-muted-foreground/75 text-center">
-              {isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}
-            </p>
+            <p className="text-xs text-muted-foreground/75 text-center">{isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}</p>
           </div>
         ) : (
           paginatedUsers.map((user) => (
@@ -121,5 +127,3 @@ export default function UsersManagementPage() {
     </motion.div>
   );
 }
-
-

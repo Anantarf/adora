@@ -11,8 +11,8 @@ export type CertificateRecord = {
   title: string;
   fileUrl: string;
   uploadedAt: Date;
-  playerId: string | null;
-  player: { id: string; name: string } | null;
+  playerId: string;
+  player: { id: string; name: string };
 };
 
 // 1. List all certificates (Admin)
@@ -28,10 +28,10 @@ export async function getCertificatesAction(): Promise<CertificateRecord[]> {
 }
 
 // 2. Create certificate (Admin)
-export async function addCertificateAction(data: { title: string; fileUrl: string; playerId?: string }) {
+export async function addCertificateAction(data: { title: string; fileUrl: string; playerId: string }) {
   await requireAdmin();
 
-  if (!data.playerId?.trim()) {
+  if (!data.playerId.trim()) {
     throw new Error("Sertifikat wajib ditujukan ke pemain tertentu.");
   }
 
@@ -42,7 +42,7 @@ export async function addCertificateAction(data: { title: string; fileUrl: strin
       data: {
         title: data.title,
         fileUrl: data.fileUrl,
-        playerId: data.playerId,
+        playerId: data.playerId.trim(),
       },
     });
 

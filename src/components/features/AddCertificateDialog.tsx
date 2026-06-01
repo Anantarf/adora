@@ -23,12 +23,13 @@ export function AddCertificateDialog() {
   const handleSubmit = async () => {
     if (!title.trim()) return toast.error("Judul sertifikat wajib diisi.");
     if (!fileUrl.trim()) return toast.error("URL file wajib diisi.");
+    if (!selectedId) return toast.error("Pilih pemain terlebih dulu.");
 
     try {
       await addCert.mutateAsync({
         title: title.trim(),
         fileUrl: fileUrl.trim(),
-        ...(selectedId ? { playerId: selectedId } : {}),
+        playerId: selectedId,
       });
       toast.success("Sertifikat berhasil ditambahkan!");
       setTitle("");
@@ -66,13 +67,8 @@ export function AddCertificateDialog() {
           {/* File URL */}
           <div className="flex flex-col gap-1.5">
             <label className="text-micro text-muted-foreground">URL File Sertifikat</label>
-            <Input
-              placeholder="https://drive.google.com/... atau /api/storage/uploads/cert-001.pdf"
-              value={fileUrl}
-              onChange={(e) => setFileUrl(e.target.value)}
-              className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
-            />
-            <p className="text-[10px] text-muted-foreground/70">Gunakan tautan publik — di Google Drive: klik kanan file → Bagikan → &quot;Siapa saja yang memiliki tautan&quot; → Salin tautan.</p>
+            <Input placeholder="/api/storage/uploads/sertifikat-001.pdf" value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
+            <p className="text-[10px] text-muted-foreground/70">Gunakan URL internal dari upload privat (contoh: /api/storage/uploads/sertifikat.pdf).</p>
           </div>
 
           {/* Player Selection */}
@@ -93,7 +89,7 @@ export function AddCertificateDialog() {
           </div>
 
           {/* Submit */}
-          <Button onClick={handleSubmit} disabled={addCert.isPending} className="h-11 uppercase font-bold tracking-widest text-xs mt-2">
+          <Button onClick={handleSubmit} disabled={addCert.isPending || !selectedId} className="h-11 uppercase font-bold tracking-widest text-xs mt-2">
             {addCert.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <FileBadge className="mr-2 size-4" />}
             {addCert.isPending ? "Menyimpan..." : "Simpan Sertifikat"}
           </Button>
