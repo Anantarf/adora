@@ -93,6 +93,7 @@ export function UploadField({
       {value ? (
         <div className="space-y-2">
           <div className="overflow-hidden rounded-xl border border-border/50 bg-background/50 p-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={value}
               alt={label}

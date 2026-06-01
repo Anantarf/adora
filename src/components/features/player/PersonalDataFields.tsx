@@ -114,10 +114,11 @@ export function PersonalDataFields({
           )}
         </div>
 
-        {/* Umur (read-only) */}
+        {/* Umur (read-only) — dipasangkan sejajar Tanggal Lahir */}
         <div className="space-y-2">
-          <label className="text-micro text-muted-foreground">Umur</label>
+          <label htmlFor="field-player-age" className="text-micro text-muted-foreground">Umur</label>
           <Input
+            id="field-player-age"
             value={ageLabel}
             readOnly
             className={`${inputClassName} text-muted-foreground`}

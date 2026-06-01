@@ -78,7 +78,7 @@ export function MedicalDocsFields({
         {/* Detail Jenis Penyakit */}
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="field-player-medicalConditionDetail" className="text-micro text-muted-foreground">
-            Jenis Penyakit
+            Jenis Penyakit {hasMedicalCondition && <span className="text-destructive">*</span>}
           </label>
           <Textarea
             id="field-player-medicalConditionDetail"

@@ -2,8 +2,13 @@ import { z } from "zod";
 import type { Player } from "@/types/dashboard";
 import { toYYYYMMDD } from "@/lib/date-utils";
 
+const phoneRegex = /^(?:\+62|62|0)[1-9]\d{7,14}$/;
+
 const optionalText = z.string().trim().optional();
 const optionalEmail = z.string().email("Format email tidak valid").optional().or(z.literal(""));
+const optionalPhone = z.string().trim().optional().refine(val => !val || phoneRegex.test(val), {
+  message: "Format nomor telepon tidak valid (contoh: 0812xxxxxx atau +62812xxxxxx)"
+});
 
 export const playerSchema = z
   .object({
@@ -23,13 +28,17 @@ export const playerSchema = z
     postalCode: z.string().trim().min(1, "Kode pos wajib diisi"),
     ktpAddress: optionalText,
     email: optionalEmail,
-    phoneNumber: z.string().trim().min(1, "Nomor telepon wajib diisi"),
+    phoneNumber: z
+      .string()
+      .trim()
+      .min(1, "Nomor telepon wajib diisi")
+      .regex(phoneRegex, "Format nomor telepon tidak valid (contoh: 0812xxxxxx atau +62812xxxxxx)"),
     instagram: optionalText,
     hasMedicalCondition: z.boolean().default(false),
     medicalConditionDetail: optionalText,
     parentName: optionalText,
     parentAddress: optionalText,
-    parentPhoneNumber: optionalText,
+    parentPhoneNumber: optionalPhone,
     groupId: z.string().nonempty("Kelompok wajib dipilih"),
     parentId: z.string().optional(),
     photoUrl: z.string().trim().optional().or(z.literal("")),
