@@ -173,7 +173,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
           }
         />
 
-        <DialogContent className={`${isBatchMode ? "sm:max-w-2xl" : "sm:max-w-3xl"} bg-card border-border/50`}>
+        <DialogContent className={`${isBatchMode ? "sm:max-w-2xl" : "sm:max-w-3xl"} bg-card border-border/50 max-h-[92vh] flex flex-col`}>
           <DialogHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/50 pb-4">
             <div className="space-y-1">
               <DialogTitle className="text-xl font-heading text-foreground tracking-wide">
@@ -198,8 +198,8 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
           </DialogHeader>
 
           {isBatchMode ? (
-            <div className="pt-2 space-y-3">
-              <div className="max-h-[60vh] sm:max-h-[65vh] overflow-y-auto overflow-x-hidden pr-2 pb-1 custom-scrollbar">
+            <div className="pt-2 space-y-3 flex-1 min-h-0 flex flex-col">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-2 pb-1 custom-scrollbar">
                 <BatchPlayerUpload onDone={() => setOpen(false)} />
               </div>
               <div className="border-t border-border/50 pt-2">
@@ -209,7 +209,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-4 pt-4 relative overflow-hidden">
+            <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex-1 min-h-0 flex flex-col space-y-4 pt-4 relative overflow-hidden">
               {/* Premium Sleek Stepper */}
               <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-background/40 p-4 shadow-xs">
                 <div className="flex items-center justify-between">
@@ -301,7 +301,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
                 </div>
               </div>
 
-              <div className="max-h-dialog-sm overflow-y-auto overflow-x-hidden pr-2 pb-2 custom-scrollbar">
+              <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden pr-2 pb-2 custom-scrollbar">
                 <PlayerFormFields
                   register={register}
                   control={control}
