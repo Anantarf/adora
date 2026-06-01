@@ -4,6 +4,7 @@
 @import "./_fullcalendar.css";
 
 @custom-variant dark (&:is(.dark *));
+@custom-variant data-active (&[data-active]);
 
 @theme inline {
   --color-background: var(--background);
