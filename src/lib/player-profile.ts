@@ -1,3 +1,5 @@
+import { parseFlexibleDateInput } from "@/lib/date-utils";
+
 export function buildPlayerFullName(firstName?: string | null, lastName?: string | null) {
   return [firstName?.trim(), lastName?.trim()].filter(Boolean).join(" ").trim();
 }
@@ -18,7 +20,7 @@ export function splitPlayerName(fullName: string) {
 export function calculateAgeFromDate(dateOfBirth?: string | Date | null, now = new Date()) {
   if (!dateOfBirth) return null;
 
-  const birthDate = typeof dateOfBirth === "string" ? new Date(dateOfBirth) : dateOfBirth;
+  const birthDate = typeof dateOfBirth === "string" ? parseFlexibleDateInput(dateOfBirth) : dateOfBirth;
   if (Number.isNaN(birthDate.getTime())) return null;
 
   let age = now.getFullYear() - birthDate.getFullYear();

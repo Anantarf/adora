@@ -105,10 +105,12 @@ export function PersonalDataFields({
           </label>
           <Input
             id="field-player-dateOfBirth"
-            type="date"
             {...register("dateOfBirth")}
-            className={`${inputClassName} w-full scheme-dark [&::-webkit-calendar-picker-indicator]:invert`}
+            inputMode="numeric"
+            placeholder="dd/mm/yyyy"
+            className={`${inputClassName} w-full tracking-wide`}
           />
+          <p className="text-[11px] text-muted-foreground/80">Gunakan format hari/bulan/tahun, misalnya 17/08/2012.</p>
           {errors.dateOfBirth && (
             <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.dateOfBirth.message}</p>
           )}

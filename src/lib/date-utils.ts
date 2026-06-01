@@ -4,6 +4,9 @@
  * All dates stored as midnight Jakarta (00:00:00+07:00) for cross-server consistency.
  */
 
+const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const DISPLAY_DATE_REGEX = /^\d{2}\/\d{2}\/\d{4}$/;
+
 /**
  * Returns a normalized Date object set to 00:00:00 Jakarta time (WIB).
  * Uses explicit +07:00 offset to guarantee consistency across server timezones.
@@ -20,7 +23,7 @@ export function getJakartaToday(): Date {
  */
 export function toJakartaDate(date?: string | Date | number): Date {
   if (!date) return getJakartaToday();
-  const d = new Date(date);
+  const d = parseFlexibleDateInput(date);
 
   if (isNaN(d.getTime())) {
     throw new Error("Format tanggal tidak valid.");
@@ -36,6 +39,49 @@ export function toJakartaDate(date?: string | Date | number): Date {
 export function toYYYYMMDD(date: Date | string): string {
   const d = new Date(date);
   return d.toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
+}
+
+export function parseFlexibleDateInput(date: string | Date | number): Date {
+  if (date instanceof Date) {
+    return date;
+  }
+
+  if (typeof date === "number") {
+    return new Date(date);
+  }
+
+  const trimmedDate = date.trim();
+
+  if (DISPLAY_DATE_REGEX.test(trimmedDate)) {
+    const [day, month, year] = trimmedDate.split("/").map(Number);
+    return new Date(`${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T00:00:00+07:00`);
+  }
+
+  if (ISO_DATE_REGEX.test(trimmedDate)) {
+    return new Date(`${trimmedDate}T00:00:00+07:00`);
+  }
+
+  return new Date(trimmedDate);
+}
+
+export function normalizeDateInputToISO(date: string): string {
+  const parsedDate = parseFlexibleDateInput(date);
+
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new Error("Format tanggal tidak valid.");
+  }
+
+  return parsedDate.toLocaleDateString("sv-SE", { timeZone: "Asia/Jakarta" });
+}
+
+export function formatDateForInput(date: Date | string): string {
+  const isoDate = typeof date === "string" ? normalizeDateInputToISO(date) : toYYYYMMDD(date);
+  const [year, month, day] = isoDate.split("-");
+  return `${day}/${month}/${year}`;
+}
+
+export function isSupportedDateInput(date: string): boolean {
+  return DISPLAY_DATE_REGEX.test(date.trim()) || ISO_DATE_REGEX.test(date.trim());
 }
 
 /**

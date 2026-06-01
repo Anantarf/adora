@@ -10,11 +10,12 @@ import { toast } from "sonner";
 import { BatchPlayerUpload } from "@/components/features/BatchPlayerUpload";
 import { playerSchema, type PlayerFormValues } from "@/lib/validation/player";
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
+import { normalizeDateInputToISO } from "@/lib/date-utils";
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, Loader2, FileUp, ChevronLeft, ChevronRight } from "lucide-react";
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Plus, Loader2, FileUp, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 interface AddPlayerDialogProps {
   defaultGroupId?: string;
@@ -101,7 +102,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
 
   const onSubmit = async (data: PlayerFormValues) => {
     try {
-      await addPlayer({ ...data });
+      await addPlayer({ ...data, dateOfBirth: normalizeDateInputToISO(data.dateOfBirth) });
       setConfirmDiscardOpen(false);
       setOpen(false);
       setIsBatchMode(false);
@@ -173,27 +174,44 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
           }
         />
 
-        <DialogContent className={`${isBatchMode ? "sm:max-w-2xl" : "sm:max-w-3xl"} bg-card border-border/50 max-h-[92vh] flex flex-col`}>
-          <DialogHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/50 pb-4">
-            <div className="space-y-1">
+        <DialogContent showCloseButton={false} className={`${isBatchMode ? "sm:max-w-2xl" : "sm:max-w-3xl"} bg-card border-border/50 max-h-[92vh] flex flex-col`}>
+          <DialogHeader className="border-b border-border/50 pb-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1 pr-2">
               <DialogTitle className="text-xl font-heading text-foreground tracking-wide">
                 {isBatchMode ? "Tambah Banyak Pemain" : "Registrasi Pemain Baru"}
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground">
                 {isBatchMode ? "Unggah berkas Excel, periksa datanya, lalu simpan." : "Masukkan data pemain satu per satu."}
               </DialogDescription>
+              </div>
+              <DialogClose
+                render={
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    className="shrink-0"
+                  />
+                }
+              >
+                <X className="size-4" />
+                <span className="sr-only">Tutup dialog</span>
+              </DialogClose>
             </div>
             {!isBatchMode && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="h-9 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-dashed border-muted-foreground/30 hover:border-primary/50 hover:text-primary hover:bg-primary/5 rounded-lg transition-all shrink-0 self-end sm:self-auto"
-                onClick={() => setIsBatchMode(true)}
-              >
-                <FileUp className="size-3.5 mr-1.5 shrink-0" />
-                Unggah Excel
-              </Button>
+              <div className="pt-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-9 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-dashed border-muted-foreground/30 hover:border-primary/50 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                  onClick={() => setIsBatchMode(true)}
+                >
+                  <FileUp className="size-3.5 mr-1.5 shrink-0" />
+                  Unggah Excel
+                </Button>
+              </div>
             )}
           </DialogHeader>
 

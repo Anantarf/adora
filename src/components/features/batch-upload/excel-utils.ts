@@ -1,4 +1,5 @@
 import ExcelJS from "exceljs";
+import { normalizeDateInputToISO } from "@/lib/date-utils";
 
 export type RawCsvRow = Record<string, unknown>;
 
@@ -33,7 +34,6 @@ export type PreflightResult = {
 export const XLSX_MIME_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 export const ACCEPTED_EXCEL_FILE_FORMATS = `.xlsx,${XLSX_MIME_TYPE}`;
 
-const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const SIMPLE_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EXCEL_DATE_EPOCH_UTC = Date.UTC(1899, 11, 30);
 const HEADER_SCAN_ROW_LIMIT = 12;
@@ -136,17 +136,11 @@ const parseDate = (value: unknown): string | null => {
     return null;
   }
 
-  const trimmed = value.trim();
-  if (!DATE_REGEX.test(trimmed)) {
+  try {
+    return normalizeDateInputToISO(value);
+  } catch {
     return null;
   }
-
-  const [year, month, day] = trimmed.split("-").map(Number);
-  const parsed = new Date(Date.UTC(year, month - 1, day));
-
-  const isSameDate = parsed.getUTCFullYear() === year && parsed.getUTCMonth() + 1 === month && parsed.getUTCDate() === day;
-
-  return isSameDate ? trimmed : null;
 };
 
 const normalizeRow = (row: RawCsvRow): Record<string, string> =>
@@ -284,7 +278,7 @@ export const normalizeAndValidateRows = (rows: RawCsvRow[], groupsById: Set<stri
 
     const dateOfBirth = parseDate(dateOfBirthInput);
     if (!dateOfBirth) {
-      errors.push({ rowNumber, message: "Tanggal lahir belum benar. Gunakan format YYYY-MM-DD." });
+      errors.push({ rowNumber, message: "Tanggal lahir belum benar. Gunakan format dd/mm/yyyy." });
       return;
     }
 
@@ -406,7 +400,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
   headerRow.values = [
     "No.",
     "Nama Lengkap",
-    "Tanggal Lahir (YYYY-MM-DD)",
+    "Tanggal Lahir (DD/MM/YYYY)",
     "Kelompok",
     "Nama Orang Tua (Opsional)",
     "Nomor Telf. Ortu (Opsional)",
@@ -442,7 +436,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
     {
       no: 1,
       name: "Budi Santoso",
-      dateOfBirth: "2012-08-17",
+      dateOfBirth: "17/08/2012",
       groupName: availableGroups[0] ?? "",
       parentName: "Devi",
       parentPhoneNumber: "081212300838",
@@ -460,7 +454,7 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
     {
       no: 2,
       name: "Nadia Putri",
-      dateOfBirth: "2011-04-03",
+      dateOfBirth: "03/04/2011",
       groupName: availableGroups[0] ?? "",
       parentName: "Suhartini",
       parentPhoneNumber: "085159717735",
@@ -529,9 +523,9 @@ export const buildTemplateWorkbook = async (availableGroups: string[]): Promise<
 
   const guideRows = [
     "1) Isi data pada sheet 'Template Pemain' mulai baris ke-5.",
-    "2) Kolom wajib: Nama Lengkap, Tanggal Lahir (YYYY-MM-DD), dan Kelompok.",
+    "2) Kolom wajib: Nama Lengkap, Tanggal Lahir (DD/MM/YYYY), dan Kelompok.",
     "3) Pilih Kelompok dari dropdown kolom D — nama kelompok harus persis sama.",
-    "4) Gunakan format tanggal: YYYY-MM-DD (contoh: 2012-08-17).",
+    "4) Gunakan format tanggal: DD/MM/YYYY (contoh: 17/08/2012).",
     "5) Nomor telepon gunakan angka saja (boleh diawali +62).",
     "6) Jika email diisi, formatnya harus valid (contoh: nama@email.com).",
   ];

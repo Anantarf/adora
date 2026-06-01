@@ -262,7 +262,7 @@ export async function addBatchPlayersAction(
 
   const parsedInput = batchPlayersInputSchema.safeParse(playersData);
   if (!parsedInput.success) {
-    throw new Error("Data batch tidak valid. Periksa kolom wajib dan format tanggal YYYY-MM-DD.");
+    throw new Error("Data batch tidak valid. Periksa kolom wajib dan format tanggal dd/mm/yyyy.");
   }
 
   const validPayload = parsedInput.data;

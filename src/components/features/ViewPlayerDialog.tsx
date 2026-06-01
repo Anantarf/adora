@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { playerSchema, playerToFormValues, type PlayerFormValues } from "@/lib/validation/player";
 import { PlayerFormFields } from "@/components/features/PlayerFormFields";
 import { buildPlayerFullName, calculateAgeFromDate } from "@/lib/player-profile";
+import { formatFullDate, normalizeDateInputToISO } from "@/lib/date-utils";
 
 interface ViewPlayerDialogProps {
   playerId: string;
@@ -77,7 +78,14 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
   const onSubmit = async (data: PlayerFormValues) => {
     if (!resolvedPlayer) return;
     try {
-      await updatePlayer({ id: resolvedPlayer.id, data: { ...data, parentId: data.parentId || null } });
+      await updatePlayer({
+        id: resolvedPlayer.id,
+        data: {
+          ...data,
+          dateOfBirth: normalizeDateInputToISO(data.dateOfBirth),
+          parentId: data.parentId || null,
+        },
+      });
       toast.success(`Profil ${buildPlayerFullName(data.firstName, data.lastName)} berhasil diperbarui!`);
       reset(data);
       setIsEditing(false);
@@ -170,7 +178,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                   <DetailRow
                     label="Tgl Lahir"
                     icon={<Calendar className="size-3.5" />}
-                    value={resolvedPlayer.dateOfBirth ? new Date(resolvedPlayer.dateOfBirth).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" }) : "-"}
+                    value={resolvedPlayer.dateOfBirth ? formatFullDate(resolvedPlayer.dateOfBirth) : "-"}
                   />
                   <DetailRow label="Umur" value={calculateAgeFromDate(resolvedPlayer.dateOfBirth) === null ? "-" : `${calculateAgeFromDate(resolvedPlayer.dateOfBirth)} tahun`} />
                   <DetailRow label="Tempat Lahir" value={resolvedPlayer.placeOfBirth || "-"} />

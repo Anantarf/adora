@@ -8,7 +8,7 @@ import { AUDIT_ACTION_CONFIG as ACTION_CONFIG, getAuditActionConfig as getAction
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Utilities
-import { getHumanReadableTable, getHumanReadableText, extractTargetName, formatValue, TIMESTAMP_FORMATTER, FIELD_LABELS } from "@/lib/utils/audit-log";
+import { getHumanReadableTable, getHumanReadableText, extractTargetName, formatValue, TIMESTAMP_FORMATTER, getFieldLabel } from "@/lib/utils/audit-log";
 
 // Subcomponents
 
@@ -21,7 +21,7 @@ function DetailRows({ data }: { data: Record<string, unknown> }) {
     <div className="flex flex-col gap-2">
       {rows.map(([key, val]) => (
         <div key={key} className="flex items-start gap-3 py-2 border-b border-border/30 last:border-0">
-          <span className="text-micro text-muted-foreground/75 w-32 shrink-0 pt-0.5">{FIELD_LABELS[key] ?? key}</span>
+          <span className="text-micro text-muted-foreground/75 w-32 shrink-0 pt-0.5">{getFieldLabel(key)}</span>
           <span className="text-xs font-semibold text-foreground">{formatValue(key, val)}</span>
         </div>
       ))}
@@ -52,7 +52,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
           <p className="text-micro text-muted-foreground/75 mb-2 font-bold uppercase tracking-widest">Sebelum</p>
           {keys.map((k) => (
             <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-              <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
+              <span className="text-micro text-muted-foreground/60">{getFieldLabel(k)}</span>
               <span className="text-xs font-semibold text-muted-foreground">{formatValue(k, before[k])}</span>
             </div>
           ))}
@@ -62,7 +62,7 @@ function AuditDetailBody({ log }: { log: AuditLogRecord }) {
           <p className="text-micro text-primary/70 mb-2 font-bold uppercase tracking-widest">Sesudah</p>
           {keys.map((k) => (
             <div key={k} className="flex flex-col gap-0.5 py-1.5 border-b border-border/20 last:border-0">
-              <span className="text-micro text-muted-foreground/60">{FIELD_LABELS[k] ?? k}</span>
+              <span className="text-micro text-muted-foreground/60">{getFieldLabel(k)}</span>
               <span className={`text-xs font-semibold ${String(before[k]) !== String(after[k]) ? "text-primary" : "text-foreground"}`}>{formatValue(k, after[k])}</span>
             </div>
           ))}
@@ -136,6 +136,11 @@ export default function AuditPage() {
     refetch();
   };
 
+  const selectedActorName = selectedLog?.user?.name || selectedLog?.user?.username || "Sistem Otomatis";
+  const selectedActivitySummary = selectedLog
+    ? `${getHumanReadableText(selectedLog.action, selectedLog.targetTable)} oleh ${selectedActorName}`
+    : "";
+
   return (
     <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
       {/* Header */}
@@ -207,7 +212,7 @@ export default function AuditPage() {
             <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
               <FileText className="size-5 text-primary" /> Detail Perubahan
             </DialogTitle>
-            <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Log ID: {selectedLog?.id}</DialogDescription>
+            <DialogDescription className="text-xs font-medium tracking-wide opacity-70">{selectedActivitySummary}</DialogDescription>
           </DialogHeader>
           <div className="bg-muted/20 rounded-2xl p-5 overflow-auto max-h-[65vh] border border-border/40 mt-4 shadow-inner">{selectedLog && <AuditDetailBody log={selectedLog} />}</div>
         </DialogContent>

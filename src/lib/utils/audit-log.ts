@@ -44,6 +44,12 @@ export const FIELD_LABELS: Record<string, string> = {
   rapor_ceo_name: "Nama CEO di Rapor",
 };
 
+const FIELD_TOKEN_LABELS: Record<string, string> = {
+  ceo: "CEO",
+  id: "ID",
+  url: "URL",
+};
+
 export const ROLE_LABELS: Record<string, string> = {
   PARENT: "Orang Tua",
   ADMIN: "Administrator Utama",
@@ -95,6 +101,28 @@ export function getHumanReadableText(action: string, table: string): string {
 
 export function getHumanReadableTable(table: string): string {
   return TARGET_TABLE_DICT[table.toLowerCase()] || table;
+}
+
+export function getFieldLabel(key: string): string {
+  const explicitLabel = FIELD_LABELS[key];
+  if (explicitLabel) return explicitLabel;
+
+  const normalizedKey = key
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .trim();
+
+  if (!normalizedKey) return key;
+
+  return normalizedKey
+    .split(/\s+/)
+    .map((part) => {
+      const lowerPart = part.toLowerCase();
+      const tokenLabel = FIELD_TOKEN_LABELS[lowerPart];
+      if (tokenLabel) return tokenLabel;
+      return lowerPart.charAt(0).toUpperCase() + lowerPart.slice(1);
+    })
+    .join(" ");
 }
 
 export function extractTargetName(details: unknown): string | null {

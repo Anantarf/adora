@@ -41,7 +41,7 @@ test.describe("Players Admin Preview", () => {
 
     // Isi field wajib Langkah 1
     await page.locator("#field-player-firstName").fill("Budi");
-    await page.locator("#field-player-dateOfBirth").fill("2010-05-15");
+    await page.locator("#field-player-dateOfBirth").fill("15/05/2010");
     await page.locator("#field-player-gender").click();
     await page.getByRole("option", { name: "Laki-laki" }).click();
     await page.locator("#field-player-schoolOrigin").fill("SMP N 1 Depok");

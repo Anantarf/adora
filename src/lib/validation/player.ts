@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { Player } from "@/types/dashboard";
-import { toYYYYMMDD } from "@/lib/date-utils";
+import { formatDateForInput, isSupportedDateInput, parseFlexibleDateInput } from "@/lib/date-utils";
 
 const phoneRegex = /^(?:\+62|62|0)[1-9]\d{7,14}$/;
 
@@ -14,7 +14,11 @@ export const playerSchema = z
   .object({
     firstName: z.string().trim().min(1, "Nama depan wajib diisi"),
     lastName: z.string().trim().optional(),
-    dateOfBirth: z.string().nonempty("Tanggal lahir wajib diisi"),
+    dateOfBirth: z
+      .string()
+      .trim()
+      .nonempty("Tanggal lahir wajib diisi")
+      .refine((value) => isSupportedDateInput(value), "Gunakan format tanggal dd/mm/yyyy"),
     placeOfBirth: optionalText,
     gender: z.string().trim().min(1, "Jenis kelamin wajib dipilih"),
     religion: optionalText,
@@ -54,7 +58,7 @@ export const playerSchema = z
     }
 
     if (data.dateOfBirth) {
-      const dob = new Date(data.dateOfBirth);
+      const dob = parseFlexibleDateInput(data.dateOfBirth);
       if (!isNaN(dob.getTime())) {
         const today = new Date();
         let age = today.getFullYear() - dob.getFullYear();
@@ -106,7 +110,7 @@ export function playerToFormValues(player: Player): PlayerFormValues {
   form.addressLine1 = player.addressLine1 || player.address || "";
   form.medicalConditionDetail = player.medicalConditionDetail || player.medicalHistory || "";
   if (player.dateOfBirth) {
-    form.dateOfBirth = toYYYYMMDD(player.dateOfBirth);
+    form.dateOfBirth = formatDateForInput(player.dateOfBirth);
   }
 
   return form as unknown as PlayerFormValues;
@@ -114,7 +118,7 @@ export function playerToFormValues(player: Player): PlayerFormValues {
 
 export const batchPlayerSchema = z.object({
   name: z.string().trim().min(2),
-  dateOfBirth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  dateOfBirth: z.string().trim().refine((value) => isSupportedDateInput(value), "Gunakan format tanggal dd/mm/yyyy"),
   placeOfBirth: z.string().trim().optional(),
   gender: z.string().trim().optional(),
   weight: z.string().trim().optional(),
@@ -142,5 +146,4 @@ export const playerListArgsSchema = z.object({
   page: z.number().int().min(1).optional(),
   pageSize: z.number().int().min(1).max(MAX_PLAYER_PAGE_SIZE).optional(),
 });
-
 
