@@ -85,6 +85,9 @@
   --color-brand-purple: #8a2be2; /* Vibrant Neon Purple */
   --color-brand-yellow: #ffe600; /* Pure Neon Yellow (instead of lime) */
   --color-brand-orange: #ff7a00; /* Golden Orange */
+
+  /* Custom Spacing Scale */
+  --spacing-4.5: 1.125rem;
 }
 
 /* Event type color tokens — konsisten di light & dark mode */
