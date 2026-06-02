@@ -1,73 +1,68 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { FadeIn } from "@/components/animations/fade-in";
-import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
+
+import { AtRiskPlayers } from "@/components/features/dashboard/AtRiskPlayers";
 import { MetricCards } from "@/components/features/dashboard/MetricCards";
 import { RecentRegistrations } from "@/components/features/dashboard/RecentRegistrations";
 import { UpcomingAgenda } from "@/components/features/dashboard/UpcomingAgenda";
-import { AtRiskPlayers } from "@/components/features/dashboard/AtRiskPlayers";
+import { useDashboardMetrics } from "@/hooks/use-dashboard-metrics";
 import { formatFullDate, getJakartaToday } from "@/lib/date-utils";
-import { Hand } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();
   const { data: metrics, isLoading, isError, refetch } = useDashboardMetrics();
 
-  const displayName = (session?.user?.username || "ADMIN").toUpperCase();
-
+  const displayName = session?.user?.username || "Admin";
   const todayLabel = formatFullDate(getJakartaToday());
 
   return (
-    <div className="flex flex-col gap-5 md:gap-6 w-full max-w-7xl mx-auto pb-10">
-      {/* Greeting */}
-      <FadeIn direction="up">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 md:gap-4 border-b border-border/50 pb-5 md:pb-6">
-          <div>
-            <p className="text-micro text-muted-foreground/50">Selamat Datang,</p>
-            <h1 className="font-heading text-xl md:text-4xl text-foreground tracking-widest uppercase flex items-center gap-3">
-              {displayName}{" "}
-              <span aria-hidden="true" className="text-2xl md:text-4xl">
-                👋
-              </span>
-            </h1>
-            <p className="text-muted-foreground text-sm font-medium tracking-wide mt-1">Pantau kondisi klub secara menyeluruh dari halaman ini.</p>
-          </div>
-          <p className="text-xs md:text-sm font-semibold text-muted-foreground/75 shrink-0">{todayLabel}</p>
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
+      <div className="flex flex-col items-start justify-between gap-3 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
+        <div className="space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Dashboard
+          </p>
+          <h1 className="font-heading text-2xl text-foreground uppercase tracking-widest md:text-3xl">
+            Selamat datang, {displayName}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Lihat hal yang perlu ditindak, lalu lanjutkan pekerjaan dari sini.
+          </p>
         </div>
-      </FadeIn>
+        <p className="text-xs font-medium text-muted-foreground md:text-sm">{todayLabel}</p>
+      </div>
 
-      {/* Metric Cards */}
-      {isError && (
-        <div className="rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive flex items-center justify-between gap-3">
-          <span>Gagal memuat metrik dashboard. Coba muat ulang.</span>
-          <button type="button" onClick={() => refetch()} className="text-[10px] px-3 py-1 rounded-lg font-bold uppercase tracking-widest border border-destructive/40 text-destructive hover:bg-destructive/10">
+      {isError ? (
+        <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
+          <span>Gagal memuat ringkasan dashboard. Coba muat ulang.</span>
+          <button
+            type="button"
+            onClick={() => refetch()}
+            className="rounded-lg border border-destructive/40 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-destructive hover:bg-destructive/10"
+          >
             Muat Ulang
           </button>
         </div>
-      )}
-      <FadeIn direction="none" delay={0.05}>
-        <MetricCards metrics={metrics} isLoading={isLoading} />
-      </FadeIn>
+      ) : null}
 
-      {/* At-Risk Players Alert */}
-      {(isLoading || (metrics?.atRiskPlayers && metrics.atRiskPlayers.length > 0)) && (
-        <FadeIn direction="up" delay={0.07}>
-          <AtRiskPlayers metrics={metrics} isLoading={isLoading} />
-        </FadeIn>
-      )}
+      {isLoading || (metrics?.atRiskPlayers && metrics.atRiskPlayers.length > 0) ? (
+        <AtRiskPlayers metrics={metrics} isLoading={isLoading} />
+      ) : null}
 
-      {/* Registrations + Agenda */}
-      <FadeIn direction="up" delay={0.1}>
-        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 items-stretch">
-          <div className="xl:col-span-2 h-full">
-            <RecentRegistrations registrations={metrics?.recentRegistrations ?? []} isLoading={isLoading} />
-          </div>
-          <div className="xl:col-span-1 h-full">
-            <UpcomingAgenda />
-          </div>
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div className="xl:col-span-2">
+          <RecentRegistrations
+            registrations={metrics?.recentRegistrations ?? []}
+            isLoading={isLoading}
+          />
         </div>
-      </FadeIn>
+        <div className="xl:col-span-1">
+          <UpcomingAgenda />
+        </div>
+      </div>
+
+      <MetricCards metrics={metrics} isLoading={isLoading} />
     </div>
   );
 }

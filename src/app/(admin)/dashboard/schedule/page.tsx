@@ -65,8 +65,8 @@ export default function SchedulePage() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 border-b border-border/50 pb-6 md:pb-8">
           <div>
-            <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Agenda Klub</h1>
-            <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola jadwal latihan, tanding, dan agenda resmi klub.</p>
+            <h1 className="font-heading text-2xl md:text-3xl text-foreground tracking-widest uppercase">Agenda Klub</h1>
+            <p className="text-muted-foreground text-sm">Kelola jadwal latihan, tanding, dan agenda resmi klub.</p>
           </div>
         </div>
 
@@ -169,7 +169,7 @@ export default function SchedulePage() {
                             e.stopPropagation();
                             setUiState({ type: "edit", event: ev });
                           }}
-                          className="size-6 text-primary/40 hover:text-primary hover:bg-primary/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="size-7 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg"
                         >
                           <Pencil className="size-3" />
                         </Button>
@@ -180,7 +180,7 @@ export default function SchedulePage() {
                             e.stopPropagation();
                             setUiState({ type: "delete", targetId: ev.id });
                           }}
-                          className="size-6 text-destructive/40 hover:text-destructive hover:bg-destructive/10 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="size-7 text-destructive/60 hover:text-destructive hover:bg-destructive/10 rounded-lg"
                         >
                           <Trash2 className="size-3" />
                         </Button>

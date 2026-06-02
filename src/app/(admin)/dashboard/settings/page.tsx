@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { CheckCircle2, FileImage, FileText, Info, Loader2, Settings, Upload, UserCheck } from "lucide-react";
+import { CheckCircle2, FileImage, FileText, Info, Loader2, Upload, UserCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -132,11 +132,8 @@ export default function SettingsPage() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-12">
       <div className="flex flex-col gap-1 border-b border-border/50 pb-6 md:pb-8">
-        <div className="flex items-center gap-3">
-          <Settings className="size-8 text-primary" />
-          <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Pengaturan Klub</h1>
-        </div>
-        <p className="text-muted-foreground text-sm font-medium tracking-wide">Kelola aset dan template dokumen resmi ADORA BBC.</p>
+        <h1 className="font-heading text-2xl md:text-3xl text-foreground tracking-widest uppercase">Pengaturan Klub</h1>
+        <p className="text-muted-foreground text-sm">Kelola aset rapor dan nama penandatangan dokumen.</p>
       </div>
 
       <div className="grid gap-6">
@@ -147,7 +144,7 @@ export default function SettingsPage() {
                 <FileImage className="size-5" />
                 <CardTitle className="font-heading text-xl uppercase tracking-wider">Template Rapor PDF</CardTitle>
               </div>
-              <CardDescription className="text-xs">Unggah aset visual untuk rapor PDF. File akan disimpan secara aman di server.</CardDescription>
+              <CardDescription className="text-xs">Unggah aset yang dipakai di rapor PDF.</CardDescription>
             </div>
             <button
               type="button"
@@ -251,7 +248,7 @@ export default function SettingsPage() {
               <UserCheck className="size-5" />
               <CardTitle className="font-heading text-xl uppercase tracking-wider">Nama Penandatangan Rapor</CardTitle>
             </div>
-            <CardDescription className="text-xs">Nama yang tercantum di bawah tanda tangan pada rapor PDF.</CardDescription>
+              <CardDescription className="text-xs">Nama yang ditampilkan di bagian tanda tangan rapor.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-6">
             {SIGNER_KEYS.map(({ key, label, placeholder }) => (
@@ -278,10 +275,9 @@ export default function SettingsPage() {
         <div className="flex items-start gap-3 p-4 rounded-xl bg-primary/5 border border-primary/10">
           <Info className="size-5 text-primary shrink-0 mt-0.5" />
           <div className="flex flex-col gap-1">
-            <p className="text-xs font-bold text-primary uppercase tracking-widest">Informasi Penting</p>
+            <p className="text-xs font-bold text-primary uppercase tracking-widest">Catatan</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              Aset yang belum diunggah tidak akan muncul di rapor PDF, dan bagian tersebut akan dikosongkan secara otomatis. Aset transparan seperti tanda tangan atau stempel bisa terlihat samar di thumbnail gelap, tetapi tetap dipakai saat
-              rapor dicetak.
+              Jika aset belum diunggah, bagian tersebut akan dikosongkan otomatis di rapor. Thumbnail transparan seperti tanda tangan atau stempel bisa terlihat samar, tetapi tetap dipakai saat rapor dicetak.
             </p>
           </div>
         </div>

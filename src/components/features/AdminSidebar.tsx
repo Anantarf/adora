@@ -9,7 +9,7 @@ import { UserProfileMenu } from "./UserProfileMenu";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+export const adminNavItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
   { title: "Agenda Klub", url: "/schedule", icon: CalendarDays },
   { title: "Kelompok Latihan", url: "/players", icon: Layers },
@@ -56,7 +56,7 @@ export function AdminSidebar() {
           <SidebarGroupLabel className="text-muted-foreground font-semibold mb-2 tracking-widest uppercase text-xs group-data-[collapsible=icon]:mb-0 group-data-[collapsible=icon]:pointer-events-none">Menu Navigasi</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-2 mt-2">
-              {navItems.map((item) => (
+              {adminNavItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     tooltip={item.title}

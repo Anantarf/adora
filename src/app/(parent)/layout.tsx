@@ -1,11 +1,11 @@
-import { SignOutButton } from "@/components/features/auth/SignOutButton";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
-import Image from "next/image";
-import { ForcePasswordGate } from "@/components/features/auth/ForcePasswordGate";
-import { ProfileDialog } from "@/components/features/auth/ProfileDialog";
 import { Metadata } from "next";
+import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
+
+import { ProfileDialog } from "@/components/features/auth/ProfileDialog";
+import { SignOutButton } from "@/components/features/auth/SignOutButton";
+import { ForcePasswordGate } from "@/components/features/auth/ForcePasswordGate";
+import { authOptions } from "@/lib/auth";
 
 export const metadata: Metadata = {
   robots: {
@@ -14,7 +14,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ParentLayout({ children }: { children: React.ReactNode }) {
+export default async function ParentLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session) {
@@ -31,33 +35,28 @@ export default async function ParentLayout({ children }: { children: React.React
 
   return (
     <ForcePasswordGate>
-      <div className="flex relative w-full flex-col min-h-dvh bg-background selection:bg-primary/20">
-        <header className="flex h-15 w-full shrink-0 items-center justify-between border-b border-border/60 px-4 md:px-6 sticky top-0 bg-background/80 backdrop-blur-md z-30 transition-all relative">
-          <div className="flex items-center gap-3 z-10">
-            <div className="w-10 h-10 flex items-center justify-center">
-              <Image src="/logo-new.svg" alt="Adora BBC Logo" width={40} height={40} className="w-auto h-auto object-contain" />
-            </div>
-            <div className="flex flex-col justify-center">
-              <h1 className="font-heading text-sm md:text-xl lg:text-2xl text-foreground uppercase leading-none font-black mt-1 tracking-wide">
-                Adora <span className="text-primary tracking-widest ml-0.5">Family</span>
-              </h1>
-              <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mt-1 ml-0.5 leading-none">Portal</span>
-            </div>
+      <div className="relative flex min-h-dvh w-full flex-col bg-background selection:bg-primary/20">
+        <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-border/60 bg-background/90 px-4 backdrop-blur md:px-6">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+              Parent
+            </p>
+            <h1 className="truncate text-sm font-semibold text-foreground md:text-base">
+              Portal Orang Tua
+            </h1>
           </div>
 
-          <div className="flex items-center gap-4 md:gap-6 z-10">
+          <div className="flex items-center gap-3">
             <ProfileDialog />
             <SignOutButton />
           </div>
         </header>
 
-        <main className="w-full flex-1 mx-auto max-w-4xl px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
-          <div className="w-full animate-in fade-in zoom-in-[0.98] duration-200 ease-out fill-mode-both">{children}</div>
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
+          <div className="w-full animate-in fade-in duration-200 ease-out fill-mode-both">
+            {children}
+          </div>
         </main>
-
-        <footer className="py-6 text-center border-t border-border/60 bg-background/50 mt-auto">
-          <p className="text-xs font-medium text-muted-foreground">&copy; {new Date().getFullYear()} ADORA BBC. All rights reserved.</p>
-        </footer>
       </div>
     </ForcePasswordGate>
   );

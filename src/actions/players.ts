@@ -13,7 +13,6 @@ import { batchPlayersInputSchema, playerListArgsSchema, DEFAULT_PLAYER_PAGE_SIZE
 
 const BATCH_CHUNK_SIZE = 200;
 
-
 function buildPlayerListWhere(groupId?: string, searchQuery?: string) {
   return {
     isDeleted: false,
@@ -31,7 +30,6 @@ function buildPlayerListWhere(groupId?: string, searchQuery?: string) {
   };
 }
 
-// 1. Ambil semua pemain (Read)
 export async function getPlayersAction(groupId?: string, searchQuery?: string) {
   await requireAdmin();
   return await prisma.player.findMany({
@@ -149,7 +147,6 @@ export async function getPlayerDetailAction(id: string) {
   });
 }
 
-// 2. Tambah pemain baru (Create)
 export async function addPlayerAction(data: {
   firstName: string;
   lastName?: string;
@@ -236,7 +233,6 @@ export async function addPlayerAction(data: {
   return player;
 }
 
-// 2.5 Tambah massal pemain (Batch Create)
 export async function addBatchPlayersAction(
   playersData: Array<{
     name: string;
@@ -349,7 +345,6 @@ export async function addBatchPlayersAction(
   return { count: result.count, submitted: validPayload.length, deduped: dedupedPayload.length };
 }
 
-// 3. Update pemain (Update)
 export async function updatePlayerAction(
   id: string,
   data: {
@@ -420,7 +415,6 @@ export async function updatePlayerAction(
   return updated;
 }
 
-// 4. Ambil pemain berdasarkan akun orang tua (untuk modal di Users page)
 export async function getPlayersByParentAction(parentId: string) {
   await requireAdmin();
   return prisma.player.findMany({
@@ -430,7 +424,6 @@ export async function getPlayersByParentAction(parentId: string) {
   });
 }
 
-// 5. Hapus pemain (Soft Delete)
 export async function deletePlayerAction(id: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
@@ -453,7 +446,6 @@ export async function deletePlayerAction(id: string) {
   revalidatePath("/dashboard/players");
 }
 
-// 6. Ambil pemain yang belum terhubung ke akun mana pun (Available Players)
 export async function getAvailablePlayersAction() {
   await requireAdmin();
   return prisma.player.findMany({
@@ -463,7 +455,6 @@ export async function getAvailablePlayersAction() {
   });
 }
 
-// 7. Hubungkan pemain ke akun orang tua
 export async function linkPlayerAction(playerId: string, parentId: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
@@ -493,7 +484,6 @@ export async function linkPlayerAction(playerId: string, parentId: string) {
   revalidatePath("/dashboard/players");
 }
 
-// 8. Putuskan hubungan pemain dari akun orang tua
 export async function unlinkPlayerAction(playerId: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;

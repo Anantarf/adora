@@ -1,21 +1,20 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState, type ChangeEvent, type InputHTMLAttributes } from "react";
 import { useForm, type Path, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useSubmitStatistic } from "@/hooks/use-statistics";
-import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
-import { FLAT_METRIC_DEFS } from "@/lib/metrics";
+import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
 
+import { useSubmitStatistic } from "@/hooks/use-statistics";
+import { FLAT_METRIC_DEFS } from "@/lib/metrics";
+import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
-import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
 
-// ─── Schema ───────────────────────────────────────────
 const scoreNormal = z.coerce.number().min(0, "Min 0").max(10, "Maks 10");
 const scoreInAndOut = z.coerce.number().min(0, "Min 0").max(99, "Maks 99");
 
@@ -39,24 +38,66 @@ const statSchema = z.object({
 });
 
 type StatForm = z.infer<typeof statSchema>;
+type ExistingStat = { id: string; metrics: MetricsJson; status: "Draft" | "Published" };
+type StatPlayer = Pick<PlayerSummary, "id" | "name" | "group">;
 
-const DRIBBLE_DEFAULTS = { inAndOut: 0, crossover: 0, vLeft: 0, vRight: 0, betweenLegsLeft: 0, betweenLegsRight: 0 };
-const PASSING_DEFAULTS = { chestPass: 0, bouncePass: 0, overheadPass: 0 };
-const DEFAULT_METRICS: StatForm = { dribble: DRIBBLE_DEFAULTS, passing: PASSING_DEFAULTS, layUp: 0, shooting: 0, notes: "" };
+const DRIBBLE_DEFAULTS = {
+  inAndOut: 0,
+  crossover: 0,
+  vLeft: 0,
+  vRight: 0,
+  betweenLegsLeft: 0,
+  betweenLegsRight: 0,
+};
 
-// ─── ScoreField Component ─────────────────────────────
-function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, name, ...props }: { label: string; error?: string; max?: number | string; name?: string } & Omit<React.InputHTMLAttributes<HTMLInputElement>, "max">) {
+const PASSING_DEFAULTS = {
+  chestPass: 0,
+  bouncePass: 0,
+  overheadPass: 0,
+};
+
+const DEFAULT_METRICS: StatForm = {
+  dribble: DRIBBLE_DEFAULTS,
+  passing: PASSING_DEFAULTS,
+  layUp: 0,
+  shooting: 0,
+  notes: "",
+};
+
+function ScoreField({
+  label,
+  error,
+  max: rawMax = 10,
+  onChange: formOnChange,
+  name,
+  ...props
+}: {
+  label: string;
+  error?: string;
+  max?: number | string;
+  name?: string;
+} & Omit<InputHTMLAttributes<HTMLInputElement>, "max">) {
   const max = Number(rawMax);
   const maxDigits = max.toString().length;
   const fieldId = `score-field-${name?.replace(/\./g, "-")}`;
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.value.length > maxDigits) e.target.value = e.target.value.slice(0, maxDigits);
-    if (Number(e.target.value) > max) e.target.value = max.toString();
-    rhfOnChange?.(e);
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (event.target.value.length > maxDigits) {
+      event.target.value = event.target.value.slice(0, maxDigits);
+    }
+
+    if (Number(event.target.value) > max) {
+      event.target.value = max.toString();
+    }
+
+    formOnChange?.(event);
   };
+
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={fieldId} className="text-micro text-muted-foreground">{label}</label>
+      <label htmlFor={fieldId} className="text-micro text-muted-foreground">
+        {label}
+      </label>
       <Input
         id={fieldId}
         name={name}
@@ -66,27 +107,29 @@ function ScoreField({ label, error, max: rawMax = 10, onChange: rhfOnChange, nam
         step={1}
         onChange={handleChange}
         {...props}
-        className="h-10 text-center font-bold tabular-nums rounded-xl bg-black/20 border-primary/10 focus:border-primary/40 focus:bg-black/30 transition-all shadow-inner"
+        className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
       />
-      {error && <p className="text-[10px] text-destructive">{error}</p>}
+      {error ? <p className="text-[10px] text-destructive">{error}</p> : null}
     </div>
   );
 }
 
-// ─── Helper: get nested error ─────────────────────────
-function getNestedError(errors: Record<string, unknown>, path: string): string | undefined {
+function getNestedError(
+  errors: Record<string, unknown>,
+  path: string,
+): string | undefined {
   const parts = path.split(".");
   let current: unknown = errors;
+
   for (const part of parts) {
-    if (!current || typeof current !== "object") return undefined;
+    if (!current || typeof current !== "object") {
+      return undefined;
+    }
     current = (current as Record<string, unknown>)[part];
   }
+
   return (current as { message?: string } | undefined)?.message;
 }
-
-// ─── Dialog ───────────────────────────────────────────
-type ExistingStat = { id: string; metrics: MetricsJson; status: "Draft" | "Published" };
-type StatPlayer = Pick<PlayerSummary, "id" | "name" | "group">;
 
 export function AddStatDialog({
   player,
@@ -107,7 +150,6 @@ export function AddStatDialog({
   const [pendingStatus, setPendingStatus] = useState<"Draft" | "Published" | null>(null);
   const { mutateAsync, isPending } = useSubmitStatistic();
   const isEdit = !!existingStat;
-
   const defaultValues: StatForm = existingStat?.metrics ?? DEFAULT_METRICS;
 
   const {
@@ -123,13 +165,16 @@ export function AddStatDialog({
 
   const values = watch();
 
-  // Calculate total from all 11 flat metrics
   const grandTotal = useMemo(() => {
-    return FLAT_METRIC_DEFS.reduce((sum, def) => {
-      const parts = def.path.split(".");
-      let val: unknown = values;
-      for (const p of parts) val = (val as Record<string, unknown>)?.[p];
-      return sum + (Number(val) || 0);
+    return FLAT_METRIC_DEFS.reduce((sum, definition) => {
+      const parts = definition.path.split(".");
+      let value: unknown = values;
+
+      for (const part of parts) {
+        value = (value as Record<string, unknown>)?.[part];
+      }
+
+      return sum + (Number(value) || 0);
     }, 0);
   }, [values]);
 
@@ -138,14 +183,26 @@ export function AddStatDialog({
       toast.error("Periode evaluasi belum dipilih.");
       return;
     }
+
     setPendingStatus(status);
     try {
-      await mutateAsync({ playerId: player.id, periodId, metrics: data as MetricsJson, status });
-      toast.success(`Nilai ${player.name} berhasil ${status === "Draft" ? "disimpan sebagai draft" : "diterbitkan"}.`);
+      await mutateAsync({
+        playerId: player.id,
+        periodId,
+        metrics: data as MetricsJson,
+        status,
+      });
+      toast.success(
+        `Nilai ${player.name} berhasil ${
+          status === "Draft" ? "disimpan sebagai draft" : "diterbitkan"
+        }.`,
+      );
       setOpen(false);
-      if (!isEdit) reset(DEFAULT_METRICS);
-    } catch (e: unknown) {
-      toast.error((e instanceof Error ? e.message : null) || "Gagal menyimpan nilai.");
+      if (!isEdit) {
+        reset(DEFAULT_METRICS);
+      }
+    } catch (error: unknown) {
+      toast.error((error instanceof Error ? error.message : null) || "Gagal menyimpan nilai.");
     } finally {
       setPendingStatus(null);
     }
@@ -153,7 +210,13 @@ export function AddStatDialog({
 
   return (
     <>
-      <Button size="sm" variant={isEdit ? "outline" : "default"} disabled={!periodId && !isEdit} className={`h-8 font-bold uppercase tracking-widest text-xs gap-1.5 ${triggerClassName ?? ""}`} onClick={() => setOpen(true)}>
+      <Button
+        size="sm"
+        variant={isEdit ? "outline" : "default"}
+        disabled={!periodId && !isEdit}
+        className={`h-8 gap-1.5 text-xs font-bold uppercase tracking-widest ${triggerClassName ?? ""}`}
+        onClick={() => setOpen(true)}
+      >
         {isEdit ? (
           <>
             <Pencil className="size-3" />
@@ -168,64 +231,92 @@ export function AddStatDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-lg max-h-dialog-lg overflow-y-auto custom-scrollbar bg-card border-border/50">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 bg-muted/60 rounded-xl shrink-0">
+        <DialogContent className="max-h-dialog-lg overflow-y-auto border-border/50 bg-card custom-scrollbar sm:max-w-lg">
+          <div className="mb-2 flex items-center gap-4">
+            <div className="shrink-0 rounded-xl bg-muted/60 p-3">
               <LineChart className="size-6 text-muted-foreground" />
             </div>
             <div className="flex flex-col gap-0.5">
-              <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">{isEdit ? "Perbarui" : "Input"} Nilai</DialogTitle>
-              <DialogDescription className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                {player.name} <span className="mx-1.5 text-primary/50">•</span> {player.group?.name ?? "Tidak Memiliki Kelompok"}
+              <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">
+                {isEdit ? "Perbarui" : "Input"} Nilai
+              </DialogTitle>
+              <DialogDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                {player.name} <span className="mx-1.5 text-primary/50">·</span>{" "}
+                {player.group?.name ?? "Tidak Memiliki Kelompok"}
               </DialogDescription>
             </div>
           </div>
 
-          {!isPeriodActive && (
-            <div className="p-3 mb-2 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium text-center tracking-wide">Periode evaluasi ini sudah tidak aktif. Data nilai tidak dapat diubah.</div>
-          )}
+          {!isPeriodActive ? (
+            <div className="mb-2 rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-xs font-medium tracking-wide text-destructive">
+              Periode evaluasi ini sudah tidak aktif. Data nilai tidak dapat diubah.
+            </div>
+          ) : null}
 
-          <form className="flex flex-col gap-3 mt-1">
+          <form className="mt-1 flex flex-col gap-3">
             <fieldset disabled={!isPeriodActive} className="flex flex-col gap-3">
-              {/* All 11 metrics in a flat grid — no section grouping */}
-              <div className="rounded-lg border border-border/40 bg-muted/20 overflow-hidden">
-                <div className="flex items-center justify-between px-3 py-2 bg-muted/40 border-b border-border/30">
+              <div className="overflow-hidden rounded-lg border border-border/40 bg-muted/20">
+                <div className="flex items-center justify-between border-b border-border/30 bg-muted/40 px-3 py-2">
                   <span className="text-micro text-muted-foreground">Aspek Penilaian</span>
-                  <span className="text-sm font-bold text-primary tabular-nums">Total: {grandTotal}</span>
+                  <span className="text-sm font-bold tabular-nums text-primary">
+                    Total: {grandTotal}
+                  </span>
                 </div>
-                <div className="p-3 grid grid-cols-2 gap-2">
-                  {FLAT_METRIC_DEFS.map((def) => (
-                    <ScoreField key={def.key} label={def.label} max={def.max} {...register(def.path as Path<StatForm>)} error={getNestedError(errors as Record<string, unknown>, def.path)} />
+                <div className="grid grid-cols-2 gap-2 p-3">
+                  {FLAT_METRIC_DEFS.map((definition) => (
+                    <ScoreField
+                      key={definition.key}
+                      label={definition.label}
+                      max={definition.max}
+                      {...register(definition.path as Path<StatForm>)}
+                      error={getNestedError(errors as Record<string, unknown>, definition.path)}
+                    />
                   ))}
                 </div>
               </div>
 
-              {/* Notes */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-micro text-muted-foreground">Catatan / Saran Pelatih (Opsional)</label>
-                <Textarea {...register("notes")} maxLength={160} placeholder="Fokus pada konsistensi dribble tangan kiri..." className="h-20 resize-none" />
+                <label className="text-micro text-muted-foreground">
+                  Catatan / Saran Pelatih (Opsional)
+                </label>
+                <Textarea
+                  {...register("notes")}
+                  maxLength={160}
+                  placeholder="Fokus pada konsistensi dribble tangan kiri..."
+                  className="h-20 resize-none"
+                />
               </div>
             </fieldset>
 
-            {/* Summary — single grand total */}
-            <div className="flex items-center justify-center gap-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+            <div className="flex items-center justify-center gap-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
               <div className="text-center">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Total Skor</p>
-                <p className="text-2xl font-bold text-primary tabular-nums">{grandTotal}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Total Skor
+                </p>
+                <p className="text-2xl font-bold tabular-nums text-primary">{grandTotal}</p>
               </div>
-              <div className="w-px h-8 bg-border/50" />
+              <div className="h-8 w-px bg-border/50" />
               <div className="text-center">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">Aspek Dinilai</p>
-                <p className="text-2xl font-bold text-foreground tabular-nums">{FLAT_METRIC_DEFS.length}</p>
+                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Aspek Dinilai
+                </p>
+                <p className="text-2xl font-bold tabular-nums text-foreground">
+                  {FLAT_METRIC_DEFS.length}
+                </p>
               </div>
             </div>
 
-            {isPeriodActive && (
-              <div className="flex flex-col gap-2 mt-1">
-                <Button type="button" onClick={handleSubmit((d) => onSubmit(d, "Published"))} disabled={isPending} className="w-full font-bold uppercase tracking-widest text-xs h-11 bg-primary hover:bg-primary/90 text-primary-foreground">
+            {isPeriodActive ? (
+              <div className="mt-1 flex flex-col gap-2">
+                <Button
+                  type="button"
+                  onClick={handleSubmit((data) => onSubmit(data, "Published"))}
+                  disabled={isPending}
+                  className="h-11 w-full bg-primary text-xs font-bold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+                >
                   {pendingStatus === "Published" ? (
                     <>
-                      <Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...
+                      <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan...
                     </>
                   ) : (
                     "Simpan & Terbitkan"
@@ -234,20 +325,20 @@ export function AddStatDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={handleSubmit((d) => onSubmit(d, "Draft"))}
+                  onClick={handleSubmit((data) => onSubmit(data, "Draft"))}
                   disabled={isPending}
-                  className="w-full font-bold uppercase tracking-widest text-xs h-11 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary transition-colors"
+                  className="h-11 w-full border-primary/30 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10 hover:text-primary"
                 >
                   {pendingStatus === "Draft" ? (
                     <>
-                      <Loader2 className="animate-spin size-4 mr-2" /> Menyimpan Draft...
+                      <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan Draft...
                     </>
                   ) : (
                     "Simpan sebagai Draft"
                   )}
                 </Button>
               </div>
-            )}
+            ) : null}
           </form>
         </DialogContent>
       </Dialog>

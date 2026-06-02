@@ -1,9 +1,10 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import * as React from "react";
+import { useMemo, useState } from "react";
+import { useDebounce } from "use-debounce";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  Loader2,
   Search,
   Edit2,
   Trash2,
@@ -16,23 +17,22 @@ import {
   HeartCrack,
   Eye,
 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import * as React from "react";
-import { usePlayersPage } from "@/hooks/use-players";
-import { type PlayerSummary } from "@/types/dashboard";
-import { useGroups, type Group } from "@/hooks/use-groups";
-import { useState, useMemo } from "react";
-import { useDebounce } from "use-debounce";
-import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
-import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
+
 import { AddGroupDialog } from "@/components/features/AddGroupDialog";
-import { EditGroupDialog } from "@/components/features/EditGroupDialog";
+import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
 import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
+import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
+import { EditGroupDialog } from "@/components/features/EditGroupDialog";
 import { ViewPlayerDialog } from "@/components/features/ViewPlayerDialog";
-import { getGroupCategoryLabel, getGroupDisplayDescription } from "@/lib/group-meta";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
-import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGroups, type Group } from "@/hooks/use-groups";
+import { usePlayersPage } from "@/hooks/use-players";
+import { getGroupCategoryLabel, getGroupDisplayDescription } from "@/lib/group-meta";
 import { buildPlayerFullName, calculateAgeFromDate } from "@/lib/player-profile";
+import { type PlayerSummary } from "@/types/dashboard";
 
 type UIState =
   | { type: "add-group" }
@@ -43,27 +43,26 @@ type UIState =
   | { type: "delete-player"; payload: Pick<PlayerSummary, "id" | "name"> }
   | null;
 
+const ITEMS_PER_PAGE = 10;
+
 export default function PlayersPage() {
   const [selectedCategory, setSelectedCategory] = useState<"SEKOLAH" | "KELOMPOK_UMUR">("SEKOLAH");
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  
-  // Searching states
   const [groupSearchQuery, setGroupSearchQuery] = useState("");
   const [playerSearchQuery, setPlayerSearchQuery] = useState("");
   const [debouncedPlayerSearch] = useDebounce(playerSearchQuery, 300);
-  
-  // UI layouts & modals
   const [viewMode, setViewMode] = useState<"database" | "grid">("database");
   const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
   const [uiState, setUiState] = useState<UIState>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 10;
 
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
-  const availableCategories = useMemo(() => Array.from(new Set((groups ?? []).map((group) => group.category))), [groups]);
+  const availableCategories = useMemo(
+    () => Array.from(new Set((groups ?? []).map((group) => group.category))),
+    [groups],
+  );
 
-  // Instantly filter groups based on active category & left side group search query
   const groupsInCategory = useMemo(() => {
     return (groups ?? []).filter((group) => {
       const matchCategory = group.category === selectedCategory;
@@ -85,16 +84,17 @@ export default function PlayersPage() {
         .filter(Boolean)
         .join(" ")
         .toLowerCase();
+
       const matchSearch = !searchNeedle || groupDetails.includes(searchNeedle);
       return matchCategory && matchSearch;
     });
   }, [groups, selectedCategory, groupSearchQuery]);
 
-  // Dynamic fallback calculation for the selected group
   const effectiveGroupId = useMemo(() => {
     if (groupsInCategory.some((group) => group.id === selectedGroupId)) {
       return selectedGroupId;
     }
+
     return groupsInCategory[0]?.id ?? null;
   }, [groupsInCategory, selectedGroupId]);
 
@@ -106,13 +106,20 @@ export default function PlayersPage() {
     !!effectiveGroupId,
   );
 
-  const selectedGroup = useMemo(() => groups?.find((g: Group) => g.id === effectiveGroupId), [groups, effectiveGroupId]);
+  const selectedGroup = useMemo(
+    () => groups?.find((group: Group) => group.id === effectiveGroupId),
+    [groups, effectiveGroupId],
+  );
   const paginatedPlayers = playersPage?.items ?? [];
   const currentServerPage = playersPage?.page ?? currentPage;
   const totalPages = playersPage?.totalPages ?? 1;
   const filteredPlayerCount = playersPage?.total ?? 0;
-
-  const totalPlayers = useMemo(() => groups?.reduce((sum: number, g: Group) => sum + (g._count?.player || 0), 0) ?? 0, [groups]);
+  const totalPlayers = useMemo(
+    () => groups?.reduce((sum: number, group: Group) => sum + (group._count?.player || 0), 0) ?? 0,
+    [groups],
+  );
+  const activeCategoryLabel =
+    selectedCategory === "SEKOLAH" ? "Kelompok sekolah" : "Kelompok umur";
 
   React.useEffect(() => {
     setCurrentPage(1);
@@ -125,18 +132,25 @@ export default function PlayersPage() {
   }, [availableCategories, selectedCategory]);
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-20">
-      {/* Modals */}
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-20">
       <AddGroupDialog
         externalOpen={uiState?.type === "add-group"}
         onExternalOpenChange={(open) => setUiState(open ? { type: "add-group" } : null)}
         hideTrigger
       />
       {uiState?.type === "edit-group" && (
-        <EditGroupDialog group={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />
+        <EditGroupDialog
+          group={uiState.payload}
+          open={true}
+          onOpenChange={(open) => !open && setUiState(null)}
+        />
       )}
       {uiState?.type === "delete-group" && (
-        <DeleteGroupConfirm group={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />
+        <DeleteGroupConfirm
+          group={uiState.payload}
+          open={true}
+          onOpenChange={(open) => !open && setUiState(null)}
+        />
       )}
       {uiState?.type === "view-player" && (
         <ViewPlayerDialog
@@ -144,24 +158,41 @@ export default function PlayersPage() {
           playerId={uiState.payload.id}
           open={true}
           onOpenChange={(open) => !open && setUiState(null)}
-          onDelete={() => setUiState({ type: "delete-player", payload: { id: uiState.payload.id, name: uiState.payload.name } })}
+          onDelete={() =>
+            setUiState({
+              type: "delete-player",
+              payload: { id: uiState.payload.id, name: uiState.payload.name },
+            })
+          }
         />
       )}
       {uiState?.type === "delete-player" && (
-        <DeletePlayerConfirm player={uiState.payload} open={true} onOpenChange={(open) => !open && setUiState(null)} />
+        <DeletePlayerConfirm
+          player={uiState.payload}
+          open={true}
+          onOpenChange={(open) => !open && setUiState(null)}
+        />
       )}
 
-      {/* HEADER SECTION */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-border/50 pb-6">
-        <div>
-          <h1 className="font-heading text-2xl md:text-3xl text-foreground tracking-widest uppercase">Kelompok Latihan</h1>
-          <p className="text-muted-foreground text-xs font-medium tracking-wide">
-            Kelola data pembagian kelas latihan dan database pemain Adora BBC.
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
+        <div className="space-y-1">
+          <h1 className="font-heading text-2xl text-foreground tracking-widest uppercase md:text-3xl">
+            Kelompok Latihan
+          </h1>
+          <p className="text-xs font-medium tracking-wide text-muted-foreground">
+            Kelola kelompok latihan dan data pemain Adora BBC dalam satu layar.
           </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+            {activeCategoryLabel}
+          </span>
+          <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+            {groupsInCategory.length} kelompok aktif
+          </span>
         </div>
       </div>
 
-      {/* STATS OVERVIEW CARDS */}
       <div className="grid grid-cols-2 gap-4">
         {(
           [
@@ -169,58 +200,68 @@ export default function PlayersPage() {
             { icon: Users, label: "Total Pemain Aktif", value: totalPlayers },
           ] as const
         ).map(({ icon: Icon, label, value }) => (
-          <div key={label} className="bg-card/40 backdrop-blur-sm border border-border/50 rounded-xl p-4 flex items-center gap-3 shadow-xs">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <Icon className="size-5" />
+          <div
+            key={label}
+            className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 px-4 py-3 shadow-xs"
+          >
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <Icon className="size-[18px]" />
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</p>
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                {label}
+              </p>
               {isGroupsLoading ? (
-                <div className="h-6 w-8 bg-muted rounded animate-pulse mt-1" />
+                <div className="mt-1 h-6 w-10 animate-pulse rounded bg-muted" />
               ) : (
-                <p className="text-xl font-heading tracking-widest text-foreground mt-0.5">{value}</p>
+                <p className="mt-0.5 font-heading text-lg tracking-[0.2em] text-foreground">
+                  {value}
+                </p>
               )}
             </div>
           </div>
         ))}
       </div>
 
-      {/* RESPONSIVE LAYOUT CONTAINER */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-        
-        {/* PANEL KIRI (MASTER: LIST KELOMPOK - 4 COLS) */}
-        <div className={`md:col-span-4 flex flex-col gap-4 ${isMobileDetailOpen ? "hidden md:flex" : "flex"}`}>
-          <div className="bg-card border border-border/50 rounded-xl p-4 flex flex-col gap-4 shadow-xs">
-            
-            {/* Header Master */}
-            <div className="flex items-center justify-between border-b border-border/50 pb-3">
-              <h3 className="text-xs font-black tracking-widest text-foreground uppercase">Daftar Kelompok</h3>
+      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-12">
+        <div
+          className={`flex flex-col gap-4 md:col-span-4 ${isMobileDetailOpen ? "hidden md:flex" : "flex"}`}
+        >
+          <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 shadow-xs">
+            <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-3">
+              <div className="space-y-1">
+                <h3 className="text-xs font-black tracking-widest text-foreground uppercase">
+                  Daftar Kelompok
+                </h3>
+                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                  Pilih kelompok di kiri, lalu kelola pemainnya di panel kanan.
+                </p>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setUiState({ type: "add-group" })}
-                className="h-8 px-2 text-[10px] font-bold uppercase text-primary hover:bg-primary/10 tracking-wider"
+                className="h-8 px-2.5 text-[10px] font-bold uppercase tracking-wider text-primary hover:bg-primary/10"
               >
                 + Kelompok
               </Button>
             </div>
 
-            {/* Pencarian Kelompok */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Cari nama kelompok..."
                 value={groupSearchQuery}
-                onChange={(e) => setGroupSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-xs rounded-lg bg-background/50 border-border/50"
+                onChange={(event) => setGroupSearchQuery(event.target.value)}
+                className="h-9 rounded-lg border-border/50 bg-background/50 pl-9 text-xs"
               />
             </div>
 
-            {/* Filter Kategori Kelompok */}
-            <div className="flex gap-1.5 p-1 bg-muted/40 rounded-lg" role="tablist">
+            <div className="flex gap-1.5 rounded-lg bg-muted/40 p-1" role="tablist">
               {(["SEKOLAH", "KELOMPOK_UMUR"] as const).map((category) => {
                 const active = selectedCategory === category;
                 const count = groups?.filter((group) => group.category === category).length ?? 0;
+
                 return (
                   <button
                     key={category}
@@ -230,14 +271,20 @@ export default function PlayersPage() {
                       setSelectedGroupId(null);
                       setGroupSearchQuery("");
                     }}
-                    className={`flex-1 flex items-center justify-center gap-1.5 rounded-md py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
                       active
-                        ? "bg-card text-foreground shadow-xs border border-border/30"
+                        ? "border border-border/30 bg-card text-foreground shadow-xs"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
                     <span>{category === "SEKOLAH" ? "Sekolah" : "Kelompok Umur"}</span>
-                    <span className={`rounded-full px-1.5 py-0.2 text-[9px] font-black ${active ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"}`}>
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${
+                        active
+                          ? "bg-primary/20 text-primary"
+                          : "bg-muted text-muted-foreground"
+                      }`}
+                    >
                       {count}
                     </span>
                   </button>
@@ -245,14 +292,16 @@ export default function PlayersPage() {
               })}
             </div>
 
-            {/* Scrollable Group List */}
-            <div className="flex flex-col gap-2 max-h-[460px] overflow-y-auto pr-1 custom-scrollbar">
+            <div className="flex max-h-[460px] flex-col gap-2 overflow-y-auto pr-1 custom-scrollbar">
               {isGroupsLoading ? (
-                Array.from({ length: 4 }).map((_, i) => (
-                  <div key={i} className="h-16 w-full rounded-lg bg-muted/30 animate-pulse border border-transparent" />
+                Array.from({ length: 4 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="h-16 w-full animate-pulse rounded-lg border border-transparent bg-muted/30"
+                  />
                 ))
               ) : groupsInCategory.length === 0 ? (
-                <div className="py-10 text-center text-xs text-muted-foreground/60 border border-dashed border-border/50 rounded-lg">
+                <div className="rounded-lg border border-dashed border-border/50 py-10 text-center text-xs text-muted-foreground/60">
                   {groupSearchQuery ? "Kelompok tidak ditemukan" : "Tidak ada kelompok latihan"}
                 </div>
               ) : (
@@ -265,26 +314,30 @@ export default function PlayersPage() {
                       key={group.id}
                       onClick={() => {
                         setSelectedGroupId(group.id);
-                        setIsMobileDetailOpen(true); // Slide in on mobile
+                        setIsMobileDetailOpen(true);
                         setPlayerSearchQuery("");
                       }}
-                      className={`w-full text-left rounded-xl border p-3.5 transition-all flex flex-col gap-1.5 cursor-pointer hover:scale-[1.01] ${
+                      className={`flex w-full cursor-pointer flex-col gap-1.5 rounded-xl border p-3 text-left transition-all ${
                         isActive
                           ? "border-primary bg-primary/5 shadow-xs"
-                          : "border-border/40 bg-background/20 hover:border-primary/30"
+                          : "border-border/40 bg-background/20 hover:border-primary/30 hover:bg-background/40"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-heading text-xs tracking-wider uppercase text-foreground truncate max-w-[70%]">
+                        <span className="max-w-[70%] truncate font-heading text-xs tracking-wider text-foreground uppercase">
                           {group.name}
                         </span>
-                        <span className={`rounded-full px-2 py-0.5 text-[9px] font-black tracking-wider ${
-                          isSchool ? "bg-amber-500/10 text-amber-500" : "bg-violet-500/10 text-violet-500"
-                        }`}>
-                          {group._count?.player ?? 0} PEMAIN
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[9px] font-black tracking-wider ${
+                            isSchool
+                              ? "bg-amber-500/10 text-amber-500"
+                              : "bg-violet-500/10 text-violet-500"
+                          }`}
+                        >
+                          {group._count?.player ?? 0} pemain
                         </span>
                       </div>
-                      <p className="text-[10px] leading-relaxed text-muted-foreground truncate">
+                      <p className="truncate text-[10px] leading-relaxed text-muted-foreground">
                         {getGroupDisplayDescription({
                           category: group.category,
                           targetKu: group.targetKu,
@@ -297,25 +350,27 @@ export default function PlayersPage() {
                 })
               )}
             </div>
-
           </div>
         </div>
 
-        {/* PANEL KANAN (DETAIL: DAFTAR PEMAIN - 8 COLS) */}
-        <div className={`md:col-span-8 flex flex-col gap-4 ${isMobileDetailOpen ? "flex" : "hidden md:flex"}`}>
+        <div
+          className={`flex flex-col gap-4 md:col-span-8 ${isMobileDetailOpen ? "flex" : "hidden md:flex"}`}
+        >
           <AnimatePresence mode="wait">
             {!effectiveGroupId ? (
-              <div className="bg-card border border-border/50 rounded-xl p-8 min-h-[460px] flex flex-col items-center justify-center text-center gap-3">
-                <Users className="size-8 text-muted-foreground/30 animate-bounce" />
-                <p className="text-xs font-semibold text-muted-foreground">Silakan pilih kelompok terlebih dahulu di panel kiri.</p>
+              <div className="flex min-h-[460px] flex-col items-center justify-center gap-3 rounded-xl border border-border/50 bg-card p-8 text-center">
+                <Users className="size-8 animate-bounce text-muted-foreground/30" />
+                <p className="text-xs font-semibold text-muted-foreground">
+                  Silakan pilih kelompok terlebih dahulu di panel kiri.
+                </p>
               </div>
             ) : isPlayersLoading && !selectedGroup ? (
-              <div className="bg-card border border-border/50 rounded-xl p-6 min-h-[500px] flex flex-col gap-4">
-                <Skeleton className="h-14 w-full bg-muted/30 rounded-xl" />
-                <Skeleton className="h-10 w-full bg-muted/20 rounded-xl" />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <Skeleton key={i} className="h-16 w-full bg-muted/10 rounded-lg" />
+              <div className="flex min-h-[500px] flex-col gap-4 rounded-xl border border-border/50 bg-card p-6">
+                <Skeleton className="h-14 w-full rounded-xl bg-muted/30" />
+                <Skeleton className="h-10 w-full rounded-xl bg-muted/20" />
+                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
+                  {Array.from({ length: 6 }).map((_, index) => (
+                    <Skeleton key={index} className="h-16 w-full rounded-lg bg-muted/10" />
                   ))}
                 </div>
               </div>
@@ -326,88 +381,128 @@ export default function PlayersPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.15 }}
-                className="bg-card border border-border/50 rounded-xl p-4 sm:p-6 flex flex-col gap-5 min-h-[520px] shadow-xs"
+                className="flex min-h-[520px] flex-col gap-5 rounded-xl border border-border/50 bg-card p-4 shadow-xs sm:p-6"
               >
-                
-                {/* 1. Header Detail Kelompok */}
                 {selectedGroup && (
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-border/50">
-                    <div className="flex flex-col gap-1 min-w-0">
-                      <div className="flex items-center flex-wrap gap-2">
-                        {/* Mobile Back Button */}
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => setIsMobileDetailOpen(false)}
-                          className="md:hidden size-8 shrink-0 rounded-lg"
-                        >
-                          <ChevronLeft className="size-4" />
-                        </Button>
-                        <h2 className="font-heading text-lg sm:text-xl uppercase tracking-widest text-foreground truncate max-w-[240px] sm:max-w-none">
-                          {selectedGroup.name}
-                        </h2>
-                        <span className={`text-[9px] font-black tracking-widest uppercase px-2 py-0.5 rounded-full ${
-                          selectedGroup.category === "SEKOLAH" ? "bg-amber-500/10 text-amber-500" : "bg-violet-500/10 text-violet-500"
-                        }`}>
-                          {getGroupCategoryLabel(selectedGroup.category)}
-                        </span>
+                  <div className="flex flex-col gap-4 border-b border-border/50 pb-4">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                      <div className="flex min-w-0 flex-col gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setIsMobileDetailOpen(false)}
+                            className="size-8 shrink-0 rounded-lg md:hidden"
+                          >
+                            <ChevronLeft className="size-4" />
+                          </Button>
+                          <h2 className="max-w-[240px] truncate font-heading text-lg tracking-widest text-foreground uppercase sm:max-w-none sm:text-xl">
+                            {selectedGroup.name}
+                          </h2>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[9px] font-black tracking-widest uppercase ${
+                              selectedGroup.category === "SEKOLAH"
+                                ? "bg-amber-500/10 text-amber-500"
+                                : "bg-violet-500/10 text-violet-500"
+                            }`}
+                          >
+                            {getGroupCategoryLabel(selectedGroup.category)}
+                          </span>
+                        </div>
+                        <p className="text-xs leading-relaxed text-muted-foreground">
+                          {getGroupDisplayDescription({
+                            category: selectedGroup.category,
+                            targetKu: selectedGroup.targetKu,
+                            schoolLevel: selectedGroup.schoolLevel,
+                            description: selectedGroup.description,
+                          }) || "Kelompok latihan"}
+                        </p>
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                          <span className="rounded-full bg-primary/8 px-2.5 py-1 text-primary">
+                            {filteredPlayerCount} pemain
+                          </span>
+                          {playerSearchQuery ? (
+                            <span className="rounded-full border border-border/50 px-2.5 py-1">
+                              Hasil pencarian
+                            </span>
+                          ) : null}
+                        </div>
                       </div>
-                      <p className="text-xs text-muted-foreground truncate leading-relaxed mt-0.5">
-                        {getGroupDisplayDescription({
-                          category: selectedGroup.category,
-                          targetKu: selectedGroup.targetKu,
-                          schoolLevel: selectedGroup.schoolLevel,
-                          description: selectedGroup.description,
-                        }) || "Kelompok Latihan"}
-                      </p>
-                    </div>
 
-                    <div className="flex gap-2 w-full sm:w-auto shrink-0">
-                      {/* Contextual Add Player Dialog */}
-                      <AddPlayerDialog
-                        defaultGroupId={effectiveGroupId ?? undefined}
-                        defaultGroupName={selectedGroup?.name}
-                      />
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-9 px-3 font-semibold text-xs rounded-lg hover:border-primary/50 hover:text-primary transition-all flex-1 sm:flex-none"
-                        onClick={() => setUiState({ type: "edit-group", payload: selectedGroup as Group })}
-                      >
-                        <Edit2 className="size-3 mr-1.5" /> Ubah
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        className="h-9 px-3 font-semibold text-xs rounded-lg border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive hover:border-destructive/60 transition-all flex-1 sm:flex-none"
-                        onClick={() => setUiState({ type: "delete-group", payload: selectedGroup as Group })}
-                      >
-                        <Trash2 className="size-3 mr-1.5" /> Hapus
-                      </Button>
+                      <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto">
+                        <AddPlayerDialog
+                          defaultGroupId={effectiveGroupId ?? undefined}
+                          defaultGroupName={selectedGroup.name}
+                        />
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 flex-1 rounded-lg px-3 text-xs font-semibold transition-all hover:border-primary/50 hover:text-primary sm:flex-none"
+                            onClick={() =>
+                              setUiState({
+                                type: "edit-group",
+                                payload: selectedGroup as Group,
+                              })
+                            }
+                          >
+                            <Edit2 className="mr-1.5 size-3" /> Ubah
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-9 flex-1 rounded-lg border-destructive/30 px-3 text-xs font-semibold text-destructive transition-all hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive sm:flex-none"
+                            onClick={() =>
+                              setUiState({
+                                type: "delete-group",
+                                payload: selectedGroup as Group,
+                              })
+                            }
+                          >
+                            <Trash2 className="mr-1.5 size-3" /> Hapus
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
 
-                {/* 2. Control Bar (Pencarian Pemain + Toggles) */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="relative flex-1 min-w-0">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-                    <Input
-                      placeholder={selectedGroup?.name ? `Cari pemain di ${selectedGroup.name}...` : "Cari pemain..."}
-                      value={playerSearchQuery}
-                      onChange={(e) => setPlayerSearchQuery(e.target.value)}
-                      className="pl-9 h-9 text-xs rounded-lg bg-background/50 border-border/50"
-                    />
+                <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="text-[11px] font-semibold text-muted-foreground">
+                        {filteredPlayerCount === 0
+                          ? "Belum ada pemain yang tampil."
+                          : `${filteredPlayerCount} pemain tampil di daftar.`}
+                      </p>
+                      {totalPages > 1 ? (
+                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                          Halaman {currentServerPage} dari {totalPages}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+                      <Input
+                        placeholder={
+                          selectedGroup?.name
+                            ? `Cari pemain di ${selectedGroup.name}...`
+                            : "Cari pemain..."
+                        }
+                        value={playerSearchQuery}
+                        onChange={(event) => setPlayerSearchQuery(event.target.value)}
+                        className="h-9 rounded-lg border-border/50 bg-background/50 pl-9 text-xs"
+                      />
+                    </div>
                   </div>
 
-                  {/* Layout View Toggles */}
-                  <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-lg self-end sm:self-auto">
+                  <div className="flex items-center gap-1.5 self-end rounded-lg bg-muted/40 p-1 sm:self-auto">
                     <button
                       type="button"
                       onClick={() => setViewMode("database")}
-                      className={`p-1.5 rounded-md transition-all ${
+                      className={`rounded-md p-1.5 transition-all ${
                         viewMode === "database"
-                          ? "bg-card text-foreground shadow-xs border border-border/30"
+                          ? "border border-border/30 bg-card text-foreground shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                       title="Tampilan Database (Tabel)"
@@ -417,9 +512,9 @@ export default function PlayersPage() {
                     <button
                       type="button"
                       onClick={() => setViewMode("grid")}
-                      className={`p-1.5 rounded-md transition-all ${
+                      className={`rounded-md p-1.5 transition-all ${
                         viewMode === "grid"
-                          ? "bg-card text-foreground shadow-xs border border-border/30"
+                          ? "border border-border/30 bg-card text-foreground shadow-xs"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                       title="Tampilan Visual (Grid)"
@@ -429,89 +524,114 @@ export default function PlayersPage() {
                   </div>
                 </div>
 
-                {/* 3. Render Players Content */}
                 {isPlayersLoading ? (
                   <div className="flex flex-col gap-3 py-6">
-                    {Array.from({ length: 4 }).map((_, i) => (
-                      <Skeleton key={i} className="h-12 w-full bg-muted/20 rounded-lg animate-pulse" />
+                    {Array.from({ length: 4 }).map((_, index) => (
+                      <Skeleton
+                        key={index}
+                        className="h-12 w-full animate-pulse rounded-lg bg-muted/20"
+                      />
                     ))}
                   </div>
                 ) : filteredPlayerCount === 0 ? (
-                  <div className="bg-background/20 border border-dashed border-border/50 rounded-xl p-12 text-center flex flex-col items-center justify-center gap-3 min-h-[300px]">
-                    <Users className="size-8 text-muted-foreground/20 shrink-0" />
+                  <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/50 bg-background/20 p-12 text-center">
+                    <Users className="size-8 shrink-0 text-muted-foreground/20" />
                     <p className="text-xs font-semibold text-muted-foreground">
                       {playerSearchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}
                     </p>
-                    <p className="text-[11px] text-muted-foreground max-w-sm mt-0.5 leading-relaxed">
+                    <p className="mt-0.5 max-w-sm text-[11px] leading-relaxed text-muted-foreground">
                       {playerSearchQuery
                         ? "Coba kata kunci lain atau periksa ejaan nama pemain."
                         : "Lengkapi data pemain baru dengan mengklik tombol Tambah Pemain di atas."}
                     </p>
                   </div>
                 ) : viewMode === "database" ? (
-                  /* ── DATABASE VIEW (DENSE DATA TABLE) ── */
-                  <div className="overflow-x-auto rounded-xl border border-border/50 bg-background/20 backdrop-blur-xs shadow-xs custom-scrollbar">
-                    <table className="w-full text-xs text-left">
-                      <thead className="text-[10px] text-muted-foreground uppercase bg-muted/40 font-bold tracking-widest border-b border-border/50">
+                  <div className="overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
+                    <table className="w-full text-left text-xs">
+                      <thead className="border-b border-border/50 bg-muted/40 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                         <tr>
-                          <th scope="col" className="px-4 py-3 text-center w-10">No</th>
-                          <th scope="col" className="px-4 py-3 w-28">ID Pemain</th>
-                          <th scope="col" className="px-4 py-3">Nama Lengkap</th>
-                          <th scope="col" className="px-4 py-3">Gender/Umur</th>
-                          <th scope="col" className="px-4 py-3">No. WhatsApp</th>
-                          <th scope="col" className="px-4 py-3 text-center">Medis</th>
-                          <th scope="col" className="px-4 py-3 text-center">Dokumen</th>
-                          <th scope="col" className="px-4 py-3 text-right w-24">Aksi</th>
+                          <th scope="col" className="w-10 px-4 py-3 text-center">
+                            No
+                          </th>
+                          <th scope="col" className="w-28 px-4 py-3">
+                            ID Pemain
+                          </th>
+                          <th scope="col" className="px-4 py-3">
+                            Nama Lengkap
+                          </th>
+                          <th scope="col" className="px-4 py-3">
+                            Gender/Umur
+                          </th>
+                          <th scope="col" className="px-4 py-3">
+                            No. WhatsApp
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-center">
+                            Medis
+                          </th>
+                          <th scope="col" className="px-4 py-3 text-center">
+                            Dokumen
+                          </th>
+                          <th scope="col" className="w-24 px-4 py-3 text-right">
+                            Aksi
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-border/40">
-                        {paginatedPlayers.map((player: PlayerSummary, idx: number) => {
-                          const age = player.dateOfBirth ? calculateAgeFromDate(new Date(player.dateOfBirth)) : null;
+                        {paginatedPlayers.map((player: PlayerSummary, index: number) => {
+                          const age = player.dateOfBirth
+                            ? calculateAgeFromDate(new Date(player.dateOfBirth))
+                            : null;
                           const hasPhoto = !!player.photoUrl;
                           const hasSignature = !!player.signatureUrl;
                           const idShort = player.id.substring(0, 8).toUpperCase();
-                          const globalIdx = (currentServerPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                          const globalIndex =
+                            (currentServerPage - 1) * ITEMS_PER_PAGE + index + 1;
 
                           return (
-                            <tr key={player.id} className="hover:bg-primary/[0.02] group transition-colors">
-                              {/* INDEX */}
-                              <td className="px-4 py-2.5 text-center font-mono font-medium text-muted-foreground/60 tabular-nums">
-                                {globalIdx}
+                            <tr
+                              key={player.id}
+                              className="group transition-colors hover:bg-primary/[0.02]"
+                            >
+                              <td className="px-4 py-2.5 text-center font-mono font-medium tabular-nums text-muted-foreground/60">
+                                {globalIndex}
                               </td>
-
-                              {/* ID PEMAIN */}
-                              <td className="px-4 py-2.5 font-mono font-semibold text-muted-foreground/75 uppercase tabular-nums">
+                              <td className="px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tabular-nums text-muted-foreground/75">
                                 ADR-{idShort}
                               </td>
-
-                              {/* NAMA PEMAIN */}
                               <td className="px-4 py-2.5 font-bold text-foreground">
-                                <div className="flex items-center gap-2 max-w-[200px]">
-                                  <div className="size-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-heading text-[10px] font-black uppercase shrink-0">
+                                <div className="flex max-w-[200px] items-center gap-2">
+                                  <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-[10px] font-black uppercase text-primary">
                                     {player.name.charAt(0)}
                                   </div>
-                                  <span className="truncate group-hover:text-primary transition-colors cursor-pointer" onClick={() => setUiState({ type: "view-player", payload: player })}>
-                                    {buildPlayerFullName(player.firstName, player.lastName) || player.name}
+                                  <span
+                                    className="cursor-pointer truncate transition-colors group-hover:text-primary"
+                                    onClick={() =>
+                                      setUiState({ type: "view-player", payload: player })
+                                    }
+                                  >
+                                    {buildPlayerFullName(player.firstName, player.lastName) ||
+                                      player.name}
                                   </span>
                                 </div>
                               </td>
-
-                              {/* GENDER / UMUR */}
-                              <td className="px-4 py-2.5 whitespace-nowrap text-muted-foreground">
+                              <td className="whitespace-nowrap px-4 py-2.5 text-muted-foreground">
                                 <span className="font-bold text-foreground">
-                                  {player.gender === "Laki-laki" ? "L" : player.gender === "Perempuan" ? "P" : "-"}
+                                  {player.gender === "Laki-laki"
+                                    ? "L"
+                                    : player.gender === "Perempuan"
+                                      ? "P"
+                                      : "-"}
                                 </span>
-                                {" · "}{age !== null ? `${age} thn` : "-"}
+                                {" · "}
+                                {age !== null ? `${age} thn` : "-"}
                               </td>
-
-                              {/* NO WHATSAPP */}
-                              <td className="px-4 py-2.5 whitespace-nowrap">
+                              <td className="whitespace-nowrap px-4 py-2.5">
                                 {player.phoneNumber ? (
                                   <a
                                     href={`https://wa.me/${player.phoneNumber.replace(/[^0-9]/g, "")}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 text-emerald-500 hover:text-emerald-400 font-mono transition-colors"
+                                    className="inline-flex items-center gap-1 font-mono text-emerald-500 transition-colors hover:text-emerald-400"
                                   >
                                     <MessageCircle className="size-3 shrink-0" />
                                     {player.phoneNumber}
@@ -520,40 +640,51 @@ export default function PlayersPage() {
                                   <span className="text-muted-foreground/30">-</span>
                                 )}
                               </td>
-
-                              {/* RIWAYAT MEDIS */}
                               <td className="px-4 py-2.5 text-center">
                                 {player.hasMedicalCondition ? (
                                   <div
-                                    className="inline-flex items-center justify-center text-rose-500 cursor-help"
-                                    title={player.medicalConditionDetail || "Ada riwayat penyakit bawaan"}
+                                    className="inline-flex cursor-help items-center justify-center text-rose-500"
+                                    title={
+                                      player.medicalConditionDetail ||
+                                      "Ada riwayat penyakit bawaan"
+                                    }
                                   >
                                     <HeartCrack className="size-4 animate-pulse-subtle" />
                                   </div>
                                 ) : (
-                                  <span className="text-[9px] bg-emerald-500/10 text-emerald-500 font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wide">
+                                  <span className="rounded-sm bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-500">
                                     Aman
                                   </span>
                                 )}
                               </td>
-
-                              {/* KELENGKAPAN DOKUMEN */}
                               <td className="px-4 py-2.5 text-center">
                                 <div className="inline-flex items-center justify-center gap-1 text-[8px] font-black tracking-wider">
-                                  <span className={`px-1 rounded-xs ${hasPhoto ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground/30"}`}>
+                                  <span
+                                    className={`rounded-xs px-1 ${
+                                      hasPhoto
+                                        ? "bg-emerald-500/15 text-emerald-500"
+                                        : "bg-muted text-muted-foreground/30"
+                                    }`}
+                                  >
                                     FOTO
                                   </span>
-                                  <span className={`px-1 rounded-xs ${hasSignature ? "bg-emerald-500/15 text-emerald-500" : "bg-muted text-muted-foreground/30"}`}>
+                                  <span
+                                    className={`rounded-xs px-1 ${
+                                      hasSignature
+                                        ? "bg-emerald-500/15 text-emerald-500"
+                                        : "bg-muted text-muted-foreground/30"
+                                    }`}
+                                  >
                                     TTD
                                   </span>
                                 </div>
                               </td>
-
-                              {/* AKSI */}
-                              <td className="px-4 py-2.5 text-right whitespace-nowrap">
+                              <td className="whitespace-nowrap px-4 py-2.5 text-right">
                                 <div className="flex items-center justify-end gap-2">
                                   <button
-                                    onClick={() => setUiState({ type: "view-player", payload: player })}
+                                    onClick={() =>
+                                      setUiState({ type: "view-player", payload: player })
+                                    }
                                     className="inline-flex items-center gap-1.5 rounded-md border border-border/50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
                                     title="Lihat Detail"
                                   >
@@ -561,7 +692,12 @@ export default function PlayersPage() {
                                     Lihat
                                   </button>
                                   <button
-                                    onClick={() => setUiState({ type: "delete-player", payload: { id: player.id, name: player.name } })}
+                                    onClick={() =>
+                                      setUiState({
+                                        type: "delete-player",
+                                        payload: { id: player.id, name: player.name },
+                                      })
+                                    }
                                     className="inline-flex items-center gap-1.5 rounded-md border border-destructive/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-destructive/80 transition-all hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                                     title="Arsipkan Pemain"
                                   >
@@ -577,23 +713,23 @@ export default function PlayersPage() {
                     </table>
                   </div>
                 ) : (
-                  /* ── VISUAL VIEW (GRID CARD LAYOUT) ── */
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {paginatedPlayers.map((player: PlayerSummary) => (
                       <div
                         key={player.id}
-                        className="bg-card border border-border/50 p-4 rounded-xl flex items-center hover:bg-muted/30 hover:border-primary/35 transition-all cursor-pointer group shadow-2xs"
+                        className="group flex cursor-pointer items-center rounded-xl border border-border/50 bg-card p-4 shadow-2xs transition-all hover:border-primary/35 hover:bg-muted/30"
                         onClick={() => setUiState({ type: "view-player", payload: player })}
                       >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center font-heading text-sm font-bold uppercase shrink-0 group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-sm font-bold uppercase text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                             {player.name.charAt(0)}
                           </div>
-                          <div className="flex flex-col min-w-0 gap-0.5">
-                            <h4 className="font-heading tracking-wide text-xs text-foreground truncate font-bold">
-                              {buildPlayerFullName(player.firstName, player.lastName) || player.name}
+                          <div className="flex min-w-0 flex-col gap-0.5">
+                            <h4 className="truncate font-heading text-xs font-bold tracking-wide text-foreground">
+                              {buildPlayerFullName(player.firstName, player.lastName) ||
+                                player.name}
                             </h4>
-                            <span className="text-[9px] font-bold tracking-wider uppercase text-muted-foreground truncate">
+                            <span className="truncate text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
                               {player.group?.name || "Tanpa Kelompok"}
                             </span>
                           </div>
@@ -603,7 +739,6 @@ export default function PlayersPage() {
                   </div>
                 )}
 
-                {/* 4. Pagination */}
                 {totalPages > 1 && (
                   <div className="mt-auto pt-4">
                     <Pagination
@@ -613,12 +748,10 @@ export default function PlayersPage() {
                     />
                   </div>
                 )}
-
               </motion.div>
             )}
           </AnimatePresence>
         </div>
-
       </div>
     </div>
   );

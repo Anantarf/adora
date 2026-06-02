@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Users, Layers, TrendingUp, FileCheck } from "lucide-react";
+
+import type { DashboardMetrics } from "@/actions/dashboard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
-import type { DashboardMetrics } from "@/actions/dashboard";
 
 type MetricCard = {
   key: keyof DashboardMetrics;
@@ -16,13 +16,13 @@ type MetricCard = {
   getColorClass: (metrics: DashboardMetrics) => string;
 };
 
-const METRIC_CARDS: MetricCard[] = [
+const metricCards: MetricCard[] = [
   {
     key: "playerCount",
     label: "Pemain Aktif",
     subtitle: "Terdaftar di klub",
     icon: Users,
-    getDisplay: (m) => String(m.playerCount),
+    getDisplay: (metrics) => String(metrics.playerCount),
     getColorClass: () => "text-foreground",
   },
   {
@@ -30,7 +30,7 @@ const METRIC_CARDS: MetricCard[] = [
     label: "Kelompok Latihan",
     subtitle: "Kelompok berjalan",
     icon: Layers,
-    getDisplay: (m) => String(m.groupCount),
+    getDisplay: (metrics) => String(metrics.groupCount),
     getColorClass: () => "text-foreground",
   },
   {
@@ -38,20 +38,26 @@ const METRIC_CARDS: MetricCard[] = [
     label: "Kehadiran Latihan",
     subtitle: "Rata-rata 30 hari terakhir",
     icon: TrendingUp,
-    getDisplay: (m) => `${m.attendanceRate}%`,
-    getColorClass: (m) => {
-      if (m.attendanceRate >= 80) return "text-primary";
-      if (m.attendanceRate >= 50) return "text-amber-500";
+    getDisplay: (metrics) => `${metrics.attendanceRate}%`,
+    getColorClass: (metrics) => {
+      if (metrics.attendanceRate >= 80) {
+        return "text-primary";
+      }
+      if (metrics.attendanceRate >= 50) {
+        return "text-amber-500";
+      }
       return "text-destructive";
     },
   },
   {
     key: "publishedStatsCount",
     label: "Progress Penilaian",
-    subtitle: "Selesai / Draft",
+    subtitle: "Selesai / draft",
     icon: FileCheck,
-    getDisplay: (m) => `${m.publishedStatsCount} / ${m.draftStatsCount}`,
-    getColorClass: (m) => (m.draftStatsCount > 0 ? "text-amber-500" : "text-foreground"),
+    getDisplay: (metrics) =>
+      `${metrics.publishedStatsCount} / ${metrics.draftStatsCount}`,
+    getColorClass: (metrics) =>
+      metrics.draftStatsCount > 0 ? "text-amber-500" : "text-foreground",
   },
 ];
 
@@ -63,10 +69,10 @@ interface MetricCardsProps {
 export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
-        {METRIC_CARDS.map((c) => (
-          <Card key={c.key} className="border-border/50 bg-card shadow-sm">
-            <CardContent className="p-4 md:p-5 space-y-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 md:gap-4">
+        {metricCards.map((card) => (
+          <Card key={card.key} className="border-border/50 bg-card shadow-sm">
+            <CardContent className="space-y-3 p-4 md:p-5">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-9 w-16" />
               <Skeleton className="h-3 w-32" />
@@ -78,29 +84,36 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
   }
 
   return (
-    <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3 md:gap-4">
-      {METRIC_CARDS.map((c) => {
-        const Icon = c.icon;
-        const display = metrics ? c.getDisplay(metrics) : "—";
-        const valueClass = metrics ? c.getColorClass(metrics) : "text-foreground";
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 md:gap-4">
+      {metricCards.map((card) => {
+        const Icon = card.icon;
+        const display = metrics ? card.getDisplay(metrics) : "-";
+        const valueClassName = metrics ? card.getColorClass(metrics) : "text-foreground";
 
         return (
-          <StaggerItem key={c.key}>
-            <Card className="border-border/50 bg-card shadow-sm hover:border-primary/30 transition-colors">
-              <CardContent className="p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-2.5 md:mb-3">
-                  <p className="text-micro text-muted-foreground/60">{c.label}</p>
-                  <div className="size-8 rounded-lg bg-muted/60 flex items-center justify-center">
-                    <Icon className="size-4 text-muted-foreground" />
-                  </div>
+          <Card
+            key={card.key}
+            className="border-border/50 bg-card shadow-sm transition-colors hover:border-primary/30"
+          >
+            <CardContent className="p-4 sm:p-5">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                    {card.label}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>
                 </div>
-                <p className={`font-heading text-2xl sm:text-4xl tracking-wider leading-none ${valueClass}`}>{display}</p>
-                <p className="text-xs text-muted-foreground mt-1">{c.subtitle}</p>
-              </CardContent>
-            </Card>
-          </StaggerItem>
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-muted/60">
+                  <Icon className="size-4 text-muted-foreground" />
+                </div>
+              </div>
+              <p className={`font-heading text-3xl leading-none tracking-[0.12em] ${valueClassName}`}>
+                {display}
+              </p>
+            </CardContent>
+          </Card>
         );
       })}
-    </StaggerContainer>
+    </div>
   );
 }

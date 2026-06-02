@@ -9,10 +9,15 @@ export default async function RegistrationsPage() {
   const registrations = await getPendingRegistrations();
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-10">
-      <div className="flex flex-col gap-1 border-b border-border/50 pb-6 md:pb-8">
-        <h1 className="font-heading text-2xl md:text-4xl text-foreground tracking-widest uppercase">Pendaftar Baru</h1>
-        <p className="text-muted-foreground text-sm font-medium tracking-wide">Calon anggota yang mengisi formulir pendaftaran online. Hubungi mereka untuk konfirmasi pembayaran.</p>
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
+      <div className="flex flex-col gap-2 border-b border-border/50 pb-6 md:pb-8">
+        <h1 className="font-heading text-2xl text-foreground tracking-widest uppercase md:text-3xl">
+          Pendaftar Baru
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          Calon anggota dari formulir web yang perlu dikonfirmasi pembayarannya
+          sebelum dipindahkan ke data pemain.
+        </p>
       </div>
 
       <RegistrationsTable registrations={registrations} />
