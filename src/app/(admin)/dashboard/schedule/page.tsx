@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import {
   CalendarDays,
-  ChevronRight,
   Clock,
   Loader2,
   MapPin,
@@ -164,48 +163,53 @@ export default function SchedulePage() {
               ) : (
                 upcomingEvents.map((event) => {
                   const config = getEventConfig(event.type);
-                  const Icon = config.icon;
 
                   return (
                     <button
                       key={event.id}
                       type="button"
                       onClick={() => setUiState({ type: "preview", event })}
-                      className="flex items-start gap-3 rounded-xl border border-border/50 bg-card px-4 py-3 text-left shadow-sm transition-colors hover:border-primary/30"
+                      className="w-full rounded-xl border border-border/50 bg-card px-4 py-3 text-left shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/20"
+                      style={{ borderLeftColor: config.color, borderLeftWidth: "4px" }}
                     >
-                      <span
-                        className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg text-white"
-                        style={{ backgroundColor: config.color }}
-                      >
-                        <Icon className="size-4" />
-                      </span>
-
-                      <div className="min-w-0 flex-1 space-y-1">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="truncate text-sm font-semibold text-foreground">{event.title}</p>
-                            <p className="text-xs text-muted-foreground">{config.label}</p>
+                      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                        <div className="min-w-0 space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.15em] leading-none"
+                              style={{
+                                backgroundColor: `${config.color}15`,
+                                color: config.color,
+                                borderColor: `${config.color}30`,
+                              }}
+                            >
+                              {config.label}
+                            </span>
+                            <span className="text-xs font-semibold text-muted-foreground">
+                              {format(new Date(event.date), "dd MMM yyyy - HH:mm", {
+                                locale: idLocale,
+                              })}
+                            </span>
                           </div>
-                          <span className="shrink-0 text-xs font-semibold text-foreground">
-                            {getCountdownLabel(event.date)}
-                          </span>
-                        </div>
 
-                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="size-3" />
-                            {format(new Date(event.date), "EEE, dd MMM yyyy", { locale: idLocale })}
-                          </span>
+                          <div className="truncate text-sm font-bold uppercase tracking-wide text-foreground sm:text-base">
+                            {event.title}
+                          </div>
+
                           {event.location ? (
-                            <span className="flex min-w-0 items-center gap-1">
+                            <div className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-muted-foreground">
                               <MapPin className="size-3 shrink-0" />
                               <span className="truncate">{event.location}</span>
-                            </span>
+                            </div>
                           ) : null}
                         </div>
 
-                        <div className="flex items-center justify-between pt-1">
-                          <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-start gap-2 sm:items-end">
+                          <span className="inline-flex rounded-md border border-border/50 bg-background/60 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-foreground">
+                            {getCountdownLabel(event.date)}
+                          </span>
+
+                          <div className="flex items-center gap-1">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -213,7 +217,7 @@ export default function SchedulePage() {
                                 eventObject.stopPropagation();
                                 setUiState({ type: "edit", event });
                               }}
-                              className="h-8 px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                              className="h-7 px-2 text-[11px] font-medium text-primary hover:bg-primary/10 hover:text-primary"
                             >
                               <Pencil className="mr-1 size-3" />
                               Edit
@@ -225,13 +229,12 @@ export default function SchedulePage() {
                                 eventObject.stopPropagation();
                                 setUiState({ type: "delete", targetId: event.id });
                               }}
-                              className="h-8 px-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              className="h-7 px-2 text-[11px] font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
                             >
                               <Trash2 className="mr-1 size-3" />
                               Hapus
                             </Button>
                           </div>
-                          <ChevronRight className="size-4 text-muted-foreground" />
                         </div>
                       </div>
                     </button>
