@@ -20,12 +20,9 @@ export default function AdminDashboardPage() {
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <div className="flex flex-col items-start justify-between gap-3 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
         <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Dashboard
+          <p className="text-sm text-muted-foreground">
+            Selamat datang, <span className="font-semibold text-foreground">{displayName}</span>.
           </p>
-          <h1 className="font-heading text-2xl text-foreground uppercase tracking-widest md:text-3xl">
-            Selamat datang, {displayName}
-          </h1>
           <p className="text-sm text-muted-foreground">
             Lihat hal yang perlu ditindak, lalu lanjutkan pekerjaan dari sini.
           </p>

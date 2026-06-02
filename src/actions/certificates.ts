@@ -1,11 +1,12 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireAuth } from "@/lib/server-auth";
+
 import { createAuditLog } from "./audit";
 import { ensureActivePlayer, ensureOwnedPlayer } from "@/lib/domain-guards";
-// ─── Types ───────────────────────────────────────────
+import { prisma } from "@/lib/prisma";
+import { requireAdmin, requireAuth } from "@/lib/server-auth";
+
 export type CertificateRecord = {
   id: string;
   title: string;
@@ -15,11 +16,10 @@ export type CertificateRecord = {
   player: { id: string; name: string };
 };
 
-// 1. List all certificates (Admin)
 export async function getCertificatesAction(): Promise<CertificateRecord[]> {
   await requireAdmin();
 
-  return await prisma.certificate.findMany({
+  return prisma.certificate.findMany({
     include: {
       player: { select: { id: true, name: true } },
     },
@@ -27,18 +27,21 @@ export async function getCertificatesAction(): Promise<CertificateRecord[]> {
   });
 }
 
-// 2. Create certificate (Admin)
-export async function addCertificateAction(data: { title: string; fileUrl: string; playerId: string }) {
+export async function addCertificateAction(data: {
+  title: string;
+  fileUrl: string;
+  playerId: string;
+}) {
   await requireAdmin();
 
   if (!data.playerId.trim()) {
     throw new Error("Sertifikat wajib ditujukan ke pemain tertentu.");
   }
 
-  const cert = await prisma.$transaction(async (tx) => {
+  const certificate = await prisma.$transaction(async (tx) => {
     await ensureActivePlayer(tx, data.playerId);
 
-    const newCert = await tx.certificate.create({
+    const newCertificate = await tx.certificate.create({
       data: {
         title: data.title,
         fileUrl: data.fileUrl,
@@ -46,23 +49,19 @@ export async function addCertificateAction(data: { title: string; fileUrl: strin
       },
     });
 
-    // Log atomically with create
-    await createAuditLog(tx, "CREATE", "certificate", newCert.id);
-    return newCert;
+    await createAuditLog(tx, "CREATE", "certificate", newCertificate.id);
+    return newCertificate;
   });
 
   revalidatePath("/dashboard/certificates");
-  return cert;
+  return certificate;
 }
 
-// 3. Delete certificate (Admin)
 export async function deleteCertificateAction(id: string) {
   await requireAdmin();
 
   await prisma.$transaction(async (tx) => {
     await tx.certificate.delete({ where: { id } });
-
-    // Log atomically with delete
     await createAuditLog(tx, "DELETE", "certificate", id);
   });
 
@@ -70,7 +69,6 @@ export async function deleteCertificateAction(id: string) {
   return { success: true };
 }
 
-// 4. Get certificates for a specific player (Parent-safe)
 export async function getPlayerCertificatesAction(playerId: string) {
   const session = await requireAuth();
   const { role: userRole, id: userId } = session.user;
@@ -85,10 +83,8 @@ export async function getPlayerCertificatesAction(playerId: string) {
     });
   }
 
-  return await prisma.certificate.findMany({
-    where: {
-      playerId,
-    },
+  return prisma.certificate.findMany({
+    where: { playerId },
     orderBy: { uploadedAt: "desc" },
   });
 }

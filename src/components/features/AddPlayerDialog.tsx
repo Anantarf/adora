@@ -228,94 +228,76 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
             </div>
           ) : (
             <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex-1 min-h-0 flex flex-col space-y-4 pt-4 relative overflow-hidden">
-              {/* Premium Sleek Stepper */}
-              <div className="flex flex-col gap-4 rounded-2xl border border-border/50 bg-background/40 p-4 shadow-xs">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <span className="text-[10px] font-extrabold uppercase tracking-[0.2em] text-primary">
-                      Langkah {step} dari 3
-                    </span>
-                    <h4 className="text-sm font-bold text-foreground">
-                      {STEP_CONFIG[step - 1]?.label}
-                    </h4>
+              <div className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-background/40 px-4 py-3 shadow-xs">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0 space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-primary">
+                        Langkah {step}/3
+                      </span>
+                      <span className="text-sm font-bold text-foreground">
+                        {STEP_CONFIG[step - 1]?.label}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {STEP_CONFIG.map((item) => {
+                        const isActive = item.id === step;
+                        const isCompleted = item.id < step;
+
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            disabled={item.id > step}
+                            onClick={() => void goToStep(item.id)}
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-colors disabled:cursor-not-allowed ${
+                              isActive
+                                ? "border-primary bg-primary/10 text-primary"
+                                : isCompleted
+                                  ? "border-primary/30 bg-primary/5 text-primary/90"
+                                  : "border-border/50 bg-card text-muted-foreground"
+                            }`}
+                          >
+                            <span
+                              className={`inline-flex size-4 items-center justify-center rounded-full text-[9px] font-bold ${
+                                isActive
+                                  ? "bg-primary text-primary-foreground"
+                                  : isCompleted
+                                    ? "bg-primary/15 text-primary"
+                                    : "bg-muted text-muted-foreground"
+                              }`}
+                            >
+                              {isCompleted ? (
+                                <svg
+                                  className="size-2.5 stroke-3"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 13l4 4L19 7"
+                                  />
+                                </svg>
+                              ) : (
+                                item.id
+                              )}
+                            </span>
+                            <span className="truncate">{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
+
                   {defaultGroupName ? (
-                    <div className="rounded-lg bg-primary/10 px-2.5 py-1 border border-primary/10">
-                      <p className="text-[10px] text-muted-foreground font-medium">
+                    <div className="rounded-full border border-primary/10 bg-primary/10 px-2.5 py-1">
+                      <p className="text-[10px] font-medium text-muted-foreground">
                         Kelompok: <span className="font-bold text-primary">{defaultGroupName}</span>
                       </p>
                     </div>
                   ) : null}
-                </div>
-
-                {/* Progress Line and Circles */}
-                <div className="relative flex items-center justify-between px-6 py-2">
-                  {/* Connecting Line background */}
-                  <div className="absolute left-10 right-10 top-[22px] h-[2px] bg-border/40" />
-                  
-                  {/* Active Line Progress overlay */}
-                  <div 
-                    className="absolute left-10 top-[22px] h-[2px] bg-linear-to-r from-primary to-orange-500 transition-all duration-300 ease-in-out" 
-                    style={{
-                      width: `${((step - 1) / (STEP_CONFIG.length - 1)) * 100}%`,
-                      maxWidth: "calc(100% - 5rem)"
-                    }}
-                  />
-
-                  {STEP_CONFIG.map((item) => {
-                    const isActive = item.id === step;
-                    const isCompleted = item.id < step;
-                    
-                    return (
-                      <button
-                        key={item.id}
-                        type="button"
-                        disabled={item.id > step}
-                        onClick={() => void goToStep(item.id)}
-                        className="relative z-10 flex flex-col items-center gap-1.5 focus:outline-none disabled:cursor-not-allowed"
-                      >
-                        {/* Circle */}
-                        <div
-                          className={`flex size-8 items-center justify-center rounded-full border text-xs font-bold transition-all duration-300 ${
-                            isActive
-                              ? "border-primary bg-primary text-primary-foreground shadow-sm shadow-primary/30 scale-105"
-                              : isCompleted
-                                ? "border-primary bg-primary/10 text-primary"
-                                : "border-border/60 bg-card text-muted-foreground"
-                          } hover:border-primary/60`}
-                        >
-                          {isCompleted ? (
-                            <svg
-                              className="size-4 stroke-3"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M5 13l4 4L19 7"
-                              />
-                            </svg>
-                          ) : (
-                            item.id
-                          )}
-                        </div>
-                        {/* Caption */}
-                        <span
-                          className={`text-[10px] font-semibold tracking-wide transition-colors ${
-                            isActive
-                              ? "text-foreground font-bold"
-                              : isCompleted
-                                ? "text-primary/90"
-                                : "text-muted-foreground/60"
-                          }`}
-                        >
-                          {item.label}
-                        </span>
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
 

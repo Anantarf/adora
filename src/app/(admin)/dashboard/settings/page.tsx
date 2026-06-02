@@ -131,9 +131,10 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col gap-6 w-full max-w-4xl mx-auto pb-12">
-      <div className="flex flex-col gap-1 border-b border-border/50 pb-6 md:pb-8">
-        <h1 className="font-heading text-2xl md:text-3xl text-foreground tracking-widest uppercase">Pengaturan Klub</h1>
-        <p className="text-muted-foreground text-sm">Kelola aset rapor dan nama penandatangan dokumen.</p>
+      <div className="border-b border-border/50 pb-6 md:pb-8">
+        <p className="text-sm text-muted-foreground">
+          Kelola aset rapor dan nama penandatangan dokumen.
+        </p>
       </div>
 
       <div className="grid gap-6">

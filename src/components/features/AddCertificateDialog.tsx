@@ -1,15 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { FileBadge, Loader2, Plus } from "lucide-react";
+import { toast } from "sonner";
+
 import { useAddCertificate } from "@/hooks/use-certificates";
 import { usePlayers } from "@/hooks/use-players";
-import { toast } from "sonner";
-import { FileBadge, Loader2, Plus } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export function AddCertificateDialog() {
   const [open, setOpen] = useState(false);
@@ -18,7 +31,12 @@ export function AddCertificateDialog() {
   const [selectedId, setSelectedId] = useState("");
 
   const { data: players } = usePlayers("all");
-  const addCert = useAddCertificate();
+  const addCertificate = useAddCertificate();
+
+  const selectedPlayer = useMemo(
+    () => players?.find((player) => player.id === selectedId) ?? null,
+    [players, selectedId],
+  );
 
   const handleSubmit = async () => {
     if (!title.trim()) return toast.error("Judul sertifikat wajib diisi.");
@@ -26,12 +44,13 @@ export function AddCertificateDialog() {
     if (!selectedId) return toast.error("Pilih pemain terlebih dulu.");
 
     try {
-      await addCert.mutateAsync({
+      await addCertificate.mutateAsync({
         title: title.trim(),
         fileUrl: fileUrl.trim(),
         playerId: selectedId,
       });
-      toast.success("Sertifikat berhasil ditambahkan!");
+
+      toast.success("Sertifikat berhasil ditambahkan.");
       setTitle("");
       setFileUrl("");
       setSelectedId("");
@@ -50,48 +69,75 @@ export function AddCertificateDialog() {
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-md bg-card border-border/50">
+
+      <DialogContent className="border-border/50 bg-card sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="font-heading text-xl uppercase tracking-wider flex items-center gap-2">
-            <FileBadge className="size-5 text-primary" /> Unggah Sertifikat
+          <DialogTitle className="flex items-center gap-2 font-heading text-xl uppercase tracking-wider">
+            <FileBadge className="size-5 text-primary" />
+            Unggah Sertifikat
           </DialogTitle>
-          <DialogDescription className="text-xs">Tambah sertifikat prestasi untuk pemain.</DialogDescription>
+          <DialogDescription className="text-xs">
+            Tambah sertifikat prestasi untuk pemain.
+          </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4 mt-2">
-          {/* Certificate Title */}
+
+        <div className="mt-2 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <label className="text-micro text-muted-foreground">Judul Sertifikat</label>
-            <Input placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026" value={title} onChange={(e) => setTitle(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
+            <Input
+              placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026"
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
+            />
           </div>
 
-          {/* File URL */}
           <div className="flex flex-col gap-1.5">
             <label className="text-micro text-muted-foreground">URL File Sertifikat</label>
-            <Input placeholder="/api/storage/uploads/sertifikat-001.pdf" value={fileUrl} onChange={(e) => setFileUrl(e.target.value)} className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30" />
-            <p className="text-[10px] text-muted-foreground/70">Gunakan URL internal dari upload privat (contoh: /api/storage/uploads/sertifikat.pdf).</p>
+            <Input
+              placeholder="/api/storage/uploads/sertifikat-001.pdf"
+              value={fileUrl}
+              onChange={(event) => setFileUrl(event.target.value)}
+              className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
+            />
+            <p className="text-[10px] text-muted-foreground/70">
+              Gunakan URL internal dari upload privat, misalnya{" "}
+              <span className="font-mono">/api/storage/uploads/sertifikat.pdf</span>.
+            </p>
           </div>
 
-          {/* Player Selection */}
           <div className="flex flex-col gap-1.5">
             <label className="text-micro text-muted-foreground">Pilih Pemain</label>
-            <Select value={selectedId} onValueChange={(v: string | null) => setSelectedId(v || "")}>
+            <Select value={selectedId} onValueChange={(value: string | null) => setSelectedId(value || "")}>
               <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder="Cari nama pemain..." />
+                <SelectValue placeholder="Pilih pemain">
+                  {selectedPlayer
+                    ? `${selectedPlayer.name}${selectedPlayer.group ? ` - ${selectedPlayer.group.name}` : ""}`
+                    : undefined}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {players?.map((p) => (
-                  <SelectItem key={p.id} value={p.id}>
-                    {p.name} {p.group ? `• ${p.group.name}` : ""}
+                {players?.map((player) => (
+                  <SelectItem key={player.id} value={player.id}>
+                    {player.name}
+                    {player.group ? ` - ${player.group.name}` : ""}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
 
-          {/* Submit */}
-          <Button onClick={handleSubmit} disabled={addCert.isPending || !selectedId} className="h-11 uppercase font-bold tracking-widest text-xs mt-2">
-            {addCert.isPending ? <Loader2 className="mr-2 size-4 animate-spin" /> : <FileBadge className="mr-2 size-4" />}
-            {addCert.isPending ? "Menyimpan..." : "Simpan Sertifikat"}
+          <Button
+            onClick={handleSubmit}
+            disabled={addCertificate.isPending || !selectedId}
+            className="mt-2 h-11 text-xs font-bold uppercase tracking-widest"
+          >
+            {addCertificate.isPending ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <FileBadge className="mr-2 size-4" />
+            )}
+            {addCertificate.isPending ? "Menyimpan..." : "Simpan Sertifikat"}
           </Button>
         </div>
       </DialogContent>

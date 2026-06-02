@@ -25,16 +25,11 @@ export function UsersManagementHeader({
   return (
     <>
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 md:flex-row md:items-center md:pb-8">
-        <div>
-          <h1 className="font-heading text-2xl uppercase tracking-widest text-foreground md:text-3xl">
-            Manajemen Akun
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {isParent
-              ? "Kelola akun orang tua dan akses mereka ke portal pemain."
-              : "Kelola akun admin yang memiliki akses ke sistem klub."}
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          {isParent
+            ? "Kelola akun orang tua dan akses mereka ke portal pemain."
+            : "Kelola akun admin yang memiliki akses ke sistem klub."}
+        </p>
         <AddUserDialog role={role} />
       </div>
 
