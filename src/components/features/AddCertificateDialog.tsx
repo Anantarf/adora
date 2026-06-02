@@ -72,18 +72,18 @@ export function AddCertificateDialog() {
 
       <DialogContent className="border-border/50 bg-card sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 font-heading text-xl uppercase tracking-wider">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <FileBadge className="size-5 text-primary" />
             Unggah Sertifikat
           </DialogTitle>
-          <DialogDescription className="text-xs">
+          <DialogDescription className="text-sm text-muted-foreground">
             Tambah sertifikat prestasi untuk pemain.
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-2 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-micro text-muted-foreground">Judul Sertifikat</label>
+            <label className="text-xs font-medium text-muted-foreground">Judul Sertifikat</label>
             <Input
               placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026"
               value={title}
@@ -93,21 +93,21 @@ export function AddCertificateDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-micro text-muted-foreground">URL File Sertifikat</label>
+            <label className="text-xs font-medium text-muted-foreground">URL File Sertifikat</label>
             <Input
               placeholder="/api/storage/uploads/sertifikat-001.pdf"
               value={fileUrl}
               onChange={(event) => setFileUrl(event.target.value)}
               className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30"
             />
-            <p className="text-[10px] text-muted-foreground/70">
+            <p className="text-xs text-muted-foreground/75">
               Gunakan URL internal dari upload privat, misalnya{" "}
               <span className="font-mono">/api/storage/uploads/sertifikat.pdf</span>.
             </p>
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-micro text-muted-foreground">Pilih Pemain</label>
+            <label className="text-xs font-medium text-muted-foreground">Pilih Pemain</label>
             <Select value={selectedId} onValueChange={(value: string | null) => setSelectedId(value || "")}>
               <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
                 <SelectValue placeholder="Pilih pemain">
@@ -130,7 +130,7 @@ export function AddCertificateDialog() {
           <Button
             onClick={handleSubmit}
             disabled={addCertificate.isPending || !selectedId}
-            className="mt-2 h-11 text-xs font-bold uppercase tracking-widest"
+            className="mt-2 h-11 text-xs font-semibold"
           >
             {addCertificate.isPending ? (
               <Loader2 className="mr-2 size-4 animate-spin" />

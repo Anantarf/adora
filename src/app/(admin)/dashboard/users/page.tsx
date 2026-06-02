@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Users, Loader2 } from "lucide-react";
+import { Users } from "lucide-react";
 import { useUsersPage, useDeleteUser, useResetPassword } from "@/hooks/use-users";
 import { UserAccountActionDialogs, type UserDialogState } from "@/components/features/users/UserAccountActionDialogs";
 import { UserAccountCard } from "@/components/features/users/UserAccountCard";
@@ -70,7 +69,7 @@ export default function UsersManagementPage() {
   };
 
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-8">
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-8">
       <UsersManagementHeader searchTerm={searchTerm} onSearchTermChange={handleSearchTermChange} totalAccounts={totalAccounts} role={activeRole} onRoleChange={handleRoleChange} />
 
       <div className="flex flex-col gap-2">
@@ -124,6 +123,6 @@ export default function UsersManagementPage() {
           if (!open) setLinkedPlayersParentId(null);
         }}
       />
-    </motion.div>
+    </div>
   );
 }

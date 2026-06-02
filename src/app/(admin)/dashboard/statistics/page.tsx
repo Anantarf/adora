@@ -152,7 +152,7 @@ const PlayerStatRow = React.memo(
     };
 
     return (
-      <TableRow className="transition-colors even:bg-muted/10 hover:bg-muted/30">
+      <TableRow className="transition-colors even:bg-muted/10 hover:bg-muted/20">
         <TableCell className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-card px-2 text-center font-medium text-muted-foreground">
           {index + 1}
         </TableCell>
@@ -177,7 +177,7 @@ const PlayerStatRow = React.memo(
         <TableCell className="text-center">
           <Badge
             variant="outline"
-            className={`text-[10px] font-bold uppercase tracking-widest ${
+            className={`text-[10px] font-semibold ${
               stat
                 ? STATUS_BADGE_CONFIG[stat.status as keyof typeof STATUS_BADGE_CONFIG].className
                 : "border-border/50 text-muted-foreground"
@@ -195,7 +195,7 @@ const PlayerStatRow = React.memo(
                 title="Download Rapor PDF"
                 onClick={handleDownload}
                 disabled={isPdfLoading}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-indigo-500/10 hover:text-indigo-400 disabled:opacity-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-50"
               >
                 {isPdfLoading ? (
                   <Loader2 className="size-4 animate-spin text-primary" />
@@ -329,12 +329,12 @@ export default function StatisticsPage() {
         <AddPeriodDialog />
       </div>
 
-      <div className="rounded-xl border border-border/40 bg-card p-4 shadow-sm">
-        <div className="mb-4 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-          <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+      <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
             {selectedPeriod ? periodDisplayLabel(selectedPeriod) : "Belum pilih periode"}
           </span>
-          <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
             {activeGroupName}
           </span>
         </div>
@@ -342,12 +342,12 @@ export default function StatisticsPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:flex md:items-end">
           <div className="flex w-full flex-col gap-1.5 md:min-w-[16rem]">
             <div className="flex items-center justify-between gap-3 px-1">
-              <label className="text-micro text-muted-foreground">Periode Evaluasi</label>
+              <label className="text-xs font-medium text-muted-foreground">Periode Evaluasi</label>
               <div className="flex items-center gap-1.5">
                 {selectedPeriod && !selectedPeriod.isActive ? (
                   <button
                     onClick={() => handleSetActive(selectedPeriod.id)}
-                    className="rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/20 bg-primary/10"
+                    className="rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/15"
                   >
                     Aktifkan
                   </button>
@@ -359,7 +359,7 @@ export default function StatisticsPage() {
                     </AlertDialogTrigger>
                     <AlertDialogContent className="sm:max-w-md border-border/50 bg-card">
                       <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2 font-heading text-xl uppercase tracking-widest text-destructive">
+                        <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
                           Hapus Periode?
                         </AlertDialogTitle>
                         <AlertDialogDescription className="flex flex-col gap-2">
@@ -417,7 +417,7 @@ export default function StatisticsPage() {
                       <div className="flex items-center">
                         <span>{periodDisplayLabel(selectedPeriod)}</span>
                         {selectedPeriod.isActive ? (
-                          <span className="ml-2 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider leading-none text-primary">
+                          <span className="ml-2 rounded-md border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
                             Aktif
                           </span>
                         ) : null}
@@ -435,7 +435,7 @@ export default function StatisticsPage() {
                       <div className="flex w-full items-center justify-between">
                         <span>{periodDisplayLabel(period)}</span>
                         {period.isActive ? (
-                          <span className="ml-2 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider leading-none text-primary">
+                          <span className="ml-2 rounded-md border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
                             Aktif
                           </span>
                         ) : null}
@@ -448,7 +448,7 @@ export default function StatisticsPage() {
           </div>
 
           <div className="flex w-full flex-col gap-1.5 md:min-w-56">
-            <label className="text-micro text-muted-foreground">Filter Kelompok</label>
+            <label className="text-xs font-medium text-muted-foreground">Filter Kelompok</label>
             <div className="relative">
               <SelectIcon className="absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
               <Select value={activeGroup} onValueChange={(value) => setActiveGroup(value ?? "all")}>
@@ -477,21 +477,21 @@ export default function StatisticsPage() {
         </div>
 
         {selectedPeriodId && !statsLoading ? (
-          <div className="mt-4 border-t border-border/40 pt-4">
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
-              <div className="rounded-lg border border-border/40 bg-background/40 px-3 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+            <div className="mt-4 border-t border-border/40 pt-4">
+            <div className="flex flex-wrap gap-2">
+              <div className="rounded-md border border-border/40 bg-background/40 px-3 py-2">
+                <p className="text-[11px] font-medium text-muted-foreground">
                   Selesai
                 </p>
-                <p className="mt-1 text-sm font-bold tabular-nums text-primary">
+                <p className="mt-1 text-sm font-semibold tabular-nums text-primary">
                   {statsSummary.published}
                 </p>
               </div>
-              <div className="rounded-lg border border-border/40 bg-background/40 px-3 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+              <div className="rounded-md border border-border/40 bg-background/40 px-3 py-2">
+                <p className="text-[11px] font-medium text-muted-foreground">
                   Draft
                 </p>
-                <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
+                <p className="mt-1 text-sm font-semibold tabular-nums text-foreground">
                   {statsSummary.draft}
                 </p>
               </div>
@@ -582,10 +582,10 @@ export default function StatisticsPage() {
                   className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm"
                 >
                   <div className="flex items-center justify-between border-b border-border/50 bg-muted/20 px-4 py-2.5">
-                    <span className="text-xs font-bold uppercase tracking-widest text-primary">
+                    <span className="text-xs font-semibold text-primary">
                       {group.name}
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                    <span className="text-[11px] font-medium text-muted-foreground">
                       {groupPlayers.length} pemain
                     </span>
                   </div>
@@ -606,7 +606,7 @@ export default function StatisticsPage() {
                             <div className="shrink-0">
                               <Badge
                                 variant="outline"
-                                className={`text-[10px] font-bold uppercase tracking-widest ${
+                                className={`text-[10px] font-semibold ${
                                   stat
                                     ? STATUS_BADGE_CONFIG[
                                         stat.status as keyof typeof STATUS_BADGE_CONFIG
@@ -634,7 +634,7 @@ export default function StatisticsPage() {
                                   key={definition.key}
                                   className="min-w-20 shrink-0 rounded-md border border-border/50 bg-background/40 px-1.5 py-1 text-center"
                                 >
-                                  <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                                  <p className="text-[9px] font-medium text-muted-foreground">
                                     {definition.shortLabel}
                                   </p>
                                   <p className="text-sm font-mono font-bold leading-tight tabular-nums text-primary">
@@ -647,7 +647,7 @@ export default function StatisticsPage() {
 
                           <div className="grid grid-cols-2 gap-2">
                             <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1.5 text-center">
-                              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                              <p className="text-[9px] font-medium text-muted-foreground">
                                 Nilai
                               </p>
                               <div className="mt-1 flex justify-center">
@@ -659,7 +659,7 @@ export default function StatisticsPage() {
                               </div>
                             </div>
                             <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1.5 text-center">
-                              <p className="text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                              <p className="text-[9px] font-medium text-muted-foreground">
                                 Skor Terisi
                               </p>
                               <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
@@ -712,7 +712,7 @@ export default function StatisticsPage() {
                                       setLoadingPlayerId(null);
                                     }
                                   }}
-                                  className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-indigo-500/10 hover:text-indigo-400 disabled:opacity-50"
+                                  className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary disabled:opacity-50"
                                 >
                                   {loadingPlayerId === player.id ? (
                                     <Loader2 className="size-4 animate-spin text-primary" />
@@ -752,30 +752,30 @@ export default function StatisticsPage() {
       {selectedPeriodId ? (
         <div className="hidden overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm md:block">
           <Table className="min-w-245">
-            <TableHeader className="bg-muted/30">
-              <TableRow className="border-b border-border/50 hover:bg-transparent">
-                <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/30 px-2 text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+              <TableHeader className="bg-muted/20">
+                <TableRow className="border-b border-border/50 hover:bg-transparent">
+                <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-[10px] font-medium text-muted-foreground">
                   No
                 </TableHead>
-                <TableHead className="sticky left-12 z-20 min-w-40 max-w-50 bg-muted/30 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <TableHead className="sticky left-12 z-20 min-w-40 max-w-50 bg-muted/20 text-[10px] font-medium text-muted-foreground">
                   Nama Pemain
                 </TableHead>
                 {FLAT_METRIC_DEFS.map((definition) => (
                   <TableHead
                     key={definition.key}
-                    className="w-12 px-1 text-center text-[9px] font-bold uppercase tracking-wider text-muted-foreground"
+                    className="w-12 px-1 text-center text-[9px] font-medium text-muted-foreground"
                     title={definition.label}
                   >
                     {definition.shortLabel}
                   </TableHead>
                 ))}
-                <TableHead className="w-20 text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <TableHead className="w-20 text-center text-[10px] font-medium text-muted-foreground">
                   Nilai
                 </TableHead>
-                <TableHead className="w-20 text-center text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <TableHead className="w-20 text-center text-[10px] font-medium text-muted-foreground">
                   Status
                 </TableHead>
-                <TableHead className="w-24 text-right text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <TableHead className="w-24 text-right text-[10px] font-medium text-muted-foreground">
                   Aksi
                 </TableHead>
               </TableRow>
@@ -842,14 +842,14 @@ export default function StatisticsPage() {
               {!playersLoading && !statsLoading
                 ? playersByGroup.map(({ group, players: groupPlayers }) => (
                     <React.Fragment key={group.id}>
-                      <TableRow className="bg-muted/20 hover:bg-muted/20">
+                      <TableRow className="bg-muted/15 hover:bg-muted/15">
                         <TableCell
                           colSpan={FLAT_METRIC_DEFS.length + 5}
-                          className="border-l-4 border-primary py-2.5 pl-3 text-sm font-bold uppercase tracking-widest text-primary"
+                          className="border-l-4 border-primary py-2.5 pl-3 text-sm font-semibold text-primary"
                         >
                           <div className="flex items-center justify-between gap-3">
                             <span>{group.name}</span>
-                            <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                            <span className="text-[11px] font-medium text-muted-foreground">
                               {groupPlayers.length} pemain
                             </span>
                           </div>
