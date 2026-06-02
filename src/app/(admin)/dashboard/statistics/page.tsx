@@ -288,10 +288,6 @@ export default function StatisticsPage() {
     [stats],
   );
 
-  const totalPlayerCount = playersByGroup.reduce(
-    (count, entry) => count + entry.players.length,
-    0,
-  );
   const selectedPeriod = periods?.find((period) => period.id === selectedPeriodId);
   const canDeletePeriod = statsSummary.published === 0 && statsSummary.draft === 0;
   const activeGroupName =
@@ -327,14 +323,9 @@ export default function StatisticsPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <h1 className="font-heading text-2xl text-foreground tracking-widest uppercase md:text-3xl">
-            Input Penilaian
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola nilai pemain per periode evaluasi.
-          </p>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain.
+        </p>
         <AddPeriodDialog />
       </div>
 
@@ -487,7 +478,7 @@ export default function StatisticsPage() {
 
         {selectedPeriodId && !statsLoading ? (
           <div className="mt-4 border-t border-border/40 pt-4">
-            <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
               <div className="rounded-lg border border-border/40 bg-background/40 px-3 py-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
                   Selesai
@@ -502,14 +493,6 @@ export default function StatisticsPage() {
                 </p>
                 <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
                   {statsSummary.draft}
-                </p>
-              </div>
-              <div className="rounded-lg border border-border/40 bg-background/40 px-3 py-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                  Total
-                </p>
-                <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
-                  {totalPlayerCount}
                 </p>
               </div>
             </div>
@@ -619,13 +602,6 @@ export default function StatisticsPage() {
                                 <span className="mr-1 text-muted-foreground">{index + 1}.</span>
                                 {player.name}
                               </p>
-                              <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                                {stat
-                                  ? STATUS_BADGE_CONFIG[
-                                      stat.status as keyof typeof STATUS_BADGE_CONFIG
-                                    ].label
-                                  : "Belum Diisi"}
-                              </p>
                             </div>
                             <div className="shrink-0">
                               <Badge
@@ -687,15 +663,16 @@ export default function StatisticsPage() {
                                 Skor Terisi
                               </p>
                               <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
-                                {metrics ? FLAT_METRIC_DEFS.length : 0}
+                                {metrics
+                                  ? FLAT_METRIC_DEFS.filter(
+                                      (definition) => definition.getValue(metrics) != null,
+                                    ).length
+                                  : 0}
                               </p>
                             </div>
                           </div>
 
                           <div className="-mx-4 mt-1 border-t border-border/40 px-4 pt-3">
-                            <div className="mb-2 text-[10px] uppercase tracking-widest text-muted-foreground">
-                              Aksi Cepat
-                            </div>
                             <div className="flex items-center justify-end gap-2">
                               {metrics ? (
                                 <button

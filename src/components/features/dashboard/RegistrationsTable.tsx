@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { Users, Info, MessageCircle, Download } from "lucide-react";
+import { Users, MessageCircle, Download } from "lucide-react";
 import { toast } from "sonner";
 
 import { RegistrationActions } from "@/components/features/dashboard/RegistrationActions";
@@ -36,26 +36,22 @@ const STATUS_META: Record<
     badgeClassName: string;
     label: string;
     nextStep: string;
-    shortNextStep: string;
   }
 > = {
   PENDING: {
     badgeClassName: "border-amber-500/30 bg-amber-500/10 text-amber-500",
     label: "Belum Bayar",
     nextStep: "Hubungi via WhatsApp untuk konfirmasi pembayaran.",
-    shortNextStep: "Hubungi untuk konfirmasi pembayaran.",
   },
   REVIEWED: {
     badgeClassName: "border-emerald-500/30 bg-emerald-500/10 text-emerald-500",
     label: "Sudah Bayar",
     nextStep: "Lanjut input pemain ke menu Kelompok Latihan.",
-    shortNextStep: "Lanjut input ke Kelompok Latihan.",
   },
   COMPLETED: {
     badgeClassName: "border-sky-500/30 bg-sky-500/10 text-sky-500",
     label: "Selesai",
     nextStep: "Pendaftaran sudah selesai diproses.",
-    shortNextStep: "Pendaftaran sudah selesai.",
   },
 };
 
@@ -141,18 +137,6 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
-
-        <div className="mb-6 rounded-xl border border-secondary/10 bg-secondary/5 p-4">
-          <div className="flex items-start gap-3">
-            <Info className="mt-0.5 size-5 shrink-0 text-secondary" />
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">Cara kerja cepat:</p>
-              <p>1. Hubungi pendaftar untuk konfirmasi pembayaran.</p>
-              <p>2. Ubah status sesuai hasil konfirmasi.</p>
-              <p>3. Jika sudah bayar, lanjut input pemain di menu Kelompok Latihan.</p>
-            </div>
-          </div>
         </div>
 
         {registrations.length === 0 ? (
@@ -306,12 +290,9 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                                 {registration.email}
                               </span>
                             ) : null}
-                            <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
-                              <span className="rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 font-bold text-primary">
-                                {registration.ageGroup}
-                              </span>
-                              <span>{statusMeta.shortNextStep}</span>
-                            </div>
+                            <span className="inline-flex w-fit rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[11px] font-bold text-primary">
+                              {registration.ageGroup}
+                            </span>
                           </div>
                         </td>
                         <td className="whitespace-nowrap px-4 py-3">

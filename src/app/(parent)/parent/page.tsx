@@ -15,21 +15,8 @@ import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { usePlayerStats } from "@/hooks/use-player-stats";
 import { useReportSettings } from "@/hooks/use-settings";
-import { FLAT_METRIC_DEFS, averageScore, flattenMetrics, overallScore } from "@/lib/metrics";
+import { averageScore, flattenMetrics, overallScore } from "@/lib/metrics";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
-
-const ParentRadarChart = dynamic(
-  () => import("./components/ParentRadarChart").then((mod) => mod.ParentRadarChart),
-  {
-    ssr: false,
-    loading: () => (
-      <Card className="flex min-h-80 flex-col items-center justify-center gap-4 border-border/50 bg-card p-6">
-        <Skeleton className="h-5 w-40 self-start bg-muted/50" />
-        <Skeleton className="size-56 rounded-full bg-muted/40" />
-      </Card>
-    ),
-  },
-);
 
 const ParentProgressionChart = dynamic(
   () =>
@@ -65,19 +52,6 @@ export default function ParentDashboard() {
     usePlayerAttendance(effectiveChildId);
   const { data: certificates } = usePlayerCertificates(effectiveChildId);
   const { data: reportSettings } = useReportSettings();
-
-  const radarData = useMemo(() => {
-    if (!stats?.length) {
-      return [];
-    }
-
-    const metrics = stats[0].metricsJson as MetricsJson;
-    return FLAT_METRIC_DEFS.map((definition) => ({
-      subject: definition.shortLabel,
-      A: definition.getValue(metrics),
-      fullMark: definition.max,
-    }));
-  }, [stats]);
 
   const progressionData = useMemo(() => {
     if (!stats?.length) {
@@ -277,11 +251,6 @@ export default function ParentDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="flex min-h-80 flex-col items-center justify-center gap-4 border-border/50 bg-card p-6">
-            <Skeleton className="h-5 w-40 self-start bg-muted/50" />
-            <Skeleton className="size-56 rounded-full bg-muted/40" />
-          </Card>
-
           <Card className="flex min-h-80 flex-col gap-4 border-border/50 bg-card p-6">
             <Skeleton className="h-5 w-48 bg-muted/50" />
             <Skeleton className="h-44 w-full rounded bg-muted/30" />
@@ -360,16 +329,14 @@ export default function ParentDashboard() {
             </Card>
           ) : null}
 
-          <ParentRadarChart data={radarData} />
-
-          <ParentProgressionChart data={progressionData} />
-
           <ParentAttendanceSummary
             attendanceSummary={attendanceSummary}
             attendances={attendances}
             attendanceLoading={attendanceLoading}
             activeChildName={activeChild.name}
           />
+
+          <ParentProgressionChart data={progressionData} />
 
           <Card className="overflow-hidden border-border/50 bg-card shadow-sm lg:col-span-2">
             <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">

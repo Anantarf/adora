@@ -10,13 +10,10 @@ export default async function RegistrationsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col gap-2 border-b border-border/50 pb-6 md:pb-8">
-        <h1 className="font-heading text-2xl text-foreground tracking-widest uppercase md:text-3xl">
-          Pendaftar Baru
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Calon anggota dari formulir web yang perlu dikonfirmasi pembayarannya
-          sebelum dipindahkan ke data pemain.
+      <div className="border-b border-border/50 pb-6 md:pb-8">
+        <p className="max-w-3xl text-sm text-muted-foreground">
+          Konfirmasi pembayaran pendaftar dari formulir web sebelum dipindahkan
+          ke data pemain.
         </p>
       </div>
 

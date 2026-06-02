@@ -9,7 +9,6 @@ import {
   Edit2,
   Trash2,
   Users,
-  FolderPlus,
   LayoutGrid,
   Table as TableIcon,
   ChevronLeft,
@@ -114,10 +113,6 @@ export default function PlayersPage() {
   const currentServerPage = playersPage?.page ?? currentPage;
   const totalPages = playersPage?.totalPages ?? 1;
   const filteredPlayerCount = playersPage?.total ?? 0;
-  const totalPlayers = useMemo(
-    () => groups?.reduce((sum: number, group: Group) => sum + (group._count?.player || 0), 0) ?? 0,
-    [groups],
-  );
   const activeCategoryLabel =
     selectedCategory === "SEKOLAH" ? "Kelompok sekolah" : "Kelompok umur";
 
@@ -175,14 +170,9 @@ export default function PlayersPage() {
       )}
 
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <h1 className="font-heading text-2xl text-foreground tracking-widest uppercase md:text-3xl">
-            Kelompok Latihan
-          </h1>
-          <p className="text-xs font-medium tracking-wide text-muted-foreground">
-            Kelola kelompok latihan dan data pemain Adora BBC dalam satu layar.
-          </p>
-        </div>
+        <p className="text-xs font-medium tracking-wide text-muted-foreground">
+          Pilih kelompok di kiri, lalu kelola pemain dan pencariannya di panel kanan.
+        </p>
         <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
           <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
             {activeCategoryLabel}
@@ -191,36 +181,6 @@ export default function PlayersPage() {
             {groupsInCategory.length} kelompok aktif
           </span>
         </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        {(
-          [
-            { icon: FolderPlus, label: "Total Kelompok", value: groups?.length ?? 0 },
-            { icon: Users, label: "Total Pemain Aktif", value: totalPlayers },
-          ] as const
-        ).map(({ icon: Icon, label, value }) => (
-          <div
-            key={label}
-            className="flex items-center gap-3 rounded-xl border border-border/50 bg-card/60 px-4 py-3 shadow-xs"
-          >
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Icon className="size-[18px]" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                {label}
-              </p>
-              {isGroupsLoading ? (
-                <div className="mt-1 h-6 w-10 animate-pulse rounded bg-muted" />
-              ) : (
-                <p className="mt-0.5 font-heading text-lg tracking-[0.2em] text-foreground">
-                  {value}
-                </p>
-              )}
-            </div>
-          </div>
-        ))}
       </div>
 
       <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-12">
@@ -622,7 +582,7 @@ export default function PlayersPage() {
                                       ? "P"
                                       : "-"}
                                 </span>
-                                {" · "}
+                                {" - "}
                                 {age !== null ? `${age} thn` : "-"}
                               </td>
                               <td className="whitespace-nowrap px-4 py-2.5">
