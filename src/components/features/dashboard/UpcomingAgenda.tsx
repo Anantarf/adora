@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { CalendarDays, ChevronRight, Clock, ArrowRight } from "lucide-react";
+import { ArrowRight, CalendarDays, Clock } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
+
 import { getPublicEventsAction } from "@/actions/schedule";
+import { QUERY_KEYS } from "@/lib/constants";
 import { getEventConfig } from "@/lib/config/events";
 import { getCountdownLabel } from "@/lib/date-utils";
-import { QUERY_KEYS } from "@/lib/constants";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function UpcomingAgenda() {
@@ -21,66 +22,73 @@ export function UpcomingAgenda() {
   const upcoming = (events ?? []).slice(0, 5);
 
   return (
-    // Sama persis strukturnya dengan RecentRegistrations: flex flex-col h-full
-    <div className="flex flex-col border border-border/50 rounded-xl bg-card/30 overflow-hidden h-full transition-all duration-300 hover:border-border/80">
-      {/* Header */}
-      <div className="p-4 md:p-6 border-b border-border/50 flex items-center justify-between bg-card/50">
-        <div>
-          <h2 className="font-heading text-base tracking-wider text-foreground flex items-center gap-2">
-            <CalendarDays className="w-4 h-4 text-muted-foreground shrink-0" />
-            AGENDA MENDATANG
-          </h2>
-          <p className="text-xs text-muted-foreground mt-1 tracking-wide">Jadwal latihan dan kegiatan klub berikutnya</p>
+    <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
+      <div className="flex items-start justify-between gap-3 border-b border-border/50 px-5 py-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="size-4 text-muted-foreground" />
+            <h2 className="text-sm font-semibold text-foreground">Agenda Mendatang</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">Jadwal latihan dan agenda resmi yang paling dekat.</p>
         </div>
-        {upcoming.length > 0 && <div className="bg-muted text-muted-foreground text-xs font-bold px-2.5 py-1 rounded-md border border-border/60 tabular-nums shrink-0 ml-2">{upcoming.length}</div>}
+        {upcoming.length > 0 ? (
+          <span className="rounded-md border border-border/60 bg-background px-2 py-1 text-xs font-semibold text-muted-foreground">
+            {upcoming.length}
+          </span>
+        ) : null}
       </div>
 
-      {/* Content — flex-1 sama seperti RecentRegistrations */}
-      <div className="flex-1 p-4 md:p-6 flex flex-col min-h-75 md:min-h-95">
+      <div className="flex min-h-72 flex-1 flex-col px-5 py-4">
         {isLoading ? (
           <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full rounded-xl" />
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-14 w-full rounded-lg" />
             ))}
           </div>
         ) : upcoming.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 gap-2 rounded-xl border border-dashed border-border/50 text-center py-8">
-            <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
-            <p className="text-sm font-medium text-muted-foreground">Tidak Ada Agenda Mendatang</p>
-            <p className="text-xs text-muted-foreground/75">Semua agenda telah selesai atau belum dijadwalkan.</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/50 bg-background/30 px-4 py-10 text-center">
+            <CalendarDays className="size-8 text-muted-foreground/30" />
+            <p className="text-sm font-medium text-muted-foreground">Belum ada agenda mendatang</p>
+            <p className="text-xs text-muted-foreground/75">Buat jadwal baru dari halaman agenda.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-2">
-            {upcoming.map((ev) => {
-              if (!ev.id || !ev.date || !ev.type || !ev.title) return null;
-              const cfg = getEventConfig(ev.type);
-              const Icon = cfg.icon;
-              const eventDate = new Date(ev.date);
+          <div className="flex flex-col gap-2.5">
+            {upcoming.map((event) => {
+              if (!event.id || !event.date || !event.type || !event.title) {
+                return null;
+              }
+
+              const config = getEventConfig(event.type);
+              const eventDate = new Date(event.date);
 
               return (
-                <Link key={ev.id} href="/dashboard/schedule" className="group flex items-center gap-3 p-3.5 rounded-xl border border-border/50 hover:border-primary/30 hover:bg-muted/20 transition-all">
-                  <div className="shrink-0 size-9 rounded-lg flex items-center justify-center text-white shadow-sm" style={{ backgroundColor: cfg.color }}>
-                    <Icon className="size-4" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-foreground truncate leading-snug">{ev.title}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Clock className="size-3 text-muted-foreground shrink-0" />
-                      <span className="text-xs text-muted-foreground truncate">{format(eventDate, "EEE, dd MMM", { locale: idLocale })}</span>
+                <Link
+                  key={event.id}
+                  href="/dashboard/schedule"
+                  className="flex items-start justify-between gap-3 rounded-lg border border-border/50 bg-background/60 px-4 py-3 transition-colors hover:border-primary/30"
+                >
+                  <div className="min-w-0 space-y-1">
+                    <p className="truncate text-sm font-semibold text-foreground">{event.title}</p>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <span
+                        className="rounded-md border px-2 py-1 font-medium"
+                        style={{
+                          color: config.color,
+                          borderColor: `${config.color}40`,
+                          backgroundColor: `${config.color}12`,
+                        }}
+                      >
+                        {config.label}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Clock className="size-3" />
+                        {format(eventDate, "EEE, dd MMM", { locale: idLocale })}
+                      </span>
                     </div>
                   </div>
-                  <div className="shrink-0 flex items-center gap-1.5">
-                    <span
-                      className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border leading-none"
-                      style={{
-                        color: cfg.color,
-                        borderColor: `${cfg.color}40`,
-                        backgroundColor: `${cfg.color}15`,
-                      }}
-                    >
-                      {getCountdownLabel(ev.date)}
-                    </span>
-                    <ChevronRight className="size-3.5 text-border group-hover:text-primary transition-colors" />
+
+                  <div className="shrink-0 text-right">
+                    <p className="text-xs font-semibold text-foreground">{getCountdownLabel(event.date)}</p>
                   </div>
                 </Link>
               );
@@ -89,18 +97,17 @@ export function UpcomingAgenda() {
         )}
       </div>
 
-      {/* Button — identik dengan RecentRegistrations */}
-      {upcoming.length > 0 && (
-        <div className="px-4 md:px-6 pb-4 md:pb-6 pt-2">
+      {upcoming.length > 0 ? (
+        <div className="border-t border-border/50 px-5 py-4">
           <Link
             href="/dashboard/schedule"
-            className="w-full min-h-11 flex items-center justify-center gap-2 py-2.5 text-xs font-bold tracking-widest uppercase bg-muted/50 hover:bg-primary hover:text-primary-foreground text-foreground rounded-lg transition-all"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
           >
-            Lihat Semua Agenda
-            <ArrowRight className="size-3.5" />
+            Buka agenda lengkap
+            <ArrowRight className="size-4" />
           </Link>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

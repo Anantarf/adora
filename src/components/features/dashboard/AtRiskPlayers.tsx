@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, UserX } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import type { DashboardMetrics } from "@/actions/dashboard";
 
@@ -13,53 +13,58 @@ interface AtRiskPlayersProps {
 export function AtRiskPlayers({ metrics, isLoading }: AtRiskPlayersProps) {
   if (isLoading) {
     return (
-      <Card className="border-border/50 bg-card shadow-sm">
-        <CardHeader className="pb-3">
-          <Skeleton className="h-6 w-48" />
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="rounded-xl border border-border/50 bg-card shadow-sm">
+        <div className="border-b border-border/50 px-5 py-4">
+          <Skeleton className="h-5 w-48" />
+        </div>
+        <div className="space-y-2 px-5 py-4">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
     );
   }
 
-  const atRiskPlayers = metrics?.atRiskPlayers || [];
+  const atRiskPlayers = metrics?.atRiskPlayers ?? [];
 
   if (atRiskPlayers.length === 0) {
-    return null; // Sembunyikan kalau tidak ada anak yang bermasalah absennya
+    return null;
   }
 
   return (
-    <Card className="border-destructive/20 bg-destructive/5 shadow-sm">
-      <CardHeader className="pb-3 border-b border-destructive/10 flex flex-row items-center gap-2 space-y-0">
-        <AlertTriangle className="size-5 text-destructive shrink-0" />
-        <CardTitle className="text-destructive flex-1 font-heading tracking-widest text-lg uppercase">
-          Peringatan Absensi
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="pt-4">
-        <p className="text-sm text-muted-foreground mb-4">
-          Pemain berikut ini tercatat <span className="font-semibold text-foreground">Alpa 3 kali atau lebih</span> dalam 30 hari terakhir. Mohon pertimbangkan untuk follow-up ke orang tua.
-        </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {atRiskPlayers.map((player) => (
-            <div key={player.id} className="flex items-center justify-between p-3 rounded-md bg-background border border-destructive/20">
-              <div className="overflow-hidden pr-2">
-                <p className="font-semibold text-sm truncate">{player.name}</p>
-                <p className="text-xs text-muted-foreground truncate">{player.groupName}</p>
-              </div>
-              <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-destructive/10 text-destructive shrink-0">
-                <UserX className="size-3" />
-                <span className="text-xs font-bold">{player.alpaCount}x</span>
-              </div>
-            </div>
-          ))}
+    <section className="rounded-xl border border-destructive/20 bg-card shadow-sm">
+      <div className="flex items-start justify-between gap-3 border-b border-destructive/10 px-5 py-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="size-4 shrink-0 text-destructive" />
+            <h2 className="text-sm font-semibold text-foreground">Perlu Tindak Lanjut Absensi</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Pemain dengan status alpa 3 kali atau lebih dalam 30 hari terakhir.
+          </p>
         </div>
-      </CardContent>
-    </Card>
+        <span className="rounded-md border border-destructive/20 bg-destructive/5 px-2 py-1 text-xs font-semibold text-destructive">
+          {atRiskPlayers.length}
+        </span>
+      </div>
+
+      <div className="grid gap-3 px-5 py-4 md:grid-cols-2 lg:grid-cols-3">
+        {atRiskPlayers.map((player) => (
+          <div
+            key={player.id}
+            className="flex items-center justify-between rounded-lg border border-border/50 bg-background/60 px-3 py-2.5"
+          >
+            <div className="overflow-hidden pr-2">
+              <p className="truncate text-sm font-semibold text-foreground">{player.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{player.groupName}</p>
+            </div>
+            <div className="flex shrink-0 items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-destructive">
+              <UserX className="size-3" />
+              <span className="text-xs font-bold">{player.alpaCount}x</span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
   );
 }

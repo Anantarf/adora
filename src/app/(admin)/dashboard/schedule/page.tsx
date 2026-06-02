@@ -1,30 +1,45 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
-import { useSchedule } from "@/hooks/use-schedule";
-import { type ScheduleEvent } from "@/types/dashboard";
-import { CalendarDays, Loader2, Trash2, Pencil, Clock, ChevronRight, MapPin } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
-import { getEventConfig, EVENT_TYPES } from "@/lib/config/events";
-import { getJakartaToday, getCountdownLabel, toJakartaDate } from "@/lib/date-utils";
+import {
+  CalendarDays,
+  ChevronRight,
+  Clock,
+  Loader2,
+  MapPin,
+  Pencil,
+  Trash2,
+} from "lucide-react";
+
+import { EventDeleteConfirm } from "@/components/features/EventDeleteConfirm";
 import { EventFormCard } from "@/components/features/EventFormCard";
 import { EventPreviewDialog } from "@/components/features/EventPreviewDialog";
-import { EventDeleteConfirm } from "@/components/features/EventDeleteConfirm";
+import { Button } from "@/components/ui/button";
+import { getEventConfig, EVENT_TYPES } from "@/lib/config/events";
+import { getCountdownLabel, getJakartaToday, toJakartaDate } from "@/lib/date-utils";
+import { useSchedule } from "@/hooks/use-schedule";
+import type { ScheduleEvent } from "@/types/dashboard";
 
-const CalendarView = dynamic(() => import("@/components/features/calendar-view").then((mod) => mod.CalendarView), {
-  ssr: false,
-  loading: () => (
-    <div className="flex items-center justify-center p-20">
-      <Loader2 className="size-8 animate-spin text-primary" />
-    </div>
-  ),
-});
+const CalendarView = dynamic(
+  () => import("@/components/features/calendar-view").then((mod) => mod.CalendarView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-20">
+        <Loader2 className="size-8 animate-spin text-primary" />
+      </div>
+    ),
+  },
+);
 
-type UIState = { type: "edit"; event: ScheduleEvent } | { type: "delete"; targetId: string } | { type: "preview"; event: ScheduleEvent } | null;
+type UIState =
+  | { type: "edit"; event: ScheduleEvent }
+  | { type: "delete"; targetId: string }
+  | { type: "preview"; event: ScheduleEvent }
+  | null;
 
 export default function SchedulePage() {
   const [uiState, setUiState] = useState<UIState>(null);
@@ -32,16 +47,23 @@ export default function SchedulePage() {
 
   const mappedEvents = useMemo(
     () =>
-      (events || []).map((ev) => {
-        const cfg = getEventConfig(ev.type);
+      (events || []).map((event) => {
+        const config = getEventConfig(event.type);
+
         return {
-          id: ev.id,
-          title: cfg.label,
-          start: ev.date,
+          id: event.id,
+          title: config.label,
+          start: event.date,
           allDay: true,
           backgroundColor: "transparent",
           borderColor: "transparent",
-          extendedProps: { type: ev.type, originalTitle: ev.title, location: ev.location, description: ev.description, date: ev.date },
+          extendedProps: {
+            type: event.type,
+            originalTitle: event.title,
+            location: event.location,
+            description: event.description,
+            date: event.date,
+          },
         };
       }),
     [events],
@@ -49,9 +71,10 @@ export default function SchedulePage() {
 
   const upcomingEvents = useMemo(() => {
     const today = getJakartaToday();
+
     return (events || [])
-      .filter((ev) => toJakartaDate(ev.date) >= today)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .filter((event) => toJakartaDate(event.date) >= today)
+      .sort((left, right) => new Date(left.date).getTime() - new Date(right.date).getTime())
       .slice(0, 5);
   }, [events]);
 
@@ -61,138 +84,170 @@ export default function SchedulePage() {
 
   return (
     <>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col gap-6 w-full max-w-7xl mx-auto pb-6">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 md:gap-6 border-b border-border/50 pb-6 md:pb-8">
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-6">
+        <div className="border-b border-border/50 pb-6">
           <p className="text-sm text-muted-foreground">
-            Kelola jadwal latihan, tanding, dan agenda resmi klub.
+            Kelola jadwal latihan, tanding, dan agenda resmi klub dari satu halaman kerja.
           </p>
         </div>
 
-        {/* Form Card */}
         <EventFormCard editEvent={editEvent} onSuccess={() => setUiState(null)} />
 
-        <div className="flex flex-col xl:flex-row gap-6 items-start">
-          {/* Kalender */}
-          <div className="flex-1 w-full min-w-0">
-            <div className="glass-card p-5 rounded-card-lg border-border/40 shadow-sm overflow-hidden">
-              <div className="w-full overflow-x-auto">
+        <div className="flex flex-col items-start gap-6 xl:flex-row">
+          <div className="min-w-0 flex-1">
+            <section className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
+              <div className="border-b border-border/50 px-5 py-4">
+                <div className="space-y-1">
+                  <h2 className="text-sm font-semibold text-foreground">Kalender Agenda</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Lihat penyebaran jadwal bulanan sebelum menambah atau mengubah agenda.
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full overflow-x-auto px-5 py-4">
                 <div className="min-w-0 md:min-w-160">
                   <CalendarView events={mappedEvents} />
                 </div>
               </div>
-              <div className="flex flex-wrap gap-2 items-center mt-4 pt-3 border-t border-border/30">
-                {Object.values(EVENT_TYPES).map((leg) => {
-                  const Icon = leg.icon;
+
+              <div className="flex flex-wrap gap-2 border-t border-border/50 px-5 py-4">
+                {Object.values(EVENT_TYPES).map((eventType) => {
+                  const Icon = eventType.icon;
+
                   return (
-                    <div key={leg.id} className="flex items-center gap-1.5 bg-muted/60 px-2.5 py-1 rounded-full border border-border shadow-sm">
-                      <div className="p-1 rounded-full text-white shadow-sm" style={{ backgroundColor: leg.color }}>
-                        <Icon className="size-2.5" />
-                      </div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{leg.label}</span>
+                    <div
+                      key={eventType.id}
+                      className="inline-flex items-center gap-2 rounded-md border border-border/50 bg-background/50 px-2.5 py-1.5 text-xs text-muted-foreground"
+                    >
+                      <span
+                        className="flex size-5 items-center justify-center rounded-full text-white"
+                        style={{ backgroundColor: eventType.color }}
+                      >
+                        <Icon className="size-3" />
+                      </span>
+                      <span className="font-medium">{eventType.label}</span>
                     </div>
                   );
                 })}
               </div>
-            </div>
+            </section>
           </div>
 
-          {/* Agenda Mendatang */}
-          <div className="w-full xl:w-95 shrink-0 flex flex-col gap-4 min-w-0">
-            <div className="h-px w-full bg-linear-to-r from-border/50 via-border to-transparent" />
-            <div className="flex items-center justify-between px-1 mb-2">
-              <div className="flex items-center gap-3">
-                <div className="size-10 rounded-icon flex items-center justify-center shrink-0 shadow-lg shadow-black/20 bg-primary">
-                  <CalendarDays className="size-5 text-primary-foreground" strokeWidth={2.5} />
-                </div>
-                <h2 className="font-heading text-lg tracking-wide text-foreground">Agenda Mendatang</h2>
-              </div>
+          <aside className="flex w-full shrink-0 flex-col gap-3 xl:w-[24rem]">
+            <div className="space-y-1 px-1">
+              <h2 className="text-sm font-semibold text-foreground">Agenda Mendatang</h2>
+              <p className="text-sm text-muted-foreground">
+                Fokus ke agenda terdekat yang masih perlu dipantau atau diubah.
+              </p>
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2.5">
               {isLoading ? (
-                <div className="flex items-center justify-center gap-2 py-10 text-primary font-bold text-xs uppercase tracking-widest">
-                  <Loader2 className="size-5 animate-spin" /> Memuat agenda...
+                <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-card px-4 py-10 text-sm text-muted-foreground shadow-sm">
+                  <Loader2 className="size-4 animate-spin text-primary" />
+                  Memuat agenda...
                 </div>
               ) : isError ? (
-                <div className="flex flex-col items-center justify-center py-14 gap-2 rounded-2xl border border-dashed border-destructive/30 text-center">
-                  <CalendarDays className="size-8 text-destructive/40 mb-1" />
-                  <p className="text-xs font-bold uppercase tracking-widest text-destructive/70">Gagal memuat agenda</p>
-                  <p className="text-[10px] text-muted-foreground/75">Periksa koneksi dan muat ulang halaman.</p>
+                <div className="rounded-xl border border-dashed border-destructive/30 bg-card px-4 py-10 text-center shadow-sm">
+                  <p className="text-sm font-semibold text-destructive">Gagal memuat agenda</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Periksa koneksi lalu muat ulang halaman.</p>
                 </div>
               ) : upcomingEvents.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-14 gap-2 rounded-2xl border border-dashed border-border/50 text-center">
-                  <CalendarDays className="size-8 text-muted-foreground/30 mb-1" />
-                  <p className="text-sm font-medium text-muted-foreground">Tidak ada agenda mendatang</p>
-                  <p className="text-[10px] text-muted-foreground/75">Buat agenda menggunakan form di atas.</p>
+                <div className="rounded-xl border border-dashed border-border/50 bg-card px-4 py-10 text-center shadow-sm">
+                  <CalendarDays className="mx-auto size-8 text-muted-foreground/30" />
+                  <p className="mt-3 text-sm font-medium text-muted-foreground">Belum ada agenda mendatang</p>
+                  <p className="mt-1 text-xs text-muted-foreground/75">
+                    Buat agenda baru dari form di atas.
+                  </p>
                 </div>
               ) : (
-                upcomingEvents.map((ev) => {
-                  const cfg = getEventConfig(ev.type);
-                  const Icon = cfg.icon;
+                upcomingEvents.map((event) => {
+                  const config = getEventConfig(event.type);
+                  const Icon = config.icon;
+
                   return (
-                    <div
-                      key={ev.id}
-                      onClick={() => setUiState({ type: "preview", event: ev })}
-                      className="group flex items-start gap-4 p-4 rounded-2xl border border-border/60 bg-card hover:border-primary/40 hover:bg-muted/20 transition-all duration-base cursor-pointer min-w-0 overflow-hidden"
+                    <button
+                      key={event.id}
+                      type="button"
+                      onClick={() => setUiState({ type: "preview", event })}
+                      className="flex items-start gap-3 rounded-xl border border-border/50 bg-card px-4 py-3 text-left shadow-sm transition-colors hover:border-primary/30"
                     >
-                      <div
-                        className="shrink-0 flex items-center justify-center size-10 rounded-xl text-white shadow-lg transition-transform group-hover:scale-110 duration-base"
-                        style={{ backgroundColor: cfg.color, boxShadow: `0 4px 14px color-mix(in srgb, ${cfg.color} 33%, transparent)` }}
+                      <span
+                        className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg text-white"
+                        style={{ backgroundColor: config.color }}
                       >
-                        <Icon className="size-5" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-foreground text-sm leading-snug wrap-break-word mb-1.5">{ev.title}</p>
-                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground/80 font-bold tracking-wide uppercase px-1.5 py-0.5 bg-muted/30 rounded-md mb-1.5">
-                          <Clock className="size-2.5" />
-                          {getCountdownLabel(ev.date)}
-                        </span>
-                        <div className="flex items-center gap-1.5">
-                          <CalendarDays className="size-3 text-muted-foreground shrink-0" />
-                          <span className="text-xs text-muted-foreground font-medium">{format(new Date(ev.date), "EEE, dd MMM yyyy", { locale: idLocale })}</span>
-                        </div>
-                        {ev.location && (
-                          <div className="flex items-start gap-1.5 mt-0.5 min-w-0">
-                            <MapPin className="size-3 text-muted-foreground shrink-0 mt-0.5" />
-                            <span className="text-xs text-muted-foreground truncate">{ev.location}</span>
+                        <Icon className="size-4" />
+                      </span>
+
+                      <div className="min-w-0 flex-1 space-y-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-foreground">{event.title}</p>
+                            <p className="text-xs text-muted-foreground">{config.label}</p>
                           </div>
-                        )}
+                          <span className="shrink-0 text-xs font-semibold text-foreground">
+                            {getCountdownLabel(event.date)}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <Clock className="size-3" />
+                            {format(new Date(event.date), "EEE, dd MMM yyyy", { locale: idLocale })}
+                          </span>
+                          {event.location ? (
+                            <span className="flex min-w-0 items-center gap-1">
+                              <MapPin className="size-3 shrink-0" />
+                              <span className="truncate">{event.location}</span>
+                            </span>
+                          ) : null}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-1">
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(eventObject) => {
+                                eventObject.stopPropagation();
+                                setUiState({ type: "edit", event });
+                              }}
+                              className="h-8 px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                            >
+                              <Pencil className="mr-1 size-3" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(eventObject) => {
+                                eventObject.stopPropagation();
+                                setUiState({ type: "delete", targetId: event.id });
+                              }}
+                              className="h-8 px-2 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="mr-1 size-3" />
+                              Hapus
+                            </Button>
+                          </div>
+                          <ChevronRight className="size-4 text-muted-foreground" />
+                        </div>
                       </div>
-                      <div className="flex flex-col items-center gap-1 shrink-0">
-                        <ChevronRight className="size-4 text-border group-hover:text-primary transition-colors duration-base" />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUiState({ type: "edit", event: ev });
-                          }}
-                          className="size-7 text-primary/60 hover:text-primary hover:bg-primary/10 rounded-lg"
-                        >
-                          <Pencil className="size-3" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setUiState({ type: "delete", targetId: ev.id });
-                          }}
-                          className="size-7 text-destructive/60 hover:text-destructive hover:bg-destructive/10 rounded-lg"
-                        >
-                          <Trash2 className="size-3" />
-                        </Button>
-                      </div>
-                    </div>
+                    </button>
                   );
                 })
               )}
             </div>
-          </div>
+          </aside>
         </div>
-      </motion.div>
+      </div>
 
-      <EventPreviewDialog event={previewEvent} onClose={() => setUiState(null)} onEdit={(ev) => setUiState({ type: "edit", event: ev })} />
+      <EventPreviewDialog
+        event={previewEvent}
+        onClose={() => setUiState(null)}
+        onEdit={(event) => setUiState({ type: "edit", event })}
+      />
 
       <EventDeleteConfirm targetId={deleteTarget} onClose={() => setUiState(null)} />
     </>
