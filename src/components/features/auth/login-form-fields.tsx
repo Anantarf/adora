@@ -15,6 +15,7 @@ interface LoginPasswordFieldProps extends LoginFieldProps {
 }
 
 export function LoginUsernameField({ label, placeholder, registration, errorMessage, disabled }: LoginFieldProps) {
+  const { onChange, ...restRegistration } = registration;
   return (
     <div className="space-y-2">
       <label htmlFor="field-username" className="text-micro text-white/70 ml-1">{label}</label>
@@ -23,7 +24,7 @@ export function LoginUsernameField({ label, placeholder, registration, errorMess
           <User className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
         </div>
         <input
-          {...registration}
+          {...restRegistration}
           id="field-username"
           type="text"
           disabled={disabled}
@@ -34,6 +35,10 @@ export function LoginUsernameField({ label, placeholder, registration, errorMess
           spellCheck={false}
           enterKeyHint="next"
           onKeyDown={(e) => e.key === " " && e.preventDefault()}
+          onChange={(e) => {
+            e.target.value = e.target.value.replace(/\s/g, "");
+            onChange(e);
+          }}
           className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
           placeholder={placeholder}
         />
@@ -44,6 +49,7 @@ export function LoginUsernameField({ label, placeholder, registration, errorMess
 }
 
 export function LoginPasswordField({ label, placeholder, registration, errorMessage, disabled, showPassword, onTogglePassword }: LoginPasswordFieldProps) {
+  const { onChange, ...restRegistration } = registration;
   return (
     <div className="space-y-2">
       <label htmlFor="field-password" className="text-micro text-white/70 ml-1">{label}</label>
@@ -52,13 +58,17 @@ export function LoginPasswordField({ label, placeholder, registration, errorMess
           <Lock className="size-5 text-white/50 group-focus-within:text-primary transition-colors" />
         </div>
         <input
-          {...registration}
+          {...restRegistration}
           id="field-password"
           type={showPassword ? "text" : "password"}
           disabled={disabled}
           autoComplete="current-password"
           enterKeyHint="go"
           onKeyDown={(e) => e.key === " " && e.preventDefault()}
+          onChange={(e) => {
+            e.target.value = e.target.value.replace(/\s/g, "");
+            onChange(e);
+          }}
           className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
           placeholder={placeholder}
         />
