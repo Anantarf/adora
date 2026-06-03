@@ -3,15 +3,24 @@
 import { motion } from "framer-motion";
 import { Eye, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { getUsersAction } from "@/actions/users";
+
+export type UserItem = {
+  id: string;
+  name: string | null;
+  username: string | null;
+  email: string | null;
+  role: "PARENT" | "ADMIN" | "COACH";
+  image: string | null;
+  _count: {
+    player: number;
+  };
+};
 
 const ROLE_LABELS: Record<string, string> = {
   PARENT: "Orang Tua",
   ADMIN: "Admin",
   COACH: "Coach",
 };
-
-type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
 
 type UserAccountCardProps = {
   user: UserItem;

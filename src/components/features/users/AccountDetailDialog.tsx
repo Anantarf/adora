@@ -1,7 +1,7 @@
 "use client";
 
 import { KeyRound, Link2, Mail, PencilLine, Shield, Trash2, UserCircle2, UserRoundCog, Users } from "lucide-react";
-import type { getUsersAction } from "@/actions/users";
+import type { UserItem } from "./UserAccountCard";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
@@ -10,8 +10,6 @@ const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
   COACH: "Coach",
 };
-
-type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
 
 type AccountDetailDialogProps = {
   user: UserItem | null;
