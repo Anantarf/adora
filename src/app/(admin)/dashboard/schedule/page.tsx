@@ -176,7 +176,7 @@ export default function SchedulePage() {
                         <div className="min-w-0 space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <span
-                              className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.15em] leading-none"
+                              className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-medium leading-none"
                               style={{
                                 backgroundColor: `${config.color}15`,
                                 color: config.color,
@@ -185,19 +185,19 @@ export default function SchedulePage() {
                             >
                               {config.label}
                             </span>
-                            <span className="text-xs font-semibold text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {format(new Date(event.date), "dd MMM yyyy - HH:mm", {
                                 locale: idLocale,
                               })}
                             </span>
                           </div>
 
-                          <div className="truncate text-sm font-bold uppercase tracking-wide text-foreground sm:text-base">
+                          <div className="truncate text-sm font-semibold text-foreground sm:text-base">
                             {event.title}
                           </div>
 
                           {event.location ? (
-                            <div className="flex min-w-0 items-center gap-1 text-[11px] font-medium text-muted-foreground">
+                            <div className="flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
                               <MapPin className="size-3 shrink-0" />
                               <span className="truncate">{event.location}</span>
                             </div>
@@ -205,7 +205,7 @@ export default function SchedulePage() {
                         </div>
 
                         <div className="flex flex-col items-start gap-2 sm:items-end">
-                          <span className="inline-flex rounded-md border border-border/50 bg-background/60 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-foreground">
+                          <span className="inline-flex rounded-md border border-border/50 bg-background/60 px-2 py-1 text-[10px] font-medium text-foreground">
                             {getCountdownLabel(event.date)}
                           </span>
 

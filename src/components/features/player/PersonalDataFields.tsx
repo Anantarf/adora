@@ -49,7 +49,7 @@ export function PersonalDataFields({
   return (
     <>
       <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">Data Pribadi</p>
+        <p className="text-sm font-semibold text-foreground">Data Pribadi</p>
         <p className="text-xs text-muted-foreground">
           Isi profil utama calon anggota sebelum lanjut ke kontak dan dokumen.
         </p>

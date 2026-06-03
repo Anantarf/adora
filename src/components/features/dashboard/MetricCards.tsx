@@ -98,7 +98,7 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
             <CardContent className="p-4 sm:p-5">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="text-xs font-medium text-muted-foreground">
                     {card.label}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>
@@ -107,7 +107,7 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
                   <Icon className="size-4 text-muted-foreground" />
                 </div>
               </div>
-              <p className={`font-heading text-3xl leading-none tracking-[0.12em] ${valueClassName}`}>
+              <p className={`font-heading text-3xl leading-none tracking-tight ${valueClassName}`}>
                 {display}
               </p>
             </CardContent>

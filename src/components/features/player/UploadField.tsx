@@ -45,7 +45,7 @@ export function UploadField({
 
   return (
     <div className="space-y-2">
-      <label className="text-micro text-muted-foreground">
+      <label className="text-xs font-medium text-muted-foreground">
         {label} {required && <span className="text-destructive">*</span>}
       </label>
       <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-border/50 bg-background/40 px-4 py-3 transition-colors hover:border-primary/40 hover:bg-primary/5">
@@ -64,7 +64,7 @@ export function UploadField({
             </span>
           </div>
         </div>
-        <span className="rounded-lg bg-primary/10 px-3 py-1 text-micro text-primary">
+        <span className="rounded-lg bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
           {previewLabel}
         </span>
         <input

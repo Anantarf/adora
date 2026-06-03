@@ -205,7 +205,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="h-9 px-3 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-dashed border-muted-foreground/30 hover:border-primary/50 hover:text-primary hover:bg-primary/5 rounded-lg transition-all"
+                  className="h-9 rounded-lg border-dashed border-muted-foreground/30 px-3 text-[11px] font-medium text-muted-foreground transition-all hover:border-primary/50 hover:bg-primary/5 hover:text-primary"
                   onClick={() => setIsBatchMode(true)}
                 >
                   <FileUp className="size-3.5 mr-1.5 shrink-0" />
@@ -221,7 +221,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
                 <BatchPlayerUpload onDone={() => setOpen(false)} />
               </div>
               <div className="border-t border-border/50 pt-2">
-                <Button type="button" variant="ghost" className="w-full text-xs font-bold uppercase tracking-widest text-muted-foreground hover:bg-muted/50 rounded-lg h-10" onClick={() => setIsBatchMode(false)}>
+                <Button type="button" variant="ghost" className="h-10 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-muted/50" onClick={() => setIsBatchMode(false)}>
                   Kembali
                 </Button>
               </div>
@@ -232,7 +232,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0 space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.18em] text-primary">
+                      <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium tracking-wide text-primary">
                         Langkah {step}/3
                       </span>
                       <span className="text-sm font-bold text-foreground">
@@ -329,7 +329,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
                   {step < STEP_CONFIG.length ? (
                     <Button
                       type="button"
-                      className="h-10 px-5 rounded-xl font-bold tracking-wider uppercase text-xs"
+                      className="h-10 rounded-xl px-5 text-sm font-semibold"
                       onClick={() => void goToStep(step + 1)}
                     >
                       Lanjut <ChevronRight className="ml-2 size-4" />

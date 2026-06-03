@@ -106,9 +106,9 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
                     <li key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-background/40 hover:border-primary/30 transition-colors">
                       <div className="flex flex-col min-w-0 pr-3">
                         <span className="text-sm font-semibold text-foreground truncate">{p.name}</span>
-                        <span className="text-micro text-muted-foreground/75 truncate mt-0.5">{p.group?.name ?? "Belum ada kelompok"}</span>
+                        <span className="mt-0.5 truncate text-xs font-medium text-muted-foreground/75">{p.group?.name ?? "Belum ada kelompok"}</span>
                       </div>
-                      <Button onClick={() => handleLink(p.id)} disabled={isLinking} size="sm" className="h-8 px-3 text-micro rounded-lg shrink-0 shadow-none">
+                      <Button onClick={() => handleLink(p.id)} disabled={isLinking} size="sm" className="h-8 shrink-0 rounded-lg px-3 text-xs font-medium shadow-none">
                         {isLinking ? <Loader2 className="size-3 animate-spin mr-1.5" /> : <Link2 className="size-3 mr-1.5" />}
                         Pilih
                       </Button>
@@ -149,7 +149,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
                     <li key={p.id} className="flex items-center justify-between p-3 rounded-xl border border-border/50 bg-background/40 hover:bg-muted/30 transition-colors group">
                       <div className="flex flex-col min-w-0 pr-3">
                         <span className="text-sm font-semibold text-foreground truncate">{p.name}</span>
-                        <span className="text-micro text-muted-foreground/75 truncate mt-0.5">{p.group?.name ?? "Belum ada kelompok"}</span>
+                        <span className="mt-0.5 truncate text-xs font-medium text-muted-foreground/75">{p.group?.name ?? "Belum ada kelompok"}</span>
                       </div>
                       <Button
                         variant="ghost"

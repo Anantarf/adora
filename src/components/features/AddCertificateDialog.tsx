@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { FileBadge, Loader2, Plus } from "lucide-react";
+import { Check, FileBadge, Loader2, Plus, Search, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAddCertificate } from "@/hooks/use-certificates";
@@ -16,19 +16,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export function AddCertificateDialog() {
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [fileUrl, setFileUrl] = useState("");
   const [selectedId, setSelectedId] = useState("");
+  const [playerQuery, setPlayerQuery] = useState("");
 
   const { data: players } = usePlayers("all");
   const addCertificate = useAddCertificate();
@@ -37,6 +31,22 @@ export function AddCertificateDialog() {
     () => players?.find((player) => player.id === selectedId) ?? null,
     [players, selectedId],
   );
+
+  const filteredPlayers = useMemo(() => {
+    if (!players) {
+      return [];
+    }
+
+    const query = playerQuery.trim().toLowerCase();
+    if (!query) {
+      return players;
+    }
+
+    return players.filter((player) => {
+      const groupName = player.group?.name?.toLowerCase() ?? "";
+      return player.name.toLowerCase().includes(query) || groupName.includes(query);
+    });
+  }, [playerQuery, players]);
 
   const handleSubmit = async () => {
     if (!title.trim()) return toast.error("Judul sertifikat wajib diisi.");
@@ -54,6 +64,7 @@ export function AddCertificateDialog() {
       setTitle("");
       setFileUrl("");
       setSelectedId("");
+      setPlayerQuery("");
       setOpen(false);
     } catch {
       toast.error("Gagal menambahkan sertifikat.");
@@ -108,23 +119,73 @@ export function AddCertificateDialog() {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-muted-foreground">Pilih Pemain</label>
-            <Select value={selectedId} onValueChange={(value: string | null) => setSelectedId(value || "")}>
-              <SelectTrigger className="h-11 border-border/50 bg-background/50 focus-visible:ring-primary/30">
-                <SelectValue placeholder="Pilih pemain">
-                  {selectedPlayer
-                    ? `${selectedPlayer.name}${selectedPlayer.group ? ` - ${selectedPlayer.group.name}` : ""}`
-                    : undefined}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {players?.map((player) => (
-                  <SelectItem key={player.id} value={player.id}>
-                    {player.name}
-                    {player.group ? ` - ${player.group.name}` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2 rounded-xl border border-border/50 bg-background/40 p-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Cari nama pemain atau kelompok..."
+                  value={playerQuery}
+                  onChange={(event) => setPlayerQuery(event.target.value)}
+                  className="h-10 border-border/50 bg-background/50 pl-9 focus-visible:ring-primary/30"
+                />
+              </div>
+
+              {selectedPlayer ? (
+                <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-foreground">{selectedPlayer.name}</p>
+                    <p className="truncate text-xs font-medium text-muted-foreground">
+                      {selectedPlayer.group?.name ?? "Belum ada kelompok"}
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-2 text-xs font-medium text-muted-foreground"
+                    onClick={() => setSelectedId("")}
+                  >
+                    Ganti
+                  </Button>
+                </div>
+              ) : null}
+
+              <div className="max-h-56 overflow-y-auto rounded-lg border border-border/40 bg-card">
+                {filteredPlayers.length > 0 ? (
+                  filteredPlayers.map((player) => {
+                    const isSelected = player.id === selectedId;
+
+                    return (
+                      <button
+                        key={player.id}
+                        type="button"
+                        onClick={() => setSelectedId(player.id)}
+                        className={`flex w-full items-center justify-between gap-3 border-b border-border/30 px-3 py-2 text-left transition-colors last:border-b-0 ${
+                          isSelected ? "bg-primary/8" : "hover:bg-muted/40"
+                        }`}
+                      >
+                        <div className="flex min-w-0 items-center gap-2">
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                            <User className="size-3.5" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-foreground">{player.name}</p>
+                            <p className="truncate text-xs font-medium text-muted-foreground">
+                              {player.group?.name ?? "Belum ada kelompok"}
+                            </p>
+                          </div>
+                        </div>
+                        {isSelected ? <Check className="size-4 shrink-0 text-primary" /> : null}
+                      </button>
+                    );
+                  })
+                ) : (
+                  <div className="px-3 py-6 text-center text-xs font-medium text-muted-foreground">
+                    Pemain tidak ditemukan.
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
 
           <Button

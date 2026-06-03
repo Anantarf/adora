@@ -55,7 +55,7 @@ export function RegistrationActions({ regId, status }: Props) {
       <div className="flex items-center gap-2 ml-2">
         <Select disabled={isPending} value={status} onValueChange={handleStatusChange}>
           <SelectTrigger
-            className={`w-[155px] h-8 text-[10px] font-bold uppercase tracking-wider transition-colors ${
+            className={`h-8 w-[155px] text-[10px] font-medium transition-colors ${
               isUnpaid
                 ? "bg-amber-500/10 text-amber-500 border-amber-500/30"
                 : "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
@@ -88,19 +88,19 @@ export function RegistrationActions({ regId, status }: Props) {
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border/50 min-w-[155px]">
-            <SelectItem value="PENDING" className="text-[10px] font-bold uppercase tracking-wider text-amber-500 focus:text-amber-600 focus:bg-amber-500/10 cursor-pointer">
+            <SelectItem value="PENDING" className="cursor-pointer text-[10px] font-medium text-amber-500 focus:bg-amber-500/10 focus:text-amber-600">
               <div className="flex items-center gap-1.5">
                 <Clock className="size-3.5" />
                 <span>Belum Bayar</span>
               </div>
             </SelectItem>
-            <SelectItem value="REVIEWED" className="text-[10px] font-bold uppercase tracking-wider text-emerald-500 focus:text-emerald-600 focus:bg-emerald-500/10 cursor-pointer">
+            <SelectItem value="REVIEWED" className="cursor-pointer text-[10px] font-medium text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-600">
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="size-3.5" />
                 <span>Sudah Bayar</span>
               </div>
             </SelectItem>
-            <SelectItem value="DELETED" className="text-[10px] font-bold uppercase tracking-wider text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer">
+            <SelectItem value="DELETED" className="cursor-pointer text-[10px] font-medium text-destructive focus:bg-destructive/10 focus:text-destructive">
               <div className="flex items-center gap-1.5">
                 <Trash2 className="size-3.5" />
                 <span>Hapus Pendaftar</span>

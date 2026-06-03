@@ -28,7 +28,7 @@ function DetailSection({ title, children }: { title: string; children: React.Rea
   return (
     <section className="space-y-3 rounded-xl border border-border/50 bg-background/50 p-4">
       <div className="border-b border-border/40 pb-2">
-        <h3 className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">{title}</h3>
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
       <dl className="divide-y divide-border/40">{children}</dl>
     </section>
@@ -46,7 +46,7 @@ function DetailRow({
 }) {
   return (
     <div className="grid grid-cols-12 items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
-      <dt className="col-span-4 flex items-center gap-2 text-micro text-muted-foreground">
+      <dt className="col-span-4 flex items-center gap-2 text-xs font-medium text-muted-foreground">
         {icon}
         {label}
       </dt>
@@ -111,11 +111,11 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
           {!isEditing && resolvedPlayer && (
             <dl className="rounded-lg border border-border/50 bg-background/40 divide-y divide-border/40">
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
-                <dt className="col-span-4 text-micro text-muted-foreground">Nama</dt>
+                <dt className="col-span-4 text-xs font-medium text-muted-foreground">Nama</dt>
                 <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{buildPlayerFullName(resolvedPlayer.firstName, resolvedPlayer.lastName) || resolvedPlayer.name}</dd>
               </div>
               <div className="grid grid-cols-12 gap-2 px-3 py-2">
-                <dt className="col-span-4 text-micro text-muted-foreground">Kelompok</dt>
+                <dt className="col-span-4 text-xs font-medium text-muted-foreground">Kelompok</dt>
                 <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
                   {resolvedPlayer.group ? resolvedPlayer.group.name : "Belum masuk kelompok"}
                 </dd>
@@ -200,7 +200,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                       <>
                         {resolvedPlayer.parentName || "-"}
                         {resolvedPlayer.user && (
-                          <span className="ml-2 inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold leading-none tracking-wide text-primary">
+                          <span className="ml-2 inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
                             <Link2 className="size-2.5" />
                             {resolvedPlayer.user.username ?? resolvedPlayer.user.id}
                           </span>

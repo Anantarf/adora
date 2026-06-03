@@ -26,7 +26,7 @@ export function MedicalDocsFields({
   return (
     <>
       <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">
+        <p className="text-sm font-semibold text-foreground">
           Data Pendukung dan Medis
         </p>
         <p className="text-xs text-muted-foreground">
@@ -50,7 +50,7 @@ export function MedicalDocsFields({
                     setValue("medicalConditionDetail", "", { shouldDirty: true, shouldValidate: true });
                   }}
                   className={cn(
-                    "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all duration-300",
+                    "flex-1 h-11 rounded-xl border text-sm font-semibold transition-all duration-300",
                     !field.value
                       ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/5 scale-[1.02]"
                       : "border-border/60 bg-background/30 text-muted-foreground hover:border-border",
@@ -62,7 +62,7 @@ export function MedicalDocsFields({
                   type="button"
                   onClick={() => field.onChange(true)}
                   className={cn(
-                    "flex-1 h-11 rounded-xl border text-xs font-bold uppercase tracking-wider transition-all duration-300",
+                    "flex-1 h-11 rounded-xl border text-sm font-semibold transition-all duration-300",
                     field.value
                       ? "border-primary bg-primary/10 text-foreground shadow-sm shadow-primary/5 scale-[1.02]"
                       : "border-border/60 bg-background/30 text-muted-foreground hover:border-border",

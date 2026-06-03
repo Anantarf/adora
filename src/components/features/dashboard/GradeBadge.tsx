@@ -19,10 +19,10 @@ export function GradeBadge({ score, variant = "compact" }: GradeBadgeProps) {
   if (variant === "full") {
     return (
       <div className="flex flex-col items-end gap-1">
-        <span className="text-micro text-muted-foreground/75">Nilai Akhir</span>
+        <span className="text-xs font-medium text-muted-foreground/75">Nilai Akhir</span>
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${styles}`}>
           <span className="text-xl font-black">{letter}</span>
-          <span className="text-micro">{label}</span>
+          <span className="text-xs font-medium">{label}</span>
         </div>
       </div>
     );

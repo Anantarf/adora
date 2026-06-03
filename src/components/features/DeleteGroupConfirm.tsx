@@ -28,7 +28,7 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">
+          <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
             <AlertTriangle className="size-5" />
             Hapus Kelompok
           </AlertDialogTitle>
@@ -38,11 +38,11 @@ export function DeleteGroupConfirm({ group, open, onOpenChange }: DeleteGroupCon
         <div className="py-6 flex flex-col gap-4">
           <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
             <p className="text-sm font-medium text-foreground leading-relaxed">
-              Apakah Anda yakin ingin menghapus kelompok <span className="font-heading tracking-widest uppercase">{group.name}</span>?
+              Apakah Anda yakin ingin menghapus kelompok <span className="font-semibold">{group.name}</span>?
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
-              <span className="text-xs font-semibold text-destructive">Tidak dapat dipulihkan</span>
+              <span className="text-xs font-medium text-destructive">Tidak dapat dipulihkan</span>
             </div>
           </div>
 

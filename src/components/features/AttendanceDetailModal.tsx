@@ -35,7 +35,6 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
     getEventAttendanceDetailAction(eventId)
       .then((data) => {
         setEvent(data);
-        // Draft: kosongkan agar admin wajib pilih eksplisit, bukan assume semua HADIR
         if (data.isDraftAttendance) {
           setStatuses({});
         } else {
@@ -47,13 +46,12 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         onClose();
       })
       .finally(() => setLoading(false));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [eventId]); // onClose intentionally excluded — inline arrow ref changes every parent render
+  }, [eventId, onClose]);
 
   const handleMarkAllHadir = () => {
     if (!event) return;
     setStatuses(Object.fromEntries(event.attendances.map((a) => [a.playerId, "HADIR"] as const)));
-    toast.success("Semua pemain ditandai Hadir.");
+    toast.success("Semua pemain ditandai hadir.");
   };
 
   const handleSave = async () => {
@@ -106,60 +104,66 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
 
   return (
     <Dialog open={!!eventId} onOpenChange={onClose}>
-      <DialogContent className="w-[96vw] xl:max-w-4xl max-w-none sm:max-w-none h-dialog-lg p-0 gap-0 bg-background border-border/50 rounded-2xl sm:rounded-3xl overflow-hidden overflow-x-hidden flex flex-col">
+      <DialogContent className="h-dialog-lg max-w-none w-[96vw] gap-0 overflow-hidden overflow-x-hidden rounded-2xl border-border/50 bg-background p-0 sm:max-w-none sm:rounded-3xl xl:max-w-4xl">
         {loading ? (
-          <div className="flex flex-col items-center justify-center p-20 gap-3">
+          <div className="flex flex-col items-center justify-center gap-3 p-20">
             <Loader2 className="size-8 animate-spin text-primary/50" />
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Memuat data presensi...</p>
+            <p className="text-sm font-medium text-muted-foreground">Memuat data presensi...</p>
           </div>
         ) : event ? (
           <>
-            {/* Header Section */}
-            <div className="p-6 pb-4 border-b border-border/50 bg-card/50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-32 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none" />
+            <div className="relative overflow-hidden border-b border-border/50 bg-card/50 p-6 pb-4">
+              <div className="pointer-events-none absolute top-0 right-0 -translate-y-1/2 translate-x-1/3 rounded-full bg-primary/5 p-32 blur-3xl" />
 
               <DialogHeader className="relative z-10 space-y-4">
                 <div className="space-y-1.5">
                   {(() => {
                     const cfg = getEventConfig(event.type);
                     return (
-                      <span className="inline-flex w-fit px-1.5 py-0.5 rounded text-[10px] font-black uppercase tracking-[0.15em] border leading-none" style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}>
+                      <span
+                        className="inline-flex w-fit rounded border px-1.5 py-0.5 text-[10px] font-medium tracking-wide leading-none"
+                        style={{ backgroundColor: `${cfg.color}15`, color: cfg.color, borderColor: `${cfg.color}30` }}
+                      >
                         {cfg.label}
                       </span>
                     );
                   })()}
-                  <DialogTitle className="font-heading text-2xl uppercase tracking-widest text-foreground leading-tight">{event.title}</DialogTitle>
+                  <DialogTitle className="text-xl font-semibold leading-tight text-foreground">
+                    {event.title}
+                  </DialogTitle>
                   <DialogDescription className="sr-only">Detail presensi pemain untuk agenda ini.</DialogDescription>
                   <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-muted-foreground">
                     <div className="flex items-center gap-1.5">
                       <CalendarDays className="size-3.5" />
-                      <span>{format(new Date(event.date), "dd MMM yyyy • HH:mm", { locale: idLocale })}</span>
+                      <span>{format(new Date(event.date), "dd MMM yyyy - HH:mm", { locale: idLocale })}</span>
                     </div>
-                    {event.location && (
-                      <>
-                        <span className="opacity-30">•</span>
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="size-3.5" />
-                          <span className="truncate max-w-50">{event.location}</span>
-                        </div>
-                      </>
-                    )}
+                    {event.location ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="opacity-30">-</span>
+                        <MapPin className="size-3.5" />
+                        <span className="max-w-50 truncate">{event.location}</span>
+                      </div>
+                    ) : null}
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {unsetCount > 0 && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-destructive/30 bg-destructive/5 text-destructive">
-                      <span className="text-micro">Belum Dipilih</span>
+                  {unsetCount > 0 ? (
+                    <div className="flex items-center gap-2 rounded-lg border border-destructive/30 bg-destructive/5 px-3 py-1.5 text-destructive">
+                      <span className="text-xs font-medium">Belum Dipilih</span>
                       <span className="text-sm font-black">{unsetCount}</span>
                     </div>
-                  )}
-                  {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => {
-                    const count = stats?.[s] ?? 0;
+                  ) : null}
+                  {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((status) => {
+                    const count = stats?.[status] ?? 0;
                     if (count === 0) return null;
+
                     return (
-                      <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
-                        <span className="text-micro">{STATUS_STYLE[s].label}</span>
+                      <div
+                        key={status}
+                        className={`flex items-center gap-2 rounded-lg border px-3 py-1.5 ${STATUS_STYLE[status].badge}`}
+                      >
+                        <span className="text-xs font-medium">{STATUS_STYLE[status].label}</span>
                         <span className="text-sm font-black">{count}</span>
                       </div>
                     );
@@ -168,17 +172,15 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               </DialogHeader>
             </div>
 
-            {/* Main Content */}
-            <div className="p-6 flex-1 min-h-0 flex flex-col gap-6 overflow-hidden">
-              {/* Quick Actions */}
+            <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-hidden p-6">
               {isFutureEvent ? (
-                <div className="flex items-center gap-2 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10 text-amber-500 text-micro">
+                <div className="flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs font-medium text-amber-500">
                   <CalendarDays className="size-4 shrink-0" />
                   <span>Presensi belum dapat diisi sebelum waktu kegiatan dimulai.</span>
                 </div>
               ) : (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-muted/20 border border-muted/50">
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                <div className="flex flex-col justify-between gap-4 rounded-xl border border-muted/50 bg-muted/20 p-4 sm:flex-row sm:items-center">
+                  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <CheckCircle2 className="size-4" />
                     <span>Tandai Semua</span>
                   </div>
@@ -187,7 +189,7 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                       size="sm"
                       variant="outline"
                       onClick={handleMarkAllHadir}
-                      className={`h-8 px-3 text-micro border-transparent hover:border-current bg-background hover:bg-background ${STATUS_STYLE.HADIR.color}`}
+                      className={`h-8 border-transparent bg-background px-3 text-xs font-medium hover:border-current hover:bg-background ${STATUS_STYLE.HADIR.color}`}
                     >
                       Semua Hadir
                     </Button>
@@ -195,38 +197,53 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
                 </div>
               )}
 
-              {/* Player List */}
-              <div className="space-y-3 flex-1 min-h-0 flex flex-col">
-                <div className="flex items-center justify-between px-1 mb-2">
-                  <span className="text-micro text-muted-foreground">Pemain ({event.attendances.length})</span>
+              <div className="flex min-h-0 flex-1 flex-col space-y-3">
+                <div className="mb-2 flex items-center justify-between px-1">
+                  <span className="text-xs font-medium text-muted-foreground">
+                    Pemain ({event.attendances.length})
+                  </span>
                 </div>
 
                 <div className="grid gap-2 overflow-y-auto overflow-x-hidden pr-1">
-                  {event.attendances.map((a) => {
-                    const currentStatus = statuses[a.playerId] as AttendanceStatus | undefined;
+                  {event.attendances.map((attendance) => {
+                    const currentStatus = statuses[attendance.playerId] as AttendanceStatus | undefined;
                     const triggerStyle = currentStatus
                       ? STATUS_STYLE[currentStatus].badge
-                      : "border-destructive/30 text-destructive/60 bg-destructive/5";
+                      : "border-destructive/30 bg-destructive/5 text-destructive/60";
+
                     return (
-                      <div key={a.playerId} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 rounded-xl border border-border/50 bg-card hover:bg-muted/30 transition-colors gap-3 sm:gap-4 min-w-0">
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="size-8 rounded-full bg-muted text-muted-foreground flex items-center justify-center font-heading text-sm shrink-0">{a.player.name.charAt(0).toUpperCase()}</div>
-                          <div className="flex flex-col min-w-0">
-                            <span className="text-sm font-bold truncate text-foreground">{a.player.name}</span>
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground truncate">
-                              {(a.player as { group?: { name: string } | null }).group?.name || "Tanpa Kelompok"}
+                      <div
+                        key={attendance.playerId}
+                        className="flex min-w-0 flex-col gap-3 rounded-xl border border-border/50 bg-card p-3 transition-colors hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                      >
+                        <div className="flex min-w-0 items-center gap-3">
+                          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm text-muted-foreground">
+                            {attendance.player.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="flex min-w-0 flex-col">
+                            <span className="truncate text-sm font-bold text-foreground">
+                              {attendance.player.name}
+                            </span>
+                            <span className="truncate text-[11px] font-medium text-muted-foreground">
+                              {(attendance.player as { group?: { name: string } | null }).group?.name || "Tanpa Kelompok"}
                             </span>
                           </div>
                         </div>
 
-                        <Select disabled={isFutureEvent} value={currentStatus ?? ""} onValueChange={(val) => setStatuses((prev) => ({ ...prev, [a.playerId]: val as AttendanceStatus }))}>
-                          <SelectTrigger className={`w-full sm:w-40 h-9 text-micro ${triggerStyle} transition-colors shrink-0`}>
+                        <Select
+                          disabled={isFutureEvent}
+                          value={currentStatus ?? ""}
+                          onValueChange={(value) =>
+                            setStatuses((prev) => ({ ...prev, [attendance.playerId]: value as AttendanceStatus }))
+                          }
+                        >
+                          <SelectTrigger className={`h-9 w-full shrink-0 text-xs font-medium transition-colors sm:w-40 ${triggerStyle}`}>
                             <SelectValue placeholder="Pilih Status" />
                           </SelectTrigger>
                           <SelectContent className="rounded-xl border-border/50">
-                            {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
-                              <SelectItem key={s} value={s} className="rounded-lg text-xs font-bold focus:bg-muted">
-                                <span className={STATUS_STYLE[s].color}>{STATUS_STYLE[s].label}</span>
+                            {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((status) => (
+                              <SelectItem key={status} value={status} className="rounded-lg text-xs font-semibold focus:bg-muted">
+                                <span className={STATUS_STYLE[status].color}>{STATUS_STYLE[status].label}</span>
                               </SelectItem>
                             ))}
                           </SelectContent>
@@ -238,13 +255,16 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="p-6 pt-4 border-t border-border/50 bg-card/50 flex flex-col-reverse sm:flex-row justify-end gap-3 rounded-b-2xl sm:rounded-b-3xl">
-              <Button variant="outline" onClick={onClose} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest">
+            <div className="flex flex-col-reverse justify-end gap-3 rounded-b-2xl border-t border-border/50 bg-card/50 p-6 pt-4 sm:flex-row sm:rounded-b-3xl">
+              <Button variant="outline" onClick={onClose} className="h-11 rounded-xl text-sm font-semibold">
                 Batal
               </Button>
-              <Button onClick={handleSave} disabled={isSaving || isFutureEvent} className="h-11 rounded-xl font-bold text-xs uppercase tracking-widest px-8">
-                {isSaving ? <Loader2 className="size-4 mr-2 animate-spin" /> : <CheckCircle2 className="size-4 mr-2" />}
+              <Button onClick={handleSave} disabled={isSaving || isFutureEvent} className="h-11 rounded-xl px-8 text-sm font-semibold">
+                {isSaving ? (
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="mr-2 size-4" />
+                )}
                 Simpan Presensi
               </Button>
             </div>

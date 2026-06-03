@@ -29,7 +29,7 @@ export function UserAccountActionDialogs({
       <AlertDialog open={uiState?.type === "delete"} onOpenChange={(val) => !isPending && onOpenChange(val)}>
         <AlertDialogContent className="bg-card border-border/50 rounded-card-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest text-destructive">Hapus Akun Pengguna?</AlertDialogTitle>
+            <AlertDialogTitle className="text-lg font-semibold text-destructive">Hapus Akun Pengguna?</AlertDialogTitle>
             <AlertDialogDescription className="text-foreground/80 font-medium text-xs mt-2 leading-relaxed">
               Akses akun ini akan dihapus <span className="text-destructive font-bold">permanen</span> dan tidak dapat dipulihkan.
             </AlertDialogDescription>
@@ -42,7 +42,7 @@ export function UserAccountActionDialogs({
           <AlertDialogFooter className="mt-6">
             <AlertDialogCancel
               disabled={isPending}
-              className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10"
+              className="h-11 rounded-xl border-border/50 px-8 text-sm font-semibold hover:bg-secondary/10"
             >
               Batal
             </AlertDialogCancel>
@@ -52,7 +52,7 @@ export function UserAccountActionDialogs({
                 onConfirmDelete();
               }}
               disabled={isPending}
-              className="h-11 px-8 bg-destructive text-white hover:bg-destructive/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+              className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-destructive px-8 text-sm font-semibold text-white shadow-sm hover:bg-destructive/90"
             >
               {isDeleting ? <Loader2 className="size-3.5 animate-spin mr-1" /> : null}
               Hapus Akun
@@ -67,8 +67,8 @@ export function UserAccountActionDialogs({
             <div className="size-16 rounded-full bg-muted border-2 border-border/50 flex items-center justify-center mb-4">
               <KeyRound className="size-7 text-muted-foreground" />
             </div>
-            <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest">Atur Ulang Kata Sandi Akun?</AlertDialogTitle>
-            <AlertDialogDescription className="text-xs font-medium tracking-wide opacity-70 flex flex-col gap-2 mt-2">
+            <AlertDialogTitle className="text-lg font-semibold text-foreground">Atur Ulang Kata Sandi Akun?</AlertDialogTitle>
+            <AlertDialogDescription className="mt-2 flex flex-col gap-2 text-sm text-muted-foreground">
               <span>Kata sandi akun ini akan dikembalikan seperti saat pertama kali dibuat.</span>
               <span className="flex items-center gap-1.5 pt-1">
                 Kata sandi awal: <strong className="font-mono text-primary tracking-normal bg-primary/10 px-2 py-0.5 rounded-md border border-primary/20">adora123</strong>
@@ -78,7 +78,7 @@ export function UserAccountActionDialogs({
           <AlertDialogFooter className="mt-6 border-t border-border/10 pt-4">
             <AlertDialogCancel
               disabled={isPending}
-              className="h-11 px-8 rounded-xl border-border/50 uppercase text-[10px] font-bold tracking-widest hover:bg-secondary/10"
+              className="h-11 rounded-xl border-border/50 px-8 text-sm font-semibold hover:bg-secondary/10"
             >
               Batal
             </AlertDialogCancel>
@@ -88,7 +88,7 @@ export function UserAccountActionDialogs({
                 onConfirmReset();
               }}
               disabled={isPending}
-              className="h-11 px-8 bg-primary text-primary-foreground hover:bg-primary/90 uppercase text-[10px] font-bold tracking-widest rounded-xl shadow-sm flex items-center justify-center gap-1.5"
+              className="flex h-11 items-center justify-center gap-1.5 rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
             >
               {isResetting ? <Loader2 className="size-3.5 animate-spin mr-1" /> : null}
               Atur Ulang Kata Sandi

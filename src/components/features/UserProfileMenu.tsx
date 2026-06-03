@@ -61,7 +61,7 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
     >
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
-          <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <KeyRound className="size-5 text-primary" /> Ubah Kata Sandi
           </DialogTitle>
           <DialogDescription className="text-xs font-medium tracking-wide opacity-70">Sandi baru langsung berlaku setelah disimpan.</DialogDescription>
@@ -69,15 +69,15 @@ function ChangePasswordDialog({ open, onClose }: { open: boolean; onClose: () =>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
           <div className="space-y-1.5">
-            <label htmlFor="change-newPassword" className="text-micro text-muted-foreground ml-1">Sandi Baru</label>
+            <label htmlFor="change-newPassword" className="ml-1 text-xs font-medium text-muted-foreground">Sandi Baru</label>
             <Input id="change-newPassword" {...register("newPassword")} type="password" placeholder="Minimal 6 karakter" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
-            {errors.newPassword && <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.newPassword.message}</p>}
+            {errors.newPassword && <p className="ml-1 text-xs font-medium text-destructive">{errors.newPassword.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="change-confirmPassword" className="text-micro text-muted-foreground ml-1">Konfirmasi Sandi</label>
+            <label htmlFor="change-confirmPassword" className="ml-1 text-xs font-medium text-muted-foreground">Konfirmasi Sandi</label>
             <Input id="change-confirmPassword" {...register("confirmPassword")} type="password" placeholder="Ulangi sandi baru" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
-            {errors.confirmPassword && <p className="text-destructive text-[10px] font-bold uppercase ml-1">{errors.confirmPassword.message}</p>}
+            {errors.confirmPassword && <p className="ml-1 text-xs font-medium text-destructive">{errors.confirmPassword.message}</p>}
           </div>
 
           <Button type="submit" disabled={isPending} className="w-full h-11 mt-2 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs rounded-xl shadow-sm">
@@ -110,7 +110,7 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
             {!isCollapsed && (
               <div className="flex flex-col flex-1 min-w-0 leading-none transition-all duration-300">
                 <span className="text-sm font-bold text-foreground truncate">{username}</span>
-                <span className="text-micro text-muted-foreground/75 mt-0.5">Pengaturan Akun</span>
+                <span className="mt-0.5 text-xs font-medium text-muted-foreground/75">Pengaturan Akun</span>
               </div>
             )}
             {!isCollapsed && (
@@ -120,7 +120,7 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
           <DropdownMenuContent align="end" side="right" className="w-56 bg-card border-border/50 rounded-xl shadow-xl ml-2">
             <DropdownMenuGroup>
               <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
-                <span className="text-micro text-muted-foreground/75">Masuk sebagai</span>
+                <span className="text-xs font-medium text-muted-foreground/75">Masuk sebagai</span>
                 <span className="text-sm font-bold text-foreground">{username}</span>
               </DropdownMenuLabel>
             </DropdownMenuGroup>
@@ -148,7 +148,7 @@ export function UserProfileMenu({ variant = "header" }: { variant?: "header" | "
         <DropdownMenuContent align="end" className="w-52 bg-card border-border/50 rounded-xl shadow-xl">
           <DropdownMenuGroup>
             <DropdownMenuLabel className="flex flex-col gap-0.5 px-3 py-2">
-              <span className="text-micro text-muted-foreground/75">Masuk sebagai</span>
+              <span className="text-xs font-medium text-muted-foreground/75">Masuk sebagai</span>
               <span className="text-sm font-bold text-foreground">{username}</span>
             </DropdownMenuLabel>
           </DropdownMenuGroup>

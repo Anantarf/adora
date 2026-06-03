@@ -57,7 +57,7 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
           <div className="size-12 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
             <AlertTriangle className="size-6 text-destructive" />
           </div>
-          <DialogTitle className="text-xl font-heading uppercase tracking-widest text-primary">Keamanan Akun</DialogTitle>
+          <DialogTitle className="text-lg font-semibold text-primary">Keamanan Akun</DialogTitle>
           <DialogDescription className="text-sm">Akun Anda menggunakan kata sandi bawaan atau baru saja di-reset. Untuk melindungi keamanan data Anda, silakan buat kata sandi baru.</DialogDescription>
         </DialogHeader>
 
@@ -74,7 +74,7 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full font-bold uppercase tracking-widest" disabled={isLoading}>
+          <Button type="submit" className="w-full text-sm font-semibold" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan...

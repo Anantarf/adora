@@ -96,7 +96,7 @@ export default function UsersManagementPage() {
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-destructive/40 bg-destructive/5 text-center">
             <Users className="size-10 text-destructive/50" />
             <p className="text-sm font-semibold text-destructive">Gagal memuat data akun.</p>
-            <button type="button" onClick={() => refetch()} className="text-[10px] px-4 py-2 rounded-lg font-bold uppercase tracking-widest border border-destructive/40 text-destructive hover:bg-destructive/10">
+            <button type="button" onClick={() => refetch()} className="rounded-lg border border-destructive/40 px-4 py-2 text-[11px] font-medium text-destructive hover:bg-destructive/10">
               Muat Ulang
             </button>
           </div>

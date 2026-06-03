@@ -42,7 +42,7 @@ export function AdminSidebar() {
                 <Image src="/logo-new.svg" alt="Adora BBC" width={isCollapsed ? 32 : 40} height={isCollapsed ? 32 : 40} className="w-auto h-auto object-contain" />
               </div>
               <div className={cn("flex flex-col justify-center overflow-hidden transition-all duration-300", isCollapsed ? "w-0 opacity-0 pointer-events-none ml-0" : "w-auto opacity-100 ml-1")}>
-                <span className="font-heading text-lg tracking-widest uppercase text-foreground leading-none mt-0.5 whitespace-nowrap">
+                <span className="font-heading mt-0.5 whitespace-nowrap text-lg leading-none tracking-wide text-foreground">
                   ADORA <span className="text-primary">BBC</span>
                 </span>
               </div>
@@ -53,7 +53,7 @@ export function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="text-muted-foreground font-semibold mb-2 tracking-widest uppercase text-xs group-data-[collapsible=icon]:mb-0 group-data-[collapsible=icon]:pointer-events-none">Menu Navigasi</SidebarGroupLabel>
+          <SidebarGroupLabel className="mb-2 text-[11px] font-medium tracking-wide text-muted-foreground group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:mb-0">Menu Navigasi</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-2 mt-2">
               {adminNavItems.map((item) => (
@@ -66,7 +66,7 @@ export function AdminSidebar() {
                   >
                     <item.icon className="size-4.5 shrink-0" />
                     <span className={cn(
-                      "font-semibold tracking-wide flex-1 transition-all duration-300 whitespace-nowrap overflow-hidden",
+                      "flex-1 overflow-hidden whitespace-nowrap text-sm font-medium transition-all duration-300",
                       isCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-auto opacity-100"
                     )}>{item.title}</span>
                   </SidebarMenuButton>
@@ -83,12 +83,12 @@ export function AdminSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton
               onClick={() => signOut({ callbackUrl: "/" })}
-              className="h-10 px-3 gap-3 rounded-xl hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all duration-base font-bold"
+              className="h-10 gap-3 rounded-xl px-3 font-medium text-muted-foreground transition-all duration-base hover:bg-destructive/10 hover:text-destructive"
               tooltip="Keluar"
             >
               <LogOut className="size-4.5 shrink-0" />
               <span className={cn(
-                "tracking-wide flex-1 transition-all duration-300 whitespace-nowrap overflow-hidden",
+                "flex-1 overflow-hidden whitespace-nowrap text-sm transition-all duration-300",
                 isCollapsed ? "w-0 opacity-0 pointer-events-none" : "w-auto opacity-100"
               )}>Keluar</span>
             </SidebarMenuButton>

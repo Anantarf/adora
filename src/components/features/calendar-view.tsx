@@ -112,7 +112,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   })()}
                 </div>
                 <span
-                  className="text-[10px] font-black uppercase tracking-[0.3em] px-3 py-1 rounded-full border"
+                  className="rounded-full border px-3 py-1 text-[10px] font-medium tracking-wide"
                   style={{ color: getEventConfig(selectedEvent.type).color, borderColor: getEventConfig(selectedEvent.type).color + "40", backgroundColor: getEventConfig(selectedEvent.type).color + "15" }}
                 >
                   {getEventConfig(selectedEvent.type).label}
@@ -122,7 +122,7 @@ export function CalendarView({ events }: CalendarViewProps) {
             </div>
 
             <div className="p-6 pt-4 space-y-5 overflow-hidden">
-              <DialogTitle className="font-heading text-2xl tracking-widest uppercase text-white leading-tight wrap-break-word">{selectedEvent.originalTitle}</DialogTitle>
+              <DialogTitle className="wrap-break-word text-xl font-semibold leading-tight text-white">{selectedEvent.originalTitle}</DialogTitle>
 
               {/* Tanggal */}
               <div className="flex items-start gap-3 min-w-0">
@@ -130,7 +130,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <CalendarDays size={14} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-micro text-white/50 mb-0.5">Hari & Tanggal</div>
+                  <div className="mb-0.5 text-xs font-medium text-white/50">Hari & Tanggal</div>
                   <div className="text-sm font-semibold text-white/80 wrap-break-word">{formatJakarta(selectedEvent.date, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</div>
                 </div>
               </div>
@@ -141,7 +141,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                   <Clock size={14} />
                 </div>
                 <div className="min-w-0">
-                  <div className="text-micro text-white/50 mb-0.5">Waktu</div>
+                  <div className="mb-0.5 text-xs font-medium text-white/50">Waktu</div>
                   <div className="text-sm font-semibold text-white/80">{formatJakarta(selectedEvent.date, { hour: "2-digit", minute: "2-digit", hour12: false })} WIB</div>
                 </div>
               </div>
@@ -153,7 +153,7 @@ export function CalendarView({ events }: CalendarViewProps) {
                     <MapPin size={14} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-micro text-white/50 mb-0.5">Lokasi</div>
+                    <div className="mb-0.5 text-xs font-medium text-white/50">Lokasi</div>
                     <div className="text-sm font-semibold text-white/80 wrap-break-word">{selectedEvent.location}</div>
                   </div>
                 </div>
@@ -166,13 +166,13 @@ export function CalendarView({ events }: CalendarViewProps) {
                     <AlignLeft size={14} />
                   </div>
                   <div className="min-w-0">
-                    <div className="text-micro text-white/50 mb-0.5">Keterangan</div>
+                    <div className="mb-0.5 text-xs font-medium text-white/50">Keterangan</div>
                     <p className="text-xs leading-relaxed text-white/50 wrap-break-word">{selectedEvent.description}</p>
                   </div>
                 </div>
               )}
 
-              <button onClick={() => setSelectedEvent(null)} className="w-full py-3 text-[10px] font-bold uppercase tracking-[0.3em] bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition-colors text-white/60">
+              <button onClick={() => setSelectedEvent(null)} className="w-full rounded-xl border border-white/10 bg-white/5 py-3 text-xs font-semibold text-white/60 transition-colors hover:bg-white/10">
                 Tutup
               </button>
             </div>

@@ -60,26 +60,26 @@ export function AddPeriodDialog() {
           <div className="flex items-center gap-3 mb-1">
             <div className="p-2 bg-muted/60 rounded-lg"><CalendarRange className="size-5 text-muted-foreground" /></div>
             <div>
-              <DialogTitle className="text-xl font-heading uppercase tracking-widest">Buat Periode Evaluasi</DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground mt-0.5">Tentukan nama dan rentang waktu periode penilaian pemain.</DialogDescription>
+              <DialogTitle className="text-lg font-semibold text-foreground">Buat Periode Evaluasi</DialogTitle>
+              <DialogDescription className="mt-0.5 text-sm text-muted-foreground">Tentukan nama dan rentang waktu periode penilaian pemain.</DialogDescription>
             </div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 mt-2">
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="period-name" className="text-micro text-muted-foreground">Nama Periode</label>
+              <label htmlFor="period-name" className="text-xs font-medium text-muted-foreground">Nama Periode</label>
               <Input id="period-name" placeholder="Contoh: Semester 1 2025" {...register("name")} />
               {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="period-startDate" className="text-micro text-muted-foreground">Tanggal Mulai</label>
+                <label htmlFor="period-startDate" className="text-xs font-medium text-muted-foreground">Tanggal Mulai</label>
                 <Input id="period-startDate" type="date" {...register("startDate")} />
                 {errors.startDate && <p className="text-xs text-destructive">{errors.startDate.message}</p>}
               </div>
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="period-endDate" className="text-micro text-muted-foreground">Tanggal Selesai</label>
+                <label htmlFor="period-endDate" className="text-xs font-medium text-muted-foreground">Tanggal Selesai</label>
                 <Input id="period-endDate" type="date" {...register("endDate")} />
                 {errors.endDate && <p className="text-xs text-destructive">{errors.endDate.message}</p>}
               </div>

@@ -38,14 +38,14 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
           {user.name && (
             <span className="text-[10px] text-muted-foreground/50 font-mono truncate hidden sm:inline">@{user.username}</span>
           )}
-          <span className="px-1.5 py-0.5 bg-primary/10 text-primary border border-primary/20 rounded text-micro leading-none shrink-0">
+          <span className="shrink-0 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
             {ROLE_LABELS[user.role] ?? user.role}
           </span>
           {isParent && (
             <button
               type="button"
               onClick={() => onViewPlayers(user.id)}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md border transition-all shrink-0 text-micro ${
+              className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-medium transition-all ${
                 user._count.player > 0
                   ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/50"
                   : "border-border/50 bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground"
@@ -64,7 +64,7 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
             onClick={() => onReset(user.id)}
             variant="ghost"
             size="sm"
-            className="h-7 px-2.5 rounded-lg text-micro gap-1.5 text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
+            className="h-7 gap-1.5 rounded-lg px-2.5 text-[10px] font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
           >
             <KeyRound className="size-3" /> <span className="hidden sm:inline">Atur Sandi</span>
           </Button>

@@ -8,7 +8,6 @@ import { CalendarDays, Search } from "lucide-react";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { getEventConfig } from "@/lib/config/events";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -130,7 +129,7 @@ export function AttendanceCardView() {
             <div key={monthKey}>
               <div className="mb-2 flex items-center gap-3">
                 <span className="h-5 w-1 rounded-full bg-primary" />
-                <h2 className="text-base font-bold uppercase tracking-[0.14em] text-foreground">
+                <h2 className="text-base font-semibold text-foreground">
                   {monthKey}
                 </h2>
               </div>
@@ -144,18 +143,18 @@ export function AttendanceCardView() {
                   const config = getEventConfig(event.type);
 
                   return (
-                    <Button
+                    <button
                       key={event.id}
-                      variant="outline"
+                      type="button"
                       onClick={() => setSelectedEventId(event.id)}
-                      className="group w-full justify-start rounded-xl border border-border/50 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+                      className="group w-full rounded-xl border border-border/50 bg-card px-4 py-3 text-left shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/20"
                       style={{ borderLeftColor: config.color, borderLeftWidth: "4px" }}
                     >
                       <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
                         <div className="min-w-0 space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <span
-                              className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-black uppercase tracking-[0.15em] leading-none"
+                              className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-medium leading-none"
                               style={{
                                 backgroundColor: `${config.color}15`,
                                 color: config.color,
@@ -164,19 +163,19 @@ export function AttendanceCardView() {
                             >
                               {config.label}
                             </span>
-                            <span className="text-xs font-semibold text-muted-foreground">
+                            <span className="text-xs text-muted-foreground">
                               {format(eventDate, "dd MMM yyyy - HH:mm", {
                                 locale: idLocale,
                               })}
                             </span>
                           </div>
 
-                          <div className="truncate text-sm font-bold uppercase tracking-wide text-foreground sm:text-base">
+                          <div className="truncate text-sm font-semibold text-foreground sm:text-base">
                             {event.title}
                           </div>
 
                           {event.groups.length > 0 ? (
-                            <div className="truncate text-[11px] font-medium text-muted-foreground">
+                            <div className="truncate text-[11px] text-muted-foreground">
                               {event.groups.map((group) => group.name).join(", ")}
                             </div>
                           ) : null}
@@ -184,7 +183,7 @@ export function AttendanceCardView() {
 
                         <div className="justify-self-start sm:justify-self-end">
                           {event.isAttendanceSubmitted ? (
-                            <div className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-500">
+                            <div className="inline-flex items-center rounded-md border border-emerald-500/20 bg-emerald-500/10 px-2 py-1 text-[10px] font-medium text-emerald-500">
                               Sudah Diisi
                               {markedAtDate
                                 ? ` - ${format(markedAtDate, "dd MMM HH:mm", {
@@ -193,13 +192,13 @@ export function AttendanceCardView() {
                                 : ""}
                             </div>
                           ) : (
-                            <div className="inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-500">
+                            <div className="inline-flex items-center rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1 text-[10px] font-medium text-amber-500">
                               Belum Diisi
                             </div>
                           )}
                         </div>
                       </div>
-                    </Button>
+                    </button>
                   );
                 })}
               </div>

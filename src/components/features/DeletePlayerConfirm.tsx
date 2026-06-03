@@ -2,7 +2,16 @@
 
 import { useDeletePlayer } from "@/hooks/use-players";
 import { toast } from "sonner";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Loader2, Trash2, ShieldAlert } from "lucide-react";
 
 interface DeletePlayerConfirmProps {
@@ -29,31 +38,37 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
+      <AlertDialogContent className="sm:max-w-md border-border/50 bg-card">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">Arsip Data Pemain</AlertDialogTitle>
-          <AlertDialogDescription className="text-sm text-muted-foreground">Data pemain tidak dihapus permanen — hanya disembunyikan dari daftar aktif.</AlertDialogDescription>
+          <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
+            Arsip Data Pemain
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-sm text-muted-foreground">
+            Data pemain tidak dihapus permanen, hanya disembunyikan dari daftar aktif.
+          </AlertDialogDescription>
         </AlertDialogHeader>
 
-        <div className="py-6 flex flex-col gap-4">
-          <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 flex flex-col gap-2">
-            <p className="text-sm font-medium text-foreground leading-relaxed">
-              Apakah Anda yakin ingin mengarsipkan data <span className="font-heading tracking-widest uppercase">{player.name}</span>?
+        <div className="flex flex-col gap-4 py-6">
+          <div className="flex flex-col gap-2 rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+            <p className="text-sm font-medium leading-relaxed text-foreground">
+              Apakah Anda yakin ingin mengarsipkan data <span className="font-semibold">{player.name}</span>?
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
-              <span className="text-xs font-semibold text-destructive">Bukan penghapusan permanen</span>
+              <span className="text-xs font-medium text-destructive">Bukan penghapusan permanen</span>
             </div>
           </div>
 
-          <div className="p-4 rounded-lg bg-secondary/10 border border-border/50 flex gap-4 items-start">
-            <ShieldAlert className="size-5 text-muted-foreground shrink-0 mt-0.5" />
-            <p className="text-xs font-medium text-muted-foreground">Statistik performa dan riwayat absensi tetap terjaga dalam audit log.</p>
+          <div className="flex items-start gap-4 rounded-lg border border-border/50 bg-secondary/10 p-4">
+            <ShieldAlert className="mt-0.5 size-5 shrink-0 text-muted-foreground" />
+            <p className="text-xs font-medium text-muted-foreground">
+              Statistik performa dan riwayat absensi tetap terjaga dalam audit log.
+            </p>
           </div>
         </div>
 
-        <AlertDialogFooter className="sm:flex-row flex-col gap-2 sm:gap-0">
-          <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-10 font-semibold text-sm border-border/50">
+        <AlertDialogFooter className="flex-col gap-2 sm:flex-row sm:gap-0">
+          <AlertDialogCancel disabled={isPending} className="h-10 border-border/50 text-sm font-semibold sm:mr-2">
             Batal
           </AlertDialogCancel>
           <AlertDialogAction
@@ -62,9 +77,13 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
               handleDelete();
             }}
             disabled={isPending}
-            className="h-10 font-semibold text-sm"
+            className="h-10 text-sm font-semibold"
           >
-            {isPending ? <Loader2 className="animate-spin size-4 mr-2" /> : <Trash2 className="size-4 mr-2" />}
+            {isPending ? (
+              <Loader2 className="mr-2 size-4 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 size-4" />
+            )}
             Arsipkan Data
           </AlertDialogAction>
         </AlertDialogFooter>

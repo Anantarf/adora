@@ -170,14 +170,14 @@ export default function PlayersPage() {
       )}
 
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <p className="text-xs font-medium tracking-wide text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Pilih kelompok di kiri, lalu kelola pemain dan pencariannya di panel kanan.
         </p>
-        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-          <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
             {activeCategoryLabel}
           </span>
-          <span className="rounded-full border border-border/50 bg-background/60 px-3 py-1.5">
+          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
             {groupsInCategory.length} kelompok aktif
           </span>
         </div>
@@ -190,7 +190,7 @@ export default function PlayersPage() {
           <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 shadow-xs">
             <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-3">
               <div className="space-y-1">
-                <h3 className="text-xs font-black tracking-widest text-foreground uppercase">
+                <h3 className="text-sm font-semibold text-foreground">
                   Daftar Kelompok
                 </h3>
                 <p className="text-[11px] leading-relaxed text-muted-foreground">
@@ -201,7 +201,7 @@ export default function PlayersPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setUiState({ type: "add-group" })}
-                className="h-8 px-2.5 text-[10px] font-bold uppercase tracking-wider text-primary hover:bg-primary/10"
+                className="h-8 px-2.5 text-[11px] font-medium text-primary hover:bg-primary/10"
               >
                 + Kelompok
               </Button>
@@ -231,7 +231,7 @@ export default function PlayersPage() {
                       setSelectedGroupId(null);
                       setGroupSearchQuery("");
                     }}
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-[10px] font-bold uppercase tracking-wider transition-all ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium transition-all ${
                       active
                         ? "border border-border/30 bg-card text-foreground shadow-xs"
                         : "text-muted-foreground hover:text-foreground"
@@ -239,7 +239,7 @@ export default function PlayersPage() {
                   >
                     <span>{category === "SEKOLAH" ? "Sekolah" : "Kelompok Umur"}</span>
                     <span
-                      className={`rounded-full px-1.5 py-0.5 text-[9px] font-black ${
+                      className={`rounded-md px-1.5 py-0.5 text-[10px] font-medium ${
                         active
                           ? "bg-primary/20 text-primary"
                           : "bg-muted text-muted-foreground"
@@ -284,11 +284,11 @@ export default function PlayersPage() {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="max-w-[70%] truncate font-heading text-xs tracking-wider text-foreground uppercase">
+                        <span className="max-w-[70%] truncate text-sm font-semibold text-foreground">
                           {group.name}
                         </span>
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[9px] font-black tracking-wider ${
+                          className={`rounded-md px-2 py-0.5 text-[10px] font-medium ${
                             isSchool
                               ? "bg-amber-500/10 text-amber-500"
                               : "bg-violet-500/10 text-violet-500"
@@ -356,11 +356,11 @@ export default function PlayersPage() {
                           >
                             <ChevronLeft className="size-4" />
                           </Button>
-                          <h2 className="max-w-[240px] truncate font-heading text-lg tracking-widest text-foreground uppercase sm:max-w-none sm:text-xl">
+                          <h2 className="max-w-[240px] truncate text-lg font-semibold text-foreground sm:max-w-none sm:text-xl">
                             {selectedGroup.name}
                           </h2>
                           <span
-                            className={`rounded-full px-2 py-0.5 text-[9px] font-black tracking-widest uppercase ${
+                            className={`rounded-md px-2 py-0.5 text-[10px] font-medium ${
                               selectedGroup.category === "SEKOLAH"
                                 ? "bg-amber-500/10 text-amber-500"
                                 : "bg-violet-500/10 text-violet-500"
@@ -377,12 +377,12 @@ export default function PlayersPage() {
                             description: selectedGroup.description,
                           }) || "Kelompok latihan"}
                         </p>
-                        <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
-                          <span className="rounded-full bg-primary/8 px-2.5 py-1 text-primary">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                          <span className="rounded-md bg-primary/8 px-2.5 py-1 font-medium text-primary">
                             {filteredPlayerCount} pemain
                           </span>
                           {playerSearchQuery ? (
-                            <span className="rounded-full border border-border/50 px-2.5 py-1">
+                            <span className="rounded-md border border-border/50 px-2.5 py-1 font-medium">
                               Hasil pencarian
                             </span>
                           ) : null}
@@ -436,7 +436,7 @@ export default function PlayersPage() {
                           : `${filteredPlayerCount} pemain tampil di daftar.`}
                       </p>
                       {totalPages > 1 ? (
-                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-muted-foreground">
+                        <p className="text-[11px] font-medium text-muted-foreground">
                           Halaman {currentServerPage} dari {totalPages}
                         </p>
                       ) : null}
@@ -508,7 +508,7 @@ export default function PlayersPage() {
                 ) : viewMode === "database" ? (
                   <div className="overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
                     <table className="w-full text-left text-xs">
-                      <thead className="border-b border-border/50 bg-muted/40 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                      <thead className="border-b border-border/50 bg-muted/40 text-[10px] font-medium text-muted-foreground">
                         <tr>
                           <th scope="col" className="w-10 px-4 py-3 text-center">
                             No
@@ -555,12 +555,12 @@ export default function PlayersPage() {
                               <td className="px-4 py-2.5 text-center font-mono font-medium tabular-nums text-muted-foreground/60">
                                 {globalIndex}
                               </td>
-                              <td className="px-4 py-2.5 font-mono text-[11px] font-semibold uppercase tabular-nums text-muted-foreground/75">
+                              <td className="px-4 py-2.5 font-mono text-[11px] font-semibold tabular-nums text-muted-foreground/75">
                                 ADR-{idShort}
                               </td>
                               <td className="px-4 py-2.5 font-bold text-foreground">
                                 <div className="flex max-w-[200px] items-center gap-2">
-                                  <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-[10px] font-black uppercase text-primary">
+                                  <div className="flex size-6 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[10px] font-semibold text-primary">
                                     {player.name.charAt(0)}
                                   </div>
                                   <span
@@ -612,13 +612,13 @@ export default function PlayersPage() {
                                     <HeartCrack className="size-4 animate-pulse-subtle" />
                                   </div>
                                 ) : (
-                                  <span className="rounded-sm bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-emerald-500">
+                                  <span className="rounded-sm bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">
                                     Aman
                                   </span>
                                 )}
                               </td>
                               <td className="px-4 py-2.5 text-center">
-                                <div className="inline-flex items-center justify-center gap-1 text-[8px] font-black tracking-wider">
+                                <div className="inline-flex items-center justify-center gap-1 text-[9px] font-medium">
                                   <span
                                     className={`rounded-xs px-1 ${
                                       hasPhoto
@@ -645,7 +645,7 @@ export default function PlayersPage() {
                                     onClick={() =>
                                       setUiState({ type: "view-player", payload: player })
                                     }
-                                    className="inline-flex items-center gap-1.5 rounded-md border border-border/50 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-border/50 px-2 py-1 text-[11px] font-medium text-muted-foreground transition-all hover:border-primary/40 hover:bg-primary/10 hover:text-primary"
                                     title="Lihat Detail"
                                   >
                                     <Eye className="size-3.5" />
@@ -658,7 +658,7 @@ export default function PlayersPage() {
                                         payload: { id: player.id, name: player.name },
                                       })
                                     }
-                                    className="inline-flex items-center gap-1.5 rounded-md border border-destructive/20 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-destructive/80 transition-all hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
+                                    className="inline-flex items-center gap-1.5 rounded-md border border-destructive/20 px-2 py-1 text-[11px] font-medium text-destructive/80 transition-all hover:border-destructive/50 hover:bg-destructive/10 hover:text-destructive"
                                     title="Arsipkan Pemain"
                                   >
                                     <Trash2 className="size-3.5" />
@@ -681,15 +681,15 @@ export default function PlayersPage() {
                         onClick={() => setUiState({ type: "view-player", payload: player })}
                       >
                         <div className="flex min-w-0 items-center gap-3">
-                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 font-heading text-sm font-bold uppercase text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary transition-colors group-hover:bg-primary group-hover:text-primary-foreground">
                             {player.name.charAt(0)}
                           </div>
                           <div className="flex min-w-0 flex-col gap-0.5">
-                            <h4 className="truncate font-heading text-xs font-bold tracking-wide text-foreground">
+                            <h4 className="truncate text-sm font-semibold text-foreground">
                               {buildPlayerFullName(player.firstName, player.lastName) ||
                                 player.name}
                             </h4>
-                            <span className="truncate text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                            <span className="truncate text-[10px] font-medium text-muted-foreground">
                               {player.group?.name || "Tanpa Kelompok"}
                             </span>
                           </div>

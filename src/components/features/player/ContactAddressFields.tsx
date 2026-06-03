@@ -84,7 +84,7 @@ export function ContactAddressFields({
   return (
     <>
       <div className="space-y-1">
-        <p className="text-xs font-bold uppercase tracking-[0.24em] text-primary/80">Kontak dan Alamat</p>
+        <p className="text-sm font-semibold text-foreground">Kontak dan Alamat</p>
         <p className="text-xs text-muted-foreground">
           Alamat rumah utama wajib diisi. Detail tambahan dan alamat KTP/KK bisa dilengkapi bila perlu.
         </p>

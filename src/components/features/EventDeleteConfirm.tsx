@@ -28,7 +28,7 @@ export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProp
     <AlertDialog open={!!targetId} onOpenChange={(open) => { if (!open && !isPending) onClose(); }}>
       <AlertDialogContent className="sm:max-w-md bg-card border-border/50">
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-heading uppercase tracking-widest flex items-center gap-2 text-destructive">
+          <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
             <AlertTriangle className="size-5" />
             Hapus Agenda
           </AlertDialogTitle>
@@ -42,7 +42,7 @@ export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProp
             <p className="text-sm font-medium text-foreground leading-relaxed">Agenda ini akan dihapus secara permanen dari sistem.</p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
-              <span className="text-xs font-semibold uppercase tracking-widest text-destructive">Tidak dapat dipulihkan</span>
+              <span className="text-xs font-medium text-destructive">Tidak dapat dipulihkan</span>
             </div>
           </div>
           <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/20 flex gap-3 items-start">
@@ -54,7 +54,7 @@ export function EventDeleteConfirm({ targetId, onClose }: EventDeleteConfirmProp
         </div>
 
         <AlertDialogFooter className="sm:flex-row flex-col gap-2 sm:gap-0">
-          <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-11 font-bold uppercase tracking-widest text-xs border-border/50">Batal</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending} className="sm:mr-2 h-11 border-border/50 text-sm font-semibold">Batal</AlertDialogCancel>
           <AlertDialogAction
             className="h-11 font-bold tracking-widest uppercase text-xs"
             onClick={(e) => {

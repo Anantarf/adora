@@ -95,7 +95,7 @@ function ScoreField({
 
   return (
     <div className="flex flex-col gap-1">
-      <label htmlFor={fieldId} className="text-micro text-muted-foreground">
+      <label htmlFor={fieldId} className="text-xs font-medium text-muted-foreground">
         {label}
       </label>
       <Input
@@ -214,7 +214,7 @@ export function AddStatDialog({
         size="sm"
         variant={isEdit ? "outline" : "default"}
         disabled={!periodId && !isEdit}
-        className={`h-8 gap-1.5 text-xs font-bold uppercase tracking-widest ${triggerClassName ?? ""}`}
+        className={`h-8 gap-1.5 text-xs font-semibold ${triggerClassName ?? ""}`}
         onClick={() => setOpen(true)}
       >
         {isEdit ? (
@@ -231,17 +231,17 @@ export function AddStatDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-dialog-lg overflow-y-auto border-border/50 bg-card custom-scrollbar sm:max-w-lg">
+        <DialogContent className="custom-scrollbar max-h-dialog-lg overflow-y-auto border-border/50 bg-card sm:max-w-lg">
           <div className="mb-2 flex items-center gap-4">
             <div className="shrink-0 rounded-xl bg-muted/60 p-3">
               <LineChart className="size-6 text-muted-foreground" />
             </div>
             <div className="flex flex-col gap-0.5">
-              <DialogTitle className="text-2xl font-heading uppercase tracking-widest text-foreground">
+              <DialogTitle className="text-xl font-semibold text-foreground">
                 {isEdit ? "Perbarui" : "Input"} Nilai
               </DialogTitle>
-              <DialogDescription className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                {player.name} <span className="mx-1.5 text-primary/50">·</span>{" "}
+              <DialogDescription className="text-sm text-muted-foreground">
+                {player.name} <span className="mx-1.5 text-primary/50">-</span>{" "}
                 {player.group?.name ?? "Tidak Memiliki Kelompok"}
               </DialogDescription>
             </div>
@@ -257,7 +257,7 @@ export function AddStatDialog({
             <fieldset disabled={!isPeriodActive} className="flex flex-col gap-3">
               <div className="overflow-hidden rounded-lg border border-border/40 bg-muted/20">
                 <div className="flex items-center justify-between border-b border-border/30 bg-muted/40 px-3 py-2">
-                  <span className="text-micro text-muted-foreground">Aspek Penilaian</span>
+                  <span className="text-xs font-medium text-muted-foreground">Aspek Penilaian</span>
                   <span className="text-sm font-bold tabular-nums text-primary">
                     Total: {grandTotal}
                   </span>
@@ -276,7 +276,7 @@ export function AddStatDialog({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-micro text-muted-foreground">
+                <label className="text-xs font-medium text-muted-foreground">
                   Catatan / Saran Pelatih (Opsional)
                 </label>
                 <Textarea
@@ -290,14 +290,14 @@ export function AddStatDialog({
 
             <div className="flex items-center justify-center gap-4 rounded-lg border border-primary/20 bg-primary/5 p-3">
               <div className="text-center">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                <p className="text-[11px] font-medium text-muted-foreground">
                   Total Skor
                 </p>
                 <p className="text-2xl font-bold tabular-nums text-primary">{grandTotal}</p>
               </div>
               <div className="h-8 w-px bg-border/50" />
               <div className="text-center">
-                <p className="text-[10px] uppercase tracking-widest text-muted-foreground">
+                <p className="text-[11px] font-medium text-muted-foreground">
                   Aspek Dinilai
                 </p>
                 <p className="text-2xl font-bold tabular-nums text-foreground">
@@ -312,7 +312,7 @@ export function AddStatDialog({
                   type="button"
                   onClick={handleSubmit((data) => onSubmit(data, "Published"))}
                   disabled={isPending}
-                  className="h-11 w-full bg-primary text-xs font-bold uppercase tracking-widest text-primary-foreground hover:bg-primary/90"
+                  className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
                 >
                   {pendingStatus === "Published" ? (
                     <>
@@ -327,7 +327,7 @@ export function AddStatDialog({
                   variant="outline"
                   onClick={handleSubmit((data) => onSubmit(data, "Draft"))}
                   disabled={isPending}
-                  className="h-11 w-full border-primary/30 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10 hover:text-primary"
+                  className="h-11 w-full border-primary/30 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:text-primary"
                 >
                   {pendingStatus === "Draft" ? (
                     <>

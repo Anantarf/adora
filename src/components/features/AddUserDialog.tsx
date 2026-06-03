@@ -11,11 +11,6 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 
-/**
- * ADORA Basketball - Add Parent Account Dialog
- * Declarative form management with Zod + React Hook Form.
- */
-
 const userSchema = z.object({
   name: z.string().min(1, "Nama tidak boleh kosong"),
   username: z
@@ -74,40 +69,40 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button size="lg" className="uppercase font-bold tracking-widest text-[10px] h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+        <DialogTrigger
+          render={
+          <Button size="lg" className="h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
             <Plus className="mr-2 size-4" /> Tambah {isParent ? "Orang Tua" : "Admin"}
           </Button>
         }
       />
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
-          <DialogTitle className="text-xl font-heading uppercase flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
             <UserPlus className="size-5 text-primary" /> Buat Akun {isParent ? "Orang Tua" : "Admin"}
           </DialogTitle>
-          <DialogDescription className="text-xs font-medium tracking-wide opacity-70">
+          <DialogDescription className="text-sm text-muted-foreground">
             {isParent ? "Akun ini nantinya digunakan orang tua pemain untuk masuk ke aplikasi." : "Akun ini akan memiliki hak akses penuh ke panel admin Adora."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
-            <label htmlFor="user-name" className="text-micro text-muted-foreground ml-1">Nama Lengkap</label>
+            <label htmlFor="user-name" className="ml-1 text-xs font-medium text-muted-foreground">Nama Lengkap</label>
             <Input id="user-name" {...register("name")} placeholder="Contoh: Budi Santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
-            {errors.name && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.name.message}</p>}
+            {errors.name && <p className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="user-username" className="text-micro text-muted-foreground ml-1">Username Login</label>
+            <label htmlFor="user-username" className="ml-1 text-xs font-medium text-muted-foreground">Username Login</label>
             <Input id="user-username" {...register("username")} placeholder="Contoh: budi_santoso" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
-            {errors.username && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.username.message}</p>}
+            {errors.username && <p className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.username.message}</p>}
           </div>
 
 
 
           <div className="space-y-1.5">
-            <label htmlFor="user-password" className="text-micro text-muted-foreground ml-1">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
+            <label htmlFor="user-password" className="ml-1 text-xs font-medium text-muted-foreground">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
             {isParent ? (
               <div onClick={() => toast.info("Kata sandi awal orang tua mengikuti pengaturan default sistem.")} className="cursor-not-allowed">
                 <Input id="user-password" value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />
@@ -115,13 +110,13 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
             ) : (
               <Input id="user-password" {...register("password")} type="text" className="h-11 bg-background/50 font-mono rounded-xl border-border/50 focus-visible:ring-primary/50" />
             )}
-            <p className="text-[10px] text-muted-foreground italic mt-0.5 ml-1">
+            <p className="ml-1 mt-0.5 text-xs text-muted-foreground">
               {isParent ? "*Sandi default diatur secara aman oleh sistem. Beritahu orang tua untuk segera menggantinya setelah login." : "*Admin dapat membuat password mereka sendiri di sini."}
             </p>
-            {errors.password && !isParent && <p className="text-destructive text-[10px] font-bold uppercase ml-1 mt-1">{errors.password.message}</p>}
+            {errors.password && !isParent && <p className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
           </div>
 
-          <Button type="submit" disabled={isPending} className="w-full h-11 mt-4 bg-primary hover:bg-primary/90 text-primary-foreground font-bold tracking-widest uppercase text-xs rounded-xl shadow-sm">
+          <Button type="submit" disabled={isPending} className="mt-4 h-11 w-full rounded-xl bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
             {isPending ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan"}
           </Button>
         </form>
