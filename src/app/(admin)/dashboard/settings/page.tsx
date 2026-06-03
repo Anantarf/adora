@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { Input } from "@/components/ui/input";
+import { ReportArchiveManager } from "@/components/features/settings/ReportArchiveManager";
 import { toUserErrorMessage } from "@/lib/utils";
 import { ASSET_KEYS, SIGNER_KEYS, getAssetPreviewMeta, type AssetKey } from "./constants";
 
@@ -336,6 +337,8 @@ export default function SettingsPage() {
           ))}
         </div>
       </section>
+
+      <ReportArchiveManager />
 
       <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/40 p-4">
         <Info className="mt-0.5 size-4 shrink-0 text-primary" />

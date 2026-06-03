@@ -8,7 +8,9 @@ import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 import { buildUpdateData } from "@/lib/utils";
 import { DEFAULT_USER_PAGE_SIZE, userListArgsSchema } from "@/lib/validation/user";
 
-function buildUserListWhere(role: "PARENT" | "ADMIN", searchQuery?: string) {
+export type ManagedUserRole = "PARENT" | "ADMIN" | "COACH";
+
+function buildUserListWhere(role: ManagedUserRole, searchQuery?: string) {
   return {
     role,
     isDeleted: false,
@@ -32,7 +34,7 @@ function sortSuperadminFirst<T extends { username: string | null }>(items: T[]) 
   });
 }
 
-export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
+export async function getUsersAction(role: ManagedUserRole = "PARENT") {
   await requireSessionRole("ADMIN");
 
   const users = await prisma.user.findMany({
@@ -55,7 +57,7 @@ export async function getUsersAction(role: "PARENT" | "ADMIN" = "PARENT") {
 }
 
 export async function getUsersPageAction(input?: {
-  role?: "PARENT" | "ADMIN";
+  role?: ManagedUserRole;
   searchQuery?: string;
   page?: number;
   pageSize?: number;
@@ -98,7 +100,7 @@ export async function getUsersPageAction(input?: {
   };
 }
 
-export async function createUserAction(data: { username: string; name: string; email?: string; password?: string; role?: "PARENT" | "ADMIN" }) {
+export async function createUserAction(data: { username: string; name: string; email?: string; password?: string; role?: ManagedUserRole }) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
@@ -235,8 +237,26 @@ export async function deleteUserAction(id: string) {
     const playerCount = await tx.player.count({
       where: { parentId: id, isDeleted: false },
     });
-    if (playerCount > 0) {
+    if (activeTargetUser.role === "PARENT" && playerCount > 0) {
       throw new Error(`Tidak dapat menghapus akun: Akun ini masih terhubung dengan ${playerCount} pemain aktif.`);
+    }
+
+    if (activeTargetUser.role === "COACH") {
+      const coachProfile = await tx.coachProfile.findUnique({
+        where: { userId: id },
+        select: { id: true },
+      });
+
+      if (coachProfile) {
+        await tx.coachAssignment.deleteMany({
+          where: { coachProfileId: coachProfile.id },
+        });
+
+        await tx.coachProfile.update({
+          where: { id: coachProfile.id },
+          data: { isDeleted: true },
+        });
+      }
     }
 
     await createAuditLog(tx, "DELETE", "user", id, userId, {

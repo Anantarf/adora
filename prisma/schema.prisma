@@ -132,8 +132,10 @@ model group {
   updatedAt   DateTime      @updatedAt
 
   homebase    homebase?     @relation(fields: [homebaseId], references: [id], onDelete: SetNull, map: "Group_homebaseId_fkey")
+  coachAssignment coachAssignment?
   eventGroups eventGroup[]
   player      player[]
+  reportArchive reportArchive[]
 
   @@index([homebaseId], map: "Group_homebaseId_idx")
   @@map("Group")
@@ -179,6 +181,7 @@ model player {
   attendance        attendance[]
   certificate       certificate[]
   group             group?        @relation(fields: [groupId], references: [id], onDelete: SetNull, map: "Player_groupId_fkey")
+  reportArchive     reportArchive[]
   user              user?         @relation(fields: [parentId], references: [id], onDelete: SetNull, map: "Player_parentId_fkey")
   preferredHomebase homebase?     @relation("PreferredHomebase", fields: [preferredHomebaseId], references: [id], onDelete: SetNull, map: "Player_preferred_homebaseId_fkey")
   statistic         statistic[]
@@ -211,9 +214,69 @@ model evaluationPeriod {
   isActive  Boolean     @default(false)
   createdAt DateTime    @default(now())
 
+  reportArchive reportArchive[]
   statistic statistic[]
 
   @@map("EvaluationPeriod")
+}
+
+model coachProfile {
+  id           String            @id @default(cuid())
+  userId       String            @unique(map: "CoachProfile_userId_key")
+  fullName     String
+  placeOfBirth String?
+  dateOfBirth  DateTime?
+  gender       String?
+  photoUrl     String?
+  licenseUrl   String?
+  isDeleted    Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  assignments  coachAssignment[]
+  user         user              @relation(fields: [userId], references: [id], onDelete: Cascade, map: "CoachProfile_userId_fkey")
+
+  @@index([isDeleted], map: "CoachProfile_isDeleted_idx")
+  @@map("CoachProfile")
+}
+
+model coachAssignment {
+  id             String       @id @default(cuid())
+  coachProfileId String
+  groupId        String       @unique(map: "CoachAssignment_groupId_key")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  coachProfile coachProfile @relation(fields: [coachProfileId], references: [id], onDelete: Cascade, map: "CoachAssignment_coachProfileId_fkey")
+  group        group        @relation(fields: [groupId], references: [id], onDelete: Cascade, map: "CoachAssignment_groupId_fkey")
+
+  @@index([coachProfileId], map: "CoachAssignment_coachProfileId_idx")
+  @@map("CoachAssignment")
+}
+
+model reportArchive {
+  id           String               @id @default(cuid())
+  playerId     String
+  periodId     String
+  groupId      String?
+  fileUrl      String
+  status       report_archive_status @default(DRAFT)
+  releasedAt   DateTime?
+  uploadedById String?
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+
+  group      group?            @relation(fields: [groupId], references: [id], onDelete: SetNull, map: "ReportArchive_groupId_fkey")
+  period     evaluationPeriod  @relation(fields: [periodId], references: [id], onDelete: Cascade, map: "ReportArchive_periodId_fkey")
+  player     player            @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "ReportArchive_playerId_fkey")
+  uploadedBy user?             @relation(fields: [uploadedById], references: [id], onDelete: SetNull, map: "ReportArchive_uploadedById_fkey")
+
+  @@unique([playerId, periodId], map: "ReportArchive_playerId_periodId_key")
+  @@index([groupId], map: "ReportArchive_groupId_idx")
+  @@index([periodId], map: "ReportArchive_periodId_idx")
+  @@index([status], map: "ReportArchive_status_idx")
+  @@index([uploadedById], map: "ReportArchive_uploadedById_idx")
+  @@map("ReportArchive")
 }
 
 model statistic {
@@ -264,7 +327,9 @@ model user {
 
   account          account[]
   auditlog         auditlog[]
+  coachProfile     coachProfile?
   player           player[]
+  reportArchive    reportArchive[]
   session          session[]
   statisticHistory statisticHistory[]
 
@@ -364,7 +429,13 @@ enum attendance_status {
 
 enum user_role {
   ADMIN
+  COACH
   PARENT
+}
+
+enum report_archive_status {
+  DRAFT
+  RELEASED
 }
 
 enum event_type {

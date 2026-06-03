@@ -8,9 +8,23 @@ import { QUERY_KEYS } from "@/lib/constants";
 export type FamilyPlayer = {
   id: string;
   name: string;
-  dateOfBirth: Date;
+  dateOfBirth: Date | string;
+  placeOfBirth: string | null;
+  gender: string | null;
+  photoUrl: string | null;
   schoolOrigin: string | null;
-  group: { id: string; name: string } | null;
+  group: {
+    id: string;
+    name: string;
+    coachAssignment: {
+      coachProfile: {
+        id: string;
+        fullName: string;
+        photoUrl: string | null;
+        licenseUrl: string | null;
+      };
+    } | null;
+  } | null;
 };
 
 export type ParentUser = {

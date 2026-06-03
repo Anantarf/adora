@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-type SupportedRole = "ADMIN" | "PARENT";
+type SupportedRole = "ADMIN" | "PARENT" | "COACH";
 
 async function getSessionRole(expectedRole?: SupportedRole) {
   const session = await getServerSession(authOptions);

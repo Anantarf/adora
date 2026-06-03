@@ -27,9 +27,27 @@ export async function getFamilyPlayersAction() {
       id: true,
       name: true,
       dateOfBirth: true,
+      placeOfBirth: true,
+      gender: true,
+      photoUrl: true,
       schoolOrigin: true,
       group: {
-        select: { id: true, name: true },
+        select: {
+          id: true,
+          name: true,
+          coachAssignment: {
+            select: {
+              coachProfile: {
+                select: {
+                  id: true,
+                  fullName: true,
+                  photoUrl: true,
+                  licenseUrl: true,
+                },
+              },
+            },
+          },
+        },
       },
     },
     orderBy: { createdAt: "asc" },

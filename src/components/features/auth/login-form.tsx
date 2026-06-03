@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -56,7 +56,18 @@ export function LoginForm() {
         const res = await fetch("/api/auth/session");
         const session = await res.json();
         const role = (session?.user as { role?: string })?.role;
-        router.push(role === "ADMIN" ? "/dashboard" : "/parent");
+        if (role === "ADMIN") {
+          router.push("/dashboard");
+          return;
+        }
+
+        if (role === "PARENT") {
+          router.push("/parent");
+          return;
+        }
+
+        await signOut({ redirect: false });
+        toast.info("Portal coach belum diaktifkan pada batch ini.");
       }
     } catch {
       toast.error("Kesalahan Sistem", {

@@ -6,9 +6,10 @@ import { toast } from "sonner";
 
 type UsersList = Awaited<ReturnType<typeof getUsersAction>>;
 type UsersPage = Awaited<ReturnType<typeof getUsersPageAction>>;
+type ManagedUserRole = Parameters<typeof getUsersAction>[0];
 
 
-export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
+export const useUsers = (role: ManagedUserRole = "PARENT") => {
   return useQuery<UsersList>({
     queryKey: QUERY_KEYS.USERS(role),
     queryFn: () => getUsersAction(role),
@@ -17,7 +18,7 @@ export const useUsers = (role: "PARENT" | "ADMIN" = "PARENT") => {
 };
 
 export const useUsersPage = (
-  role: "PARENT" | "ADMIN" = "PARENT",
+  role: ManagedUserRole = "PARENT",
   searchQuery?: string,
   page = 1,
   pageSize = 10,
@@ -35,7 +36,7 @@ export const useAddUser = () => {
     mutationFn: createUserAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS_BASE });
-      toast.success("Akun orang tua berhasil dibuat!");
+      toast.success("Akun berhasil dibuat.");
     },
     onError: () => {
       toast.error("Gagal membuat akun. Periksa kembali data yang dimasukkan.");
@@ -75,10 +76,10 @@ export const useDeleteUser = () => {
     mutationFn: deleteUserAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS_BASE });
-      toast.success("Akun berhasil dihapus.");
+      toast.success("Akun berhasil dinonaktifkan.");
     },
     onError: () => {
-      toast.error("Gagal menghapus akun. Pastikan tidak ada data pemain yang tertaut.");
+      toast.error("Gagal menonaktifkan akun. Pastikan tidak ada data aktif yang masih bertaut.");
     },
   });
 };

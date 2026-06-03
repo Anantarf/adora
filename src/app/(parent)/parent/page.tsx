@@ -2,19 +2,21 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Activity, FileText, Loader2, User } from "lucide-react";
-import { toast } from "sonner";
+import { Activity, Loader2, User } from "lucide-react";
 
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
+import { ParentCertificatesCard } from "./components/ParentCertificatesCard";
+import { ParentCoachCard } from "./components/ParentCoachCard";
+import { ParentPlayerHero } from "./components/ParentPlayerHero";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
-import { Button } from "@/components/ui/button";
+import { ParentReportArchivesCard } from "./components/ParentReportArchivesCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
+import { useReleasedReportArchives } from "@/hooks/use-report-archives";
 import { usePlayerStats } from "@/hooks/use-player-stats";
-import { useReportSettings } from "@/hooks/use-settings";
 import { averageScore, flattenMetrics, overallScore } from "@/lib/metrics";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
@@ -37,7 +39,6 @@ const ParentProgressionChart = dynamic(
 export default function ParentDashboard() {
   const { data: children, isLoading: familyLoading } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const [isPdfLoading, setIsPdfLoading] = useState(false);
 
   const effectiveChildId = useMemo(() => {
     const validIds = children?.map((child) => child.id) ?? [];
@@ -51,7 +52,7 @@ export default function ParentDashboard() {
   const { data: attendances, isLoading: attendanceLoading } =
     usePlayerAttendance(effectiveChildId);
   const { data: certificates } = usePlayerCertificates(effectiveChildId);
-  const { data: reportSettings } = useReportSettings();
+  const { data: releasedArchives } = useReleasedReportArchives(effectiveChildId);
 
   const progressionData = useMemo(() => {
     if (!stats?.length) {
@@ -138,45 +139,6 @@ export default function ParentDashboard() {
         })
       : "Periode Evaluasi");
 
-  const handleDownloadPDF = async () => {
-    if (!latestMetrics) {
-      return;
-    }
-
-    setIsPdfLoading(true);
-    try {
-      const { generateRaporPDF } = await import("@/lib/generate-rapor-pdf");
-
-      await generateRaporPDF({
-        playerName: activeChild.name,
-        groupName: activeChild.group?.name || "Tanpa Kelompok",
-        schoolOrigin: activeChild.schoolOrigin,
-        periodName: currentPeriodLabel,
-        metrics: latestMetrics,
-        attendanceRate: attendanceSummary?.rate ?? null,
-        certificates: certificates?.map((certificate) => ({
-          title: certificate.title,
-          uploadedAt: certificate.uploadedAt,
-        })),
-        assets: {
-          headerUrl: reportSettings?.rapor_header_url ?? undefined,
-          ceoSignUrl: reportSettings?.rapor_ceo_sign_url ?? undefined,
-          coachSignUrl: reportSettings?.rapor_coach_sign_url ?? undefined,
-          stampUrl: reportSettings?.rapor_stamp_url ?? undefined,
-        },
-        signers: {
-          coachName: reportSettings?.rapor_coach_name ?? undefined,
-          ceoName: reportSettings?.rapor_ceo_name ?? undefined,
-        },
-      });
-    } catch (error) {
-      console.error("[PARENT_REPORT_DOWNLOAD_ERROR]", error);
-      toast.error("Gagal membuat rapor PDF. Coba lagi.");
-    } finally {
-      setIsPdfLoading(false);
-    }
-  };
-
   return (
     <div className="flex w-full flex-col gap-6 md:gap-8">
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border pb-6 md:flex-row md:items-center md:pb-8">
@@ -225,6 +187,15 @@ export default function ParentDashboard() {
           </div>
         )}
       </div>
+
+      <ParentPlayerHero player={activeChild} />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
+        <ParentCoachCard player={activeChild} />
+      </div>
+
+      <ParentReportArchivesCard archives={releasedArchives} playerName={activeChild.name} />
 
       {statsLoading ? (
         <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
@@ -349,19 +320,9 @@ export default function ParentDashboard() {
                     Ringkasan evaluasi dari rapor terbaru.
                   </CardDescription>
                 </div>
-                <Button
-                  size="sm"
-                  className="h-10 w-full shrink-0 px-4 text-[10px] font-bold uppercase tracking-widest sm:w-auto"
-                  onClick={handleDownloadPDF}
-                  disabled={isPdfLoading || !latestMetrics}
-                >
-                  {isPdfLoading ? (
-                    <Loader2 className="mr-2 size-3 animate-spin" />
-                  ) : (
-                    <FileText className="mr-2 size-3" />
-                  )}
-                  Unduh Rapor PDF
-                </Button>
+                <span className="rounded-full border border-border/50 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  {currentPeriodLabel}
+                </span>
               </div>
             </CardHeader>
             <CardContent className="p-4 md:p-6">

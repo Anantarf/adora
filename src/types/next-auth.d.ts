@@ -4,7 +4,7 @@ import "next-auth/jwt";
 declare module "next-auth" {
   interface User {
     id: string;
-    role: "ADMIN" | "PARENT";
+    role: "ADMIN" | "PARENT" | "COACH";
     username: string | null;
     mustChangePassword?: boolean;
   }
@@ -15,7 +15,7 @@ declare module "next-auth" {
       name?: string | null;
       email?: string | null;
       image?: string | null;
-      role: "ADMIN" | "PARENT";
+      role: "ADMIN" | "PARENT" | "COACH";
       username: string | null;
       mustChangePassword?: boolean;
     };
@@ -25,7 +25,7 @@ declare module "next-auth" {
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    role: "ADMIN" | "PARENT";
+    role: "ADMIN" | "PARENT" | "COACH";
     username: string | null;
     mustChangePassword?: boolean;
   }

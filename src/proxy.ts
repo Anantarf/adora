@@ -74,9 +74,11 @@ export default async function proxy(request: NextRequest) {
 
   const isProtectedRoute =
     pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/coach") ||
     pathname.startsWith("/parent") ||
     pathname.startsWith("/api/admin") ||
-    pathname.startsWith("/api/parent");
+    pathname.startsWith("/api/parent") ||
+    pathname.startsWith("/api/coach");
 
   if (isProtectedRoute) {
     const token = await getToken({
@@ -97,7 +99,11 @@ export default async function proxy(request: NextRequest) {
     }
 
     if (pathname.startsWith("/dashboard") && token.role !== "ADMIN") {
-      return handleUnauthorized("/parent");
+      return handleUnauthorized(token.role === "PARENT" ? "/parent" : "/login");
+    }
+
+    if (pathname.startsWith("/coach") && token.role !== "COACH") {
+      return handleUnauthorized(token.role === "ADMIN" ? "/dashboard" : "/login");
     }
 
     if (

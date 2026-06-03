@@ -102,6 +102,14 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
         userId: session.user.id,
         fileUrl,
         lookup: {
+          findCoachLicense: (value) =>
+            prisma.coachProfile.findFirst({
+              where: {
+                licenseUrl: value,
+                isDeleted: false,
+              },
+              select: { id: true },
+            }),
           findPlayerAsset: (value) =>
             prisma.player.findFirst({
               where: {
@@ -115,6 +123,27 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
               where: { fileUrl: value },
               select: { id: true, playerId: true },
             }),
+          findReportArchive: (value) =>
+            prisma.reportArchive.findFirst({
+              where: { fileUrl: value },
+              select: { id: true, playerId: true },
+            }),
+          isCoachVisibleToParent: async (coachProfileId, parentId) => {
+            const player = await prisma.player.findFirst({
+              where: {
+                parentId,
+                isDeleted: false,
+                group: {
+                  coachAssignment: {
+                    coachProfileId,
+                  },
+                },
+              },
+              select: { id: true },
+            });
+
+            return Boolean(player);
+          },
           isPlayerOwnedByParent: async (playerId, parentId) => {
             const player = await prisma.player.findFirst({
               where: {

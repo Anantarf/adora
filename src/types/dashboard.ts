@@ -3,7 +3,7 @@
  * Clean types for better maintenance and fewer "any" smells.
  */
 
-export type UserRole = "ADMIN" | "PARENT";
+export type UserRole = "ADMIN" | "PARENT" | "COACH";
 
 // ─── Evaluation Period ────────────────────────────────
 export interface EvaluationPeriod {

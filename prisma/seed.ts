@@ -11,16 +11,20 @@ async function main() {
   console.log("Memulai proses seeding data ADORA BBC...\n");
 
   console.log("Membersihkan data lama...");
+  await prisma.reportArchive.deleteMany();
   await prisma.statisticHistory.deleteMany();
   await prisma.statistic.deleteMany();
   await prisma.attendance.deleteMany();
   await prisma.certificate.deleteMany();
+  await prisma.coachAssignment.deleteMany();
+  await prisma.coachProfile.deleteMany();
   await prisma.player.deleteMany();
   await prisma.eventGroup.deleteMany();
   await prisma.event.deleteMany();
   await prisma.group.deleteMany();
   await prisma.registration.deleteMany();
   await prisma.evaluationPeriod.deleteMany();
+  await prisma.user.deleteMany({ where: { role: "COACH" } });
   await prisma.user.deleteMany({ where: { role: "PARENT" } });
   console.log("Data lama berhasil dibersihkan.\n");
 
@@ -47,6 +51,17 @@ async function main() {
       name: "Bunda Arya",
       email: "parent@adorabbc.com",
       role: "PARENT",
+    },
+  });
+
+  const coachUser = await prisma.user.create({
+    data: {
+      id: crypto.randomUUID(),
+      username: "coachdemo",
+      password: pw,
+      name: "Coach Danuri Akbar",
+      email: "coach@adorabbc.com",
+      role: "COACH",
     },
   });
 
@@ -129,6 +144,23 @@ async function main() {
     },
   });
 
+  const coachProfile = await prisma.coachProfile.create({
+    data: {
+      userId: coachUser.id,
+      fullName: "Danuri Akbar",
+      placeOfBirth: "Depok",
+      dateOfBirth: new Date("1990-06-12T00:00:00.000Z"),
+      gender: "Laki-laki",
+    },
+  });
+
+  await prisma.coachAssignment.create({
+    data: {
+      coachProfileId: coachProfile.id,
+      groupId: groupU12.id,
+    },
+  });
+
   await prisma.attendance.createMany({
     data: [
       {
@@ -183,6 +215,18 @@ async function main() {
     },
   });
 
+  await prisma.reportArchive.create({
+    data: {
+      playerId: parentPlayer.id,
+      periodId: evaluationPeriod.id,
+      groupId: groupU12.id,
+      fileUrl: "/template-rapor-sd.pdf",
+      status: "RELEASED",
+      releasedAt: new Date("2026-05-31T10:00:00.000Z"),
+      uploadedById: adminUser.id,
+    },
+  });
+
   const settings = [
     { key: "rapor_header_url", value: "/template-rapor-sd.pdf" },
     { key: "rapor_coach_name", value: "Danuri Akbar" },
@@ -194,6 +238,7 @@ async function main() {
 
   console.log("Admin user (superadmin / password) berhasil di-seed.");
   console.log("Parent demo (parentdemo / password) berhasil di-seed.");
+  console.log("Coach demo (coachdemo / password) berhasil di-seed.");
   console.log("Homebase, kelompok, agenda, attendance, dan rapor demo berhasil di-seed.");
   console.log("Pengaturan klub berhasil di-seed.");
   console.log("\nSEEDING SELESAI.");

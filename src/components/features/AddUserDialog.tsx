@@ -23,11 +23,21 @@ const userSchema = z.object({
 
 type UserForm = z.infer<typeof userSchema>;
 
-export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }) {
+type ManagedUserRole = "PARENT" | "ADMIN" | "COACH";
+
+export function AddUserDialog({ role = "PARENT" }: { role?: ManagedUserRole }) {
   const [open, setOpen] = useState(false);
   const { mutateAsync: addUser, isPending } = useAddUser();
 
   const isParent = role === "PARENT";
+  const isCoach = role === "COACH";
+  const titleLabel = isParent ? "Orang Tua" : isCoach ? "Coach" : "Admin";
+  const passwordLabel = isParent ? "Kata Sandi Awal" : isCoach ? "Kata Sandi Coach" : "Kata Sandi Admin";
+  const description = isParent
+    ? "Akun ini nantinya digunakan orang tua pemain untuk masuk ke aplikasi."
+    : isCoach
+      ? "Akun ini disiapkan untuk coach dan akan dihubungkan ke profil coach pada pengelolaan akun."
+      : "Akun ini akan memiliki hak akses penuh ke panel admin Adora.";
 
   const {
     register,
@@ -47,7 +57,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
 
   const onSubmit = async (data: UserForm) => {
     if (!isParent && (!data.password || data.password.length < 6)) {
-      toast.error("Password admin minimal 6 karakter.");
+      toast.error(`Password ${isCoach ? "coach" : "admin"} minimal 6 karakter.`);
       return;
     }
 
@@ -59,7 +69,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
         password: isParent ? undefined : data.password,
         role: role,
       });
-      toast.success(`Akun ${isParent ? "orang tua" : "admin"} berhasil dibuat.`);
+      toast.success(`Akun ${titleLabel.toLowerCase()} berhasil dibuat.`);
       setOpen(false);
       reset();
     } catch {
@@ -72,17 +82,17 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
         <DialogTrigger
           render={
           <Button size="lg" className="h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
-            <Plus className="mr-2 size-4" /> Tambah {isParent ? "Orang Tua" : "Admin"}
+            <Plus className="mr-2 size-4" /> Tambah {titleLabel}
           </Button>
         }
       />
       <DialogContent className="sm:max-w-md bg-card border-border/50">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg font-semibold text-foreground">
-            <UserPlus className="size-5 text-primary" /> Buat Akun {isParent ? "Orang Tua" : "Admin"}
+            <UserPlus className="size-5 text-primary" /> Buat Akun {titleLabel}
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            {isParent ? "Akun ini nantinya digunakan orang tua pemain untuk masuk ke aplikasi." : "Akun ini akan memiliki hak akses penuh ke panel admin Adora."}
+            {description}
           </DialogDescription>
         </DialogHeader>
 
@@ -99,19 +109,27 @@ export function AddUserDialog({ role = "PARENT" }: { role?: "PARENT" | "ADMIN" }
             {errors.username && <p className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.username.message}</p>}
           </div>
 
-
+          <div className="space-y-1.5">
+            <label htmlFor="user-email" className="ml-1 text-xs font-medium text-muted-foreground">Email</label>
+            <Input id="user-email" {...register("email")} type="email" placeholder="opsional@example.com" className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
+            {errors.email && <p className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.email.message}</p>}
+          </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="user-password" className="ml-1 text-xs font-medium text-muted-foreground">Kata Sandi {isParent ? "Awal" : "Admin"}</label>
+            <label htmlFor="user-password" className="ml-1 text-xs font-medium text-muted-foreground">{passwordLabel}</label>
             {isParent ? (
               <div onClick={() => toast.info("Kata sandi awal orang tua mengikuti pengaturan default sistem.")} className="cursor-not-allowed">
                 <Input id="user-password" value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />
               </div>
             ) : (
-              <Input id="user-password" {...register("password")} type="text" className="h-11 bg-background/50 font-mono rounded-xl border-border/50 focus-visible:ring-primary/50" />
+              <Input id="user-password" {...register("password")} type="password" className="h-11 bg-background/50 font-mono rounded-xl border-border/50 focus-visible:ring-primary/50" />
             )}
             <p className="ml-1 mt-0.5 text-xs text-muted-foreground">
-              {isParent ? "*Sandi default diatur secara aman oleh sistem. Beritahu orang tua untuk segera menggantinya setelah login." : "*Admin dapat membuat password mereka sendiri di sini."}
+              {isParent
+                ? "*Sandi default diatur secara aman oleh sistem. Beritahu orang tua untuk segera menggantinya setelah login."
+                : isCoach
+                  ? "*Coach akan memakai kata sandi ini saat portal coach diaktifkan."
+                  : "*Admin dapat membuat password mereka sendiri di sini."}
             </p>
             {errors.password && !isParent && <p className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
           </div>

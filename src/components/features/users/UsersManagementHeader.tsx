@@ -9,8 +9,8 @@ type UsersManagementHeaderProps = {
   searchTerm: string;
   onSearchTermChange: (value: string) => void;
   totalAccounts: number;
-  role: "PARENT" | "ADMIN";
-  onRoleChange: (role: "PARENT" | "ADMIN") => void;
+  role: "PARENT" | "ADMIN" | "COACH";
+  onRoleChange: (role: "PARENT" | "ADMIN" | "COACH") => void;
 };
 
 export function UsersManagementHeader({
@@ -20,16 +20,17 @@ export function UsersManagementHeader({
   role,
   onRoleChange,
 }: UsersManagementHeaderProps) {
-  const isParent = role === "PARENT";
+  const roleCopy =
+    role === "PARENT"
+      ? "Kelola akun orang tua dan akses mereka ke portal pemain."
+      : role === "COACH"
+        ? "Kelola akun coach, profil coach, dan kesiapan data assignment mereka."
+        : "Kelola akun admin yang memiliki akses ke sistem klub.";
 
   return (
     <>
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 md:flex-row md:items-center md:pb-8">
-        <p className="text-sm text-muted-foreground">
-          {isParent
-            ? "Kelola akun orang tua dan akses mereka ke portal pemain."
-            : "Kelola akun admin yang memiliki akses ke sistem klub."}
-        </p>
+        <p className="text-sm text-muted-foreground">{roleCopy}</p>
         <AddUserDialog role={role} />
       </div>
 
@@ -37,7 +38,7 @@ export function UsersManagementHeader({
         <button
           onClick={() => onRoleChange("PARENT")}
           className={`rounded-md px-4 py-2 text-xs font-medium transition-colors ${
-            isParent
+            role === "PARENT"
               ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-muted/40"
           }`}
@@ -47,12 +48,22 @@ export function UsersManagementHeader({
         <button
           onClick={() => onRoleChange("ADMIN")}
           className={`rounded-md px-4 py-2 text-xs font-medium transition-colors ${
-            !isParent
+            role === "ADMIN"
               ? "bg-primary text-primary-foreground"
               : "text-muted-foreground hover:bg-muted/40"
           }`}
         >
           Admin
+        </button>
+        <button
+          onClick={() => onRoleChange("COACH")}
+          className={`rounded-md px-4 py-2 text-xs font-medium transition-colors ${
+            role === "COACH"
+              ? "bg-primary text-primary-foreground"
+              : "text-muted-foreground hover:bg-muted/40"
+          }`}
+        >
+          Coach
         </button>
       </div>
 

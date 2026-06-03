@@ -8,6 +8,7 @@ import type { getUsersAction } from "@/actions/users";
 const ROLE_LABELS: Record<string, string> = {
   PARENT: "Orang Tua",
   ADMIN: "Admin",
+  COACH: "Coach",
 };
 
 type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
@@ -18,6 +19,12 @@ type UserAccountCardProps = {
 };
 
 export function UserAccountCard({ user, onViewDetail }: UserAccountCardProps) {
+  const displayName = user.name ?? user.username ?? "-";
+  const secondaryLabel =
+    user.role === "PARENT"
+      ? `${user._count.player} pemain tertaut`
+      : user.email || "Email belum diisi";
+
   return (
     <motion.div
       layout
@@ -30,14 +37,18 @@ export function UserAccountCard({ user, onViewDetail }: UserAccountCardProps) {
         <div className="size-8 rounded-full bg-muted border border-border/60 flex items-center justify-center shrink-0">
           <UserCircle2 className="size-4 text-muted-foreground" />
         </div>
-        <div className="flex items-center gap-2 min-w-0 flex-wrap">
-          <span className="font-heading font-bold text-sm text-foreground truncate">{user.name ?? user.username}</span>
-          {user.name && (
-            <span className="text-[10px] text-muted-foreground/50 font-mono truncate hidden sm:inline">@{user.username}</span>
-          )}
-          <span className="shrink-0 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
-            {ROLE_LABELS[user.role] ?? user.role}
-          </span>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 min-w-0 flex-wrap">
+            <span className="font-heading font-bold text-sm text-foreground truncate">{displayName}</span>
+            <span className="shrink-0 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+              {ROLE_LABELS[user.role] ?? user.role}
+            </span>
+          </div>
+          <div className="mt-0.5 flex items-center gap-2 min-w-0 flex-wrap text-[10px] text-muted-foreground/70">
+            <span className="font-mono truncate">@{user.username}</span>
+            <span className="hidden text-muted-foreground/40 sm:inline">•</span>
+            <span className="truncate">{secondaryLabel}</span>
+          </div>
         </div>
       </div>
 

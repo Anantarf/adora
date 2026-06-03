@@ -1,6 +1,6 @@
 "use client";
 
-import { KeyRound, Link2, Mail, Shield, Trash2, UserCircle2, Users } from "lucide-react";
+import { KeyRound, Link2, Mail, PencilLine, Shield, Trash2, UserCircle2, UserRoundCog, Users } from "lucide-react";
 import type { getUsersAction } from "@/actions/users";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 const ROLE_LABELS: Record<string, string> = {
   PARENT: "Orang Tua",
   ADMIN: "Admin",
+  COACH: "Coach",
 };
 
 type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
@@ -16,9 +17,11 @@ type AccountDetailDialogProps = {
   user: UserItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onEdit: (id: string) => void;
   onReset: (id: string) => void;
   onDelete: (id: string) => void;
   onManagePlayers: (id: string) => void;
+  onManageCoachProfile: (id: string) => void;
 };
 
 function DetailRow({
@@ -42,13 +45,16 @@ export function AccountDetailDialog({
   user,
   open,
   onOpenChange,
+  onEdit,
   onReset,
   onDelete,
   onManagePlayers,
+  onManageCoachProfile,
 }: AccountDetailDialogProps) {
   if (!user) return null;
 
   const isParent = user.role === "PARENT";
+  const isCoach = user.role === "COACH";
   const username = user.username ?? "-";
   const isProtected = username === "superadmin";
   const displayName = user.name ?? username;
@@ -111,7 +117,7 @@ export function AccountDetailDialog({
               </div>
             </div>
 
-            <div className={`mt-5 grid gap-5 ${isParent ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
+            <div className={`mt-5 grid gap-5 ${(isParent || isCoach) ? "lg:grid-cols-[minmax(0,1fr)_320px]" : ""}`}>
               {isParent && (
                 <div className="border-t border-border/40 pt-5 lg:pt-0 lg:border-t-0 lg:border-l lg:border-border/40 lg:pl-5 lg:order-2">
                   <div className="flex items-start justify-between gap-3">
@@ -149,8 +155,35 @@ export function AccountDetailDialog({
                 </div>
               )}
 
-              <div className={isParent ? "lg:order-1" : ""}>
-                <div className={`${isParent ? "" : "border-t border-border/40 pt-5"}`}>
+              {isCoach && (
+                <div className="border-t border-border/40 pt-5 lg:order-2 lg:border-t-0 lg:border-l lg:border-border/40 lg:pl-5 lg:pt-0">
+                  <div className="rounded-lg border border-border/50 px-3 py-3">
+                    <div className="flex items-start gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/50 bg-background">
+                        <UserRoundCog className="size-4 text-muted-foreground" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-foreground">Profil Coach</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Lengkapi biodata, lisensi, foto, dan assignment kelompok latihan coach ini.
+                        </p>
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="mt-4 h-9 w-full rounded-lg border-border/50 px-3 text-xs font-medium"
+                      onClick={() => onManageCoachProfile(user.id)}
+                    >
+                      <UserRoundCog className="mr-1.5 size-3.5" />
+                      Kelola Profil Coach
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              <div className={(isParent || isCoach) ? "lg:order-1" : ""}>
+                <div className={`${(isParent || isCoach) ? "" : "border-t border-border/40 pt-5"}`}>
                   <h4 className="text-sm font-semibold text-foreground">Aksi Akun</h4>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Jalankan perubahan sensitif dari sini agar daftar akun tetap ringkas.
@@ -159,6 +192,20 @@ export function AccountDetailDialog({
                   <div className="mt-4 flex flex-col gap-3">
                     {!isProtected ? (
                       <>
+                        <button
+                          type="button"
+                          onClick={() => onEdit(user.id)}
+                          className="flex items-start gap-3 rounded-lg border border-border/50 px-3 py-3 text-left transition-colors hover:bg-muted/20"
+                        >
+                          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/50 bg-background">
+                            <PencilLine className="size-4 text-muted-foreground" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground">Edit akun</p>
+                            <p className="text-xs text-muted-foreground">Perbarui nama, username, dan email akun ini.</p>
+                          </div>
+                        </button>
+
                         <button
                           type="button"
                           onClick={() => onReset(user.id)}
@@ -182,8 +229,8 @@ export function AccountDetailDialog({
                             <Trash2 className="size-4 text-destructive/70" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-sm font-medium text-foreground">Hapus akun</p>
-                            <p className="text-xs text-muted-foreground">Akun akan dinonaktifkan permanen jika tidak ada pemain aktif yang tertaut.</p>
+                            <p className="text-sm font-medium text-foreground">Nonaktifkan akun</p>
+                            <p className="text-xs text-muted-foreground">Akun akan dinonaktifkan dan relasi aktif akan dibersihkan sesuai aturan role.</p>
                           </div>
                         </button>
                       </>
