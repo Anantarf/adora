@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Users, KeyRound, Trash2, UserCircle2 } from "lucide-react";
+import { Eye, UserCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { getUsersAction } from "@/actions/users";
 
@@ -14,13 +14,10 @@ type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
 
 type UserAccountCardProps = {
   user: UserItem;
-  onReset: (id: string) => void;
-  onDelete: (id: string) => void;
-  onViewPlayers: (userId: string) => void;
+  onViewDetail: (id: string) => void;
 };
 
-export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: UserAccountCardProps) {
-  const isParent = user.role === "PARENT";
+export function UserAccountCard({ user, onViewDetail }: UserAccountCardProps) {
   return (
     <motion.div
       layout
@@ -41,38 +38,20 @@ export function UserAccountCard({ user, onReset, onDelete, onViewPlayers }: User
           <span className="shrink-0 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
             {ROLE_LABELS[user.role] ?? user.role}
           </span>
-          {isParent && (
-            <button
-              type="button"
-              onClick={() => onViewPlayers(user.id)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-md border px-2.5 py-1 text-[10px] font-medium transition-all ${
-                user._count.player > 0
-                  ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:border-primary/50"
-                  : "border-border/50 bg-background text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-              }`}
-            >
-              <Users className="size-3" /> {user._count.player} Pemain
-            </button>
-          )}
         </div>
       </div>
 
-      {/* Right: Actions */}
-      {user.username !== "superadmin" && (
-        <div className="flex items-center gap-1.5 shrink-0">
-          <Button
-            onClick={() => onReset(user.id)}
-            variant="ghost"
-            size="sm"
-            className="h-7 gap-1.5 rounded-lg px-2.5 text-[10px] font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
-          >
-            <KeyRound className="size-3" /> <span className="hidden sm:inline">Atur Sandi</span>
-          </Button>
-          <Button onClick={() => onDelete(user.id)} variant="ghost" size="icon" className="h-7 w-7 rounded-lg text-destructive/60 hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0">
-            <Trash2 className="size-3" />
-          </Button>
-        </div>
-      )}
+      <div className="flex items-center gap-1.5 shrink-0">
+        <Button
+          onClick={() => onViewDetail(user.id)}
+          variant="ghost"
+          size="sm"
+          className="h-8 gap-1.5 rounded-lg px-2.5 text-[11px] font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+        >
+          <Eye className="size-3.5" />
+          <span>Lihat Detail</span>
+        </Button>
+      </div>
     </motion.div>
   );
 }

@@ -99,6 +99,7 @@ export function MedicalDocsFields({
           assetKey="player_photo"
           onUploaded={(url) => setValue("photoUrl", url, { shouldDirty: true, shouldValidate: true })}
           error={errors.photoUrl?.message}
+          hint="Disarankan foto potret rasio 3:4, minimal 600 x 800 px agar tidak gepeng saat dipakai di detail pemain."
         />
 
         {/* Upload Tanda Tangan Elektronik */}
@@ -108,6 +109,7 @@ export function MedicalDocsFields({
           assetKey="player_signature"
           onUploaded={(url) => setValue("signatureUrl", url, { shouldDirty: true, shouldValidate: true })}
           error={errors.signatureUrl?.message}
+          hint="Gunakan gambar dengan area tanda tangan yang rapat agar tetap jelas saat ditampilkan kecil."
         />
       </div>
     </>

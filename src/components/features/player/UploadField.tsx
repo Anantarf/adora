@@ -12,6 +12,7 @@ interface UploadFieldProps {
   error?: string;
   assetKey: string;
   required?: boolean;
+  hint?: string;
 }
 
 async function uploadAsset(file: File, assetKey: string) {
@@ -39,6 +40,7 @@ export function UploadField({
   error,
   assetKey,
   required = false,
+  hint,
 }: UploadFieldProps) {
   const [isUploading, setIsUploading] = useState(false);
   const previewLabel = value ? "Ganti file" : "Unggah";
@@ -109,6 +111,7 @@ export function UploadField({
           </a>
         </div>
       ) : null}
+      {hint ? <p className="text-[11px] text-muted-foreground">{hint}</p> : null}
       {error ? <p className="text-destructive text-xs">{error}</p> : null}
     </div>
   );

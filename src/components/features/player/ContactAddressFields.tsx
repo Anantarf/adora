@@ -79,7 +79,8 @@ export function ContactAddressFields({
     }
   }, [sameParentAddress, fullAddress, setValue]);
 
-  const textareaClassName = "min-h-22 rounded-xl resize-none border border-border/50 bg-background/55 hover:bg-background/75 focus:bg-background focus:border-primary/80 focus:ring-4 focus:ring-primary/10 transition-all p-3 text-sm";
+  const textareaClassName =
+    "min-h-22 rounded-xl resize-none border border-border/50 bg-background/55 p-3 text-sm text-foreground transition-all hover:bg-background/75 focus:bg-background focus:border-primary/80 focus:ring-4 focus:ring-primary/10 dark:bg-background/55 dark:text-foreground dark:scheme-dark";
 
   return (
     <>
@@ -236,7 +237,7 @@ export function ContactAddressFields({
             {...register("ktpAddress")}
             readOnly={sameKtpAddress}
             placeholder={sameKtpAddress ? "Sama dengan alamat domisili" : "Isi jika berbeda dengan alamat domisili saat ini"}
-            className={`${textareaClassName} ${sameKtpAddress ? "opacity-60 cursor-not-allowed bg-muted/15 border-dashed border-border/80" : ""}`}
+            className={`${textareaClassName} ${sameKtpAddress ? "cursor-not-allowed border-dashed border-border/80 bg-muted/20 text-muted-foreground opacity-80 dark:bg-muted/20" : ""}`}
           />
         </div>
 
@@ -296,7 +297,7 @@ export function ContactAddressFields({
             {...register("parentAddress")}
             readOnly={sameParentAddress}
             placeholder={sameParentAddress ? "Sama dengan alamat domisili" : "Alamat orang tua/wali"}
-            className={`${textareaClassName} ${sameParentAddress ? "opacity-60 cursor-not-allowed bg-muted/15 border-dashed border-border/80" : ""}`}
+            className={`${textareaClassName} ${sameParentAddress ? "cursor-not-allowed border-dashed border-border/80 bg-muted/20 text-muted-foreground opacity-80 dark:bg-muted/20" : ""}`}
           />
         </div>
       </div>

@@ -7,6 +7,7 @@ import { UserAccountActionDialogs, type UserDialogState } from "@/components/fea
 import { UserAccountCard } from "@/components/features/users/UserAccountCard";
 import { UsersManagementHeader } from "@/components/features/users/UsersManagementHeader";
 import { LinkedPlayersModal } from "@/components/features/users/LinkedPlayersModal";
+import { AccountDetailDialog } from "@/components/features/users/AccountDetailDialog";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,6 +15,7 @@ export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeRole, setActiveRole] = useState<"PARENT" | "ADMIN">("PARENT");
   const [uiState, setUiState] = useState<UserDialogState>(null);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [linkedPlayersParentId, setLinkedPlayersParentId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
@@ -43,6 +45,7 @@ export default function UsersManagementPage() {
   const isParent = activeRole === "PARENT";
 
   const activeTargetId = uiState?.targetId || null;
+  const selectedUser = paginatedUsers.find((user) => user.id === selectedUserId) ?? null;
 
   const handleDeleteConfirm = async () => {
     if (!activeTargetId) return;
@@ -106,15 +109,33 @@ export default function UsersManagementPage() {
             <p className="text-sm font-medium text-muted-foreground">{isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : "admin"}`}</p>
             <p className="text-xs text-muted-foreground/75 text-center">{isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : "admin"} baru menggunakan tombol di bagian atas.`}</p>
           </div>
-        ) : (
+      ) : (
           paginatedUsers.map((user) => (
-            <UserAccountCard key={user.id} user={user} onReset={(id) => setUiState({ type: "reset", targetId: id })} onDelete={(id) => setUiState({ type: "delete", targetId: id })} onViewPlayers={(id) => setLinkedPlayersParentId(id)} />
+            <UserAccountCard key={user.id} user={user} onViewDetail={setSelectedUserId} />
           ))
         )}
       </div>
 
       {!isLoading && totalPages > 1 && <Pagination currentPage={currentServerPage} totalPages={totalPages} onPageChange={setCurrentPage} />}
 
+      <AccountDetailDialog
+        user={selectedUser}
+        open={!!selectedUser}
+        onOpenChange={(open) => {
+          if (!open) setSelectedUserId(null);
+        }}
+        onReset={(id) => {
+          setSelectedUserId(null);
+          setUiState({ type: "reset", targetId: id });
+        }}
+        onDelete={(id) => {
+          setSelectedUserId(null);
+          setUiState({ type: "delete", targetId: id });
+        }}
+        onManagePlayers={(id) => {
+          setLinkedPlayersParentId(id);
+        }}
+      />
       <UserAccountActionDialogs uiState={uiState} onOpenChange={handleDialogOpenChange} onConfirmDelete={handleDeleteConfirm} onConfirmReset={handleResetConfirm} isDeleting={isDeleting} isResetting={isResetting} />
       <LinkedPlayersModal
         parentId={linkedPlayersParentId}

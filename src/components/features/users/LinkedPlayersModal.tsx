@@ -67,7 +67,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
   return (
     <Dialog open={!!parentId} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md bg-card border-border/50 p-0 overflow-hidden flex flex-col max-h-[85vh]">
-        <DialogHeader className="px-5 pt-5 pb-4 shrink-0 border-b border-border/50">
+        <DialogHeader className="px-5 pt-5 pb-4 pr-12 shrink-0 border-b border-border/50">
           <DialogTitle className="font-heading text-lg uppercase tracking-wide text-foreground">{isAdding ? "Hubungkan Pemain" : "Pemain Terhubung"}</DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground mt-1.5">
             {isAdding ? "Cari dan pilih pemain untuk ditautkan ke akun ini." : parentName ? `Daftar pemain yang terhubung ke akun ${parentName}.` : "Daftar pemain yang terhubung ke akun ini."}

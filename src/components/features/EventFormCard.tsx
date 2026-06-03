@@ -18,6 +18,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 const eventSchema = z.object({
   eventId: z.string().optional(),
@@ -36,6 +37,11 @@ type EventFormValues = z.infer<typeof eventSchema>;
 interface EventFormCardProps {
   editEvent?: ScheduleEvent;
   onSuccess: () => void;
+  title?: string;
+  description?: string;
+  className?: string;
+  surface?: "card" | "plain";
+  hideCancel?: boolean;
 }
 
 function getBlankFormValues(): EventFormValues {
@@ -54,7 +60,15 @@ function getBlankFormValues(): EventFormValues {
   };
 }
 
-export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
+export function EventFormCard({
+  editEvent,
+  onSuccess,
+  title,
+  description,
+  className,
+  surface = "card",
+  hideCancel = false,
+}: EventFormCardProps) {
   const [date, setDate] = useState<Date | undefined>(getJakartaToday);
   const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
 
@@ -83,6 +97,12 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
   const homebaseId = watch("homebaseId");
   const selectedEventConfig = selectedType ? getEventConfig(selectedType) : null;
   const SelectedEventIcon = selectedEventConfig?.icon ?? CalendarDays;
+  const headingText = title ?? (isEditMode ? "Ubah Agenda" : "Tambah Agenda");
+  const descriptionText =
+    description
+    ?? (isEditMode
+      ? "Perbarui tanggal, kelompok, dan lokasi agenda tanpa meninggalkan halaman kerja."
+      : "Tambahkan agenda baru setelah mengecek sebaran jadwal dan bentrok di kalender.");
 
   useEffect(() => {
     if (editEvent) {
@@ -164,22 +184,17 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
     }
   };
 
-  return (
-    <Card className="rounded-xl border border-border/50 bg-card shadow-sm">
-      <div className="space-y-5 p-5">
+  const content = (
+    <div className={cn("space-y-5", surface === "card" ? "p-5" : className)}>
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <SelectedEventIcon className="size-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold text-foreground">
-                {isEditMode ? "Ubah Agenda" : "Tambah Agenda"}
-              </h2>
+              <h2 className="text-sm font-semibold text-foreground">{headingText}</h2>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Atur tanggal, kelompok, dan lokasi agenda klub dari satu form.
-            </p>
+            <p className="text-sm text-muted-foreground">{descriptionText}</p>
           </div>
-          {isEditMode ? (
+          {isEditMode && !hideCancel ? (
             <button
               type="button"
               onClick={handleCancel}
@@ -389,6 +404,15 @@ export function EventFormCard({ editEvent, onSuccess }: EventFormCardProps) {
           </div>
         </form>
       </div>
+  );
+
+  if (surface === "plain") {
+    return content;
+  }
+
+  return (
+    <Card className={cn("rounded-xl border border-border/50 bg-card shadow-sm", className)}>
+      {content}
     </Card>
   );
 }

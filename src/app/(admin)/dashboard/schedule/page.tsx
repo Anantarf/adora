@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { EventDeleteConfirm } from "@/components/features/EventDeleteConfirm";
+import { EventEditDialog } from "@/components/features/EventEditDialog";
 import { EventFormCard } from "@/components/features/EventFormCard";
 import { EventPreviewDialog } from "@/components/features/EventPreviewDialog";
 import { Button } from "@/components/ui/button";
@@ -77,7 +78,7 @@ export default function SchedulePage() {
       .slice(0, 5);
   }, [events]);
 
-  const editEvent = uiState?.type === "edit" ? uiState.event : undefined;
+  const editEvent = uiState?.type === "edit" ? uiState.event : null;
   const previewEvent = uiState?.type === "preview" ? uiState.event : null;
   const deleteTarget = uiState?.type === "delete" ? uiState.targetId : null;
 
@@ -90,161 +91,165 @@ export default function SchedulePage() {
           </p>
         </div>
 
-        <EventFormCard editEvent={editEvent} onSuccess={() => setUiState(null)} />
-
-        <div className="flex flex-col items-start gap-6 xl:flex-row">
-          <div className="min-w-0 flex-1">
-            <section className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
-              <div className="border-b border-border/50 px-5 py-4">
-                <div className="space-y-1">
-                  <h2 className="text-sm font-semibold text-foreground">Kalender Agenda</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Lihat penyebaran jadwal bulanan sebelum menambah atau mengubah agenda.
-                  </p>
-                </div>
-              </div>
-
-              <div className="w-full overflow-x-auto px-5 py-4">
-                <div className="min-w-0 md:min-w-160">
-                  <CalendarView events={mappedEvents} />
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 border-t border-border/50 px-5 py-4">
-                {Object.values(EVENT_TYPES).map((eventType) => {
-                  const Icon = eventType.icon;
-
-                  return (
-                    <div
-                      key={eventType.id}
-                      className="inline-flex items-center gap-2 rounded-md border border-border/50 bg-background/50 px-2.5 py-1.5 text-xs text-muted-foreground"
-                    >
-                      <span
-                        className="flex size-5 items-center justify-center rounded-full text-white"
-                        style={{ backgroundColor: eventType.color }}
-                      >
-                        <Icon className="size-3" />
-                      </span>
-                      <span className="font-medium">{eventType.label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          </div>
-
-          <aside className="flex w-full shrink-0 flex-col gap-3 xl:w-[24rem]">
-            <div className="space-y-1 px-1">
-              <h2 className="text-sm font-semibold text-foreground">Agenda Mendatang</h2>
+        <section className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
+          <div className="border-b border-border/50 px-5 py-4">
+            <div className="space-y-1">
+              <h2 className="text-sm font-semibold text-foreground">Kalender Agenda</h2>
               <p className="text-sm text-muted-foreground">
-                Fokus ke agenda terdekat yang masih perlu dipantau atau diubah.
+                Cek penyebaran jadwal dan potensi bentrok sebelum menambah atau mengubah agenda.
               </p>
             </div>
+          </div>
 
-            <div className="flex flex-col gap-2.5">
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-card px-4 py-10 text-sm text-muted-foreground shadow-sm">
-                  <Loader2 className="size-4 animate-spin text-primary" />
-                  Memuat agenda...
-                </div>
-              ) : isError ? (
-                <div className="rounded-xl border border-dashed border-destructive/30 bg-card px-4 py-10 text-center shadow-sm">
-                  <p className="text-sm font-semibold text-destructive">Gagal memuat agenda</p>
-                  <p className="mt-1 text-xs text-muted-foreground">Periksa koneksi lalu muat ulang halaman.</p>
-                </div>
-              ) : upcomingEvents.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-border/50 bg-card px-4 py-10 text-center shadow-sm">
-                  <CalendarDays className="mx-auto size-8 text-muted-foreground/30" />
-                  <p className="mt-3 text-sm font-medium text-muted-foreground">Belum ada agenda mendatang</p>
-                  <p className="mt-1 text-xs text-muted-foreground/75">
-                    Buat agenda baru dari form di atas.
-                  </p>
-                </div>
-              ) : (
-                upcomingEvents.map((event) => {
-                  const config = getEventConfig(event.type);
-
-                  return (
-                    <button
-                      key={event.id}
-                      type="button"
-                      onClick={() => setUiState({ type: "preview", event })}
-                      className="w-full rounded-xl border border-border/50 bg-card px-4 py-3 text-left shadow-sm transition-colors hover:border-primary/30 hover:bg-muted/20"
-                      style={{ borderLeftColor: config.color, borderLeftWidth: "4px" }}
-                    >
-                      <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
-                        <div className="min-w-0 space-y-1">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-medium leading-none"
-                              style={{
-                                backgroundColor: `${config.color}15`,
-                                color: config.color,
-                                borderColor: `${config.color}30`,
-                              }}
-                            >
-                              {config.label}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {format(new Date(event.date), "dd MMM yyyy - HH:mm", {
-                                locale: idLocale,
-                              })}
-                            </span>
-                          </div>
-
-                          <div className="truncate text-sm font-semibold text-foreground sm:text-base">
-                            {event.title}
-                          </div>
-
-                          {event.location ? (
-                            <div className="flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
-                              <MapPin className="size-3 shrink-0" />
-                              <span className="truncate">{event.location}</span>
-                            </div>
-                          ) : null}
-                        </div>
-
-                        <div className="flex flex-col items-start gap-2 sm:items-end">
-                          <span className="inline-flex rounded-md border border-border/50 bg-background/60 px-2 py-1 text-[10px] font-medium text-foreground">
-                            {getCountdownLabel(event.date)}
-                          </span>
-
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(eventObject) => {
-                                eventObject.stopPropagation();
-                                setUiState({ type: "edit", event });
-                              }}
-                              className="h-7 px-2 text-[11px] font-medium text-primary hover:bg-primary/10 hover:text-primary"
-                            >
-                              <Pencil className="mr-1 size-3" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(eventObject) => {
-                                eventObject.stopPropagation();
-                                setUiState({ type: "delete", targetId: event.id });
-                              }}
-                              className="h-7 px-2 text-[11px] font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
-                            >
-                              <Trash2 className="mr-1 size-3" />
-                              Hapus
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })
-              )}
+          <div className="grid gap-0 border-b border-border/50 xl:grid-cols-[minmax(0,1fr)_24rem] xl:divide-x xl:divide-border/50">
+            <div className="w-full overflow-x-auto px-5 py-4">
+              <div className="min-w-0 md:min-w-160">
+                <CalendarView events={mappedEvents} />
+              </div>
             </div>
-          </aside>
-        </div>
+
+            <aside className="flex flex-col gap-3 px-5 py-4">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-foreground">Agenda Mendatang</h3>
+                <p className="text-sm text-muted-foreground">
+                  Pantau agenda terdekat yang masih perlu ditinjau atau diubah.
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2.5">
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/40 px-4 py-10 text-sm text-muted-foreground">
+                    <Loader2 className="size-4 animate-spin text-primary" />
+                    Memuat agenda...
+                  </div>
+                ) : isError ? (
+                  <div className="rounded-xl border border-dashed border-destructive/30 bg-background/40 px-4 py-10 text-center">
+                    <p className="text-sm font-semibold text-destructive">Gagal memuat agenda</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Periksa koneksi lalu muat ulang halaman.</p>
+                  </div>
+                ) : upcomingEvents.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border/50 bg-background/40 px-4 py-10 text-center">
+                    <CalendarDays className="mx-auto size-8 text-muted-foreground/30" />
+                    <p className="mt-3 text-sm font-medium text-muted-foreground">Belum ada agenda mendatang</p>
+                    <p className="mt-1 text-xs text-muted-foreground/75">
+                      Tambahkan agenda baru dari form di bawah kalender.
+                    </p>
+                  </div>
+                ) : (
+                  upcomingEvents.map((event) => {
+                    const config = getEventConfig(event.type);
+
+                    return (
+                      <button
+                        key={event.id}
+                        type="button"
+                        onClick={() => setUiState({ type: "preview", event })}
+                        className="w-full rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/20"
+                        style={{ borderLeftColor: config.color, borderLeftWidth: "4px" }}
+                      >
+                        <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-medium leading-none"
+                                style={{
+                                  backgroundColor: `${config.color}15`,
+                                  color: config.color,
+                                  borderColor: `${config.color}30`,
+                                }}
+                              >
+                                {config.label}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {format(new Date(event.date), "dd MMM yyyy - HH:mm", {
+                                  locale: idLocale,
+                                })}
+                              </span>
+                            </div>
+
+                            <div className="truncate text-sm font-semibold text-foreground sm:text-base">
+                              {event.title}
+                            </div>
+
+                            {event.location ? (
+                              <div className="flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
+                                <MapPin className="size-3 shrink-0" />
+                                <span className="truncate">{event.location}</span>
+                              </div>
+                            ) : null}
+                          </div>
+
+                          <div className="flex flex-col items-start gap-2 sm:items-end">
+                            <span className="inline-flex rounded-md border border-border/50 bg-background/60 px-2 py-1 text-[10px] font-medium text-foreground">
+                              {getCountdownLabel(event.date)}
+                            </span>
+
+                            <div className="flex items-center gap-1">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(eventObject) => {
+                                  eventObject.stopPropagation();
+                                  setUiState({ type: "edit", event });
+                                }}
+                                className="h-7 px-2 text-[11px] font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                              >
+                                <Pencil className="mr-1 size-3" />
+                                Edit
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(eventObject) => {
+                                  eventObject.stopPropagation();
+                                  setUiState({ type: "delete", targetId: event.id });
+                                }}
+                                className="h-7 px-2 text-[11px] font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                              >
+                                <Trash2 className="mr-1 size-3" />
+                                Hapus
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })
+                )}
+              </div>
+            </aside>
+          </div>
+
+          <div className="flex flex-wrap gap-2 px-5 py-4">
+            {Object.values(EVENT_TYPES).map((eventType) => {
+              const Icon = eventType.icon;
+
+              return (
+                <div
+                  key={eventType.id}
+                  className="inline-flex items-center gap-2 rounded-md border border-border/50 bg-background/50 px-2.5 py-1.5 text-xs text-muted-foreground"
+                >
+                  <span
+                    className="flex size-5 items-center justify-center rounded-full text-white"
+                    style={{ backgroundColor: eventType.color }}
+                  >
+                    <Icon className="size-3" />
+                  </span>
+                  <span className="font-medium">{eventType.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <EventFormCard
+          onSuccess={() => setUiState(null)}
+          title="Tambah Agenda"
+          description="Tambahkan agenda baru setelah mengecek kalender dan agenda terdekat."
+        />
       </div>
+
+      <EventEditDialog event={editEvent} onClose={() => setUiState(null)} />
 
       <EventPreviewDialog
         event={previewEvent}

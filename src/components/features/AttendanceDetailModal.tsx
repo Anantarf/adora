@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { Loader2, CalendarDays, MapPin, CheckCircle2 } from "lucide-react";
@@ -38,7 +38,13 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
         if (data.isDraftAttendance) {
           setStatuses({});
         } else {
-          setStatuses(Object.fromEntries(data.attendances.map((a) => [a.playerId, a.status as AttendanceStatus])));
+          const uniqueStatuses = new Map<string, AttendanceStatus>();
+          data.attendances.forEach((attendance) => {
+            if (!uniqueStatuses.has(attendance.playerId)) {
+              uniqueStatuses.set(attendance.playerId, attendance.status as AttendanceStatus);
+            }
+          });
+          setStatuses(Object.fromEntries(uniqueStatuses));
         }
       })
       .catch(() => {
@@ -48,16 +54,31 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
       .finally(() => setLoading(false));
   }, [eventId, onClose]);
 
+  const uniqueAttendances = useMemo(() => {
+    if (!event) {
+      return [];
+    }
+
+    const uniqueByPlayerId = new Map<string, (typeof event.attendances)[number]>();
+    event.attendances.forEach((attendance) => {
+      if (!uniqueByPlayerId.has(attendance.playerId)) {
+        uniqueByPlayerId.set(attendance.playerId, attendance);
+      }
+    });
+
+    return Array.from(uniqueByPlayerId.values());
+  }, [event]);
+
   const handleMarkAllHadir = () => {
     if (!event) return;
-    setStatuses(Object.fromEntries(event.attendances.map((a) => [a.playerId, "HADIR"] as const)));
+    setStatuses(Object.fromEntries(uniqueAttendances.map((attendance) => [attendance.playerId, "HADIR"] as const)));
     toast.success("Semua pemain ditandai hadir.");
   };
 
   const handleSave = async () => {
     if (!event) return;
 
-    const unsetCount = event.attendances.filter((a) => !statuses[a.playerId]).length;
+    const unsetCount = uniqueAttendances.filter((attendance) => !statuses[attendance.playerId]).length;
     if (unsetCount > 0) {
       toast.error(`${unsetCount} pemain belum dipilih statusnya. Pilih semua sebelum menyimpan.`);
       return;
@@ -67,9 +88,9 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
     try {
       const result = await submitAttendanceAction({
         date: toYYYYMMDD(new Date(event.date)),
-        playerStatuses: event.attendances.map((a) => ({
-          playerId: a.playerId,
-          status: statuses[a.playerId]!,
+        playerStatuses: uniqueAttendances.map((attendance) => ({
+          playerId: attendance.playerId,
+          status: statuses[attendance.playerId]!,
         })),
         eventId,
       });
@@ -90,10 +111,10 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
     }
   };
 
-  const unsetCount = event?.attendances.filter((a) => !statuses[a.playerId]).length ?? 0;
+  const unsetCount = uniqueAttendances.filter((attendance) => !statuses[attendance.playerId]).length;
   const isFutureEvent = event ? new Date(event.date) > new Date() : false;
 
-  const stats = event?.attendances.reduce(
+  const stats = uniqueAttendances.reduce(
     (acc, attendance) => {
       const status = statuses[attendance.playerId];
       if (status) acc[status] += 1;
@@ -200,12 +221,12 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
               <div className="flex min-h-0 flex-1 flex-col space-y-3">
                 <div className="mb-2 flex items-center justify-between px-1">
                   <span className="text-xs font-medium text-muted-foreground">
-                    Pemain ({event.attendances.length})
+                    Pemain ({uniqueAttendances.length})
                   </span>
                 </div>
 
                 <div className="grid gap-2 overflow-y-auto overflow-x-hidden pr-1">
-                  {event.attendances.map((attendance) => {
+                  {uniqueAttendances.map((attendance) => {
                     const currentStatus = statuses[attendance.playerId] as AttendanceStatus | undefined;
                     const triggerStyle = currentStatus
                       ? STATUS_STYLE[currentStatus].badge

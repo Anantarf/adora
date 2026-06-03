@@ -24,9 +24,23 @@ interface ViewPlayerDialogProps {
   onDelete: () => void;
 }
 
+function buildReadableAddress(player: Player) {
+  return [
+    player.addressLine1 || player.address,
+    player.addressLine2,
+    player.city,
+    player.province,
+    player.postalCode,
+  ].filter(Boolean).join(", ");
+}
+
+function normalizeAddress(value?: string | null) {
+  return value?.trim().replace(/\s+/g, " ").toLowerCase() ?? "";
+}
+
 function DetailSection({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="space-y-3 rounded-xl border border-border/50 bg-background/50 p-4">
+    <section className="space-y-2 rounded-xl border border-border/50 bg-background/50 p-3">
       <div className="border-b border-border/40 pb-2">
         <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       </div>
@@ -39,19 +53,53 @@ function DetailRow({
   label,
   value,
   icon,
+  valueClassName,
 }: {
   label: string;
   value: React.ReactNode;
   icon?: React.ReactNode;
+  valueClassName?: string;
 }) {
   return (
-    <div className="grid grid-cols-12 items-start gap-2.5 py-2.5 first:pt-0 last:pb-0">
+    <div className="grid grid-cols-12 items-start gap-2 py-1.5 first:pt-0 last:pb-0">
       <dt className="col-span-4 flex items-center gap-2 text-xs font-medium text-muted-foreground">
         {icon}
         {label}
       </dt>
-      <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{value}</dd>
+      <dd className={`col-span-8 text-right sm:text-left wrap-break-word ${valueClassName ?? "text-sm font-semibold text-foreground"}`}>{value}</dd>
     </div>
+  );
+}
+
+function DocumentLinkCard({
+  href,
+  icon,
+  title,
+  description,
+}: {
+  href: string;
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="flex items-center justify-between gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2.5 transition-colors hover:border-primary/40 hover:bg-background/60"
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg border border-border/50 bg-background/60 text-primary">
+          {icon}
+        </div>
+        <div className="min-w-0">
+          <div className="text-sm font-semibold text-foreground">{title}</div>
+          <div className="text-xs text-muted-foreground">{description}</div>
+        </div>
+      </div>
+      <span className="shrink-0 text-xs font-medium text-primary">Lihat</span>
+    </a>
   );
 }
 
@@ -60,6 +108,11 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
   const { data: player, isLoading: isPlayerLoading } = usePlayerDetail(playerId, open);
   const resolvedPlayer = (player as unknown as Player) ?? null;
+  const homeAddress = resolvedPlayer ? buildReadableAddress(resolvedPlayer) : "";
+  const isKtpSameAsHome =
+    Boolean(homeAddress) && normalizeAddress(resolvedPlayer?.ktpAddress) === normalizeAddress(homeAddress);
+  const isParentAddressSameAsHome =
+    Boolean(homeAddress) && normalizeAddress(resolvedPlayer?.parentAddress) === normalizeAddress(homeAddress);
 
   const { mutateAsync: updatePlayer, isPending } = useUpdatePlayer();
 
@@ -95,6 +148,8 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
     }
   };
 
+  const editFormId = "player-detail-edit-form";
+
   return (
     <Dialog
       open={open}
@@ -103,30 +158,81 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
         onOpenChange(val);
       }}
     >
-      <DialogContent className="sm:max-w-3xl bg-card border-border/50 transition-all duration-base">
-        <DialogHeader className="space-y-2.5">
+      <DialogContent className="flex h-[min(92vh,52rem)] max-h-[92vh] flex-col overflow-hidden border-border/50 bg-card p-0 transition-all duration-base sm:max-w-4xl">
+        <DialogHeader className="space-y-2 border-b border-border/50 px-5 py-3 pr-12">
           <DialogTitle className="text-lg font-heading tracking-wide text-foreground text-left">
             {isEditing ? "Ubah Profil Pemain" : isPlayerLoading ? "Memuat Detail Pemain" : "Detail Pemain"}
           </DialogTitle>
           {!isEditing && resolvedPlayer && (
-            <dl className="rounded-lg border border-border/50 bg-background/40 divide-y divide-border/40">
-              <div className="grid grid-cols-12 gap-2 px-3 py-2">
-                <dt className="col-span-4 text-xs font-medium text-muted-foreground">Nama</dt>
-                <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{buildPlayerFullName(resolvedPlayer.firstName, resolvedPlayer.lastName) || resolvedPlayer.name}</dd>
+            <div className="flex items-start gap-4 rounded-lg border border-border/50 bg-background/40 p-3">
+              <div className="shrink-0">
+                {resolvedPlayer.photoUrl ? (
+                  <a
+                    href={resolvedPlayer.photoUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="block overflow-hidden rounded-lg border border-border/50 bg-background/60 transition-colors hover:border-primary/40"
+                    aria-label="Lihat pas foto pemain"
+                  >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={resolvedPlayer.photoUrl}
+                      alt={`Pas foto ${buildPlayerFullName(resolvedPlayer.firstName, resolvedPlayer.lastName) || resolvedPlayer.name}`}
+                      className="h-28 w-21 object-cover object-top"
+                    />
+                  </a>
+                ) : (
+                  <div className="flex h-28 w-21 items-center justify-center rounded-lg border border-dashed border-border/50 bg-background/40 px-2 text-center text-[11px] font-medium text-muted-foreground">
+                    Tidak ada foto
+                  </div>
+                )}
               </div>
-              <div className="grid grid-cols-12 gap-2 px-3 py-2">
-                <dt className="col-span-4 text-xs font-medium text-muted-foreground">Kelompok</dt>
-                <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
-                  {resolvedPlayer.group ? resolvedPlayer.group.name : "Belum masuk kelompok"}
-                </dd>
-              </div>
-            </dl>
+
+              <dl className="min-w-0 flex-1 divide-y divide-border/40 rounded-lg border border-border/40 bg-background/30">
+                <div className="grid grid-cols-12 gap-2 px-3 py-1.5">
+                  <dt className="col-span-4 text-xs font-medium text-muted-foreground">Nama</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">{buildPlayerFullName(resolvedPlayer.firstName, resolvedPlayer.lastName) || resolvedPlayer.name}</dd>
+                </div>
+                <div className="grid grid-cols-12 gap-2 px-3 py-1.5">
+                  <dt className="col-span-4 text-xs font-medium text-muted-foreground">Kelompok</dt>
+                  <dd className="col-span-8 text-sm font-semibold text-foreground text-right sm:text-left wrap-break-word">
+                    {resolvedPlayer.group ? resolvedPlayer.group.name : "Belum masuk kelompok"}
+                  </dd>
+                </div>
+              </dl>
+            </div>
           )}
+          {!isEditing && resolvedPlayer ? (
+            <div className="flex flex-wrap gap-2">
+              {calculateAgeFromDate(resolvedPlayer.dateOfBirth) !== null ? (
+                <span className="inline-flex items-center rounded-md border border-border/50 bg-background/40 px-2 py-1 text-xs font-medium text-foreground">
+                  {calculateAgeFromDate(resolvedPlayer.dateOfBirth)} tahun
+                </span>
+              ) : null}
+              {resolvedPlayer.gender ? (
+                <span className="inline-flex items-center rounded-md border border-border/50 bg-background/40 px-2 py-1 text-xs font-medium text-foreground">
+                  {resolvedPlayer.gender}
+                </span>
+              ) : null}
+              {resolvedPlayer.schoolOrigin ? (
+                <span className="inline-flex items-center rounded-md border border-border/50 bg-background/40 px-2 py-1 text-xs font-medium text-foreground">
+                  {resolvedPlayer.schoolOrigin}
+                </span>
+              ) : null}
+              {resolvedPlayer.user?.username ? (
+                <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                  <Link2 className="size-3" />
+                  {resolvedPlayer.user.username}
+                </span>
+              ) : null}
+            </div>
+          ) : null}
         </DialogHeader>
 
+        <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto px-5 py-3 pr-3">
         {isEditing ? (
           resolvedPlayer ? (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5 pt-1.5">
+          <form id={editFormId} onSubmit={handleSubmit(onSubmit)} className="space-y-3 pt-1">
             <PlayerFormFields
               register={register}
               control={control}
@@ -137,24 +243,6 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
               step="all"
               inputClassName="h-10 bg-background/50"
             />
-
-            <div className="pt-3 flex items-center gap-1.5 border-t border-border/50">
-              <Button
-                type="button"
-                variant="outline"
-                className="flex-1 h-10 font-semibold border-border/60"
-                onClick={() => {
-                  setIsEditing(false);
-                  reset(playerToFormValues(resolvedPlayer as Player));
-                }}
-              >
-                Batal
-              </Button>
-              <Button type="submit" disabled={isPending} className="flex-2 h-10 font-semibold">
-                {isPending ? <Loader2 className="animate-spin size-3.5 sm:size-4 mr-2" /> : <Edit2 className="size-3.5 sm:size-4 mr-2" />}
-                Simpan Perubahan
-              </Button>
-            </div>
           </form>
           ) : (
             <div className="py-10 flex items-center justify-center text-muted-foreground">
@@ -169,7 +257,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
               </div>
             ) : (
               <>
-            <div className="py-1.5">
+            <div className="py-1">
               <div className="space-y-4">
                 <DetailSection title="Data Pribadi">
                   <DetailRow
@@ -188,77 +276,118 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                 <DetailSection title="Kontak dan Alamat">
                   <DetailRow
                     label="Alamat Rumah"
-                    value={[resolvedPlayer.addressLine1 || resolvedPlayer.address, resolvedPlayer.addressLine2, resolvedPlayer.city, resolvedPlayer.province, resolvedPlayer.postalCode].filter(Boolean).join(", ") || "-"}
+                    value={buildReadableAddress(resolvedPlayer) || "-"}
+                    valueClassName="text-sm font-medium leading-relaxed text-foreground/85"
                   />
-                  <DetailRow label="Alamat KTP/KK" value={resolvedPlayer.ktpAddress || "-"} />
+                  <DetailRow
+                    label="Alamat KTP/KK"
+                    value={
+                      !resolvedPlayer.ktpAddress
+                        ? "-"
+                        : isKtpSameAsHome
+                          ? "Sama dengan alamat rumah"
+                          : resolvedPlayer.ktpAddress
+                    }
+                    valueClassName={
+                      !resolvedPlayer.ktpAddress
+                        ? "text-sm font-medium text-foreground"
+                        : isKtpSameAsHome
+                          ? "text-sm font-medium text-muted-foreground"
+                          : "text-sm font-medium leading-relaxed text-foreground/85"
+                    }
+                  />
                   <DetailRow label="Email" value={resolvedPlayer.email || "-"} />
                   <DetailRow label="No. Telf" icon={<Phone className="size-3.5" />} value={resolvedPlayer.phoneNumber || "-"} />
                   <DetailRow label="Instagram" value={resolvedPlayer.instagram || "-"} />
+                  <DetailRow label="Nama Orang Tua" value={resolvedPlayer.parentName || "-"} />
+                  <DetailRow label="No. Telf. Orang Tua" value={resolvedPlayer.parentPhoneNumber || "-"} />
                   <DetailRow
-                    label="Nama Orang Tua"
+                    label="Alamat Orang Tua"
                     value={
-                      <>
-                        {resolvedPlayer.parentName || "-"}
-                        {resolvedPlayer.user && (
-                          <span className="ml-2 inline-flex items-center gap-1 rounded border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
-                            <Link2 className="size-2.5" />
-                            {resolvedPlayer.user.username ?? resolvedPlayer.user.id}
-                          </span>
-                        )}
-                      </>
+                      !resolvedPlayer.parentAddress
+                        ? "-"
+                        : isParentAddressSameAsHome
+                          ? "Sama dengan alamat rumah"
+                          : resolvedPlayer.parentAddress
+                    }
+                    valueClassName={
+                      !resolvedPlayer.parentAddress
+                        ? "text-sm font-medium text-foreground"
+                        : isParentAddressSameAsHome
+                          ? "text-sm font-medium text-muted-foreground"
+                          : "text-sm font-medium leading-relaxed text-foreground/85"
                     }
                   />
-                  <DetailRow label="No. Telf. Orang Tua" value={resolvedPlayer.parentPhoneNumber || "-"} />
-                  <DetailRow label="Alamat Orang Tua" value={resolvedPlayer.parentAddress || "-"} />
                 </DetailSection>
 
                 <DetailSection title="Medis dan Dokumen">
                   <DetailRow label="Riwayat Penyakit" value={resolvedPlayer.hasMedicalCondition ? resolvedPlayer.medicalConditionDetail || resolvedPlayer.medicalHistory || "-" : "Tidak ada"} />
-                  <DetailRow
-                    label="Pas Foto"
-                    value={
-                      resolvedPlayer.photoUrl ? (
-                        <a href={resolvedPlayer.photoUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-                          <ImageIcon className="size-3.5" /> Lihat Pas Foto
-                        </a>
-                      ) : (
-                        "-"
-                      )
-                    }
-                  />
-                  <DetailRow
-                    label="Tanda Tangan"
-                    value={
-                      resolvedPlayer.signatureUrl ? (
-                        <a href={resolvedPlayer.signatureUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-primary hover:underline">
-                          <PenLine className="size-3.5" /> Lihat Tanda Tangan
-                        </a>
-                      ) : (
-                        "-"
-                      )
-                    }
-                  />
+                  {resolvedPlayer.photoUrl || resolvedPlayer.signatureUrl ? (
+                    <div className="space-y-2 pt-2">
+                      {resolvedPlayer.photoUrl ? (
+                        <DocumentLinkCard
+                          href={resolvedPlayer.photoUrl}
+                          icon={<ImageIcon className="size-4" />}
+                          title="Pas Foto"
+                          description="Buka lampiran pas foto pemain."
+                        />
+                      ) : null}
+                      {resolvedPlayer.signatureUrl ? (
+                        <DocumentLinkCard
+                          href={resolvedPlayer.signatureUrl}
+                          icon={<PenLine className="size-4" />}
+                          title="Tanda Tangan"
+                          description="Buka lampiran tanda tangan pemain."
+                        />
+                      ) : null}
+                    </div>
+                  ) : (
+                    <DetailRow label="Lampiran" value="Belum ada pas foto atau tanda tangan." />
+                  )}
                 </DetailSection>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-border/50 flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-1.5">
-              <Button type="button" variant="outline" className="h-10 px-4 font-semibold border-border/60" onClick={() => onOpenChange(false)}>
-                Tutup
-              </Button>
-              <div className="flex items-center gap-1.5">
-                <Button type="button" className="h-10 px-4.5 font-semibold" onClick={() => setIsEditing(true)}>
-                  <Edit2 className="size-4 mr-2" /> Edit Profil
-                </Button>
-                <Button type="button" variant="outline" className="h-10 px-4 font-semibold border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={onDelete}>
-                  <Trash2 className="size-4 mr-2" /> Hapus
-                </Button>
               </div>
             </div>
               </>
             )}
           </>
         )}
+        </div>
+
+        {isEditing ? (
+          resolvedPlayer ? (
+            <div className="flex shrink-0 items-center gap-1.5 border-t border-border/50 bg-card px-5 py-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="h-10 flex-1 border-border/60 font-semibold"
+                onClick={() => {
+                  setIsEditing(false);
+                  reset(playerToFormValues(resolvedPlayer));
+                }}
+              >
+                Batal
+              </Button>
+              <Button type="submit" form={editFormId} disabled={isPending} className="h-10 flex-[2] font-semibold">
+                {isPending ? <Loader2 className="mr-2 size-3.5 animate-spin sm:size-4" /> : <Edit2 className="mr-2 size-3.5 sm:size-4" />}
+                Simpan Perubahan
+              </Button>
+            </div>
+          ) : null
+        ) : resolvedPlayer ? (
+          <div className="flex shrink-0 flex-col-reverse gap-1.5 border-t border-border/50 bg-card px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <Button type="button" variant="outline" className="h-10 border-border/60 px-4 font-semibold" onClick={() => onOpenChange(false)}>
+              Tutup
+            </Button>
+            <div className="flex items-center gap-1.5">
+              <Button type="button" className="h-10 px-4.5 font-semibold" onClick={() => setIsEditing(true)}>
+                <Edit2 className="mr-2 size-4" /> Edit Profil
+              </Button>
+              <Button type="button" variant="outline" className="h-10 border-destructive/40 px-4 font-semibold text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={onDelete}>
+                <Trash2 className="mr-2 size-4" /> Hapus
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </DialogContent>
     </Dialog>
   );

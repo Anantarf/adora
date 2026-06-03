@@ -131,7 +131,6 @@ export function EventPreviewDialog({ event, onClose, onEdit }: EventPreviewDialo
                 type="button"
                 onClick={() => {
                   onEdit(event);
-                  onClose();
                 }}
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/10 py-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/20"
               >
