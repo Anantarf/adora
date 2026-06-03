@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Loader2, Upload, UserRoundCog } from "lucide-react";
 import { toast } from "sonner";
 
-import type { getUsersAction } from "@/actions/users";
 import { useCoachProfileByUser, useUpsertCoachProfile } from "@/hooks/use-coach-profiles";
 import { useGroups } from "@/hooks/use-groups";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toUserErrorMessage } from "@/lib/utils";
-
-type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
+import type { UserItem } from "./UserAccountCard";
 
 async function uploadAsset(file: File, assetKey: string) {
   const formData = new FormData();

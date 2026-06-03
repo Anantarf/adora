@@ -6,11 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, PencilLine } from "lucide-react";
 
-import type { getUsersAction } from "@/actions/users";
 import { useUpdateUser } from "@/hooks/use-users";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import type { UserItem } from "./UserAccountCard";
 
 const schema = z.object({
   name: z.string().min(1, "Nama tidak boleh kosong."),
@@ -21,7 +21,6 @@ const schema = z.object({
   email: z.string().email("Email tidak valid").optional().or(z.literal("")),
 });
 
-type UserItem = Awaited<ReturnType<typeof getUsersAction>>[number];
 type FormValues = z.infer<typeof schema>;
 
 export function EditUserDialog({

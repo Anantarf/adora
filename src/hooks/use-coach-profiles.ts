@@ -8,10 +8,36 @@ import {
   upsertCoachProfileAction,
 } from "@/actions/coach-profiles";
 
+export type CoachUserWithProfile = {
+  id: string;
+  name: string | null;
+  username: string | null;
+  email: string | null;
+  coachProfile: {
+    id: string;
+    fullName: string;
+    placeOfBirth: string | null;
+    dateOfBirth: Date | null | string;
+    gender: string | null;
+    photoUrl: string | null;
+    licenseUrl: string | null;
+    isDeleted: boolean;
+    assignments: Array<{
+      group: {
+        id: string;
+        name: string;
+      };
+    }>;
+  } | null;
+};
+
 export const useCoachProfileByUser = (userId: string | null, enabled = true) =>
-  useQuery({
+  useQuery<CoachUserWithProfile>({
     queryKey: ["coach-profile", userId],
-    queryFn: () => getCoachProfileByUserAction(userId!),
+    queryFn: async () => {
+      const res = await getCoachProfileByUserAction(userId!);
+      return res as CoachUserWithProfile;
+    },
     enabled: enabled && !!userId,
     staleTime: 1000 * 60 * 5,
   });
