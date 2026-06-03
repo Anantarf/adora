@@ -13,9 +13,9 @@ function PhotoSlot({ label, desc, image, color = "orange", className = "" }: { l
     >
       {image ? (
         <>
-          <Image src={image} alt={label} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw" className="object-cover group-hover:scale-105 transition-transform duration-700" />
+          <Image src={image} alt={label} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 33vw, 25vw" quality={75} className="object-cover opacity-95 transition-transform duration-700 group-hover:scale-105" />
           {/* Always visible gradient */}
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/74 via-black/14 to-transparent" />
           {/* Caption — always visible, enhanced on hover */}
           <div className="absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 group-hover:pb-5">
             <p className="font-heading font-black text-xs text-brand-yellow uppercase italic tracking-widest mb-1">{label}</p>

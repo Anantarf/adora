@@ -15,7 +15,9 @@ import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGroups } from "@/hooks/use-groups";
@@ -330,73 +332,9 @@ export default function StatisticsPage() {
       </div>
 
       <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
-        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
-            {selectedPeriod ? periodDisplayLabel(selectedPeriod) : "Belum pilih periode"}
-          </span>
-          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
-            {activeGroupName}
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:flex md:items-end">
-          <div className="flex w-full flex-col gap-1.5 md:min-w-[16rem]">
-            <div className="flex items-center justify-between gap-3 px-1">
-              <label className="text-xs font-medium text-muted-foreground">Periode Evaluasi</label>
-              <div className="flex items-center gap-1.5">
-                {selectedPeriod && !selectedPeriod.isActive ? (
-                  <button
-                    onClick={() => handleSetActive(selectedPeriod.id)}
-                    className="rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary transition-colors hover:bg-primary/15"
-                  >
-                    Aktifkan
-                  </button>
-                ) : null}
-                {selectedPeriod ? (
-                  <AlertDialog>
-                    <AlertDialogTrigger className="rounded p-1.5 text-muted-foreground outline-none transition-colors hover:bg-destructive/10 hover:text-destructive">
-                      <Trash2 className="size-3.5" />
-                    </AlertDialogTrigger>
-                    <AlertDialogContent className="sm:max-w-md border-border/50 bg-card">
-                      <AlertDialogHeader>
-                        <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
-                          Hapus Periode?
-                        </AlertDialogTitle>
-                        <AlertDialogDescription className="flex flex-col gap-2">
-                          <span className="text-sm font-bold text-destructive">
-                            Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.
-                          </span>
-                          {canDeletePeriod ? (
-                            <span className="text-xs leading-relaxed text-muted-foreground">
-                              Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus
-                              periode yang tepat.
-                            </span>
-                          ) : (
-                            <span className="text-xs leading-relaxed text-amber-500/80">
-                              Periode ini memiliki{" "}
-                              {statsSummary.published + statsSummary.draft} data nilai pemain.
-                              Kosongkan semua data nilai terlebih dahulu sebelum menghapus
-                              periode.
-                            </span>
-                          )}
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Batal</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={handleDeletePeriod}
-                          disabled={!canDeletePeriod}
-                          className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
-                        >
-                          Hapus Periode
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                  </AlertDialog>
-                ) : null}
-              </div>
-            </div>
-            <div className="relative w-full">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <div className="relative min-w-0 flex-1 sm:min-w-[19rem] sm:flex-none">
               <CalendarRange className="absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
               <Select
                 value={selectedPeriodId ?? ""}
@@ -428,7 +366,7 @@ export default function StatisticsPage() {
                 <SelectContent
                   alignItemWithTrigger={false}
                   sideOffset={6}
-                  className="max-h-60 rounded-xl border-border/50"
+                  className="max-h-72 rounded-xl border-border/50"
                 >
                   {periods?.map((period) => (
                     <SelectItem key={period.id} value={period.id}>
@@ -442,14 +380,81 @@ export default function StatisticsPage() {
                       </div>
                     </SelectItem>
                   ))}
+
+                  {selectedPeriod ? (
+                    <>
+                      <Separator className="my-2" />
+                      <div className="px-2 pb-1 pt-0.5">
+                        <div className="mb-2 px-2 text-[10px] font-medium text-muted-foreground">
+                          Aksi Periode
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          {!selectedPeriod.isActive ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="h-8 justify-start px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                              onClick={(event) => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                void handleSetActive(selectedPeriod.id);
+                              }}
+                            >
+                              Aktifkan periode ini
+                            </Button>
+                          ) : null}
+                          <AlertDialog>
+                            <AlertDialogTrigger
+                              className="flex h-8 items-center rounded-md px-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              Hapus periode
+                            </AlertDialogTrigger>
+                            <AlertDialogContent className="sm:max-w-md border-border/50 bg-card">
+                              <AlertDialogHeader>
+                                <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
+                                  Hapus Periode?
+                                </AlertDialogTitle>
+                                <AlertDialogDescription className="flex flex-col gap-2">
+                                  <span className="text-sm font-bold text-destructive">
+                                    Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.
+                                  </span>
+                                  {canDeletePeriod ? (
+                                    <span className="text-xs leading-relaxed text-muted-foreground">
+                                      Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus
+                                      periode yang tepat.
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs leading-relaxed text-amber-500/80">
+                                      Periode ini memiliki{" "}
+                                      {statsSummary.published + statsSummary.draft} data nilai pemain.
+                                      Kosongkan semua data nilai terlebih dahulu sebelum menghapus
+                                      periode.
+                                    </span>
+                                  )}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Batal</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={handleDeletePeriod}
+                                  disabled={!canDeletePeriod}
+                                  className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
+                                >
+                                  Hapus Periode
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                    </>
+                  ) : null}
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="flex w-full flex-col gap-1.5 md:min-w-56">
-            <label className="text-xs font-medium text-muted-foreground">Filter Kelompok</label>
-            <div className="relative">
+            <div className="relative min-w-0 flex-1 sm:min-w-56 sm:flex-none">
               <SelectIcon className="absolute left-3 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
               <Select value={activeGroup} onValueChange={(value) => setActiveGroup(value ?? "all")}>
                 <SelectTrigger className="h-11 border-border/50 bg-background/50 pl-9 focus-visible:ring-primary/30">
@@ -474,30 +479,24 @@ export default function StatisticsPage() {
               </Select>
             </div>
           </div>
-        </div>
 
-        {selectedPeriodId && !statsLoading ? (
-            <div className="mt-4 border-t border-border/40 pt-4">
-            <div className="flex flex-wrap gap-2">
-              <div className="rounded-md border border-border/40 bg-background/40 px-3 py-2">
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  Selesai
-                </p>
-                <p className="mt-1 text-sm font-semibold tabular-nums text-primary">
+          {selectedPeriodId && !statsLoading ? (
+            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
+                <span className="text-[11px] font-medium text-muted-foreground">Selesai</span>
+                <span className="text-sm font-semibold tabular-nums text-primary">
                   {statsSummary.published}
-                </p>
+                </span>
               </div>
-              <div className="rounded-md border border-border/40 bg-background/40 px-3 py-2">
-                <p className="text-[11px] font-medium text-muted-foreground">
-                  Draft
-                </p>
-                <p className="mt-1 text-sm font-semibold tabular-nums text-foreground">
+              <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
+                <span className="text-[11px] font-medium text-muted-foreground">Draft</span>
+                <span className="text-sm font-semibold tabular-nums text-foreground">
                   {statsSummary.draft}
-                </p>
+                </span>
               </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {!selectedPeriodId ? (

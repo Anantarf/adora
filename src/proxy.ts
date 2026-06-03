@@ -2,22 +2,30 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-// unsafe-inline masih dipakai untuk kompatibilitas hydration Next.js saat ini.
-const CSP = [
-  "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co",
-  "connect-src 'self' ws: wss: https://*.supabase.co",
-  "font-src 'self'",
-  "frame-src 'none'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'self'",
-].join("; ");
+function buildCsp() {
+  const scriptSrc = ["'self'", "'unsafe-inline'"];
+
+  if (process.env.NODE_ENV !== "production") {
+    scriptSrc.push("'unsafe-eval'");
+  }
+
+  return [
+    "default-src 'self'",
+    `script-src ${scriptSrc.join(" ")}`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob: https://*.supabase.co",
+    "connect-src 'self' ws: wss: https://*.supabase.co",
+    "font-src 'self'",
+    "frame-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
 
 export default async function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+  const csp = buildCsp();
 
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
@@ -31,7 +39,7 @@ export default async function proxy(request: NextRequest) {
   securedResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   securedResponse.headers.set("X-XSS-Protection", "1; mode=block");
   securedResponse.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  securedResponse.headers.set("Content-Security-Policy", CSP);
+  securedResponse.headers.set("Content-Security-Policy", csp);
 
   if (process.env.NODE_ENV === "production") {
     securedResponse.headers.set(

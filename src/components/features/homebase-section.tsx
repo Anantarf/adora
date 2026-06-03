@@ -58,7 +58,14 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                     {/* Background Layer */}
                     <div className="absolute inset-0 z-0">
                       {imageUrl ? (
-                        <Image src={imageUrl} alt={name} fill sizes="(max-width: 768px) 100vw, 50vw" className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                        <Image
+                          src={imageUrl}
+                          alt={name}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          quality={75}
+                          className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        />
                       ) : (
                         <>
                           <div className="absolute inset-0 pattern-halftone opacity-30 z-0" />
@@ -70,7 +77,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                     </div>
 
                     {/* Gradient Overlay for Text Readability (Lighter) */}
-                    <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/20 to-transparent z-10" />
+                    <div className="absolute inset-0 bg-linear-to-t from-black/84 via-black/14 to-transparent z-10" />
 
                     {/* Overlay Text Content */}
                     <div className="absolute inset-0 p-5 lg:p-6 flex flex-col justify-end z-20">

@@ -15,12 +15,12 @@ export function LandingHeroSection({ registrationYearText }: LandingHeroSectionP
           alt="Tim ADORA Basketball Club Depok - Pelatihan Basket Usia Dini"
           fill
           sizes="100vw"
-          quality={40}
-          className="object-cover object-center opacity-30 mix-blend-luminosity"
+          quality={75}
+          className="object-cover object-center opacity-55"
           preload
         />
-        <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/80 to-brand-purple/40 mix-blend-multiply z-10" />
-        <div className="absolute inset-0 pattern-halftone opacity-20 z-10" />
+        <div className="absolute inset-0 bg-linear-to-t from-brand-purple via-brand-purple/72 to-brand-purple/28 z-10" />
+        <div className="absolute inset-0 pattern-halftone opacity-12 z-10" />
       </div>
 
       <div className="relative z-20 container mx-auto px-4 flex flex-col items-center text-center">

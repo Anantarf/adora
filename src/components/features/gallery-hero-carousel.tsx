@@ -42,9 +42,9 @@ export function GalleryHeroCarousel() {
         {slide.image ? (
           <>
             {/* Real Photo Background */}
-            <Image src={slide.image} alt={slide.label} fill sizes="(max-width: 768px) 100vw, 40vw" quality={75} className="object-cover object-center" />
+            <Image src={slide.image} alt={slide.label} fill sizes="(max-width: 768px) 100vw, 40vw" quality={75} className="object-cover object-center opacity-95" />
             {/* Gradient overlay so text is readable */}
-            <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent z-10" />
+            <div className="absolute inset-0 bg-linear-to-t from-black/74 via-black/16 to-transparent z-10" />
             {/* Caption on hover or always at bottom */}
             <div className="absolute bottom-0 left-0 right-0 p-4 z-20">
               <p className={`text-brand-yellow font-heading font-black text-sm md:text-base uppercase tracking-widest italic mb-1`}>{slide.label}</p>
