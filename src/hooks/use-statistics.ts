@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getStatHistoryAction, getStatsByPeriodAction, submitStatisticAction } from "@/actions/stats";
 import { QUERY_KEYS } from "@/lib/constants";
 import type { MetricsJson } from "@/types/dashboard";
+import type { MetricsJsonV2 } from "@/lib/evaluation-rules";
 
 export const useStatsByPeriod = (periodId: string | null) =>
   useQuery({
@@ -28,8 +29,9 @@ export const useSubmitStatistic = () => {
     mutationFn: (data: {
       playerId: string;
       periodId: string;
-      metrics: MetricsJson;
+      metrics: MetricsJson | MetricsJsonV2 | Record<string, number>;
       status: "Draft" | "Published";
+      notes?: string;
     }) => submitStatisticAction(data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({

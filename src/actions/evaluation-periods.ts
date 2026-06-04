@@ -7,6 +7,28 @@ import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import type { EvaluationPeriod } from "@/types/dashboard";
 import { acquireAdvisoryLock, withSerializableTransaction } from "@/lib/db-concurrency";
+import { DEFAULT_EVALUATION_CONFIG_V2, normalizeEvaluationConfig } from "@/lib/evaluation-rules";
+
+const EVALUATION_CONFIG_SETTING_KEY = "evaluation_rules_v2";
+
+async function getActiveEvaluationConfig(
+  tx: Pick<typeof prisma, "clubSetting">,
+) {
+  const setting = await tx.clubSetting.findUnique({
+    where: { key: EVALUATION_CONFIG_SETTING_KEY },
+    select: { value: true },
+  });
+
+  if (!setting?.value) {
+    return DEFAULT_EVALUATION_CONFIG_V2;
+  }
+
+  try {
+    return normalizeEvaluationConfig(JSON.parse(setting.value));
+  } catch {
+    return DEFAULT_EVALUATION_CONFIG_V2;
+  }
+}
 
 // 1. List all periods
 export async function getPeriodsAction(): Promise<EvaluationPeriod[]> {
@@ -26,6 +48,7 @@ export async function createPeriodAction(data: { name: string; startDate: string
   const userId = session.user.id ?? null;
 
   const period = await withSerializableTransaction(async (tx) => {
+    const evaluationConfig = await getActiveEvaluationConfig(tx);
     if (data.setActive) {
       await acquireAdvisoryLock(tx, "evaluation-period:active");
       await tx.evaluationPeriod.updateMany({ where: { isActive: true }, data: { isActive: false } });
@@ -36,6 +59,7 @@ export async function createPeriodAction(data: { name: string; startDate: string
         startDate: toJakartaDate(data.startDate),
         endDate: toJakartaDate(data.endDate),
         isActive: data.setActive ?? false,
+        evaluationConfigJson: evaluationConfig,
       },
     });
     await createAuditLog(tx, "CREATE", "evaluationPeriod", p.id, userId, {
@@ -43,6 +67,7 @@ export async function createPeriodAction(data: { name: string; startDate: string
       startDate: p.startDate,
       endDate: p.endDate,
       isActive: p.isActive,
+      evaluationConfigVersion: evaluationConfig.version,
     });
     return p;
   });

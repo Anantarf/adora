@@ -21,7 +21,7 @@ describe('Evaluation Periods Action', () => {
   test('berhasil menghapus periode jika tidak ada statistik terkait', async () => {
     // 1. Setup mock: count mengembalikan 0 (tidak ada statistik)
     prisma.statistic.count.mockResolvedValue(0);
-    prisma.evaluationPeriod.findUnique.mockResolvedValue({ id: 'test-id', name: 'Periode Test', startDate: new Date(), endDate: new Date(), isActive: false, createdAt: new Date() });
+    prisma.evaluationPeriod.findUnique.mockResolvedValue({ id: 'test-id', name: 'Periode Test', startDate: new Date(), endDate: new Date(), isActive: false, createdAt: new Date(), evaluationConfigJson: null });
     
     // 2. Eksekusi fungsi
     await deletePeriodAction('test-period-id');

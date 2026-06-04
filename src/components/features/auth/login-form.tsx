@@ -66,8 +66,13 @@ export function LoginForm() {
           return;
         }
 
+        if (role === "COACH") {
+          router.push("/coach");
+          return;
+        }
+
         await signOut({ redirect: false });
-        toast.info("Portal coach belum diaktifkan pada batch ini.");
+        toast.error("Role akun tidak dikenali. Silakan hubungi admin.");
       }
     } catch {
       toast.error("Kesalahan Sistem", {

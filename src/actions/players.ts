@@ -41,7 +41,22 @@ export async function getPlayersAction(groupId?: string, searchQuery?: string) {
       lastName: true,
       schoolOrigin: true,
       groupId: true,
-      group: { select: { id: true, name: true } },
+      group: {
+        select: {
+          id: true,
+          name: true,
+          coachAssignment: {
+            select: {
+              coachProfile: {
+                select: {
+                  id: true,
+                  fullName: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
     orderBy: { name: "asc" },
   });

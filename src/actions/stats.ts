@@ -6,7 +6,14 @@ import { z } from "zod";
 import { createAuditLog } from "@/actions/audit";
 import { acquireAdvisoryLock, withSerializableTransaction } from "@/lib/db-concurrency";
 import { toJakartaDate } from "@/lib/date-utils";
+import {
+  buildDynamicMetricsJson,
+  calculateAttendanceScore,
+  normalizeEvaluationConfig,
+  type MetricsJsonV2,
+} from "@/lib/evaluation-rules";
 import { prisma } from "@/lib/prisma";
+import { buildReportArchiveSnapshot, freezeHistoricalSnapshot } from "@/lib/report-signer";
 import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
@@ -68,11 +75,20 @@ const attendanceSubmitSchema = z.object({
 const statisticSubmitSchema = z.object({
   playerId: z.string().trim().min(1),
   periodId: z.string().trim().min(1),
-  metrics: metricsSchema,
+  metrics: z.unknown(),
   status: z.enum(["Draft", "Published"]),
+  notes: z.string().max(1000).optional(),
 });
 
-function parseMetrics(metricsJson: unknown): MetricsJson {
+function parseMetrics(metricsJson: unknown): MetricsJson | MetricsJsonV2 {
+  if (
+    metricsJson &&
+    typeof metricsJson === "object" &&
+    (metricsJson as { version?: string }).version === "v2"
+  ) {
+    return metricsJson as MetricsJsonV2;
+  }
+
   const parsed = metricsSchema.safeParse(metricsJson);
   return parsed.success ? parsed.data : EMPTY_METRICS;
 }
@@ -204,8 +220,9 @@ export async function submitAttendanceAction(data: {
 export async function submitStatisticAction(data: {
   playerId: string;
   periodId: string;
-  metrics: MetricsJson;
+  metrics: MetricsJson | MetricsJsonV2 | Record<string, number>;
   status: "Draft" | "Published";
+  notes?: string;
 }) {
   const session = await requireAdmin();
   const userId = session.user.id as string | undefined;
@@ -224,7 +241,32 @@ export async function submitStatisticAction(data: {
 
     const player = await tx.player.findUnique({
       where: { id: payload.playerId },
-      select: { id: true, isDeleted: true },
+      select: {
+        id: true,
+        isDeleted: true,
+        group: {
+          select: {
+            id: true,
+            name: true,
+            homebase: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            coachAssignment: {
+              select: {
+                coachProfile: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!player || player.isDeleted) {
@@ -233,6 +275,15 @@ export async function submitStatisticAction(data: {
 
     const period = await tx.evaluationPeriod.findUnique({
       where: { id: payload.periodId },
+      select: {
+        id: true,
+        name: true,
+        createdAt: true,
+        startDate: true,
+        endDate: true,
+        isActive: true,
+        evaluationConfigJson: true,
+      },
     });
 
     if (!period) {
@@ -245,6 +296,49 @@ export async function submitStatisticAction(data: {
       );
     }
 
+    const evaluationConfig = period.evaluationConfigJson
+      ? normalizeEvaluationConfig(period.evaluationConfigJson)
+      : null;
+
+    const attendanceRows = await tx.attendance.findMany({
+      where: {
+        playerId: payload.playerId,
+        date: {
+          gte: period.startDate,
+          lte: period.endDate,
+        },
+      },
+      select: {
+        status: true,
+      },
+    });
+
+    const attendanceCounts = attendanceRows.reduce(
+      (summary, attendance) => {
+        summary[attendance.status] += 1;
+        return summary;
+      },
+      { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<AttendanceStatus, number>,
+    );
+
+    const attendanceSnapshot = evaluationConfig?.attendance.enabled
+      ? calculateAttendanceScore(attendanceCounts, evaluationConfig.attendance)
+      : null;
+
+    const legacyMetrics = metricsSchema.safeParse(payload.metrics);
+    const metricsJson =
+      evaluationConfig
+        ? buildDynamicMetricsJson({
+            config: evaluationConfig,
+            values: (payload.metrics as Record<string, number>) ?? {},
+            notes: payload.notes,
+            attendance: attendanceSnapshot,
+          })
+        : legacyMetrics.success
+          ? legacyMetrics.data
+          : EMPTY_METRICS;
+    const serializedMetricsJson = JSON.parse(JSON.stringify(metricsJson));
+
     const existingStatistic = await tx.statistic.findUnique({
       where: {
         playerId_periodId: {
@@ -252,14 +346,56 @@ export async function submitStatisticAction(data: {
           periodId: payload.periodId,
         },
       },
+      select: {
+        id: true,
+        groupIdSnapshot: true,
+        groupNameSnapshot: true,
+        homebaseIdSnapshot: true,
+        homebaseNameSnapshot: true,
+        coachProfileIdSnapshot: true,
+        coachNameSnapshot: true,
+      },
     });
+
+    const statisticSnapshot = player.group
+      ? buildReportArchiveSnapshot({ group: player.group })
+      : {
+          groupId: null,
+          groupNameSnapshot: null,
+          homebaseIdSnapshot: null,
+          homebaseNameSnapshot: null,
+          coachProfileIdSnapshot: null,
+          coachNameSnapshot: null,
+        };
+
+    const frozenStatisticSnapshot = freezeHistoricalSnapshot(
+      existingStatistic
+        ? {
+            groupIdSnapshot: existingStatistic.groupIdSnapshot,
+            groupNameSnapshot: existingStatistic.groupNameSnapshot,
+            homebaseIdSnapshot: existingStatistic.homebaseIdSnapshot,
+            homebaseNameSnapshot: existingStatistic.homebaseNameSnapshot,
+            coachProfileIdSnapshot: existingStatistic.coachProfileIdSnapshot,
+            coachNameSnapshot: existingStatistic.coachNameSnapshot,
+          }
+        : null,
+      {
+        groupIdSnapshot: statisticSnapshot.groupId,
+        groupNameSnapshot: statisticSnapshot.groupNameSnapshot,
+        homebaseIdSnapshot: statisticSnapshot.homebaseIdSnapshot,
+        homebaseNameSnapshot: statisticSnapshot.homebaseNameSnapshot,
+        coachProfileIdSnapshot: statisticSnapshot.coachProfileIdSnapshot,
+        coachNameSnapshot: statisticSnapshot.coachNameSnapshot,
+      },
+    );
 
     if (existingStatistic) {
       const updatedStatistic = await tx.statistic.update({
         where: { id: existingStatistic.id },
         data: {
-          metricsJson: payload.metrics,
+          metricsJson: serializedMetricsJson,
           status: payload.status,
+          ...frozenStatisticSnapshot,
         },
       });
 
@@ -272,8 +408,9 @@ export async function submitStatisticAction(data: {
         playerId: payload.playerId,
         periodId: payload.periodId,
         date: period.startDate,
-        metricsJson: payload.metrics,
+        metricsJson: serializedMetricsJson,
         status: payload.status,
+        ...frozenStatisticSnapshot,
       },
     });
 
@@ -293,6 +430,12 @@ export async function getStatsByPeriodAction(periodId: string) {
     select: {
       id: true,
       status: true,
+      groupIdSnapshot: true,
+      groupNameSnapshot: true,
+      homebaseIdSnapshot: true,
+      homebaseNameSnapshot: true,
+      coachProfileIdSnapshot: true,
+      coachNameSnapshot: true,
       metricsJson: true,
       player: {
         select: {

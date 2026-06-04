@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/actions/audit";
 import { ensureOwnedPlayer } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
+import { buildReportArchiveSnapshot, freezeHistoricalSnapshot } from "@/lib/report-signer";
 import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 
 export async function getReportArchiveRowsAction(groupId: string, periodId: string) {
@@ -94,14 +95,39 @@ export async function upsertReportArchiveDraftAction(input: {
   const archive = await prisma.$transaction(async (tx) => {
     const player = await tx.player.findFirst({
       where: { id: input.playerId, isDeleted: false },
-      select: { id: true, name: true, groupId: true },
+      select: {
+        id: true,
+        name: true,
+        group: {
+          select: {
+            id: true,
+            name: true,
+            homebase: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            coachAssignment: {
+              select: {
+                coachProfile: {
+                  select: {
+                    id: true,
+                    fullName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!player) {
       throw new Error("Pemain tidak ditemukan atau sudah tidak aktif.");
     }
 
-    if (!player.groupId) {
+    if (!player.group) {
       throw new Error("Pemain belum memiliki kelompok latihan aktif.");
     }
 
@@ -114,6 +140,42 @@ export async function upsertReportArchiveDraftAction(input: {
       throw new Error("Periode evaluasi tidak ditemukan.");
     }
 
+    const archiveSnapshot = buildReportArchiveSnapshot({
+      group: player.group,
+    });
+
+    const existingArchive = await tx.reportArchive.findUnique({
+      where: {
+        playerId_periodId: {
+          playerId: input.playerId,
+          periodId: input.periodId,
+        },
+      },
+      select: {
+        id: true,
+        groupId: true,
+        groupNameSnapshot: true,
+        homebaseIdSnapshot: true,
+        homebaseNameSnapshot: true,
+        coachProfileIdSnapshot: true,
+        coachNameSnapshot: true,
+      },
+    });
+
+    const frozenArchiveSnapshot = freezeHistoricalSnapshot(
+      existingArchive
+        ? {
+            groupId: existingArchive.groupId,
+            groupNameSnapshot: existingArchive.groupNameSnapshot,
+            homebaseIdSnapshot: existingArchive.homebaseIdSnapshot,
+            homebaseNameSnapshot: existingArchive.homebaseNameSnapshot,
+            coachProfileIdSnapshot: existingArchive.coachProfileIdSnapshot,
+            coachNameSnapshot: existingArchive.coachNameSnapshot,
+          }
+        : null,
+      archiveSnapshot,
+    );
+
     const result = await tx.reportArchive.upsert({
       where: {
         playerId_periodId: {
@@ -124,14 +186,14 @@ export async function upsertReportArchiveDraftAction(input: {
       create: {
         playerId: input.playerId,
         periodId: input.periodId,
-        groupId: player.groupId,
+        ...frozenArchiveSnapshot,
         fileUrl: input.fileUrl.trim(),
         status: "DRAFT",
         releasedAt: null,
         uploadedById: userId,
       },
       update: {
-        groupId: player.groupId,
+        ...frozenArchiveSnapshot,
         fileUrl: input.fileUrl.trim(),
         status: "DRAFT",
         releasedAt: null,
@@ -230,6 +292,9 @@ export async function getReleasedReportArchivesForPlayerAction(playerId: string)
       id: true,
       fileUrl: true,
       releasedAt: true,
+      coachNameSnapshot: true,
+      groupNameSnapshot: true,
+      homebaseNameSnapshot: true,
       period: {
         select: {
           id: true,

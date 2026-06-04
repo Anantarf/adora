@@ -22,7 +22,13 @@ export default async function LoginPage() {
   // Already logged in, redirect to the correct portal.
   if (session?.user) {
     const role = session.user.role;
-    redirect(role === "ADMIN" ? "/dashboard" : "/parent");
+    redirect(
+      role === "ADMIN"
+        ? "/dashboard"
+        : role === "COACH"
+          ? "/coach"
+          : "/parent",
+    );
   }
 
   return (

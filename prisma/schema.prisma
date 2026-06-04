@@ -212,6 +212,7 @@ model evaluationPeriod {
   startDate DateTime
   endDate   DateTime
   isActive  Boolean     @default(false)
+  evaluationConfigJson Json?
   createdAt DateTime    @default(now())
 
   reportArchive reportArchive[]
@@ -259,6 +260,11 @@ model reportArchive {
   playerId     String
   periodId     String
   groupId      String?
+  groupNameSnapshot String?
+  homebaseIdSnapshot String?
+  homebaseNameSnapshot String?
+  coachProfileIdSnapshot String?
+  coachNameSnapshot String?
   fileUrl      String
   status       report_archive_status @default(DRAFT)
   releasedAt   DateTime?
@@ -286,6 +292,12 @@ model statistic {
   status      statistic_status @default(Draft)
   playerId    String
   periodId    String?
+  groupIdSnapshot String?
+  groupNameSnapshot String?
+  homebaseIdSnapshot String?
+  homebaseNameSnapshot String?
+  coachProfileIdSnapshot String?
+  coachNameSnapshot String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @default(now()) @updatedAt
 

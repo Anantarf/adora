@@ -3,6 +3,7 @@ import autoTable from "jspdf-autotable";
 import { PDFDocument } from "pdf-lib";
 import { averageScore, dribbleTotal, letterGrade, passingTotal } from "@/lib/metrics";
 import type { MetricsJson } from "@/types/dashboard";
+import { getEvaluationSummary, isMetricsJsonV2, type MetricsJsonV2 } from "@/lib/evaluation-rules";
 import { toast } from "sonner";
 import { toUserErrorMessage } from "@/lib/utils";
 import {
@@ -76,9 +77,76 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
 
 // ─── Assessment Table ─────────────────────────────────────────────────────────
 
-export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJson): number {
+export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJson | MetricsJsonV2): number {
   drawSectionTitle(doc, "POIN PENILAIAN", y);
   y += 4;
+
+  if (isMetricsJsonV2(metrics)) {
+    const summary = getEvaluationSummary(metrics);
+    const bodyRows = summary.categorySummaries.flatMap((categorySummary) => {
+      const category = metrics.categories.find((entry) => entry.id === categorySummary.id);
+      if (!category) {
+        return [];
+      }
+
+      return category.items.map((item, index) => [
+        index === 0
+          ? {
+              content: category.label,
+              rowSpan: category.items.length,
+              styles: { valign: "middle" as const, halign: "center" as const, fontStyle: "bold" as const },
+            }
+          : "",
+        item.label,
+        { content: `${item.score} / ${item.maxScore}`, styles: { halign: "center" as const } },
+        index === 0
+          ? {
+              content: `${categorySummary.averageScore}`,
+              rowSpan: category.items.length,
+              styles: { valign: "middle" as const, halign: "center" as const, fontStyle: "bold" as const, fontSize: 11 },
+            }
+          : "",
+      ]);
+    });
+
+    autoTable(doc, {
+      startY: y,
+      margin: { left: MARGIN, right: MARGIN },
+      tableWidth: CONTENT_W,
+      head: [[
+        { content: "Kategori", styles: { halign: "center" } },
+        { content: "Aspek Penilaian", styles: { halign: "center" } },
+        { content: "Nilai", styles: { halign: "center" } },
+        { content: "Rata-rata", styles: { halign: "center" } },
+      ]],
+      body: bodyRows as unknown as Parameters<typeof autoTable>[1]["body"],
+      columnStyles: {
+        0: { cellWidth: 35 },
+        1: { cellWidth: 80 },
+        2: { cellWidth: 30 },
+        3: { cellWidth: CONTENT_W - 145 },
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1,
+      },
+      bodyStyles: {
+        fillColor: false,
+      },
+      headStyles: {
+        fillColor: false,
+        textColor: 0,
+        fontStyle: "bold",
+        lineColor: [0, 0, 0],
+        lineWidth: 0.1,
+      },
+      theme: "plain",
+    });
+
+    return ((doc as jsPDF & { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ?? y) + SECTION_GAP + 3;
+  }
 
   const dribTotal = dribbleTotal(metrics.dribble);
   const passTotal = passingTotal(metrics.passing);
@@ -150,13 +218,13 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
 export function renderConclusionAndGrades(
   doc: jsPDF,
   y: number,
-  info: { playerName: string; periodName: string; metrics: MetricsJson },
+  info: { playerName: string; periodName: string; metrics: MetricsJson | MetricsJsonV2 },
   addNewPage: () => number,
 ): number {
   const { playerName, periodName, metrics } = info;
   const score = averageScore(metrics);
-  const grade = letterGrade(score);
-  const notesText = metrics.notes?.trim() || `${playerName} telah menyelesaikan evaluasi pada periode ${periodName}. Nilai rata-rata menunjukkan performa ${grade.label.toLowerCase()} dengan skor akhir ${score}.`;
+  const grade = isMetricsJsonV2(metrics) ? getEvaluationSummary(metrics).grade : letterGrade(score);
+  const notesText = ("notes" in metrics && typeof metrics.notes === "string" ? metrics.notes.trim() : "") || `${playerName} telah menyelesaikan evaluasi pada periode ${periodName}. Nilai rata-rata menunjukkan performa ${grade.label.toLowerCase()} dengan skor akhir ${score}.`;
   const scales = [
     { l: "A", d: "SANGAT BAIK" },
     { l: "B", d: "BAIK" },

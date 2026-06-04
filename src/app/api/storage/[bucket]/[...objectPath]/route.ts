@@ -102,6 +102,26 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
         userId: session.user.id,
         fileUrl,
         lookup: {
+          findCoachAsset: (value) =>
+            prisma.coachProfile.findFirst({
+              where: {
+                OR: [{ licenseUrl: value }, { photoUrl: value }],
+                isDeleted: false,
+              },
+              select: {
+                id: true,
+                userId: true,
+                licenseUrl: true,
+              },
+            }).then((profile) =>
+              profile
+                ? {
+                    id: profile.id,
+                    userId: profile.userId,
+                    isLicense: profile.licenseUrl === value,
+                  }
+                : null,
+            ),
           findCoachLicense: (value) =>
             prisma.coachProfile.findFirst({
               where: {

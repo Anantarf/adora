@@ -12,6 +12,7 @@ import { toast } from "sonner";
 
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
+import { EvaluationConfigDialog } from "@/components/features/EvaluationConfigDialog";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
@@ -27,6 +28,8 @@ import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { PERIOD_STATUS_BADGE as STATUS_BADGE_CONFIG } from "@/lib/constants/badge-configs";
 import { FLAT_METRIC_DEFS, averageScore } from "@/lib/metrics";
+import { getEvaluationSummary, isMetricsJsonV2, normalizeEvaluationConfig, type MetricsJsonV2 } from "@/lib/evaluation-rules";
+import { resolveCoachSignerName } from "@/lib/report-signer";
 import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
 
 const MetricCell = ({ value }: { value?: number }) =>
@@ -36,7 +39,7 @@ const MetricCell = ({ value }: { value?: number }) =>
     <span className="text-muted-foreground">-</span>
   );
 
-function getValidMetrics(metrics: unknown): MetricsJson | null {
+function getValidMetrics(metrics: unknown): MetricsJson | MetricsJsonV2 | null {
   let data = metrics;
 
   if (typeof metrics === "string") {
@@ -52,6 +55,10 @@ function getValidMetrics(metrics: unknown): MetricsJson | null {
   }
 
   const candidate = data as Record<string, unknown>;
+  if (isMetricsJsonV2(candidate)) {
+    return candidate;
+  }
+
   const isValid =
     candidate.dribble != null &&
     typeof candidate.dribble === "object" &&
@@ -99,6 +106,8 @@ const PlayerStatRow = React.memo(
     group,
     selectedPeriod,
     settings,
+    metricDefinitions,
+    evaluationConfig,
   }: {
     player: PlayerSummary;
     index: number;
@@ -106,6 +115,7 @@ const PlayerStatRow = React.memo(
       id: string;
       metricsJson: unknown;
       status: string;
+      coachNameSnapshot?: string | null;
     } | null;
     group: {
       id: string;
@@ -117,9 +127,20 @@ const PlayerStatRow = React.memo(
       isActive: boolean;
     } | null;
     settings?: Record<string, string> | null | undefined;
+    metricDefinitions: Array<{
+      key: string;
+      label: string;
+      shortLabel?: string;
+    }>;
+    evaluationConfig?: unknown;
   }) => {
     const metrics = getValidMetrics(stat?.metricsJson);
+    const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
     const [isPdfLoading, setIsPdfLoading] = useState(false);
+    const coachSignerName = resolveCoachSignerName(
+      stat?.coachNameSnapshot ?? player.group?.coachAssignment?.coachProfile?.fullName,
+      settings?.rapor_coach_name,
+    );
 
     const handleDownload = async () => {
       if (!metrics) {
@@ -142,7 +163,7 @@ const PlayerStatRow = React.memo(
             stampUrl: settings?.rapor_stamp_url ?? undefined,
           },
           signers: {
-            coachName: settings?.rapor_coach_name ?? undefined,
+            coachName: coachSignerName,
             ceoName: settings?.rapor_ceo_name ?? undefined,
           },
         });
@@ -161,12 +182,12 @@ const PlayerStatRow = React.memo(
         <TableCell className="sticky left-12 z-20 min-w-40 max-w-50 bg-card font-semibold">
           {player.name}
         </TableCell>
-        {FLAT_METRIC_DEFS.map((definition) => (
+        {metricDefinitions.map((definition, index) => (
           <TableCell
             key={definition.key}
             className="text-center font-mono text-sm tabular-nums"
           >
-            <MetricCell value={metrics ? definition.getValue(metrics) : undefined} />
+            <MetricCell value={metricSummary?.flatRows[index]?.value} />
           </TableCell>
         ))}
         <TableCell className="text-center">
@@ -214,11 +235,12 @@ const PlayerStatRow = React.memo(
                 stat
                   ? {
                       id: stat.id,
-                      metrics: stat.metricsJson as MetricsJson,
+                      metrics: stat.metricsJson as MetricsJson | MetricsJsonV2,
                       status: stat.status as "Draft" | "Published",
                     }
                   : undefined
               }
+              evaluationConfig={evaluationConfig}
             />
           </div>
         </TableCell>
@@ -291,6 +313,24 @@ export default function StatisticsPage() {
   );
 
   const selectedPeriod = periods?.find((period) => period.id === selectedPeriodId);
+  const selectedEvaluationConfig = selectedPeriod?.evaluationConfigJson ?? null;
+  const selectedMetricDefinitions = useMemo(() => {
+    if (!selectedEvaluationConfig) {
+      return FLAT_METRIC_DEFS.map((definition) => ({
+        key: definition.key,
+        label: definition.label,
+        shortLabel: definition.shortLabel,
+      }));
+    }
+
+    return normalizeEvaluationConfig(selectedEvaluationConfig).categories.flatMap((category) =>
+      category.items.map((item) => ({
+        key: `${category.id}-${item.id}`,
+        label: item.label,
+        shortLabel: item.label,
+      })),
+    );
+  }, [selectedEvaluationConfig]);
   const canDeletePeriod = statsSummary.published === 0 && statsSummary.draft === 0;
   const activeGroupName =
     activeGroup === "all"
@@ -328,7 +368,10 @@ export default function StatisticsPage() {
         <p className="text-sm text-muted-foreground">
           Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain.
         </p>
-        <AddPeriodDialog />
+        <div className="flex items-center gap-2">
+          <EvaluationConfigDialog />
+          <AddPeriodDialog />
+        </div>
       </div>
 
       <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
@@ -592,6 +635,12 @@ export default function StatisticsPage() {
                     {groupPlayers.map((player, index) => {
                       const stat = statsMap[player.id];
                       const metrics = getValidMetrics(stat?.metricsJson);
+                      const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
+                      const coachSignerName = resolveCoachSignerName(
+                        stat?.coachNameSnapshot ??
+                          player.group?.coachAssignment?.coachProfile?.fullName,
+                        settings?.rapor_coach_name,
+                      );
 
                       return (
                         <article key={player.id} className="space-y-3 p-4">
@@ -623,10 +672,8 @@ export default function StatisticsPage() {
                           </div>
 
                           <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                            {FLAT_METRIC_DEFS.map((definition) => {
-                              const value = metrics
-                                ? definition.getValue(metrics)
-                                : undefined;
+                            {selectedMetricDefinitions.map((definition, metricIndex) => {
+                              const value = metricSummary?.flatRows[metricIndex]?.value;
 
                               return (
                                 <div
@@ -663,9 +710,7 @@ export default function StatisticsPage() {
                               </p>
                               <p className="mt-1 text-sm font-bold tabular-nums text-foreground">
                                 {metrics
-                                  ? FLAT_METRIC_DEFS.filter(
-                                      (definition) => definition.getValue(metrics) != null,
-                                    ).length
+                                  ? metricSummary?.flatRows.length ?? 0
                                   : 0}
                               </p>
                             </div>
@@ -699,7 +744,7 @@ export default function StatisticsPage() {
                                           stampUrl: settings?.rapor_stamp_url ?? undefined,
                                         },
                                         signers: {
-                                          coachName: settings?.rapor_coach_name ?? undefined,
+                                          coachName: coachSignerName,
                                           ceoName: settings?.rapor_ceo_name ?? undefined,
                                         },
                                       });
@@ -724,15 +769,16 @@ export default function StatisticsPage() {
                                 player={player}
                                 periodId={selectedPeriod?.id}
                                 isPeriodActive={selectedPeriod?.isActive}
-                                existingStat={
+                            existingStat={
                                   stat
                                     ? {
                                         id: stat.id,
-                                        metrics: stat.metricsJson as MetricsJson,
+                                        metrics: stat.metricsJson as MetricsJson | MetricsJsonV2,
                                         status: stat.status as "Draft" | "Published",
                                       }
                                     : undefined
                                 }
+                                evaluationConfig={selectedEvaluationConfig}
                                 triggerClassName="h-10 px-3"
                                 alwaysShowLabel
                               />
@@ -759,7 +805,7 @@ export default function StatisticsPage() {
                 <TableHead className="sticky left-12 z-20 min-w-40 max-w-50 bg-muted/20 text-[10px] font-medium text-muted-foreground">
                   Nama Pemain
                 </TableHead>
-                {FLAT_METRIC_DEFS.map((definition) => (
+                {selectedMetricDefinitions.map((definition) => (
                   <TableHead
                     key={definition.key}
                     className="w-12 px-1 text-center text-[9px] font-medium text-muted-foreground"
@@ -790,7 +836,7 @@ export default function StatisticsPage() {
                       <TableCell className="sticky left-12 z-20 min-w-40 max-w-50 bg-card">
                         <Skeleton className="h-4 w-32 bg-muted/50" />
                       </TableCell>
-                      {FLAT_METRIC_DEFS.map((definition) => (
+                      {selectedMetricDefinitions.map((definition) => (
                         <TableCell key={definition.key} className="text-center">
                           <Skeleton className="mx-auto h-4 w-6 bg-muted/40" />
                         </TableCell>
@@ -814,7 +860,7 @@ export default function StatisticsPage() {
 
               {!playersLoading && !statsLoading && playersByGroup.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={FLAT_METRIC_DEFS.length + 5} className="h-24 text-center">
+                  <TableCell colSpan={selectedMetricDefinitions.length + 5} className="h-24 text-center">
                     {(players?.length ?? 0) === 0 ? (
                       <>
                         <p className="text-sm font-semibold text-foreground">
@@ -843,7 +889,7 @@ export default function StatisticsPage() {
                     <React.Fragment key={group.id}>
                       <TableRow className="bg-muted/15 hover:bg-muted/15">
                         <TableCell
-                          colSpan={FLAT_METRIC_DEFS.length + 5}
+                          colSpan={selectedMetricDefinitions.length + 5}
                           className="border-l-4 border-primary py-2.5 pl-3 text-sm font-semibold text-primary"
                         >
                           <div className="flex items-center justify-between gap-3">
@@ -866,6 +912,8 @@ export default function StatisticsPage() {
                             group={group}
                             selectedPeriod={selectedPeriod}
                             settings={settings}
+                            metricDefinitions={selectedMetricDefinitions}
+                            evaluationConfig={selectedEvaluationConfig}
                           />
                         );
                       })}

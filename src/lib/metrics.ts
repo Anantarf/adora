@@ -1,4 +1,5 @@
 import type { MetricsJson } from "@/types/dashboard";
+import { getEvaluationSummary, isMetricsJsonV2, type MetricsJsonV2 } from "@/lib/evaluation-rules";
 
 // ─── Flat metric definitions (display order) ──────────
 export type FlatMetricDef = {
@@ -28,8 +29,13 @@ export const FLAT_METRIC_DEFS: FlatMetricDef[] = [
 ];
 
 /** Flatten MetricsJson into an ordered list of { label, value, max } */
-export const flattenMetrics = (m: MetricsJson) =>
-  FLAT_METRIC_DEFS.map((d) => ({ key: d.key, label: d.label, value: d.getValue(m), max: d.max }));
+export const flattenMetrics = (m: MetricsJson | MetricsJsonV2) =>
+  getEvaluationSummary(m).flatRows.map((row) => ({
+    key: row.key,
+    label: row.label,
+    value: row.value,
+    max: row.max,
+  }));
 
 export const dribbleTotal = (d: MetricsJson["dribble"]) =>
   d.inAndOut + d.crossover + d.vLeft + d.vRight + d.betweenLegsLeft + d.betweenLegsRight;
@@ -37,12 +43,16 @@ export const dribbleTotal = (d: MetricsJson["dribble"]) =>
 export const passingTotal = (p: MetricsJson["passing"]) =>
   p.chestPass + p.bouncePass + p.overheadPass;
 
-export const overallScore = (m: MetricsJson) =>
-  dribbleTotal(m.dribble) + passingTotal(m.passing) + m.layUp + m.shooting;
+export const overallScore = (m: MetricsJson | MetricsJsonV2) =>
+  getEvaluationSummary(m).overallScore;
 
 // Normalize all 11 metrics to 0–100 scale, then average.
 // inAndOut max = 99; all others max = 10.
-export const averageScore = (m: MetricsJson): number => {
+export const averageScore = (m: MetricsJson | MetricsJsonV2): number => {
+  if (isMetricsJsonV2(m)) {
+    return getEvaluationSummary(m).totalScore;
+  }
+
   const vals = [
     m.dribble.inAndOut / 99,
     m.dribble.crossover / 10,

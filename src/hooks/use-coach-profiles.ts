@@ -5,7 +5,9 @@ import { toast } from "sonner";
 
 import {
   getCoachProfileByUserAction,
+  getOwnCoachProfileAction,
   upsertCoachProfileAction,
+  upsertOwnCoachProfileAction,
 } from "@/actions/coach-profiles";
 
 export type CoachUserWithProfile = {
@@ -42,6 +44,16 @@ export const useCoachProfileByUser = (userId: string | null, enabled = true) =>
     staleTime: 1000 * 60 * 5,
   });
 
+export const useMyCoachProfile = () =>
+  useQuery<CoachUserWithProfile>({
+    queryKey: ["coach-profile", "me"],
+    queryFn: async () => {
+      const res = await getOwnCoachProfileAction();
+      return res as CoachUserWithProfile;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
 export const useUpsertCoachProfile = () => {
   const queryClient = useQueryClient();
 
@@ -55,6 +67,21 @@ export const useUpsertCoachProfile = () => {
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Gagal menyimpan profil coach.");
+    },
+  });
+};
+
+export const useUpsertOwnCoachProfile = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: upsertOwnCoachProfileAction,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["coach-profile", "me"] });
+      toast.success("Profil coach berhasil diperbarui.");
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Gagal memperbarui profil coach.");
     },
   });
 };

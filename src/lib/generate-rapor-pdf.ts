@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import type { MetricsJson } from "@/types/dashboard";
+import type { MetricsJsonV2 } from "@/lib/evaluation-rules";
 import {
   PAGE_W, PAGE_H, MARGIN, CONTENT_W,
   HEADER_MAX_H, HEADER_BOTTOM_TRIM, HEADER_SEP_GAP, PDF_TEMPLATE_SKIP,
@@ -20,7 +21,7 @@ export interface RaporData {
   groupName: string;
   schoolOrigin?: string | null;
   periodName: string;
-  metrics: MetricsJson;
+  metrics: MetricsJson | MetricsJsonV2;
   attendanceRate?: number | null;
   certificates?: Array<{
     title: string;

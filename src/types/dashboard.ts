@@ -12,6 +12,7 @@ export interface EvaluationPeriod {
   startDate: Date | string;
   endDate: Date | string;
   isActive: boolean;
+  evaluationConfigJson?: unknown;
   createdAt: Date | string;
 }
 
@@ -123,6 +124,12 @@ export interface Player {
   group?: {
     id: string;
     name: string;
+    coachAssignment?: {
+      coachProfile?: {
+        id: string;
+        fullName: string;
+      } | null;
+    } | null;
   } | null;
   user?: {
     id: string;
@@ -140,6 +147,12 @@ export interface PlayerSummary {
   group?: {
     id: string;
     name: string;
+    coachAssignment?: {
+      coachProfile?: {
+        id: string;
+        fullName: string;
+      } | null;
+    } | null;
   } | null;
   gender?: string | null;
   dateOfBirth?: Date | string | null;

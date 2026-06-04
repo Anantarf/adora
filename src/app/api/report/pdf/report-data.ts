@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { MetricsJson } from "@/types/dashboard";
+import { getEvaluationSummary, isMetricsJsonV2, type MetricsJsonV2 } from "@/lib/evaluation-rules";
 
 const PRINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -69,7 +70,52 @@ function formatDate(date: Date, options: Intl.DateTimeFormatOptions): string {
   return new Date(date).toLocaleDateString("id-ID", options);
 }
 
-function extractReportMetrics(raw: unknown): { metrics: ReportMetricItem[]; notes: string } {
+function parseStoredMetrics(raw: unknown): MetricsJson | MetricsJsonV2 | null {
+  let data = raw;
+
+  if (typeof raw === "string") {
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  if (!data || typeof data !== "object") {
+    return null;
+  }
+
+  if (isMetricsJsonV2(data)) {
+    return data;
+  }
+
+  const candidate = data as Record<string, unknown>;
+  const isLegacyMetrics =
+    candidate.dribble != null &&
+    typeof candidate.dribble === "object" &&
+    candidate.passing != null &&
+    typeof candidate.passing === "object";
+
+  return isLegacyMetrics ? (candidate as MetricsJson) : null;
+}
+
+function extractReportMetrics(raw: MetricsJson | MetricsJsonV2 | null): { metrics: ReportMetricItem[]; notes: string } {
+  if (!raw) {
+    return { metrics: [], notes: "" };
+  }
+
+  if (isMetricsJsonV2(raw)) {
+    const summary = getEvaluationSummary(raw);
+    return {
+      metrics: summary.flatRows.map((item) => ({
+        label: item.label,
+        value: item.value,
+        max: item.max,
+      })),
+      notes: summary.notes,
+    };
+  }
+
   const parsed = raw as Partial<MetricsJson> & { notes?: unknown };
 
   return {
@@ -165,12 +211,13 @@ export function canActorAccessPlayer(actor: SessionActor, player: PlayerReportRe
 
 export function buildReportViewModel(player: PlayerReportRecord): ReportViewModel {
   const latestStat = player.statistic[0];
-  const extractedMetrics = latestStat ? extractReportMetrics(latestStat.metricsJson) : { metrics: [], notes: "" };
+  const latestMetrics = latestStat ? parseStoredMetrics(latestStat.metricsJson) : null;
+  const extractedMetrics = extractReportMetrics(latestMetrics);
   const totalAttendance = player.attendance.length;
   const hadirCount = player.attendance.filter((attendance) => attendance.status === "HADIR").length;
   const attendanceRate = totalAttendance > 0 ? ((hadirCount / totalAttendance) * 100).toFixed(0) : "N/A";
-  const overallScore = extractedMetrics.metrics.length > 0
-    ? (extractedMetrics.metrics.reduce((total, item) => total + item.value, 0) / extractedMetrics.metrics.length).toFixed(1)
+  const overallScore = latestMetrics
+    ? String(getEvaluationSummary(latestMetrics).totalScore)
     : "N/A";
 
   return {

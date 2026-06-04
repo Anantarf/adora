@@ -1,6 +1,7 @@
 export type StorageAclRole = "ADMIN" | "PARENT" | "COACH";
 
 export type StorageAclLookup = {
+  findCoachAsset(fileUrl: string): Promise<{ id: string; userId: string; isLicense: boolean } | null>;
   findCoachLicense(fileUrl: string): Promise<{ id: string } | null>;
   findPlayerAsset(fileUrl: string): Promise<{ id: string } | null>;
   findCertificate(fileUrl: string): Promise<{ id: string; playerId: string } | null>;
@@ -21,10 +22,15 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
   }
 
   if (input.role === "COACH") {
+    const coachAsset = await input.lookup.findCoachAsset(input.fileUrl);
+    if (coachAsset && coachAsset.userId === input.userId) {
+      return { allowed: true, statusCode: 200, message: "allowed" };
+    }
+
     return {
       allowed: false,
       statusCode: 403,
-      message: "Akses file privat untuk coach belum diaktifkan pada batch ini.",
+      message: "File privat ini bukan milik akun coach ini.",
     };
   }
 
