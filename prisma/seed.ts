@@ -587,7 +587,6 @@ async function main() {
       startDate: new Date("2026-03-01T00:00:00.000Z"),
       endDate: new Date("2026-04-30T23:59:59.999Z"),
       isActive: false,
-      evaluationConfigJson: null, // Legacy
     },
   });
 
