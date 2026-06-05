@@ -181,12 +181,12 @@ const PlayerStatRow = React.memo(
         <TableCell className="sticky left-12 z-20 min-w-40 max-w-50 bg-card font-semibold">
           {player.name}
         </TableCell>
-        {metricDefinitions.map((definition, index) => (
+        {metricDefinitions.map((definition) => (
           <TableCell
             key={definition.key}
             className="text-center font-mono text-sm tabular-nums"
           >
-            <MetricCell value={metricSummary?.flatRows[index]?.value} />
+            <MetricCell value={metricSummary?.flatRows.find((r) => r.key === definition.key)?.value} />
           </TableCell>
         ))}
         <TableCell className="text-center">
@@ -667,8 +667,8 @@ export default function StatisticsPage() {
                           </div>
 
                           <div className="flex gap-2 overflow-x-auto pb-2 custom-scrollbar">
-                            {selectedMetricDefinitions.map((definition, metricIndex) => {
-                              const value = metricSummary?.flatRows[metricIndex]?.value;
+                            {selectedMetricDefinitions.map((definition) => {
+                              const value = metricSummary?.flatRows.find((r) => r.key === definition.key)?.value;
 
                               return (
                                 <div
