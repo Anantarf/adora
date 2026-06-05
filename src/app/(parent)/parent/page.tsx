@@ -17,7 +17,8 @@ import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { useReleasedReportArchives } from "@/hooks/use-report-archives";
 import { usePlayerStats } from "@/hooks/use-player-stats";
-import { averageScore, flattenMetrics, overallScore } from "@/lib/metrics";
+import { averageScore, flattenMetrics } from "@/lib/metrics";
+import { getEvaluationSummary, isMetricsJsonV2 } from "@/lib/evaluation-rules";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
 const ParentProgressionChart = dynamic(
@@ -59,15 +60,18 @@ export default function ParentDashboard() {
       return [];
     }
 
-    return [...stats].reverse().map((stat) => ({
-      name:
-        stat.period?.name ??
-        new Date(stat.date).toLocaleDateString("id-ID", {
-          month: "short",
-          year: "2-digit",
-        }),
-      Overall: overallScore(stat.metricsJson as MetricsJson),
-    }));
+    return [...stats].reverse().map((stat) => {
+      const metrics = stat.metricsJson as MetricsJson;
+      return {
+        name:
+          stat.period?.name ??
+          new Date(stat.date).toLocaleDateString("id-ID", {
+            month: "short",
+            year: "2-digit",
+          }),
+        Overall: averageScore(metrics),
+      };
+    });
   }, [stats]);
 
   const attendanceSummary = useMemo(() => {
@@ -129,7 +133,6 @@ export default function ParentDashboard() {
     children.find((child: FamilyPlayer) => child.id === effectiveChildId) || children[0];
   const latestStat = stats?.[0];
   const latestMetrics = latestStat?.metricsJson as MetricsJson | undefined;
-  const flatItems = latestMetrics ? flattenMetrics(latestMetrics) : [];
   const currentPeriodLabel =
     latestStat?.period?.name ??
     (latestStat
@@ -140,24 +143,27 @@ export default function ParentDashboard() {
       : "Periode Evaluasi");
 
   return (
-    <div className="flex w-full flex-col gap-6 md:gap-8">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border pb-6 md:flex-row md:items-center md:pb-8">
+    <div className="flex w-full flex-col gap-5 md:gap-6">
+      <div className="flex flex-col items-start justify-between gap-3 border-b border-border/70 pb-4 md:flex-row md:items-end md:pb-5">
         <div className="space-y-1">
-          <h1 className="font-heading text-2xl uppercase tracking-widest text-foreground md:text-3xl">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+            Dashboard Orang Tua
+          </p>
+          <h1 className="font-heading text-2xl uppercase tracking-[0.16em] text-foreground md:text-[2.35rem]">
             Pantauan Pemain
           </h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="max-w-2xl text-sm text-muted-foreground">
             Lihat ringkasan perkembangan, kehadiran, dan rapor terbaru anak Anda.
           </p>
         </div>
 
         {children.length > 1 ? (
-          <div className="flex w-full flex-col gap-2 md:w-auto">
-            <span className="ml-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="flex w-full flex-col gap-2 md:w-auto md:items-end">
+            <span className="ml-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Pilih Anak
             </span>
             <Select value={effectiveChildId || undefined} onValueChange={setSelectedChildId}>
-              <SelectTrigger className="h-11 w-full border-border bg-card font-semibold text-foreground md:w-72">
+              <SelectTrigger className="h-10 w-full rounded-full border-border/70 bg-card px-4 font-semibold text-foreground md:w-72">
                 <SelectValue placeholder="Pilih profil">
                   {effectiveChildId
                     ? children.find((child) => child.id === effectiveChildId)?.name
@@ -175,12 +181,12 @@ export default function ParentDashboard() {
           </div>
         ) : (
           <div className="flex flex-col gap-2 md:items-end">
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Profil Aktif
             </span>
-            <div className="flex h-11 items-center gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4">
+            <div className="inline-flex min-h-10 items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-2">
               <span className="font-semibold text-foreground">{activeChild.name}</span>
-              <span className="rounded-full bg-primary/20 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
                 {activeChild.group?.name || "Tanpa Kelompok"}
               </span>
             </div>
@@ -189,13 +195,6 @@ export default function ParentDashboard() {
       </div>
 
       <ParentPlayerHero player={activeChild} />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
-        <ParentCoachCard player={activeChild} />
-      </div>
-
-      <ParentReportArchivesCard archives={releasedArchives} playerName={activeChild.name} />
 
       {statsLoading ? (
         <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
@@ -249,7 +248,7 @@ export default function ParentDashboard() {
           </Card>
         </div>
       ) : !stats?.length ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card/50 p-12 text-center">
+        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
             <Activity className="size-8" />
           </div>
@@ -264,41 +263,113 @@ export default function ParentDashboard() {
           </div>
         </div>
       ) : (
-        <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
-          {latestMetrics ? (
+        <div className="flex flex-col gap-6">
+          <div className="grid w-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            {latestMetrics ? (
+              <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
+                <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
+                        Ringkasan Nilai
+                      </CardTitle>
+                      <CardDescription className="text-xs">
+                        {currentPeriodLabel}
+                      </CardDescription>
+                    </div>
+                    <GradeBadge score={averageScore(latestMetrics)} variant="full" />
+                  </div>
+                </CardHeader>
+                <CardContent className="p-3 md:p-4">
+                  {isMetricsJsonV2(latestMetrics) ? (
+                    // V2: tampilkan ringkasan per kategori
+                    <div className="space-y-3">
+                      {getEvaluationSummary(latestMetrics).categorySummaries.map((category) => (
+                        <div
+                          key={category.id}
+                          className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 px-4 py-3"
+                        >
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground">{category.label}</p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              Bobot {category.weight}%
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold tabular-nums text-primary">
+                              {category.averageScore}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">/100</p>
+                          </div>
+                        </div>
+                      ))}
+                      {getEvaluationSummary(latestMetrics).attendance ? (
+                        <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-foreground">
+                              {getEvaluationSummary(latestMetrics).attendance!.label}
+                            </p>
+                            <p className="mt-0.5 text-[11px] text-muted-foreground">
+                              Bobot {getEvaluationSummary(latestMetrics).attendance!.weight}%
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-2xl font-bold tabular-nums text-primary">
+                              {getEvaluationSummary(latestMetrics).attendance!.score}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">/100</p>
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : (
+                    // V1 legacy: tampilkan flat grid semua aspek
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+                      {flattenMetrics(latestMetrics).map((item) => (
+                        <div
+                          key={item.key}
+                          className="flex min-h-18 flex-col justify-center rounded-lg border border-border/40 bg-muted/30 p-2.5 text-center md:min-h-20 md:p-3"
+                        >
+                          <p className="mb-1 text-xs leading-tight text-muted-foreground">
+                            {item.label}
+                          </p>
+                          <p className="text-xl font-bold tabular-nums text-foreground md:text-2xl">
+                            {item.value}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ) : null}
+
             <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
               <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-                <div className="flex items-start justify-between gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-                      Ringkasan Nilai
+                      Catatan Pelatih
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      {currentPeriodLabel}
+                      Ringkasan evaluasi dari rapor terbaru.
                     </CardDescription>
                   </div>
-                  <GradeBadge score={averageScore(latestMetrics)} variant="full" />
+                  <span className="rounded-full border border-border/50 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                    {currentPeriodLabel}
+                  </span>
                 </div>
               </CardHeader>
-              <CardContent className="p-3 md:p-4">
-                <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                  {flatItems.map((item) => (
-                    <div
-                      key={item.key}
-                      className="flex min-h-18 flex-col justify-center rounded-lg border border-border/40 bg-muted/30 p-2.5 text-center md:min-h-20 md:p-3"
-                    >
-                      <p className="mb-1 text-xs leading-tight text-muted-foreground">
-                        {item.label}
-                      </p>
-                      <p className="text-xl font-bold tabular-nums text-foreground md:text-2xl">
-                        {item.value}
-                      </p>
-                    </div>
-                  ))}
+              <CardContent className="p-4 md:p-5">
+                <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
+                  <p className="text-sm leading-relaxed text-foreground/85">
+                    {latestMetrics?.notes ||
+                      "Belum ada catatan khusus pada evaluasi terbaru."}
+                  </p>
                 </div>
               </CardContent>
             </Card>
-          ) : null}
+          </div>
 
           <ParentAttendanceSummary
             attendanceSummary={attendanceSummary}
@@ -307,33 +378,14 @@ export default function ParentDashboard() {
             activeChildName={activeChild.name}
           />
 
-          <ParentProgressionChart data={progressionData} />
+          <ParentReportArchivesCard archives={releasedArchives} playerName={activeChild.name} />
 
-          <Card className="overflow-hidden border-border/50 bg-card shadow-sm lg:col-span-2">
-            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-                    Catatan Pelatih
-                  </CardTitle>
-                  <CardDescription className="text-xs">
-                    Ringkasan evaluasi dari rapor terbaru.
-                  </CardDescription>
-                </div>
-                <span className="rounded-full border border-border/50 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                  {currentPeriodLabel}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent className="p-4 md:p-6">
-              <div className="rounded-xl border border-primary/10 bg-primary/5 p-4 md:p-5">
-                <p className="text-sm leading-relaxed text-foreground/85">
-                  {latestMetrics?.notes ||
-                    "Belum ada catatan khusus pada evaluasi terbaru."}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <ParentCoachCard player={activeChild} />
+            <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
+          </div>
+
+          <ParentProgressionChart data={progressionData} />
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@ export function ParentReportArchivesCard({
       </CardHeader>
       <CardContent className="space-y-3 p-5">
         {!archives?.length ? (
-          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 py-10 text-center">
+          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-7 text-center">
             <p className="text-sm font-medium text-muted-foreground">Belum ada rapor resmi yang dirilis.</p>
             <p className="mt-1 text-xs text-muted-foreground/80">
               Arsip rapor {playerName} akan tampil di sini setelah admin merilis dokumennya.

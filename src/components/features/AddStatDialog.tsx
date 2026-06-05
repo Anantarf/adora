@@ -6,11 +6,9 @@ import { toast } from "sonner";
 
 import { useSubmitStatistic } from "@/hooks/use-statistics";
 import {
-  buildDynamicMetricsJson,
   buildMetricFieldKey,
   buildMetricValuesFromConfig,
   normalizeEvaluationConfig,
-  type EvaluationConfigV2,
   type MetricsJsonV2,
 } from "@/lib/evaluation-rules";
 import { FLAT_METRIC_DEFS } from "@/lib/metrics";

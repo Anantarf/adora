@@ -28,7 +28,7 @@ export function ParentAttendanceSummary({
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-4 sm:p-6">
+      <CardContent className="p-4 sm:p-5">
         {attendanceLoading ? (
           <div className="flex items-center justify-center gap-2 py-8 text-primary font-bold text-xs uppercase tracking-widest">
             <Loader2 className="size-4 animate-spin" /> Memuat data kehadiran...
@@ -40,16 +40,15 @@ export function ParentAttendanceSummary({
             <p className="text-xs text-muted-foreground/75">Data kehadiran akan muncul setelah pelatih mengisi presensi agenda.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-5">
-            {/* Summary strip */}
-            <div className="flex flex-wrap gap-3 items-center">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap items-center gap-2.5">
               {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
                 <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
                   <span className="text-micro">{STATUS_STYLE[s].label}</span>
                   <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
                 </div>
               ))}
-              <div className="w-full sm:w-auto sm:ml-auto flex items-center justify-between sm:justify-start gap-2 px-4 py-1.5 rounded-lg border border-primary/20 bg-primary/5">
+              <div className="flex w-full items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-1.5 sm:ml-auto sm:w-auto sm:justify-start">
                 <span className="text-micro text-muted-foreground">Tingkat Kehadiran</span>
                 <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
                   {attendanceSummary?.rate ?? 0}%
@@ -57,7 +56,6 @@ export function ParentAttendanceSummary({
               </div>
             </div>
 
-            {/* Record list */}
             <div className="flex flex-col gap-1.5">
               <p className="text-micro text-muted-foreground/50 px-1 mb-1">10 Agenda Terakhir</p>
               {attendances.slice(0, 10).map((a) => {

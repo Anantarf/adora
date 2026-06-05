@@ -5,7 +5,6 @@ import {
   Loader2,
   LayoutList as SelectIcon,
   CalendarRange,
-  Trash2,
   FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -332,10 +331,6 @@ export default function StatisticsPage() {
     );
   }, [selectedEvaluationConfig]);
   const canDeletePeriod = statsSummary.published === 0 && statsSummary.draft === 0;
-  const activeGroupName =
-    activeGroup === "all"
-      ? "Semua kelompok"
-      : groups?.find((group) => group.id === activeGroup)?.name ?? "Kelompok";
 
   const handleSetActive = async (periodId: string) => {
     try {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,11 +24,16 @@ export function EvaluationConfigDialog() {
   const { mutateAsync, isPending } = useUpdateEvaluationConfig();
   const [draft, setDraft] = useState<EvaluationConfigV2>(DEFAULT_EVALUATION_CONFIG_V2);
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(false);
+  const [prevData, setPrevData] = useState<EvaluationConfigV2 | undefined>(undefined);
+
+  if (open !== prevOpen || data !== prevData) {
+    setPrevOpen(open);
+    setPrevData(data);
     if (open) {
       setDraft(normalizeEvaluationConfig(data ?? DEFAULT_EVALUATION_CONFIG_V2));
     }
-  }, [data, open]);
+  }
 
   const handleSave = async () => {
     try {

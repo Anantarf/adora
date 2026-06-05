@@ -46,7 +46,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
           <Button
             type="button"
             variant="outline"
-            className="h-10 w-full rounded-xl border-border/50"
+            className="h-10 w-full rounded-xl border-border/50 bg-background/30"
             disabled={!coach?.licenseUrl}
             onClick={() => setOpen(true)}
           >

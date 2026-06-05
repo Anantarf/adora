@@ -30,7 +30,7 @@ export function ParentCertificatesCard({
       </CardHeader>
       <CardContent className="space-y-3 p-5">
         {!certificates?.length ? (
-          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 py-10 text-center">
+          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-7 text-center">
             <p className="text-sm font-medium text-muted-foreground">
               Belum ada sertifikat yang ditautkan.
             </p>

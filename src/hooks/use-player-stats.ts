@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getPlayerStatsAction } from "@/actions/stats";
 import { QUERY_KEYS } from "@/lib/constants";
 import type { MetricsJson, StatisticHistory } from "@/types/dashboard";
+import type { MetricsJsonV2 } from "@/lib/evaluation-rules";
 
 export type { MetricsJson };
 
@@ -12,7 +13,7 @@ export type PlayerStatRecord = {
   id: string;
   date: Date;
   status: string;
-  metricsJson: MetricsJson;
+  metricsJson: MetricsJson | MetricsJsonV2;
   playerId: string;
   periodId: string | null;
   createdAt: Date;

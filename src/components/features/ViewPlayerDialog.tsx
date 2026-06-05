@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Edit2, Trash2, Calendar, MapPin, Phone, Loader2, Link2, ImageIcon, PenLine } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { usePlayerDetail, useUpdatePlayer, type PlayerDetailData } from "@/hooks/use-players";
+import { usePlayerDetail, useUpdatePlayer } from "@/hooks/use-players";
 import { useGroups } from "@/hooks/use-groups";
 
 import { toast } from "sonner";
