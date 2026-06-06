@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createAuditLog } from "@/actions/audit";
+import { normalizeExpectedPrivateUploadUrl } from "@/lib/private-upload";
 import { prisma } from "@/lib/prisma";
 import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
 
@@ -47,6 +48,7 @@ const coachProfileSelect = {
 } as const;
 
 function normalizeCoachProfilePayload(input: {
+  userId: string;
   fullName: string;
   placeOfBirth?: string;
   dateOfBirth?: string;
@@ -63,8 +65,22 @@ function normalizeCoachProfilePayload(input: {
     placeOfBirth: input.placeOfBirth?.trim() || null,
     dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : null,
     gender: input.gender?.trim() || null,
-    photoUrl: input.photoUrl?.trim() || null,
-    licenseUrl: input.licenseUrl?.trim() || null,
+    photoUrl: normalizeExpectedPrivateUploadUrl(
+      input.photoUrl,
+      {
+        allowedPrefixes: [`coach_photo_${input.userId}_`],
+        allowedExtensions: [".png", ".jpg", ".jpeg"],
+      },
+      "Foto profil coach",
+    ),
+    licenseUrl: normalizeExpectedPrivateUploadUrl(
+      input.licenseUrl,
+      {
+        allowedPrefixes: [`coach_license_${input.userId}_`],
+        allowedExtensions: [".png", ".jpg", ".jpeg"],
+      },
+      "Lisensi coach",
+    ),
     isDeleted: false,
   };
 }
@@ -145,10 +161,10 @@ export async function upsertCoachProfileAction(input: CoachProfileInput) {
       where: { userId: input.userId },
       create: {
         userId: input.userId,
-        ...normalizeCoachProfilePayload(input),
+        ...normalizeCoachProfilePayload({ ...input, userId: input.userId }),
       },
       update: {
-        ...normalizeCoachProfilePayload(input),
+        ...normalizeCoachProfilePayload({ ...input, userId: input.userId }),
       },
       select: {
         id: true,
@@ -209,10 +225,10 @@ export async function upsertOwnCoachProfileAction(input: CoachSelfProfileInput) 
       where: { userId: coachUser.id },
       create: {
         userId: coachUser.id,
-        ...normalizeCoachProfilePayload(input),
+        ...normalizeCoachProfilePayload({ ...input, userId: coachUser.id }),
       },
       update: {
-        ...normalizeCoachProfilePayload(input),
+        ...normalizeCoachProfilePayload({ ...input, userId: coachUser.id }),
       },
       select: {
         id: true,

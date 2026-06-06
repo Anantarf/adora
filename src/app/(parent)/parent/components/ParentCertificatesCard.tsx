@@ -25,17 +25,17 @@ export function ParentCertificatesCard({
           Sertifikat Prestasi
         </CardTitle>
         <CardDescription className="text-xs">
-          Tautan sertifikat dan penghargaan yang pernah diraih {playerName}.
+          Sertifikat dan penghargaan yang pernah diterima {playerName}.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 p-5">
         {!certificates?.length ? (
           <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-7 text-center">
             <p className="text-sm font-medium text-muted-foreground">
-              Belum ada sertifikat yang ditautkan.
+              Belum ada sertifikat yang tersedia.
             </p>
             <p className="mt-1 text-xs text-muted-foreground/80">
-              Sertifikat untuk {playerName} akan muncul di sini setelah diunggah admin.
+              Sertifikat untuk {playerName} akan tampil di sini setelah ditambahkan oleh tim ADORA.
             </p>
           </div>
         ) : (
@@ -53,7 +53,7 @@ export function ParentCertificatesCard({
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">{certificate.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Diunggah{" "}
+                  Ditambahkan pada{" "}
                   {new Date(certificate.uploadedAt).toLocaleDateString("id-ID", {
                     day: "numeric",
                     month: "long",

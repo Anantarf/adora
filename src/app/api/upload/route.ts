@@ -20,6 +20,48 @@ const ALLOWED_TYPES = new Map<string, string>([
   [".pdf", "application/pdf"],
 ]);
 
+const IMAGE_EXTENSIONS = [".png", ".jpg", ".jpeg"] as const;
+const IMAGE_AND_PDF_EXTENSIONS = [...IMAGE_EXTENSIONS, ".pdf"] as const;
+
+type UploadPolicy = {
+  match: (assetKey: string) => boolean;
+  allowedExtensions: readonly string[];
+};
+
+const UPLOAD_POLICIES: UploadPolicy[] = [
+  {
+    match: (assetKey: string) => /^coach_photo_[A-Za-z0-9_-]+_\d+$/.test(assetKey),
+    allowedExtensions: IMAGE_EXTENSIONS,
+  },
+  {
+    match: (assetKey: string) => /^coach_license_[A-Za-z0-9_-]+_\d+$/.test(assetKey),
+    allowedExtensions: IMAGE_EXTENSIONS,
+  },
+  {
+    match: (assetKey: string) => /^player_photo_\d+$/.test(assetKey),
+    allowedExtensions: IMAGE_EXTENSIONS,
+  },
+  {
+    match: (assetKey: string) => /^player_signature_\d+$/.test(assetKey),
+    allowedExtensions: IMAGE_EXTENSIONS,
+  },
+  {
+    match: (assetKey: string) => /^report_archive_[A-Za-z0-9_-]+_[A-Za-z0-9_-]+_\d+$/.test(assetKey),
+    allowedExtensions: IMAGE_AND_PDF_EXTENSIONS,
+  },
+  {
+    match: (assetKey: string) => assetKey === "rapor_header_url",
+    allowedExtensions: IMAGE_AND_PDF_EXTENSIONS,
+  },
+  {
+    match: (assetKey: string) =>
+      assetKey === "rapor_ceo_sign_url" ||
+      assetKey === "rapor_coach_sign_url" ||
+      assetKey === "rapor_stamp_url",
+    allowedExtensions: [".png"] as const,
+  },
+];
+
 function getClientIp(req: NextRequest): string {
   return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
 }
@@ -44,12 +86,25 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, serviceRoleKey);
 }
 
-function resolveUploadName(assetKey: FormDataEntryValue | null, ext: string): string {
-  if (typeof assetKey === "string" && assetKey.trim()) {
-    return `${assetKey.trim()}${ext}`;
+function resolveUploadTarget(assetKey: FormDataEntryValue | null, ext: string) {
+  if (typeof assetKey !== "string" || !assetKey.trim()) {
+    throw new Error("UPLOAD_ASSET_KEY_REQUIRED");
   }
 
-  return `upload_${crypto.randomUUID()}${ext}`;
+  const normalizedAssetKey = assetKey.trim();
+  const policy = UPLOAD_POLICIES.find((item) => item.match(normalizedAssetKey));
+  if (!policy) {
+    throw new Error("UPLOAD_ASSET_KEY_INVALID");
+  }
+
+  if (!policy.allowedExtensions.includes(ext)) {
+    throw new Error("UPLOAD_ASSET_EXTENSION_INVALID");
+  }
+
+  return {
+    assetKey: normalizedAssetKey,
+    objectKey: `${normalizedAssetKey}_${crypto.randomUUID()}${ext}`,
+  };
 }
 
 async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutCode: string) {
@@ -121,13 +176,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Tipe file tidak cocok dengan konten aktual." }, { status: 400 });
     }
 
-    const uniqueName = resolveUploadName(formData.get("assetKey"), ext);
+    const uploadTarget = resolveUploadTarget(formData.get("assetKey"), ext);
     const supabase = getSupabaseClient();
     const { error } = await withTimeout(
-      supabase.storage.from(getPrivateUploadBucket()).upload(uniqueName, buffer, {
+      supabase.storage.from(getPrivateUploadBucket()).upload(uploadTarget.objectKey, buffer, {
         contentType: file.type || expectedMime,
         cacheControl: "3600",
-        upsert: true,
+        upsert: false,
       }),
       STORAGE_TIMEOUT_MS,
       "UPLOAD_STORAGE_TIMEOUT",
@@ -137,9 +192,21 @@ export async function POST(req: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json({ url: buildPrivateStorageUrl(uniqueName) });
+    return NextResponse.json({ url: buildPrivateStorageUrl(uploadTarget.objectKey) });
   } catch (error) {
     if (error instanceof Error) {
+      if (error.message === "UPLOAD_ASSET_KEY_REQUIRED") {
+        return NextResponse.json({ error: "Jenis unggahan tidak dikenali." }, { status: 400 });
+      }
+
+      if (error.message === "UPLOAD_ASSET_KEY_INVALID") {
+        return NextResponse.json({ error: "Jenis unggahan tidak diizinkan." }, { status: 400 });
+      }
+
+      if (error.message === "UPLOAD_ASSET_EXTENSION_INVALID") {
+        return NextResponse.json({ error: "Format file tidak sesuai untuk jenis unggahan ini." }, { status: 400 });
+      }
+
       if (error.message === "UPLOAD_STORAGE_NOT_CONFIGURED") {
         await recordOperationalError({
           source: "upload-api",

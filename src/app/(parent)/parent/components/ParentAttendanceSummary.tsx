@@ -24,7 +24,7 @@ export function ParentAttendanceSummary({
           <ClipboardCheck className="size-5 text-primary" />
           <div>
             <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Rekap Kehadiran</CardTitle>
-            <CardDescription className="text-xs">Riwayat kehadiran {activeChildName} dalam 50 agenda terakhir.</CardDescription>
+            <CardDescription className="text-xs">Ringkasan kehadiran {activeChildName} dari 50 agenda terakhir.</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -36,8 +36,8 @@ export function ParentAttendanceSummary({
         ) : !attendances?.length ? (
           <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
             <ClipboardCheck className="size-8 text-muted-foreground/30 mb-1" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Belum ada data kehadiran</p>
-            <p className="text-xs text-muted-foreground/75">Data kehadiran akan muncul setelah pelatih mengisi presensi agenda.</p>
+            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Data Kehadiran Belum Tersedia</p>
+            <p className="text-xs text-muted-foreground/75">Riwayat kehadiran akan tampil di sini setelah kehadiran dicatat untuk agenda latihan atau pertandingan.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
@@ -49,7 +49,7 @@ export function ParentAttendanceSummary({
                 </div>
               ))}
               <div className="flex w-full items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-1.5 sm:ml-auto sm:w-auto sm:justify-start">
-                <span className="text-micro text-muted-foreground">Tingkat Kehadiran</span>
+                <span className="text-micro text-muted-foreground">Persentase Kehadiran</span>
                 <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
                   {attendanceSummary?.rate ?? 0}%
                 </span>
@@ -57,7 +57,7 @@ export function ParentAttendanceSummary({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <p className="text-micro text-muted-foreground/50 px-1 mb-1">10 Agenda Terakhir</p>
+              <p className="text-micro text-muted-foreground/50 px-1 mb-1">10 Kehadiran Terbaru</p>
               {attendances.slice(0, 10).map((a) => {
                 const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
                 const eventTitle = a.event?.title ?? eventLabel;

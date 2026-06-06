@@ -60,7 +60,7 @@ export default async function ParentLayout({
                   ADORA
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/70">
-                  Parent Area
+                  Area Orang Tua
                 </span>
               </div>
               <p className="truncate text-xs font-medium text-muted-foreground md:text-sm">

@@ -1,3 +1,5 @@
+import { isExpectedPrivateUploadUrl } from "@/lib/private-upload";
+
 export type StorageAclRole = "ADMIN" | "PARENT" | "COACH";
 
 export type StorageAclLookup = {
@@ -22,6 +24,19 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
   }
 
   if (input.role === "COACH") {
+    const isOwnCoachUpload = isExpectedPrivateUploadUrl(input.fileUrl, {
+      allowedPrefixes: [`coach_photo_${input.userId}_`, `coach_license_${input.userId}_`],
+      allowedExtensions: [".png", ".jpg", ".jpeg"],
+    });
+
+    if (!isOwnCoachUpload) {
+      return {
+        allowed: false,
+        statusCode: 403,
+        message: "File privat ini bukan unggahan yang terikat ke akun coach ini.",
+      };
+    }
+
     const coachAsset = await input.lookup.findCoachAsset(input.fileUrl);
     if (coachAsset && coachAsset.userId === input.userId) {
       return { allowed: true, statusCode: 200, message: "allowed" };

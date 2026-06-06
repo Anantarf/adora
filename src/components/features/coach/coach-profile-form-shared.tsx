@@ -72,7 +72,7 @@ export function CoachProfileFields({
   onChange,
   uploadingKey,
   onUpload,
-  licenseAccept = "image/png,image/jpeg,application/pdf",
+  licenseAccept = "image/png,image/jpeg",
 }: {
   values: CoachProfileFormValues;
   onChange: {

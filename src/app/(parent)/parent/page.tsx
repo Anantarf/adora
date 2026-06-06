@@ -117,13 +117,13 @@ export default function ParentDashboard() {
           <User className="size-10" />
         </div>
         <h2 className="mb-4 text-xl font-heading uppercase text-foreground">
-          Belum Ada Profil Terhubung
+          Profil Anak Belum Terhubung
         </h2>
         <p className="max-w-md text-sm font-medium leading-relaxed text-muted-foreground">
-          Akun ini belum terhubung dengan profil pemain.
+          Akun ini belum terhubung ke profil anak.
         </p>
         <p className="max-w-md text-sm font-medium leading-relaxed text-muted-foreground">
-          Hubungi admin untuk menghubungkan akun dengan putra atau putri Anda.
+          Hubungi tim ADORA agar akun ini dapat dihubungkan ke profil putra atau putri Anda.
         </p>
       </div>
     );
@@ -147,13 +147,13 @@ export default function ParentDashboard() {
       <div className="flex flex-col items-start justify-between gap-3 border-b border-border/70 pb-4 md:flex-row md:items-end md:pb-5">
         <div className="space-y-1">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Dashboard Orang Tua
+            Portal Orang Tua
           </p>
           <h1 className="font-heading text-2xl uppercase tracking-[0.16em] text-foreground md:text-[2.35rem]">
             Pantauan Pemain
           </h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Lihat ringkasan perkembangan, kehadiran, dan rapor terbaru anak Anda.
+            Pantau perkembangan, kehadiran, dan hasil evaluasi terbaru anak Anda di satu tempat.
           </p>
         </div>
 
@@ -254,11 +254,12 @@ export default function ParentDashboard() {
           </div>
           <div className="space-y-1">
             <h3 className="text-xl font-heading uppercase text-foreground">
-              Belum Ada Evaluasi
+              Evaluasi Belum Tersedia
             </h3>
             <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-              Pelatih belum mengunggah nilai terbaru untuk{" "}
-              <span className="font-semibold text-foreground">{activeChild.name}</span>.
+              Hasil evaluasi terbaru untuk{" "}
+              <span className="font-semibold text-foreground">{activeChild.name}</span> akan
+              tampil di sini setelah penilaian berikutnya tersedia.
             </p>
           </div>
         </div>
@@ -352,7 +353,7 @@ export default function ParentDashboard() {
                       Catatan Pelatih
                     </CardTitle>
                     <CardDescription className="text-xs">
-                      Ringkasan evaluasi dari rapor terbaru.
+                      Ringkasan masukan pelatih dari evaluasi terbaru.
                     </CardDescription>
                   </div>
                   <span className="rounded-full border border-border/50 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -364,7 +365,7 @@ export default function ParentDashboard() {
                 <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
                   <p className="text-sm leading-relaxed text-foreground/85">
                     {latestMetrics?.notes ||
-                      "Belum ada catatan khusus pada evaluasi terbaru."}
+                      "Belum ada catatan khusus dari pelatih pada evaluasi terbaru."}
                   </p>
                 </div>
               </CardContent>

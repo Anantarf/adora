@@ -30,15 +30,15 @@ export function ParentReportArchivesCard({
           Arsip Rapor
         </CardTitle>
         <CardDescription className="text-xs">
-          Dokumen rapor resmi yang sudah dirilis oleh admin untuk setiap periode evaluasi.
+          Kumpulan rapor resmi anak Anda untuk setiap periode evaluasi yang sudah tersedia.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3 p-5">
         {!archives?.length ? (
           <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-7 text-center">
-            <p className="text-sm font-medium text-muted-foreground">Belum ada rapor resmi yang dirilis.</p>
+            <p className="text-sm font-medium text-muted-foreground">Belum ada rapor yang tersedia.</p>
             <p className="mt-1 text-xs text-muted-foreground/80">
-              Arsip rapor {playerName} akan tampil di sini setelah admin merilis dokumennya.
+              Rapor {playerName} akan tampil di sini setelah dokumen evaluasi diterbitkan.
             </p>
           </div>
         ) : (
@@ -50,7 +50,7 @@ export function ParentReportArchivesCard({
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground">{archive.period.name}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  Dirilis{" "}
+                  Tersedia sejak{" "}
                   {archive.releasedAt
                     ? new Date(archive.releasedAt).toLocaleDateString("id-ID", {
                         day: "numeric",
@@ -67,7 +67,7 @@ export function ParentReportArchivesCard({
                 className="inline-flex h-10 items-center justify-center rounded-xl border border-border/50 bg-card px-4 text-xs font-semibold text-foreground transition-colors hover:bg-muted/20"
               >
                 <FileText className="mr-2 size-4 text-primary" />
-                Buka Rapor
+                Lihat Rapor
               </a>
             </div>
           ))

@@ -8,10 +8,22 @@ import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import { withSerializableTransaction } from "@/lib/db-concurrency";
 import { ensureActiveGroup, ensureActiveParentUser, ensureActivePlayer } from "@/lib/domain-guards";
+import { normalizeExpectedPrivateUploadUrl } from "@/lib/private-upload";
 import { buildPlayerFullName, splitPlayerName } from "@/lib/player-profile";
 import { batchPlayersInputSchema, playerListArgsSchema, DEFAULT_PLAYER_PAGE_SIZE } from "@/lib/validation/player";
 
 const BATCH_CHUNK_SIZE = 200;
+
+function normalizePlayerAssetUrl(url: string | undefined, kind: "photo" | "signature") {
+  return normalizeExpectedPrivateUploadUrl(
+    url,
+    {
+      allowedPrefixes: [kind === "photo" ? "player_photo_" : "player_signature_"],
+      allowedExtensions: [".png", ".jpg", ".jpeg"],
+    },
+    kind === "photo" ? "Foto pemain" : "Tanda tangan pemain",
+  );
+}
 
 function buildPlayerListWhere(groupId?: string, searchQuery?: string) {
   return {
@@ -230,8 +242,8 @@ export async function addPlayerAction(data: {
         parentName: data.parentName?.trim() || undefined,
         parentAddress: data.parentAddress?.trim() || undefined,
         parentPhoneNumber: data.parentPhoneNumber?.trim() || undefined,
-        photoUrl: data.photoUrl?.trim() || undefined,
-        signatureUrl: data.signatureUrl?.trim() || undefined,
+        photoUrl: normalizePlayerAssetUrl(data.photoUrl, "photo") || undefined,
+        signatureUrl: normalizePlayerAssetUrl(data.signatureUrl, "signature") || undefined,
         parentId: data.parentId?.trim() || undefined,
         updatedAt: new Date(),
       },
@@ -412,8 +424,8 @@ export async function updatePlayerAction(
         parentName: data.parentName,
         parentAddress: data.parentAddress,
         parentPhoneNumber: data.parentPhoneNumber,
-        photoUrl: data.photoUrl,
-        signatureUrl: data.signatureUrl,
+        photoUrl: normalizePlayerAssetUrl(data.photoUrl, "photo"),
+        signatureUrl: normalizePlayerAssetUrl(data.signatureUrl, "signature"),
         groupId: data.groupId,
         ...(data.parentId !== undefined ? { parentId: data.parentId } : {}),
         updatedAt: new Date(),

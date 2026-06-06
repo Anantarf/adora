@@ -17,10 +17,10 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
       <Card className="border-border/50 bg-card shadow-sm">
         <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
           <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-            Informasi Coach
+            Informasi Pelatih
           </CardTitle>
           <CardDescription className="text-xs">
-            Coach aktif yang menangani kelompok latihan {player.group?.name || "pemain ini"}.
+            Pelatih utama yang saat ini mendampingi kelompok latihan {player.group?.name || "anak Anda"}.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 p-5">
@@ -35,10 +35,10 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
             </div>
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Coach Penanggung Jawab
+                Pelatih Utama
               </p>
               <p className="mt-1 text-lg font-semibold text-foreground">
-                {coach?.fullName || "Belum ditentukan"}
+                {coach?.fullName || "Belum tersedia"}
               </p>
             </div>
           </div>
@@ -51,7 +51,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
             onClick={() => setOpen(true)}
           >
             <BadgeCheck className="mr-2 size-4" />
-            {coach?.licenseUrl ? "Lihat Lisensi" : "Lisensi Belum Tersedia"}
+            {coach?.licenseUrl ? "Lihat Lisensi Pelatih" : "Lisensi Belum Tersedia"}
           </Button>
         </CardContent>
       </Card>
@@ -60,10 +60,10 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
         <DialogContent className="border-border/50 bg-card sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-foreground">
-              Lisensi Coach
+              Lisensi Pelatih
             </DialogTitle>
             <DialogDescription className="text-sm text-muted-foreground">
-              Dokumen lisensi untuk coach {coach?.fullName || "-"}.
+              Dokumen lisensi untuk pelatih {coach?.fullName || "-"}.
             </DialogDescription>
           </DialogHeader>
           {coach?.licenseUrl ? (
