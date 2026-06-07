@@ -58,13 +58,17 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
     };
   }
 
-  const coachLicense = await input.lookup.findCoachLicense(input.fileUrl);
-  if (coachLicense) {
-    const allowed = await input.lookup.isCoachVisibleToParent(coachLicense.id, input.userId);
+  const coachAsset = await input.lookup.findCoachAsset(input.fileUrl);
+  if (coachAsset) {
+    const allowed = await input.lookup.isCoachVisibleToParent(coachAsset.id, input.userId);
     return {
       allowed,
       statusCode: allowed ? 200 : 403,
-      message: allowed ? "allowed" : "Lisensi coach ini tidak terhubung ke pemain parent ini.",
+      message: allowed
+        ? "allowed"
+        : coachAsset.isLicense
+          ? "Lisensi coach ini tidak terhubung ke pemain parent ini."
+          : "Foto coach ini tidak terhubung ke pemain parent ini.",
     };
   }
 
