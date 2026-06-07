@@ -22,8 +22,20 @@ export default async function CoachLayout({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || session.user.role !== "COACH") {
-    redirect("/");
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (session.user.role === "ADMIN") {
+    redirect("/dashboard");
+  }
+
+  if (session.user.role === "PARENT") {
+    redirect("/parent");
+  }
+
+  if (session.user.role !== "COACH") {
+    redirect("/login");
   }
 
   return (

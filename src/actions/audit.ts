@@ -28,7 +28,7 @@ export async function getAuditLogsAction(options?: { take?: number; cursor?: str
     include: {
       user: { select: { id: true, name: true, username: true } },
     },
-    orderBy: { timestamp: "desc" },
+    orderBy: [{ timestamp: "desc" }, { id: "desc" }],
   });
 
   const hasMore = logs.length > take;
@@ -66,6 +66,6 @@ export async function createAuditLog(
     });
   } catch (error) {
     console.error("[AUDIT_LOG_ERROR]:", error);
-    return null;
+    throw new Error("Gagal mencatat audit log.");
   }
 }

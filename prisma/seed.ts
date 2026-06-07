@@ -36,7 +36,6 @@ async function main() {
       name: "ADORA Gandul (Pusat)",
       address: "Jl. Gandul Raya No. 15, Cinere, Kota Depok, Jawa Barat 16514",
       phone: "081234567890",
-      description: "Homebase Utama / Pusat dengan fasilitas lapangan indoor standar FIBA.",
     },
   });
 
@@ -45,7 +44,6 @@ async function main() {
       name: "ADORA Cibubur",
       address: "GOR Cileungsi, Jl. Raya Cileungsi - Jonggol No. 45, Bogor, Jawa Barat 16820",
       phone: "081298765432",
-      description: "Cabang Cibubur / Cileungsi dengan fasilitas outdoor & semi-indoor.",
     },
   });
   console.log("Homebase berhasil di-seed.");

@@ -12,30 +12,30 @@ export const ASSET_KEYS: AssetConfig[] = [
   {
     key: "rapor_header_url",
     label: "Template Kertas Rapor (Paper Background)",
-    description: "Unggah desain kertas rapor utuh (format: PDF) atau kop surat (format: PNG/JPG). Jika mengunggah PDF, konten rapor akan dicetak di atas template tersebut.",
+    description: "Utamakan format PDF agar ukuran rapor tetap ringan. PNG/JPG hanya cocok untuk kop surat ringan, bukan background full-page resolusi besar.",
     accept: ".png,.jpg,.jpeg,.pdf",
-    maxSizeLabel: "Maks 2MB",
+    maxSizeLabel: "Maks 1MB",
   },
   {
     key: "rapor_ceo_sign_url",
     label: "Tanda Tangan CEO",
     description: "Unggah tanda tangan CEO dalam format PNG transparan.",
     accept: ".png",
-    maxSizeLabel: "Maks 1MB",
+    maxSizeLabel: "Maks 300KB",
   },
   {
     key: "rapor_coach_sign_url",
     label: "Tanda Tangan Head Coach",
     description: "Unggah tanda tangan head coach dalam format PNG transparan.",
     accept: ".png",
-    maxSizeLabel: "Maks 1MB",
+    maxSizeLabel: "Maks 300KB",
   },
   {
     key: "rapor_stamp_url",
     label: "Stempel Digital",
     description: "Unggah stempel resmi ADORA BBC dalam format PNG transparan.",
     accept: ".png",
-    maxSizeLabel: "Maks 1MB",
+    maxSizeLabel: "Maks 300KB",
   },
 ];
 

@@ -37,6 +37,10 @@ const ParentProgressionChart = dynamic(
   },
 );
 
+function formatWeight(value: number) {
+  return Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/\.?0+$/, "");
+}
+
 export default function ParentDashboard() {
   const { data: children, isLoading: familyLoading } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -162,7 +166,7 @@ export default function ParentDashboard() {
             <span className="ml-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Pilih Anak
             </span>
-            <Select value={effectiveChildId || undefined} onValueChange={setSelectedChildId}>
+            <Select value={effectiveChildId ?? ""} onValueChange={setSelectedChildId}>
               <SelectTrigger className="h-10 w-full rounded-full border-border/70 bg-card px-4 font-semibold text-foreground md:w-72">
                 <SelectValue placeholder="Pilih profil">
                   {effectiveChildId
@@ -293,7 +297,7 @@ export default function ParentDashboard() {
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-foreground">{category.label}</p>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                              Bobot {category.weight}%
+                              Bobot {formatWeight(category.weight)}%
                             </p>
                           </div>
                           <div className="text-right">
@@ -311,7 +315,7 @@ export default function ParentDashboard() {
                               {getEvaluationSummary(latestMetrics).attendance!.label}
                             </p>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                              Bobot {getEvaluationSummary(latestMetrics).attendance!.weight}%
+                              Bobot {formatWeight(getEvaluationSummary(latestMetrics).attendance!.weight)}% • {getEvaluationSummary(latestMetrics).attendance!.counts.HADIR} / {getEvaluationSummary(latestMetrics).attendance!.totalSessions} kegiatan dihadiri
                             </p>
                           </div>
                           <div className="text-right">

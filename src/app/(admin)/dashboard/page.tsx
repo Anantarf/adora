@@ -41,12 +41,19 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-3 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-foreground">Ringkasan operasional klub hari ini.</p>
-          <p className="text-sm text-muted-foreground">{summaryText}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+            Dashboard Utama
+          </p>
+          <h2 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+            Ringkasan Operasional Hari Ini
+          </h2>
+          <p className="max-w-3xl text-sm text-muted-foreground">{summaryText}</p>
         </div>
-        <p className="text-xs font-medium text-muted-foreground md:text-sm">{todayLabel}</p>
+        <div className="rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground md:text-sm">
+          {todayLabel}
+        </div>
       </div>
 
       {isError ? (

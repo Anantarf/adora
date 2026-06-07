@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ChevronRight, Clock, FileText, Loader2, RefreshCw, ShieldAlert, User } from "lucide-react";
 
 import { useAuditLogs, type AuditLogRecord } from "@/hooks/use-audit-log";
+import { useGroups } from "@/hooks/use-groups";
 import { useHomebases } from "@/hooks/use-homebases";
 import { Button } from "@/components/ui/button";
 import {
@@ -182,19 +183,26 @@ function AuditLogEntry({
 }
 
 export default function AuditPage() {
-  const [cursor, setCursor] = useState<string | undefined>(undefined);
   const [selectedLog, setSelectedLog] = useState<AuditLogRecord | null>(null);
 
-  const { data, isLoading, isRefetching, refetch } = useAuditLogs(cursor);
+  const { data, isLoading, isRefetching, isFetchingNextPage, hasNextPage, fetchNextPage, refetch } = useAuditLogs();
   const { data: homebases } = useHomebases();
+  const { data: groups } = useGroups();
+  const logs = useMemo(
+    () => data?.pages.flatMap((page) => page.logs) ?? [],
+    [data],
+  );
 
   const detailLookups = useMemo<AuditValueLookups>(
     () => ({
       homebaseId: Object.fromEntries(
         (homebases ?? []).map((homebase) => [homebase.id, homebase.name]),
       ),
+      groupId: Object.fromEntries(
+        (groups ?? []).map((group) => [group.id, group.name]),
+      ),
     }),
-    [homebases],
+    [groups, homebases],
   );
 
   const selectedActorName =
@@ -214,8 +222,7 @@ export default function AuditPage() {
           variant="outline"
           size="sm"
           onClick={() => {
-            setCursor(undefined);
-            refetch();
+            void refetch();
           }}
           disabled={isRefetching}
           className="h-10 border-border/50 px-4 text-xs font-medium hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
@@ -259,27 +266,37 @@ export default function AuditPage() {
             <Loader2 className="size-8 animate-spin text-primary" />
             <p className="text-sm text-muted-foreground">Memuat riwayat aktivitas...</p>
           </div>
-        ) : !data?.logs || data.logs.length === 0 ? (
+        ) : logs.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/50 bg-background/30 py-20 text-center">
             <ShieldAlert className="size-10 text-muted-foreground/25" />
             <p className="text-sm font-medium text-muted-foreground">Belum ada aktivitas</p>
           </div>
         ) : (
           <>
-            {data.logs.map((log) => (
+            {logs.map((log) => (
               <AuditLogEntry key={log.id} log={log} onClick={() => setSelectedLog(log)} />
             ))}
 
-            {data.nextCursor ? (
+            {hasNextPage ? (
               <div className="mt-4 flex justify-center">
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCursor(data.nextCursor!)}
+                  onClick={() => void fetchNextPage()}
+                  disabled={isFetchingNextPage}
                   className="h-10 border-border/50 px-5 text-xs font-medium hover:bg-primary/10 hover:text-primary"
                 >
-                  Muat Lebih Banyak
-                  <ChevronRight className="ml-1 size-3.5" />
+                  {isFetchingNextPage ? (
+                    <>
+                      <Loader2 className="mr-2 size-3.5 animate-spin" />
+                      Memuat...
+                    </>
+                  ) : (
+                    <>
+                      Muat Lebih Banyak
+                      <ChevronRight className="ml-1 size-3.5" />
+                    </>
+                  )}
                 </Button>
               </div>
             ) : null}

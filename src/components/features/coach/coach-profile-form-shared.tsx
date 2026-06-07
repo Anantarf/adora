@@ -102,7 +102,7 @@ export function CoachProfileFields({
         </div>
         <div className="space-y-1.5">
           <label className="ml-1 text-xs font-medium text-muted-foreground">Jenis Kelamin</label>
-          <Select value={values.gender || undefined} onValueChange={(value) => onChange.setGender(value ?? "")}>
+          <Select value={values.gender} onValueChange={(value) => onChange.setGender(value ?? "")}>
             <SelectTrigger className="h-11 w-full rounded-xl border-border/50 bg-background/50">
               <SelectValue placeholder="Pilih jenis kelamin" />
             </SelectTrigger>

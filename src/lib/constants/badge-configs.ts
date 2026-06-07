@@ -19,19 +19,23 @@ export const PERIOD_STATUS_BADGE = {
 
 // ─── Audit Log ────────────────────────────────────────────────────────────────
 
-export type AuditActionKey = "CREATE" | "UPDATE" | "DELETE" | "default";
+export type AuditActionKey = "CREATE" | "UPDATE" | "DELETE" | "RELEASE" | "SECURITY" | "default";
 
 export const AUDIT_ACTION_CONFIG: Record<AuditActionKey, { color: string; icon: typeof Plus; label: string; description: string }> = {
   CREATE:  { color: "#22C55E", icon: Plus,     label: "Tambah", description: "Data baru ditambahkan"      },
   UPDATE:  { color: "#3B82F6", icon: Pencil,   label: "Ubah",   description: "Informasi diperbarui"       },
   DELETE:  { color: "#E11D48", icon: Trash2,   label: "Hapus",  description: "Data dihapus dari sistem"   },
+  RELEASE: { color: "#F97316", icon: FileText, label: "Rilis",  description: "Dokumen dirilis ke pengguna" },
+  SECURITY:{ color: "#A855F7", icon: FileText, label: "Akses",  description: "Perubahan keamanan akun"      },
   default: { color: "#8B5CF6", icon: FileText, label: "Aksi",   description: "Aksi sistem lainnya"        },
 };
 
 export function getAuditActionConfig(action: string) {
   const key = action.toUpperCase();
+  if (key.includes("RESET_PASSWORD") || key.includes("CHANGE_FORCED_PASSWORD")) return AUDIT_ACTION_CONFIG.SECURITY;
+  if (key.includes("RELEASE"))                                                return AUDIT_ACTION_CONFIG.RELEASE;
   if (key.includes("CREATE") || key.includes("ADD"))                           return AUDIT_ACTION_CONFIG.CREATE;
-  if (key.includes("UPDATE") || key.includes("EDIT") || key.includes("SET"))  return AUDIT_ACTION_CONFIG.UPDATE;
+  if (key.includes("UPDATE") || key.includes("EDIT") || key.includes("SET") || key.includes("SUBMIT") || key.includes("UPSERT"))  return AUDIT_ACTION_CONFIG.UPDATE;
   if (key.includes("DELETE") || key.includes("REMOVE"))                        return AUDIT_ACTION_CONFIG.DELETE;
   return AUDIT_ACTION_CONFIG.default;
 }

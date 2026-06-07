@@ -1,13 +1,15 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { useSession } from "next-auth/react";
 
 import { useSubmitStatistic } from "@/hooks/use-statistics";
 import {
   buildMetricFieldKey,
   buildMetricValuesFromConfig,
+  FIXED_ASPECT_MAX_SCORE,
   normalizeEvaluationConfig,
   type MetricsJsonV2,
 } from "@/lib/evaluation-rules";
@@ -48,6 +50,15 @@ function clampScore(value: number, maxScore: number) {
   return Math.max(0, Math.min(maxScore, Math.round(value)));
 }
 
+function parseScoreInput(nextValue: string, maxScore: number) {
+  const digitsOnly = nextValue.replace(/[^\d]/g, "");
+  return clampScore(Number(digitsOnly), maxScore);
+}
+
+function formatWeight(value: number) {
+  return Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/\.?0+$/, "");
+}
+
 function getLegacyMetricValue(metrics: MetricsJson, path: string) {
   const parts = path.split(".");
   let current: unknown = metrics;
@@ -76,8 +87,11 @@ export function AddStatDialog({
   alwaysShowLabel?: boolean;
   evaluationConfig?: unknown;
 }) {
+  const { data: session } = useSession();
+  const isCoach = session?.user?.role === "COACH";
   const [open, setOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<"Draft" | "Published" | null>(null);
+  const scoreInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [legacyMetrics, setLegacyMetrics] = useState<MetricsJson>(
     (existingStat?.metrics as MetricsJson) ?? DEFAULT_LEGACY_METRICS,
   );
@@ -140,7 +154,7 @@ export function AddStatDialog({
   }, [dynamicConfig, dynamicValues]);
 
   const handleLegacyChange = (path: string, maxScore: number, nextValue: string) => {
-    const score = clampScore(Number(nextValue), maxScore);
+    const score = parseScoreInput(nextValue, maxScore);
 
     setLegacyMetrics((previous) => {
       const copy = structuredClone(previous);
@@ -200,6 +214,24 @@ export function AddStatDialog({
   };
 
   const notesMaxLength = dynamicConfig?.notesMaxLength ?? 160;
+  let scoreInputIndex = 0;
+
+  const registerScoreInputRef = (index: number) => (node: HTMLInputElement | null) => {
+    scoreInputRefs.current[index] = node;
+  };
+
+  const handleScoreInputEnter = (event: React.KeyboardEvent<HTMLInputElement>, currentIndex: number) => {
+    if (event.key !== "Enter") {
+      return;
+    }
+
+    event.preventDefault();
+    scoreInputRefs.current[currentIndex + 1]?.focus();
+    scoreInputRefs.current[currentIndex + 1]?.select();
+  };
+  if (isCoach && isEdit && existingStat?.status === "Published") {
+    return null;
+  }
 
   return (
     <>
@@ -263,31 +295,34 @@ export function AddStatDialog({
                           <div>
                             <p className="text-sm font-semibold text-foreground">{category.label}</p>
                             <p className="text-[11px] text-muted-foreground">
-                              Bobot {category.weight}% • {category.items.length} aspek
+                              Bobot {formatWeight(category.weight)}% • {category.items.length} aspek
                             </p>
                           </div>
                         </div>
                         <div className="grid gap-3 md:grid-cols-2">
                           {category.items.map((item) => {
                             const fieldKey = buildMetricFieldKey(category.id, item.id);
+                            const inputIndex = scoreInputIndex;
+                            scoreInputIndex += 1;
                             return (
                               <div key={fieldKey} className="space-y-1">
                                 <label className="text-xs font-medium text-muted-foreground">{item.label}</label>
                                 <Input
-                                  type="number"
-                                  min={0}
-                                  max={item.maxScore}
-                                  step={1}
-                                  value={dynamicValues[fieldKey] ?? 0}
+                                  ref={registerScoreInputRef(inputIndex)}
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={String(dynamicValues[fieldKey] ?? 0)}
                                   onChange={(event) =>
                                     setDynamicValues((previous) => ({
                                       ...previous,
-                                      [fieldKey]: clampScore(Number(event.target.value), item.maxScore),
+                                      [fieldKey]: parseScoreInput(event.target.value, item.maxScore),
                                     }))
                                   }
+                                  onKeyDown={(event) => handleScoreInputEnter(event, inputIndex)}
                                   className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
                                 />
-                                <p className="text-[10px] text-muted-foreground">Maks. {item.maxScore}</p>
+                                <p className="text-[10px] text-muted-foreground">Skala 0-{FIXED_ASPECT_MAX_SCORE}</p>
                               </div>
                             );
                           })}
@@ -304,23 +339,69 @@ export function AddStatDialog({
                       Total: {legacyGrandTotal}
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 p-3">
-                    {FLAT_METRIC_DEFS.map((definition) => (
-                      <div key={definition.key} className="flex flex-col gap-1">
-                        <label className="text-xs font-medium text-muted-foreground">{definition.label}</label>
-                        <Input
-                          type="number"
-                          min={0}
-                          max={definition.max}
-                          step={1}
-                          value={getLegacyMetricValue(legacyMetrics, definition.path)}
-                          onChange={(event) =>
-                            handleLegacyChange(definition.path, definition.max, event.target.value)
-                          }
-                          className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
-                        />
-                      </div>
-                    ))}
+                  <div className="space-y-4 p-3">
+                    {(() => {
+                      // Group FLAT_METRIC_DEFS by category
+                      const categoryGroups: Array<{
+                        label: string;
+                        definitions: typeof FLAT_METRIC_DEFS;
+                      }> = [];
+                      let currentCategory = "";
+                      for (const def of FLAT_METRIC_DEFS) {
+                        const categoryLabel = def.path.includes(".")
+                          ? def.path.split(".")[0]
+                          : "finishing"; // layUp and shooting both belong to Finishing
+                        const displayLabel =
+                          categoryLabel === "dribble"
+                            ? "Dribble"
+                            : categoryLabel === "passing"
+                              ? "Passing"
+                              : "Finishing";
+                        if (displayLabel !== currentCategory) {
+                          categoryGroups.push({ label: displayLabel, definitions: [] });
+                          currentCategory = displayLabel;
+                        }
+                        categoryGroups[categoryGroups.length - 1].definitions.push(def);
+                      }
+
+                      return categoryGroups.map((group) => (
+                        <div key={group.label} className="space-y-2 rounded-xl border border-border/40 bg-background/40 p-3">
+                          <div className="flex items-center gap-2 pb-0.5">
+                            <span className="text-xs font-semibold uppercase tracking-wide text-primary/80">
+                              {group.label}
+                            </span>
+                            <span className="h-px flex-1 bg-border/40" />
+                            <span className="text-[10px] font-medium text-muted-foreground">
+                              {group.definitions.length} aspek
+                            </span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-2">
+                            {group.definitions.map((definition) => {
+                              const inputIndex = scoreInputIndex;
+                              scoreInputIndex += 1;
+                              return (
+                                <div key={definition.key} className="flex flex-col gap-1">
+                                  <label className="text-xs font-medium text-muted-foreground">{definition.label}</label>
+                                  <Input
+                                    ref={registerScoreInputRef(inputIndex)}
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
+                                    value={String(getLegacyMetricValue(legacyMetrics, definition.path))}
+                                    onChange={(event) =>
+                                      handleLegacyChange(definition.path, definition.max, event.target.value)
+                                    }
+                                    onKeyDown={(event) => handleScoreInputEnter(event, inputIndex)}
+                                    className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
+                                  />
+                                  <p className="text-[10px] text-muted-foreground">Skala 0-{definition.max}</p>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ));
+                    })()}
                   </div>
                 </div>
               )}
@@ -362,35 +443,54 @@ export function AddStatDialog({
 
             {isPeriodActive ? (
               <div className="mt-1 flex flex-col gap-2">
-                <Button
-                  type="button"
-                  onClick={() => void onSubmit("Published")}
-                  disabled={isPending}
-                  className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
-                >
-                  {pendingStatus === "Published" ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan...
-                    </>
-                  ) : (
-                    "Simpan & Terbitkan"
-                  )}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => void onSubmit("Draft")}
-                  disabled={isPending}
-                  className="h-11 w-full border-primary/30 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:text-primary"
-                >
-                  {pendingStatus === "Draft" ? (
-                    <>
-                      <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan Draf...
-                    </>
-                  ) : (
-                    "Simpan sebagai Draf"
-                  )}
-                </Button>
+                {isCoach ? (
+                  <Button
+                    type="button"
+                    onClick={() => void onSubmit("Draft")}
+                    disabled={isPending}
+                    className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                  >
+                    {pendingStatus === "Draft" ? (
+                      <>
+                        <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan Draf...
+                      </>
+                    ) : (
+                      "Simpan sebagai Draf"
+                    )}
+                  </Button>
+                ) : (
+                  <>
+                    <Button
+                      type="button"
+                      onClick={() => void onSubmit("Published")}
+                      disabled={isPending}
+                      className="h-11 w-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                    >
+                      {pendingStatus === "Published" ? (
+                        <>
+                          <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan...
+                        </>
+                      ) : (
+                        "Simpan & Terbitkan"
+                      )}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => void onSubmit("Draft")}
+                      disabled={isPending}
+                      className="h-11 w-full border-primary/30 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:text-primary"
+                    >
+                      {pendingStatus === "Draft" ? (
+                        <>
+                          <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan Draf...
+                        </>
+                      ) : (
+                        "Simpan sebagai Draf"
+                      )}
+                    </Button>
+                  </>
+                )}
               </div>
             ) : null}
           </div>

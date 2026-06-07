@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, Plus, Settings2, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Info, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import {
+  AUTO_ATTENDANCE_REDUCED_THRESHOLD,
   DEFAULT_EVALUATION_CONFIG_V2,
+  FIXED_ASPECT_MAX_SCORE,
   normalizeEvaluationConfig,
   type EvaluationConfigV2,
 } from "@/lib/evaluation-rules";
@@ -18,22 +20,27 @@ function nextId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function formatWeight(value: number) {
+  return Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/\.?0+$/, "");
+}
+
 export function EvaluationConfigDialog() {
   const [open, setOpen] = useState(false);
   const { data } = useEvaluationConfig();
   const { mutateAsync, isPending } = useUpdateEvaluationConfig();
   const [draft, setDraft] = useState<EvaluationConfigV2>(DEFAULT_EVALUATION_CONFIG_V2);
 
-  const [prevOpen, setPrevOpen] = useState(false);
-  const [prevData, setPrevData] = useState<EvaluationConfigV2 | undefined>(undefined);
-
-  if (open !== prevOpen || data !== prevData) {
-    setPrevOpen(open);
-    setPrevData(data);
-    if (open) {
-      setDraft(normalizeEvaluationConfig(data ?? DEFAULT_EVALUATION_CONFIG_V2));
+  useEffect(() => {
+    if (!open) {
+      return;
     }
-  }
+
+    setDraft(normalizeEvaluationConfig(data ?? DEFAULT_EVALUATION_CONFIG_V2));
+  }, [data, open]);
+
+  const updateDraft = (updater: (current: EvaluationConfigV2) => EvaluationConfigV2) => {
+    setDraft((current) => normalizeEvaluationConfig(updater(current)));
+  };
 
   const handleSave = async () => {
     try {
@@ -58,14 +65,33 @@ export function EvaluationConfigDialog() {
       <DialogContent className="custom-scrollbar max-h-[90vh] overflow-y-auto border-border/50 bg-card sm:max-w-4xl">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-foreground">
-            Aturan Penilaian Dinamis
+            Aturan Penilaian
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Atur kategori, aspek penilaian, bobot, presensi, dan predikat. Perubahan hanya akan dipakai oleh periode baru.
+            Bobot kategori, presensi, dan skala aspek dikunci oleh sistem. Perubahan hanya akan dipakai oleh periode baru.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-5">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+            <div className="flex items-start gap-3">
+              <Info className="mt-0.5 size-4 text-primary" />
+              <div className="space-y-2 text-sm text-muted-foreground">
+                <p className="font-medium text-foreground">Aturan bobot otomatis aktif.</p>
+                <p>
+                  Jika kategori teknis aktif sampai {AUTO_ATTENDANCE_REDUCED_THRESHOLD}, presensi bernilai{" "}
+                  <span className="font-semibold text-foreground">10%</span>. Jika lebih dari{" "}
+                  {AUTO_ATTENDANCE_REDUCED_THRESHOLD}, presensi turun jadi{" "}
+                  <span className="font-semibold text-foreground">5%</span> dan sisa bobot dibagi rata ke semua kategori teknis.
+                </p>
+                <p>
+                  Semua aspek memakai skala tetap{" "}
+                  <span className="font-semibold text-foreground">0-{FIXED_ASPECT_MAX_SCORE}</span>.
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-muted-foreground">Maksimum Karakter Catatan</label>
@@ -75,7 +101,7 @@ export function EvaluationConfigDialog() {
                 max={1000}
                 value={draft.notesMaxLength}
                 onChange={(event) =>
-                  setDraft((previous) => ({
+                  updateDraft((previous) => ({
                     ...previous,
                     notesMaxLength: Math.max(40, Math.min(1000, Number(event.target.value) || 160)),
                   }))
@@ -88,22 +114,22 @@ export function EvaluationConfigDialog() {
             <div className="flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Kategori Penilaian</h3>
-                <p className="text-xs text-muted-foreground">Tambahkan kategori dan jenis penilaian sesuai kebutuhan periode baru.</p>
+                <p className="text-xs text-muted-foreground">Kelola nama kategori dan daftar aspek. Bobot dihitung otomatis oleh sistem.</p>
               </div>
               <Button
                 type="button"
                 size="sm"
                 variant="outline"
                 onClick={() =>
-                  setDraft((previous) => ({
+                  updateDraft((previous) => ({
                     ...previous,
                     categories: [
                       ...previous.categories,
                       {
                         id: nextId("category"),
                         label: `Kategori ${previous.categories.length + 1}`,
-                        weight: 10,
-                        items: [{ id: nextId("item"), label: "Aspek Baru", maxScore: 10 }],
+                        weight: 0,
+                        items: [{ id: nextId("item"), label: "Aspek Baru", maxScore: FIXED_ASPECT_MAX_SCORE }],
                       },
                     ],
                   }))
@@ -117,42 +143,30 @@ export function EvaluationConfigDialog() {
             <div className="space-y-4">
               {draft.categories.map((category, categoryIndex) => (
                 <div key={category.id} className="space-y-3 rounded-xl border border-border/40 bg-background/30 p-4">
-                  <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_120px_auto]">
-                    <Input
-                      value={category.label}
-                      onChange={(event) =>
-                        setDraft((previous) => ({
-                          ...previous,
-                          categories: previous.categories.map((entry, index) =>
-                            index === categoryIndex ? { ...entry, label: event.target.value } : entry,
-                          ),
-                        }))
-                      }
-                      placeholder="Nama kategori"
-                    />
-                    <Input
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={category.weight}
-                      onChange={(event) =>
-                        setDraft((previous) => ({
-                          ...previous,
-                          categories: previous.categories.map((entry, index) =>
-                            index === categoryIndex
-                              ? { ...entry, weight: Math.max(0, Math.min(100, Number(event.target.value) || 0)) }
-                              : entry,
-                          ),
-                        }))
-                      }
-                      placeholder="Bobot %"
-                    />
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 space-y-2">
+                      <Input
+                        value={category.label}
+                        onChange={(event) =>
+                          updateDraft((previous) => ({
+                            ...previous,
+                            categories: previous.categories.map((entry, index) =>
+                              index === categoryIndex ? { ...entry, label: event.target.value } : entry,
+                            ),
+                          }))
+                        }
+                        placeholder="Nama kategori"
+                      />
+                      <p className="text-[11px] text-muted-foreground">
+                        Bobot otomatis {formatWeight(category.weight)}% • {category.items.length} aspek • Skala 0-{FIXED_ASPECT_MAX_SCORE}
+                      </p>
+                    </div>
                     <Button
                       type="button"
                       size="icon"
                       variant="outline"
                       onClick={() =>
-                        setDraft((previous) => ({
+                        updateDraft((previous) => ({
                           ...previous,
                           categories: previous.categories.filter((_, index) => index !== categoryIndex),
                         }))
@@ -168,7 +182,7 @@ export function EvaluationConfigDialog() {
                         <Input
                           value={item.label}
                           onChange={(event) =>
-                            setDraft((previous) => ({
+                            updateDraft((previous) => ({
                               ...previous,
                               categories: previous.categories.map((entry, index) =>
                                 index === categoryIndex
@@ -186,36 +200,15 @@ export function EvaluationConfigDialog() {
                           }
                           placeholder="Nama aspek"
                         />
-                        <Input
-                          type="number"
-                          min={1}
-                          max={100}
-                          value={item.maxScore}
-                          onChange={(event) =>
-                            setDraft((previous) => ({
-                              ...previous,
-                              categories: previous.categories.map((entry, index) =>
-                                index === categoryIndex
-                                  ? {
-                                      ...entry,
-                                      items: entry.items.map((entryItem, innerIndex) =>
-                                        innerIndex === itemIndex
-                                          ? { ...entryItem, maxScore: Math.max(1, Number(event.target.value) || 10) }
-                                          : entryItem,
-                                      ),
-                                    }
-                                  : entry,
-                              ),
-                            }))
-                          }
-                          placeholder="Maks"
-                        />
+                        <div className="flex h-10 items-center justify-center rounded-xl border border-border/50 bg-muted/30 text-xs font-semibold text-muted-foreground">
+                          Skala 0-{FIXED_ASPECT_MAX_SCORE}
+                        </div>
                         <Button
                           type="button"
                           size="icon"
                           variant="outline"
                           onClick={() =>
-                            setDraft((previous) => ({
+                            updateDraft((previous) => ({
                               ...previous,
                               categories: previous.categories.map((entry, index) =>
                                 index === categoryIndex
@@ -236,7 +229,7 @@ export function EvaluationConfigDialog() {
                     size="sm"
                     variant="ghost"
                     onClick={() =>
-                      setDraft((previous) => ({
+                      updateDraft((previous) => ({
                         ...previous,
                         categories: previous.categories.map((entry, index) =>
                           index === categoryIndex
@@ -244,7 +237,7 @@ export function EvaluationConfigDialog() {
                                 ...entry,
                                 items: [
                                   ...entry.items,
-                                  { id: nextId("item"), label: `Aspek ${entry.items.length + 1}`, maxScore: 10 },
+                                  { id: nextId("item"), label: `Aspek ${entry.items.length + 1}`, maxScore: FIXED_ASPECT_MAX_SCORE },
                                 ],
                               }
                             : entry,
@@ -263,38 +256,10 @@ export function EvaluationConfigDialog() {
           <div className="space-y-3 rounded-xl border border-border/50 p-4">
             <div>
               <h3 className="text-sm font-semibold text-foreground">Presensi</h3>
-              <p className="text-xs text-muted-foreground">Nilai presensi dihitung otomatis dari data kehadiran dalam rentang periode.</p>
+              <p className="text-xs text-muted-foreground">Presensi selalu aktif dan dihitung otomatis dari data kehadiran dalam rentang periode.</p>
             </div>
-            <div className="grid gap-3 md:grid-cols-2">
-              <label className="flex items-center gap-2 text-sm text-foreground">
-                <input
-                  type="checkbox"
-                  checked={draft.attendance.enabled}
-                  onChange={(event) =>
-                    setDraft((previous) => ({
-                      ...previous,
-                      attendance: { ...previous.attendance, enabled: event.target.checked },
-                    }))
-                  }
-                />
-                Aktifkan presensi dalam penilaian
-              </label>
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                value={draft.attendance.weight}
-                onChange={(event) =>
-                  setDraft((previous) => ({
-                    ...previous,
-                    attendance: {
-                      ...previous.attendance,
-                      weight: Math.max(0, Math.min(100, Number(event.target.value) || 0)),
-                    },
-                  }))
-                }
-                placeholder="Bobot presensi"
-              />
+            <div className="rounded-xl border border-border/40 bg-background/30 p-3 text-sm text-muted-foreground">
+              Bobot presensi saat ini: <span className="font-semibold text-foreground">{formatWeight(draft.attendance.weight)}%</span>
             </div>
           </div>
 
@@ -309,7 +274,7 @@ export function EvaluationConfigDialog() {
                   <Input
                     value={grade.letter}
                     onChange={(event) =>
-                      setDraft((previous) => ({
+                      updateDraft((previous) => ({
                         ...previous,
                         grading: previous.grading.map((entry, gradeIndex) =>
                           gradeIndex === index ? { ...entry, letter: event.target.value.toUpperCase() } : entry,
@@ -321,7 +286,7 @@ export function EvaluationConfigDialog() {
                   <Input
                     value={grade.label}
                     onChange={(event) =>
-                      setDraft((previous) => ({
+                      updateDraft((previous) => ({
                         ...previous,
                         grading: previous.grading.map((entry, gradeIndex) =>
                           gradeIndex === index ? { ...entry, label: event.target.value.toUpperCase() } : entry,
@@ -336,7 +301,7 @@ export function EvaluationConfigDialog() {
                     max={100}
                     value={grade.minScore}
                     onChange={(event) =>
-                      setDraft((previous) => ({
+                      updateDraft((previous) => ({
                         ...previous,
                         grading: previous.grading.map((entry, gradeIndex) =>
                           gradeIndex === index

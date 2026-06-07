@@ -14,6 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ReportArchiveManager } from "@/components/features/settings/ReportArchiveManager";
 import { toUserErrorMessage } from "@/lib/utils";
@@ -103,10 +104,11 @@ export default function SettingsPage() {
   };
 
   const handleFileUpload = async (key: AssetKey, file: File, label: string) => {
-    const maxSizeBytes = key === "rapor_header_url" ? 2 * 1024 * 1024 : 1 * 1024 * 1024;
+    const maxSizeBytes = key === "rapor_header_url" ? 1 * 1024 * 1024 : 300 * 1024;
     if (file.size > maxSizeBytes) {
+      const maxSizeLabel = key === "rapor_header_url" ? "1MB" : "300KB";
       toast.error(
-        `Ukuran file ${label} terlalu besar. Batas maksimal ${key === "rapor_header_url" ? "2MB" : "1MB"}.`,
+        `Ukuran file ${label} terlalu besar. Batas maksimal ${maxSizeLabel}.`,
       );
       return;
     }
@@ -142,8 +144,14 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-12">
-      <div className="border-b border-border/50 pb-6 md:pb-8">
-        <p className="text-sm text-muted-foreground">
+      <div className="space-y-2 border-b border-border/50 pb-6 md:pb-8">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+          Pengaturan
+        </p>
+        <h2 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+          Aset dan Tanda Tangan Rapor
+        </h2>
+        <p className="max-w-3xl text-sm text-muted-foreground">
           Kelola aset rapor PDF dan nama penandatangan tanpa mengubah alur dokumen.
         </p>
       </div>
@@ -153,17 +161,16 @@ export default function SettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <FileImage className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Aset Rapor PDF</h2>
+              <h3 className="text-base font-semibold text-foreground">Aset Rapor PDF</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Unggah aset yang dipakai di header, tanda tangan, dan stempel rapor.
             </p>
           </div>
-          <button
-            type="button"
+          <Button
             onClick={handlePreviewPdf}
             disabled={isPreviewLoading}
-            className="inline-flex h-10 items-center gap-2 rounded-md bg-primary px-4 text-xs font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+            size="xl"
           >
             {isPreviewLoading ? (
               <Loader2 className="size-3.5 animate-spin" />
@@ -171,7 +178,7 @@ export default function SettingsPage() {
               <FileText className="size-3.5" />
             )}
             Pratinjau Rapor
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-6 px-5 py-4">
@@ -293,7 +300,7 @@ export default function SettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <UserCheck className="size-4 text-primary" />
-              <h2 className="text-sm font-semibold text-foreground">Nama Penandatangan</h2>
+              <h3 className="text-base font-semibold text-foreground">Nama Penandatangan</h3>
             </div>
             <p className="text-sm text-muted-foreground">
               Nama ini akan dipakai di bagian tanda tangan rapor.
@@ -320,10 +327,10 @@ export default function SettingsPage() {
                   placeholder={placeholder}
                   className="h-10 flex-1 border-border/50 bg-background/50"
                 />
-                <button
+                <Button
                   onClick={() => handleTextSave(key, label)}
                   disabled={saving[key]}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-xs font-semibold text-white transition-colors hover:bg-primary/90 disabled:opacity-50"
+                  size="xl"
                 >
                   {saving[key] ? (
                     <Loader2 className="size-3.5 animate-spin" />
@@ -331,7 +338,7 @@ export default function SettingsPage() {
                     <CheckCircle2 className="size-3.5" />
                   )}
                   Simpan
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -347,7 +354,9 @@ export default function SettingsPage() {
           <p className="text-xs leading-relaxed text-muted-foreground">
             Jika aset belum diunggah, bagian tersebut akan dikosongkan otomatis di rapor.
             Thumbnail transparan seperti tanda tangan atau stempel bisa terlihat samar,
-            tetapi file aslinya tetap dipakai saat rapor dicetak.
+            tetapi file aslinya tetap dipakai saat rapor dicetak. Untuk ukuran file rapor
+            yang lebih ringan, utamakan template header PDF dan hindari PNG/JPG full-page
+            beresolusi besar.
           </p>
         </div>
       </div>

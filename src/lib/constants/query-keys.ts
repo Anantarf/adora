@@ -22,6 +22,7 @@ export const QUERY_KEYS = {
   STATISTICS_BY_PERIOD: (periodId: string | null) => ["statistics-period", periodId],
   STATISTIC_HISTORY: (statisticId: string | null) => ["statistic-history", statisticId],
   FAMILY_PLAYERS: ["family-players"],
+  COACH_WORKSPACE: ["coach-workspace"],
   PARENTS: ["parents"],
   LINKED_PLAYERS: (parentId: string) => ["linked-players", parentId],
 } as const;

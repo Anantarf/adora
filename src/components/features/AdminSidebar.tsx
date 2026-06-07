@@ -53,7 +53,7 @@ export function AdminSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="mb-2 text-[11px] font-medium tracking-wide text-muted-foreground group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:mb-0">Menu Navigasi</SidebarGroupLabel>
+          <SidebarGroupLabel className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:mb-0">Menu Navigasi</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="gap-2 mt-2">
               {adminNavItems.map((item) => (

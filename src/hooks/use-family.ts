@@ -37,7 +37,7 @@ export const useFamily = () =>
   useQuery({
     queryKey: QUERY_KEYS.FAMILY_PLAYERS,
     queryFn: () => getFamilyPlayersAction(),
-    staleTime: 1000 * 60 * 30,
+    staleTime: 1000 * 60 * 5,
   });
 
 export const usePlayerAttendance = (playerId: string | null) =>

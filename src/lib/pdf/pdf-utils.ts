@@ -19,12 +19,74 @@ export const PANEL_FILL: [number, number, number] = [250, 246, 241];
 export const PANEL_BORDER: [number, number, number] = [225, 214, 203];
 export const TABLE_HEAD_FILL: [number, number, number] = [243, 232, 222];
 
-export const loadImageAsBase64 = async (url: string): Promise<{ data: string; format: string }> => {
+type PdfImageLoadOptions = {
+  maxWidthPx?: number;
+  maxHeightPx?: number;
+  quality?: number;
+};
+
+function loadImageElement(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("IMAGE_LOAD_FAILED"));
+    image.src = src;
+  });
+}
+
+async function normalizeImageForPdf(blob: Blob, options: PdfImageLoadOptions) {
+  const objectUrl = URL.createObjectURL(blob);
+
+  try {
+    const image = await loadImageElement(objectUrl);
+    const maxWidthPx = options.maxWidthPx ?? image.width;
+    const maxHeightPx = options.maxHeightPx ?? image.height;
+    const scale = Math.min(1, maxWidthPx / image.width, maxHeightPx / image.height);
+    const targetWidth = Math.max(1, Math.round(image.width * scale));
+    const targetHeight = Math.max(1, Math.round(image.height * scale));
+
+    if (targetWidth === image.width && targetHeight === image.height) {
+      return null;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("PDF_IMAGE_CANVAS_CONTEXT_UNAVAILABLE");
+    }
+
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(image, 0, 0, targetWidth, targetHeight);
+
+    const mimeType = blob.type || "image/png";
+    const quality = options.quality ?? 0.82;
+    return {
+      data: canvas.toDataURL(mimeType, quality),
+      format: mimeType.split("/")[1]?.toUpperCase() || "PNG",
+    };
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
+}
+
+export const loadImageAsBase64 = async (
+  url: string,
+  options: PdfImageLoadOptions = {},
+): Promise<{ data: string; format: string }> => {
   try {
     const fetchUrl = url.includes("?") ? `${url}&t=${Date.now()}` : `${url}?t=${Date.now()}`;
     const response = await fetch(fetchUrl);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const blob = await response.blob();
+
+    const normalizedImage = await normalizeImageForPdf(blob, options);
+    if (normalizedImage) {
+      return normalizedImage;
+    }
 
     return await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -76,7 +138,7 @@ export function drawFitImage(doc: jsPDF, base64: string, format: string, x: numb
 
   const dx = x + (w - finalW) / 2;
   const dy = y + h - finalH;
-  doc.addImage(base64, format, dx, dy, finalW, finalH);
+  doc.addImage(base64, format, dx, dy, finalW, finalH, undefined, "FAST");
 }
 
 export function drawSectionTitle(doc: jsPDF, title: string, y: number) {

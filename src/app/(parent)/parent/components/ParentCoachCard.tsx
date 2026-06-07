@@ -34,9 +34,14 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
               )}
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                Pelatih Utama
-              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                  Pelatih Utama
+                </span>
+                <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-500 border border-emerald-500/20">
+                  Live Active Assignment
+                </span>
+              </div>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {coach?.fullName || "Belum tersedia"}
               </p>

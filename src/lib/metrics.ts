@@ -15,7 +15,7 @@ export type FlatMetricDef = {
 };
 
 export const FLAT_METRIC_DEFS: FlatMetricDef[] = [
-  { key: "inAndOut",        label: "In & Out Dribble",     shortLabel: "I&O",     path: "dribble.inAndOut",        max: 99, getValue: (m) => m.dribble.inAndOut },
+  { key: "inAndOut",        label: "In & Out Dribble",     shortLabel: "I&O",     path: "dribble.inAndOut",        max: 10, getValue: (m) => m.dribble.inAndOut },
   { key: "crossover",       label: "Crossover",            shortLabel: "Cross",   path: "dribble.crossover",       max: 10, getValue: (m) => m.dribble.crossover },
   { key: "vLeft",           label: "V Dribble (Kiri)",     shortLabel: "V-L",     path: "dribble.vLeft",           max: 10, getValue: (m) => m.dribble.vLeft },
   { key: "vRight",          label: "V Dribble (Kanan)",    shortLabel: "V-R",     path: "dribble.vRight",          max: 10, getValue: (m) => m.dribble.vRight },
@@ -54,7 +54,7 @@ export const averageScore = (m: MetricsJson | MetricsJsonV2): number => {
   }
 
   const vals = [
-    m.dribble.inAndOut / 99,
+    m.dribble.inAndOut / 10,
     m.dribble.crossover / 10,
     m.dribble.vLeft / 10,
     m.dribble.vRight / 10,

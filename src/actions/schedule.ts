@@ -6,7 +6,7 @@ import { createAuditLog } from "./audit";
 import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { ensureActiveGroup, ensureActiveHomebase } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { requireAdmin, requireSessionRole, requireActiveUser } from "@/lib/server-auth";
 import { ScheduleEvent } from "@/types/dashboard";
 
 function parseEventDate(input: string): Date {
@@ -182,15 +182,43 @@ export async function deleteEventAction(id: string) {
 
 export async function getEventsWithAttendanceAction() {
   try {
-    await requireSessionRole("ADMIN");
+    const session = await requireActiveUser();
+    const { role, id: userId } = session.user;
+
+    if (role !== "ADMIN" && role !== "COACH") {
+      throw new Error("Akses Ditolak: Hanya Admin atau Pelatih yang diizinkan.");
+    }
+
+    let assignedGroupIds: string[] = [];
+    let whereClause: Prisma.eventWhereInput = {};
+
+    if (role === "COACH") {
+      const coach = await prisma.coachProfile.findUnique({
+        where: { userId, isDeleted: false },
+        include: { assignments: true },
+      });
+      if (!coach) {
+        throw new Error("Akses Ditolak: Profil pelatih tidak ditemukan.");
+      }
+      assignedGroupIds = coach.assignments.map((a) => a.groupId);
+      whereClause = {
+        eventGroups: {
+          some: {
+            groupId: { in: assignedGroupIds },
+          },
+        },
+      };
+    }
 
     const events = await prisma.event.findMany({
+      where: whereClause,
       orderBy: { date: "desc" },
       include: {
         eventGroups: {
           include: { group: { select: { id: true, name: true } } },
         },
         attendances: {
+          where: role === "COACH" ? { player: { groupId: { in: assignedGroupIds } } } : undefined,
           select: { status: true, createdAt: true },
         },
       },
@@ -225,7 +253,12 @@ export async function getEventsWithAttendanceAction() {
 
 export async function getEventAttendanceDetailAction(eventId: string) {
   try {
-    await requireSessionRole("ADMIN");
+    const session = await requireActiveUser();
+    const { role, id: userId } = session.user;
+
+    if (role !== "ADMIN" && role !== "COACH") {
+      throw new Error("Akses Ditolak: Hanya Admin atau Pelatih yang diizinkan.");
+    }
 
     const event = await prisma.event.findUnique({
       where: { id: eventId },
@@ -235,7 +268,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
         },
         attendances: {
           include: {
-            player: { select: { id: true, name: true, schoolOrigin: true, group: { select: { name: true } } } },
+            player: { select: { id: true, name: true, schoolOrigin: true, groupId: true, group: { select: { name: true } } } },
           },
           orderBy: { player: { name: "asc" } },
         },
@@ -246,13 +279,35 @@ export async function getEventAttendanceDetailAction(eventId: string) {
       throw new Error("Event tidak ditemukan");
     }
 
+    let assignedGroupIds: string[] = [];
+    if (role === "COACH") {
+      const coach = await prisma.coachProfile.findUnique({
+        where: { userId, isDeleted: false },
+        include: { assignments: true },
+      });
+      if (!coach) {
+        throw new Error("Akses Ditolak: Profil pelatih tidak ditemukan.");
+      }
+      assignedGroupIds = coach.assignments.map((a) => a.groupId);
+
+      const eventGroupIds = event.eventGroups.map((eg) => eg.groupId);
+      const hasAccess = eventGroupIds.some((gid) => assignedGroupIds.includes(gid));
+      if (!hasAccess) {
+        throw new Error("Akses Ditolak: Anda tidak ditugaskan ke kelompok untuk agenda ini.");
+      }
+    }
+
     let allAttendances = event.attendances;
 
     if (event.attendances.length === 0 && event.eventGroups.length > 0) {
       const groupIds = event.eventGroups.map((eventGroup) => eventGroup.groupId);
+      const fetchGroupIds = role === "COACH"
+        ? groupIds.filter((gid) => assignedGroupIds.includes(gid))
+        : groupIds;
+
       const players = await prisma.player.findMany({
-        where: { groupId: { in: groupIds }, isDeleted: false },
-        select: { id: true, name: true, schoolOrigin: true, group: { select: { name: true } } },
+        where: { groupId: { in: fetchGroupIds }, isDeleted: false },
+        select: { id: true, name: true, schoolOrigin: true, groupId: true, group: { select: { name: true } } },
         orderBy: { name: "asc" },
       });
 
@@ -269,9 +324,12 @@ export async function getEventAttendanceDetailAction(eventId: string) {
           id: player.id,
           name: player.name,
           schoolOrigin: player.schoolOrigin,
+          groupId: player.groupId,
           group: player.group,
         },
       }));
+    } else if (role === "COACH") {
+      allAttendances = allAttendances.filter((att) => att.player && att.player.groupId && assignedGroupIds.includes(att.player.groupId));
     }
 
     return {
@@ -285,3 +343,5 @@ export async function getEventAttendanceDetailAction(eventId: string) {
     throw new Error("Gagal mengambil detail presensi agenda");
   }
 }
+
+

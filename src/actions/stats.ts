@@ -9,12 +9,14 @@ import { toJakartaDate } from "@/lib/date-utils";
 import {
   buildDynamicMetricsJson,
   calculateAttendanceScore,
+  FIXED_ASPECT_MAX_SCORE,
+  buildMetricFieldKey,
   normalizeEvaluationConfig,
   type MetricsJsonV2,
 } from "@/lib/evaluation-rules";
 import { prisma } from "@/lib/prisma";
 import { buildReportArchiveSnapshot, freezeHistoricalSnapshot } from "@/lib/report-signer";
-import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { requireAdmin, requireSessionRole, requireActiveUser } from "@/lib/server-auth";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
 const EMPTY_METRICS: MetricsJson = {
@@ -95,6 +97,42 @@ function parseMetrics(metricsJson: unknown): MetricsJson | MetricsJsonV2 {
 
 function revalidateStatisticsPages() {
   revalidatePath("/dashboard/statistics");
+  revalidatePath("/coach/statistics");
+}
+
+function normalizeDynamicMetricInput(config: ReturnType<typeof normalizeEvaluationConfig>, rawMetrics: unknown) {
+  const source =
+    rawMetrics && typeof rawMetrics === "object" && !Array.isArray(rawMetrics)
+      ? (rawMetrics as Record<string, unknown>)
+      : {};
+  const values: Record<string, number> = {};
+
+  for (const category of config.categories) {
+    for (const item of category.items) {
+      const fieldKey = buildMetricFieldKey(category.id, item.id);
+      const rawValue = source[fieldKey];
+
+      if (rawValue == null || rawValue === "") {
+        values[fieldKey] = 0;
+        continue;
+      }
+
+      const numericValue =
+        typeof rawValue === "number"
+          ? rawValue
+          : typeof rawValue === "string"
+            ? Number(rawValue)
+            : Number.NaN;
+
+      if (!Number.isFinite(numericValue) || numericValue < 0 || numericValue > FIXED_ASPECT_MAX_SCORE) {
+        throw new Error(`Nilai aspek "${item.label}" harus berada dalam rentang 0-10.`);
+      }
+
+      values[fieldKey] = Math.round(numericValue);
+    }
+  }
+
+  return values;
 }
 
 export async function submitAttendanceAction(data: {
@@ -103,8 +141,13 @@ export async function submitAttendanceAction(data: {
   note?: string;
   eventId: string;
 }) {
-  const session = await requireAdmin();
-  const userId = session.user.id ?? null;
+  const session = await requireActiveUser();
+  const { role, id: userId } = session.user;
+
+  if (role !== "ADMIN" && role !== "COACH") {
+    throw new Error("Akses Ditolak: Hanya Admin atau Pelatih yang diizinkan.");
+  }
+
   const parsed = attendanceSubmitSchema.safeParse(data);
 
   if (!parsed.success) {
@@ -130,6 +173,18 @@ export async function submitAttendanceAction(data: {
   const attendanceDate = toJakartaDate(payload.date);
 
   await withSerializableTransaction(async (tx) => {
+    let assignedGroupIds: string[] = [];
+    if (role === "COACH") {
+      const coach = await tx.coachProfile.findUnique({
+        where: { userId, isDeleted: false },
+        include: { assignments: true },
+      });
+      if (!coach) {
+        throw new Error("Akses Ditolak: Profil pelatih tidak ditemukan.");
+      }
+      assignedGroupIds = coach.assignments.map((a) => a.groupId);
+    }
+
     const playerIds = dedupedStatuses.map((playerStatus) => playerStatus.playerId);
     const lockKeys = [...playerIds]
       .sort()
@@ -141,15 +196,32 @@ export async function submitAttendanceAction(data: {
 
     const event = await tx.event.findUnique({
       where: { id: payload.eventId },
-      select: { id: true },
+      select: {
+        id: true,
+        eventGroups: {
+          select: { groupId: true }
+        }
+      },
     });
 
     if (!event) {
       throw new Error("Agenda untuk presensi tidak ditemukan atau sudah dihapus.");
     }
 
+    if (role === "COACH") {
+      const eventGroupIds = event.eventGroups.map((eg) => eg.groupId);
+      const isAssigned = eventGroupIds.some((gid) => assignedGroupIds.includes(gid));
+      if (!isAssigned) {
+        throw new Error("Akses Ditolak: Anda tidak ditugaskan untuk agenda ini.");
+      }
+    }
+
     const existingPlayers = await tx.player.findMany({
-      where: { id: { in: playerIds }, isDeleted: false },
+      where: {
+        id: { in: playerIds },
+        isDeleted: false,
+        ...(role === "COACH" ? { groupId: { in: assignedGroupIds } } : {}),
+      },
       select: { id: true },
     });
 
@@ -224,8 +296,13 @@ export async function submitStatisticAction(data: {
   status: "Draft" | "Published";
   notes?: string;
 }) {
-  const session = await requireAdmin();
-  const userId = session.user.id as string | undefined;
+  const session = await requireActiveUser();
+  const { role, id: userId } = session.user;
+
+  if (role !== "ADMIN" && role !== "COACH") {
+    throw new Error("Akses Ditolak: Hanya Admin atau Pelatih yang diizinkan.");
+  }
+
   const parsed = statisticSubmitSchema.safeParse(data);
 
   if (!parsed.success) {
@@ -235,6 +312,12 @@ export async function submitStatisticAction(data: {
   }
 
   const payload = parsed.data;
+
+  if (role === "COACH" && payload.status === "Published") {
+    throw new Error(
+      "Akses Ditolak: Pelatih hanya diperbolehkan menyimpan nilai sebagai Draft. Publikasi hanya dapat dilakukan oleh Admin.",
+    );
+  }
 
   const statistic = await withSerializableTransaction(async (tx) => {
     await acquireAdvisoryLock(tx, `statistic:${payload.playerId}:${payload.periodId}`);
@@ -271,6 +354,22 @@ export async function submitStatisticAction(data: {
 
     if (!player || player.isDeleted) {
       throw new Error("Pemain untuk input nilai tidak ditemukan.");
+    }
+
+    if (role === "COACH") {
+      const coach = await tx.coachProfile.findUnique({
+        where: { userId, isDeleted: false },
+        include: { assignments: true },
+      });
+      if (!coach) {
+        throw new Error("Akses Ditolak: Profil pelatih tidak ditemukan.");
+      }
+      const assignedGroupIds = coach.assignments.map((a) => a.groupId);
+      if (!player.group?.id || !assignedGroupIds.includes(player.group.id)) {
+        throw new Error(
+          "Akses Ditolak: Anda tidak ditugaskan untuk kelompok pemain ini.",
+        );
+      }
     }
 
     const period = await tx.evaluationPeriod.findUnique({
@@ -326,11 +425,14 @@ export async function submitStatisticAction(data: {
       : null;
 
     const legacyMetrics = metricsSchema.safeParse(payload.metrics);
+    const dynamicMetricValues = evaluationConfig
+      ? normalizeDynamicMetricInput(evaluationConfig, payload.metrics)
+      : null;
     const metricsJson =
       evaluationConfig
         ? buildDynamicMetricsJson({
             config: evaluationConfig,
-            values: (payload.metrics as Record<string, number>) ?? {},
+            values: dynamicMetricValues ?? {},
             notes: payload.notes,
             attendance: attendanceSnapshot,
           })
@@ -354,6 +456,7 @@ export async function submitStatisticAction(data: {
         homebaseNameSnapshot: true,
         coachProfileIdSnapshot: true,
         coachNameSnapshot: true,
+        status: true,
       },
     });
 
@@ -390,6 +493,12 @@ export async function submitStatisticAction(data: {
     );
 
     if (existingStatistic) {
+      if (role === "COACH" && existingStatistic.status === "Published") {
+        throw new Error(
+          "Akses Ditolak: Nilai yang sudah diterbitkan tidak dapat diubah oleh Pelatih."
+        );
+      }
+
       const updatedStatistic = await tx.statistic.update({
         where: { id: existingStatistic.id },
         data: {
@@ -423,10 +532,30 @@ export async function submitStatisticAction(data: {
 }
 
 export async function getStatsByPeriodAction(periodId: string) {
-  await requireSessionRole("ADMIN");
+  const session = await requireSessionRole();
+  const { role, id: userId } = session.user;
+  if (role !== "ADMIN" && role !== "COACH") {
+    throw new Error("Akses ditolak");
+  }
+
+  let assignedGroupIds: string[] = [];
+  if (role === "COACH") {
+    const coach = await prisma.coachProfile.findUnique({
+      where: { userId, isDeleted: false },
+      include: { assignments: true },
+    });
+    if (!coach) return [];
+    assignedGroupIds = coach.assignments.map((a) => a.groupId);
+  }
 
   const statistics = await prisma.statistic.findMany({
-    where: { periodId, player: { isDeleted: false } },
+    where: {
+      periodId,
+      player: {
+        isDeleted: false,
+        ...(role === "COACH" ? { groupId: { in: assignedGroupIds } } : {}),
+      },
+    },
     select: {
       id: true,
       status: true,
@@ -455,7 +584,29 @@ export async function getStatsByPeriodAction(periodId: string) {
 }
 
 export async function getStatHistoryAction(statisticId: string) {
-  await requireSessionRole("ADMIN");
+  const session = await requireSessionRole();
+  const { role, id: userId } = session.user;
+  if (role !== "ADMIN" && role !== "COACH") {
+    throw new Error("Akses ditolak");
+  }
+
+  const stat = await prisma.statistic.findUnique({
+    where: { id: statisticId },
+    select: { player: { select: { groupId: true } } },
+  });
+  if (!stat) throw new Error("Data nilai tidak ditemukan");
+
+  if (role === "COACH") {
+    const coach = await prisma.coachProfile.findUnique({
+      where: { userId, isDeleted: false },
+      include: { assignments: true },
+    });
+    if (!coach) throw new Error("Profil coach tidak ditemukan.");
+    const assignedGroupIds = coach.assignments.map((a) => a.groupId);
+    if (!stat.player?.groupId || !assignedGroupIds.includes(stat.player.groupId)) {
+      throw new Error("Akses Ditolak: Anda tidak memiliki wewenang untuk melihat riwayat nilai pemain ini.");
+    }
+  }
 
   const history = await prisma.statisticHistory.findMany({
     where: { statisticId },
@@ -473,7 +624,7 @@ export async function getPlayerStatsAction(playerId: string) {
   const session = await requireSessionRole();
   const { role, id: userId } = session.user;
 
-  if (role !== "PARENT" && role !== "ADMIN") {
+  if (role !== "PARENT" && role !== "ADMIN" && role !== "COACH") {
     throw new Error("Akses ke evaluasi pemain tidak diizinkan untuk role ini.");
   }
 
@@ -487,10 +638,28 @@ export async function getPlayerStatsAction(playerId: string) {
         "Akses Terlarang: Anda tidak diizinkan melihat evaluasi anak dari keluarga lain.",
       );
     }
+  } else if (role === "COACH") {
+    const coach = await prisma.coachProfile.findUnique({
+      where: { userId, isDeleted: false },
+      include: { assignments: true },
+    });
+    if (!coach) throw new Error("Profil pelatih tidak ditemukan.");
+    const assignedGroupIds = coach.assignments.map((a) => a.groupId);
+    const player = await prisma.player.findUnique({
+      where: { id: playerId },
+      select: { groupId: true },
+    });
+    if (!player?.groupId || !assignedGroupIds.includes(player.groupId)) {
+      throw new Error("Akses Ditolak: Anda tidak memiliki wewenang untuk melihat nilai pemain ini.");
+    }
   }
 
   const statistics = await prisma.statistic.findMany({
-    where: { playerId, player: { isDeleted: false }, status: "Published" },
+    where: {
+      playerId,
+      player: { isDeleted: false },
+      ...(role === "PARENT" ? { status: "Published" } : {}),
+    },
     include: { period: { select: { id: true, name: true } } },
     orderBy: { date: "desc" },
   });

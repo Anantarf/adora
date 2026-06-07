@@ -46,8 +46,8 @@ export async function updateEvaluationConfigAction(config: EvaluationConfigV2) {
     normalized.categories.reduce((sum, category) => sum + category.weight, 0) +
     (normalized.attendance.enabled ? normalized.attendance.weight : 0);
 
-  if (totalWeight <= 0) {
-    throw new Error("Total bobot penilaian harus lebih besar dari 0.");
+  if (Math.abs(totalWeight - 100) > 0.001) {
+    throw new Error("Aturan bobot otomatis tidak valid. Total bobot harus tepat 100%.");
   }
 
   await prisma.$transaction(async (tx) => {

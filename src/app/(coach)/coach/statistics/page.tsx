@@ -9,27 +9,24 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
-import { EvaluationConfigDialog } from "@/components/features/EvaluationConfigDialog";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useGroups } from "@/hooks/use-groups";
-import { usePeriods, useSetActivePeriod, useDeletePeriod } from "@/hooks/use-evaluation-periods";
-import { usePlayers } from "@/hooks/use-players";
+import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
+import { usePeriods } from "@/hooks/use-evaluation-periods";
 import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { PERIOD_STATUS_BADGE as STATUS_BADGE_CONFIG } from "@/lib/constants/badge-configs";
 import { averageScore } from "@/lib/metrics";
 import { DEFAULT_EVALUATION_CONFIG_V2, getEvaluationSummary, isMetricsJsonV2, normalizeEvaluationConfig, type MetricsJsonV2 } from "@/lib/evaluation-rules";
 import { resolveCoachSignerName } from "@/lib/report-signer";
-import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
+import type { MetricsJson } from "@/types/dashboard";
+
+type PlayerSummary = ReturnType<typeof useCoachWorkspace>["data"] extends { players: Array<infer T> } ? T : any;
 
 function getValidMetrics(metrics: unknown): MetricsJson | MetricsJsonV2 | null {
   let data = metrics;
@@ -204,7 +201,7 @@ const PlayerStatRow = React.memo(
     const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
     const [isPdfLoading, setIsPdfLoading] = useState(false);
     const coachSignerName = resolveCoachSignerName(
-      stat?.coachNameSnapshot ?? player.group?.coachAssignment?.coachProfile?.fullName,
+      stat?.coachNameSnapshot ?? settings?.rapor_coach_name,
       settings?.rapor_coach_name,
     );
 
@@ -219,7 +216,7 @@ const PlayerStatRow = React.memo(
         await generateRaporPDF({
           playerName: player.name,
           groupName: group.name,
-          schoolOrigin: player.schoolOrigin,
+          schoolOrigin: player.schoolOrigin || "-",
           periodName: selectedPeriod ? selectedPeriod.name : "Periode Evaluasi",
           metrics,
           assets: {
@@ -315,17 +312,14 @@ const PlayerStatRow = React.memo(
 
 PlayerStatRow.displayName = "PlayerStatRow";
 
-export default function StatisticsPage() {
+export default function CoachStatisticsPage() {
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
   const [activeGroup, setActiveGroup] = useState<string>("all");
   const [loadingPlayerId, setLoadingPlayerId] = useState<string | null>(null);
 
+  const { data: coachData, isLoading: coachLoading } = useCoachWorkspace();
   const { data: periods } = usePeriods();
-  const { data: groups } = useGroups();
-  const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId || null);
-  const { mutateAsync: setActive } = useSetActivePeriod();
-  const { mutateAsync: deletePeriod } = useDeletePeriod();
   const { data: settings } = useClubSettings();
 
   const initialized = React.useRef(false);
@@ -342,6 +336,13 @@ export default function StatisticsPage() {
     }
   }, [periods]);
 
+  const groups = coachData?.groups ?? [];
+  const players = useMemo(() => {
+    if (!coachData?.players) return [];
+    if (activeGroup === "all") return coachData.players;
+    return coachData.players.filter((player) => player.group?.id === activeGroup);
+  }, [coachData, activeGroup]);
+
   const statsMap = useMemo(
     () => Object.fromEntries((stats ?? []).map((stat) => [stat.player.id, stat])),
     [stats],
@@ -355,7 +356,7 @@ export default function StatisticsPage() {
     return groups
       .map((group) => ({
         group,
-        players: players.filter((player) => player.groupId === group.id),
+        players: players.filter((player) => player.group?.id === group.id),
       }))
       .filter((entry) => entry.players.length > 0);
   }, [players, groups]);
@@ -389,42 +390,22 @@ export default function StatisticsPage() {
       shortLabel: getCategoryShortLabel(category.label),
     }));
   }, [selectedEvaluationConfig]);
-  const canDeletePeriod = statsSummary.published === 0 && statsSummary.draft === 0;
 
-  const handleSetActive = async (periodId: string) => {
-    try {
-      await setActive(periodId);
-      toast.success("Periode aktif diperbarui.");
-    } catch {
-      toast.error("Gagal mengubah periode aktif.");
-    }
-  };
-
-  const handleDeletePeriod = async () => {
-    if (!selectedPeriodId) {
-      return;
-    }
-
-    try {
-      await deletePeriod(selectedPeriodId);
-      toast.success("Periode evaluasi berhasil dihapus.");
-      setSelectedPeriodId("");
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Gagal menghapus periode evaluasi.",
-      );
-    }
-  };
+  const isLoading = coachLoading || statsLoading;
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain.
-        </p>
-        <div className="flex items-center gap-2">
-          <EvaluationConfigDialog />
-          <AddPeriodDialog />
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
+        <div className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+            Penilaian Pemain
+          </p>
+          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+            Input Nilai & Statistik
+          </h1>
+          <p className="max-w-3xl text-sm text-muted-foreground">
+            Pilih periode evaluasi aktif dan kelompok Anda, lalu isi nilai draf untuk pemain.
+          </p>
         </div>
       </div>
 
@@ -444,7 +425,7 @@ export default function StatisticsPage() {
                   <SelectValue
                     placeholder={
                       periods?.length === 0
-                        ? "Belum ada periode - buat dulu"
+                        ? "Belum ada periode evaluasi"
                         : "Pilih Periode"
                     }
                   >
@@ -477,76 +458,6 @@ export default function StatisticsPage() {
                       </div>
                     </SelectItem>
                   ))}
-
-                  {selectedPeriod ? (
-                    <>
-                      <Separator className="my-2" />
-                      <div className="px-2 pb-1 pt-0.5">
-                        <div className="mb-2 px-2 text-[10px] font-medium text-muted-foreground">
-                          Aksi Periode
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          {!selectedPeriod.isActive ? (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="h-8 justify-start px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
-                              onClick={(event) => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                void handleSetActive(selectedPeriod.id);
-                              }}
-                            >
-                              Aktifkan periode ini
-                            </Button>
-                          ) : null}
-                          <AlertDialog>
-                            <AlertDialogTrigger
-                              className="flex h-8 items-center rounded-md px-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
-                              onClick={(event) => event.stopPropagation()}
-                            >
-                              Hapus periode
-                            </AlertDialogTrigger>
-                            <AlertDialogContent className="sm:max-w-md border-border/50 bg-card">
-                              <AlertDialogHeader>
-                                <AlertDialogTitle className="flex items-center gap-2 text-lg font-semibold text-destructive">
-                                  Hapus Periode?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription className="flex flex-col gap-2">
-                                  <span className="text-sm font-bold text-destructive">
-                                    Periode &quot;{selectedPeriod.name}&quot; akan dihapus permanen.
-                                  </span>
-                                  {canDeletePeriod ? (
-                                    <span className="text-xs leading-relaxed text-muted-foreground">
-                                      Tindakan ini tidak dapat dibatalkan. Pastikan Anda menghapus
-                                      periode yang tepat.
-                                    </span>
-                                  ) : (
-                                    <span className="text-xs leading-relaxed text-amber-500/80">
-                                      Periode ini memiliki{" "}
-                                      {statsSummary.published + statsSummary.draft} data nilai pemain.
-                                      Kosongkan semua data nilai terlebih dahulu sebelum menghapus
-                                      periode.
-                                    </span>
-                                  )}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Batal</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={handleDeletePeriod}
-                                  disabled={!canDeletePeriod}
-                                  className="bg-destructive text-white hover:bg-destructive/90 disabled:opacity-50"
-                                >
-                                  Hapus Periode
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </div>
-                    </>
-                  ) : null}
                 </SelectContent>
               </Select>
             </div>
@@ -557,7 +468,7 @@ export default function StatisticsPage() {
                 <SelectTrigger className="h-11 border-border/50 bg-background/50 pl-9 focus-visible:ring-primary/30">
                   <SelectValue placeholder="Pilih Kelompok">
                     {activeGroup === "all"
-                      ? "Semua Kelompok"
+                      ? "Semua Kelompok Saya"
                       : groups?.find((group) => group.id === activeGroup)?.name}
                   </SelectValue>
                 </SelectTrigger>
@@ -566,7 +477,7 @@ export default function StatisticsPage() {
                   sideOffset={6}
                   className="max-h-60 rounded-xl border-border/50"
                 >
-                  <SelectItem value="all">Semua Kelompok</SelectItem>
+                  <SelectItem value="all">Semua Kelompok Saya</SelectItem>
                   {groups?.map((group) => (
                     <SelectItem key={group.id} value={group.id}>
                       {group.name}
@@ -580,13 +491,13 @@ export default function StatisticsPage() {
           {selectedPeriodId && !statsLoading ? (
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Selesai</span>
+                <span className="text-[11px] font-medium text-muted-foreground">Selesai/Terbit</span>
                 <span className="text-sm font-semibold tabular-nums text-primary">
                   {statsSummary.published}
                 </span>
               </div>
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Draft</span>
+                <span className="text-[11px] font-medium text-muted-foreground">Draft Saya</span>
                 <span className="text-sm font-semibold tabular-nums text-foreground">
                   {statsSummary.draft}
                 </span>
@@ -602,15 +513,12 @@ export default function StatisticsPage() {
           <p className="text-sm font-medium text-muted-foreground">
             Belum ada periode evaluasi
           </p>
-          <p className="mt-1 text-xs text-muted-foreground/75">
-            Buat periode baru untuk mulai input nilai.
-          </p>
         </div>
       ) : null}
 
       {selectedPeriodId ? (
         <div className="space-y-4 md:hidden">
-          {playersLoading || statsLoading ? (
+          {isLoading ? (
             <div className="space-y-4 animate-pulse">
               {[1, 2].map((groupIndex) => (
                 <div
@@ -647,31 +555,15 @@ export default function StatisticsPage() {
             </div>
           ) : null}
 
-          {!playersLoading && !statsLoading && playersByGroup.length === 0 ? (
+          {!isLoading && playersByGroup.length === 0 ? (
             <div className="rounded-xl border border-border/50 bg-card p-6 text-center">
-              {(players?.length ?? 0) === 0 ? (
-                <>
-                  <p className="text-sm font-semibold text-foreground">
-                    Belum ada pemain terdaftar
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Tambah pemain terlebih dahulu melalui halaman Pemain.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-semibold text-foreground">
-                    Semua pemain belum memiliki kelompok
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Tetapkan kelompok pada pemain melalui halaman Pemain.
-                  </p>
-                </>
-              )}
+              <p className="text-sm font-semibold text-foreground">
+                Belum ada pemain di kelompok Anda
+              </p>
             </div>
           ) : null}
 
-          {!playersLoading && !statsLoading
+          {!isLoading
             ? playersByGroup.map(({ group, players: groupPlayers }) => (
                 <section
                   key={group.id}
@@ -691,8 +583,7 @@ export default function StatisticsPage() {
                       const metrics = getValidMetrics(stat?.metricsJson);
                       const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
                       const coachSignerName = resolveCoachSignerName(
-                        stat?.coachNameSnapshot ??
-                          player.group?.coachAssignment?.coachProfile?.fullName,
+                        stat?.coachNameSnapshot ?? settings?.rapor_coach_name,
                         settings?.rapor_coach_name,
                       );
 
@@ -770,7 +661,7 @@ export default function StatisticsPage() {
                                       await generateRaporPDF({
                                         playerName: player.name,
                                         groupName: group.name,
-                                        schoolOrigin: player.schoolOrigin,
+                                        schoolOrigin: player.schoolOrigin || "-",
                                         periodName: selectedPeriod
                                           ? selectedPeriod.name
                                           : "Periode Evaluasi",
@@ -836,8 +727,8 @@ export default function StatisticsPage() {
       {selectedPeriodId ? (
         <div className="hidden overflow-x-auto rounded-2xl border border-border/50 bg-card shadow-sm md:block">
           <Table className="min-w-[980px]">
-              <TableHeader className="bg-muted/[0.16]">
-                <TableRow className="border-b border-border/50 hover:bg-transparent">
+            <TableHeader className="bg-muted/[0.16]">
+              <TableRow className="border-b border-border/50 hover:bg-transparent">
                 <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-[10px] font-medium text-muted-foreground">
                   No
                 </TableHead>
@@ -859,7 +750,7 @@ export default function StatisticsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {playersLoading || statsLoading ? (
+              {isLoading ? (
                 <>
                   {[1, 2, 3, 4, 5].map((rowIndex) => (
                     <TableRow key={rowIndex} className="animate-pulse">
@@ -893,33 +784,17 @@ export default function StatisticsPage() {
                 </>
               ) : null}
 
-              {!playersLoading && !statsLoading && playersByGroup.length === 0 ? (
+              {!isLoading && playersByGroup.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
-                    {(players?.length ?? 0) === 0 ? (
-                      <>
-                        <p className="text-sm font-semibold text-foreground">
-                          Belum ada pemain terdaftar
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Tambah pemain terlebih dahulu melalui halaman Pemain.
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-semibold text-foreground">
-                          Semua pemain belum memiliki kelompok
-                        </p>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Tetapkan kelompok pada pemain melalui halaman Pemain.
-                        </p>
-                      </>
-                    )}
+                    <p className="text-sm font-semibold text-foreground">
+                      Belum ada pemain di kelompok Anda
+                    </p>
                   </TableCell>
                 </TableRow>
               ) : null}
 
-              {!playersLoading && !statsLoading
+              {!isLoading
                 ? playersByGroup.map(({ group, players: groupPlayers }) => (
                     <React.Fragment key={group.id}>
                       <TableRow className="bg-muted/[0.12] hover:bg-muted/[0.12]">

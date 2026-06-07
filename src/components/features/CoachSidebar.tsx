@@ -14,7 +14,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LogOut, UserRoundCog } from "lucide-react";
+import { LayoutDashboard, LogOut, UserRoundCog, Users, CalendarCheck2, Star } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -24,6 +24,10 @@ import { UserProfileMenu } from "@/components/features/UserProfileMenu";
 import { cn } from "@/lib/utils";
 
 export const coachNavItems = [
+  { title: "Dashboard Coach", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Pemain Saya", url: "/players", icon: Users },
+  { title: "Presensi Latihan", url: "/attendances", icon: CalendarCheck2 },
+  { title: "Penilaian & Statistik", url: "/statistics", icon: Star },
   { title: "Profil Coach", url: "/profile", icon: UserRoundCog },
 ];
 
@@ -55,7 +59,7 @@ export function CoachSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="mb-2 text-[11px] font-medium tracking-wide text-muted-foreground group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:mb-0">
+          <SidebarGroupLabel className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:mb-0">
             Portal Coach
           </SidebarGroupLabel>
           <SidebarGroupContent>

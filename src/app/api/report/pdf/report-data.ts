@@ -120,7 +120,7 @@ function extractReportMetrics(raw: MetricsJson | MetricsJsonV2 | null): { metric
 
   return {
     metrics: [
-      { label: "In & Out Dribble", value: toNumber(parsed.dribble?.inAndOut), max: 99 },
+      { label: "In & Out Dribble", value: toNumber(parsed.dribble?.inAndOut), max: 10 },
       { label: "Crossover", value: toNumber(parsed.dribble?.crossover), max: 10 },
       { label: "V Dribble (Kiri)", value: toNumber(parsed.dribble?.vLeft), max: 10 },
       { label: "V Dribble (Kanan)", value: toNumber(parsed.dribble?.vRight), max: 10 },

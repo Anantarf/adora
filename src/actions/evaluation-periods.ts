@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin } from "@/lib/server-auth";
+import { requireAdmin, requireActiveUser } from "@/lib/server-auth";
 import { toJakartaDate } from "@/lib/date-utils";
 import { createAuditLog } from "./audit";
 import type { EvaluationPeriod } from "@/types/dashboard";
@@ -32,13 +32,19 @@ async function getActiveEvaluationConfig(
 
 // 1. List all periods
 export async function getPeriodsAction(): Promise<EvaluationPeriod[]> {
-  await requireAdmin();
+  const session = await requireActiveUser();
+  if (session.user.role !== "ADMIN" && session.user.role !== "COACH") {
+    throw new Error("Akses Ditolak: Hanya Admin atau Pelatih yang diizinkan.");
+  }
   return prisma.evaluationPeriod.findMany({ orderBy: { startDate: "desc" } });
 }
 
 // 2. Get active period (if any)
 export async function getActivePeriodAction(): Promise<EvaluationPeriod | null> {
-  await requireAdmin();
+  const session = await requireActiveUser();
+  if (session.user.role !== "ADMIN" && session.user.role !== "COACH") {
+    throw new Error("Akses Ditolak: Hanya Admin atau Pelatih yang diizinkan.");
+  }
   return prisma.evaluationPeriod.findFirst({ where: { isActive: true } });
 }
 

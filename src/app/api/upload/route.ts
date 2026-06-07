@@ -27,6 +27,7 @@ type UploadPolicy = {
   allowedRoles: Array<"ADMIN" | "COACH">;
   match: (assetKey: string) => boolean;
   allowedExtensions: readonly string[];
+  maxSizeBytes?: number;
 };
 
 const UPLOAD_POLICIES: UploadPolicy[] = [
@@ -59,6 +60,7 @@ const UPLOAD_POLICIES: UploadPolicy[] = [
     allowedRoles: ["ADMIN"],
     match: (assetKey: string) => assetKey === "rapor_header_url",
     allowedExtensions: IMAGE_AND_PDF_EXTENSIONS,
+    maxSizeBytes: 1 * 1024 * 1024,
   },
   {
     allowedRoles: ["ADMIN"],
@@ -67,6 +69,7 @@ const UPLOAD_POLICIES: UploadPolicy[] = [
       assetKey === "rapor_coach_sign_url" ||
       assetKey === "rapor_stamp_url",
     allowedExtensions: [".png"] as const,
+    maxSizeBytes: 300 * 1024,
   },
 ];
 
@@ -119,6 +122,7 @@ function resolveUploadTarget(
 
   return {
     assetKey: normalizedAssetKey,
+    maxSizeBytes: policy.maxSizeBytes ?? MAX_SIZE_BYTES,
     objectKey: `${normalizedAssetKey}_${crypto.randomUUID()}${ext}`,
   };
 }
@@ -172,10 +176,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "File tidak boleh kosong." }, { status: 400 });
     }
 
-    if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: "Ukuran file melebihi batas maksimal 2MB." }, { status: 400 });
-    }
-
     const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
     const expectedMime = ALLOWED_TYPES.get(ext);
     if (!expectedMime) {
@@ -197,6 +197,20 @@ export async function POST(req: NextRequest) {
       ext,
       session.user.role,
     );
+
+    if (file.size > MAX_SIZE_BYTES) {
+      return NextResponse.json({ error: "Ukuran file melebihi batas maksimal 2MB." }, { status: 400 });
+    }
+
+    if (file.size > uploadTarget.maxSizeBytes) {
+      const maxSizeMb = uploadTarget.maxSizeBytes >= 1024 * 1024
+        ? `${uploadTarget.maxSizeBytes / (1024 * 1024)}MB`
+        : `${Math.round(uploadTarget.maxSizeBytes / 1024)}KB`;
+      return NextResponse.json({
+        error: `Ukuran file melebihi batas maksimal ${maxSizeMb} untuk aset ini.`,
+      }, { status: 400 });
+    }
+
     const supabase = getSupabaseClient();
     const { error } = await withTimeout(
       supabase.storage.from(getPrivateUploadBucket()).upload(uploadTarget.objectKey, buffer, {

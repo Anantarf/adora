@@ -11,17 +11,17 @@ const LOCKOUT_MS = 15 * 60 * 1000;
 const INVALID_CREDENTIALS_ERROR = "Username atau sandi tidak valid.";
 const LOGIN_TEMPORARY_ERROR = "Layanan login sedang bermasalah. Silakan coba lagi sebentar lagi.";
 
-async function checkFailureLimit(ip: string) {
+async function checkFailureLimit(identifier: string) {
   try {
-    const record = await getActiveBucket(LOGIN_FAILURE_NAMESPACE, ip);
+    const record = await getActiveBucket(LOGIN_FAILURE_NAMESPACE, identifier);
 
     if (record && record.count >= MAX_FAILURES) {
       await recordOperationalWarning({
         source: "auth",
-        message: "Login blocked because IP is temporarily locked out",
+        message: "Login blocked because identifier is temporarily locked out",
         statusCode: 429,
         metadata: {
-          ip,
+          identifier,
           count: record.count,
           resetAt: record.resetAt.toISOString(),
         },
@@ -38,22 +38,22 @@ async function checkFailureLimit(ip: string) {
       source: "auth",
       message: "Failed to read login failure limiter state",
       error,
-      metadata: { ip },
+      metadata: { identifier },
     });
   }
 }
 
-async function recordFailure(ip: string, failed: boolean) {
+async function recordFailure(identifier: string, failed: boolean) {
   try {
     if (failed) {
-      const bucket = await incrementBucket(LOGIN_FAILURE_NAMESPACE, ip, LOCKOUT_MS);
+      const bucket = await incrementBucket(LOGIN_FAILURE_NAMESPACE, identifier, LOCKOUT_MS);
       if (bucket.count === MAX_FAILURES) {
         await recordOperationalWarning({
           source: "auth",
           message: "Login lockout threshold reached",
           statusCode: 429,
           metadata: {
-            ip,
+            identifier,
             count: bucket.count,
             resetAt: bucket.resetAt.toISOString(),
           },
@@ -62,13 +62,13 @@ async function recordFailure(ip: string, failed: boolean) {
       return;
     }
 
-    await clearBucket(LOGIN_FAILURE_NAMESPACE, ip);
+    await clearBucket(LOGIN_FAILURE_NAMESPACE, identifier);
   } catch (error) {
     await recordOperationalError({
       source: "auth",
       message: "Failed to update login failure limiter state",
       error,
-      metadata: { ip, failed },
+      metadata: { identifier, failed },
     });
   }
 }
@@ -120,6 +120,7 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
     maxAge: 24 * 60 * 60,
+    updateAge: 60 * 60 * 4,
   },
   pages: {
     signIn: "/login",
@@ -141,24 +142,26 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Izin akses gagal: Identitas login belum lengkap.");
         }
 
+        const identifier = `${ip}:${credentials.username}`;
+
         try {
-          await checkFailureLimit(ip);
+          await checkFailureLimit(identifier);
 
           const user = await findActiveUser(credentials.username);
 
           if (!user || !user.password || user.isDeleted) {
-            await recordFailure(ip, true);
+            await recordFailure(identifier, true);
             throw new Error(INVALID_CREDENTIALS_ERROR);
           }
 
           const isPasswordCorrect = await comparePassword(credentials.password, user.password);
 
           if (!isPasswordCorrect) {
-            await recordFailure(ip, true);
+            await recordFailure(identifier, true);
             throw new Error(INVALID_CREDENTIALS_ERROR);
           }
 
-          await recordFailure(ip, false);
+          await recordFailure(identifier, false);
 
           return {
             id: user.id,
@@ -181,6 +184,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.username = user.username;
         token.mustChangePassword = user.mustChangePassword;
+        token.lastChecked = Date.now();
       }
 
       if (trigger === "update" && session) {
@@ -189,13 +193,37 @@ export const authOptions: NextAuthOptions = {
         }
       }
 
+      if (token.id && token.lastChecked && (Date.now() - (token.lastChecked as number) > 15 * 60 * 1000)) {
+        try {
+          const freshUser = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { isDeleted: true, role: true, mustChangePassword: true, username: true },
+          });
+
+          if (!freshUser || freshUser.isDeleted) {
+            token.error = "UserDeleted";
+          } else {
+            token.role = freshUser.role;
+            token.username = freshUser.username;
+            token.mustChangePassword = freshUser.mustChangePassword;
+            token.lastChecked = Date.now();
+          }
+        } catch (error) {
+          console.error("JIT Session Validation Error:", error);
+        }
+      }
+
       return token;
     },
     async session({ session, token }) {
+      if (token?.error === "UserDeleted") {
+        return { ...session, user: undefined as any };
+      }
+
       if (token && session.user) {
-        session.user.role = token.role;
-        session.user.id = token.id;
-        session.user.username = token.username;
+        session.user.role = token.role as any;
+        session.user.id = token.id as string;
+        session.user.username = token.username as string;
         session.user.mustChangePassword = token.mustChangePassword as boolean | undefined;
       }
 

@@ -70,6 +70,12 @@ export type FlatMetricRow = {
   categoryLabel?: string;
 };
 
+export const FIXED_ASPECT_MAX_SCORE = 10;
+export const AUTO_ATTENDANCE_DEFAULT_WEIGHT = 10;
+export const AUTO_ATTENDANCE_REDUCED_WEIGHT = 5;
+export const AUTO_ATTENDANCE_REDUCED_THRESHOLD = 4;
+const AUTO_WEIGHT_PRECISION = 2;
+
 const DEFAULT_GRADING: EvaluationGradeBand[] = [
   { letter: "A", label: "SANGAT BAIK", minScore: 80 },
   { letter: "B", label: "BAIK", minScore: 70 },
@@ -83,43 +89,40 @@ export const DEFAULT_EVALUATION_CONFIG_V2: EvaluationConfigV2 = {
     {
       id: "dribble",
       label: "Dribble",
-      weight: 40,
+      weight: 30,
       items: [
-        { id: "in-and-out", label: "In & Out Dribble", maxScore: 99 },
-        { id: "crossover", label: "Crossover", maxScore: 10 },
-        { id: "v-left", label: "V Dribble (Kiri)", maxScore: 10 },
-        { id: "v-right", label: "V Dribble (Kanan)", maxScore: 10 },
-        { id: "between-legs-left", label: "Between Legs (Kiri)", maxScore: 10 },
-        { id: "between-legs-right", label: "Between Legs (Kanan)", maxScore: 10 },
+        { id: "in-and-out", label: "In & Out Dribble", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "crossover", label: "Crossover", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "v-left", label: "V Dribble (Kiri)", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "v-right", label: "V Dribble (Kanan)", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "between-legs-left", label: "Between Legs (Kiri)", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "between-legs-right", label: "Between Legs (Kanan)", maxScore: FIXED_ASPECT_MAX_SCORE },
       ],
     },
     {
       id: "passing",
       label: "Passing",
-      weight: 25,
+      weight: 30,
       items: [
-        { id: "chest-pass", label: "Chest Pass", maxScore: 10 },
-        { id: "bounce-pass", label: "Bounce Pass", maxScore: 10 },
-        { id: "overhead-pass", label: "Overhead Pass", maxScore: 10 },
+        { id: "chest-pass", label: "Chest Pass", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "bounce-pass", label: "Bounce Pass", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "overhead-pass", label: "Overhead Pass", maxScore: FIXED_ASPECT_MAX_SCORE },
       ],
     },
     {
       id: "finishing",
       label: "Finishing",
-      weight: 20,
-      items: [{ id: "lay-up", label: "Lay Up", maxScore: 10 }],
-    },
-    {
-      id: "shooting",
-      label: "Shooting",
-      weight: 15,
-      items: [{ id: "shooting", label: "Shooting", maxScore: 10 }],
+      weight: 30,
+      items: [
+        { id: "lay-up", label: "Lay Up", maxScore: FIXED_ASPECT_MAX_SCORE },
+        { id: "shooting", label: "Shooting", maxScore: FIXED_ASPECT_MAX_SCORE },
+      ],
     },
   ],
   attendance: {
     enabled: true,
     label: "Presensi",
-    weight: 10,
+    weight: AUTO_ATTENDANCE_DEFAULT_WEIGHT,
     statusScores: {
       HADIR: 100,
       IZIN: 75,
@@ -141,6 +144,36 @@ function slugify(value: string) {
 
 function toNumber(value: unknown, fallback = 0) {
   return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function roundAutoWeight(value: number) {
+  return Number(value.toFixed(AUTO_WEIGHT_PRECISION));
+}
+
+function getAutoAttendanceWeight(categoryCount: number) {
+  return categoryCount > AUTO_ATTENDANCE_REDUCED_THRESHOLD
+    ? AUTO_ATTENDANCE_REDUCED_WEIGHT
+    : AUTO_ATTENDANCE_DEFAULT_WEIGHT;
+}
+
+function distributeAutoCategoryWeights(categoryCount: number) {
+  if (categoryCount <= 0) {
+    return [];
+  }
+
+  const attendanceWeight = getAutoAttendanceWeight(categoryCount);
+  const technicalPool = 100 - attendanceWeight;
+
+  if (categoryCount === 1) {
+    return [technicalPool];
+  }
+
+  const baseWeight = roundAutoWeight(technicalPool / categoryCount);
+  return Array.from({ length: categoryCount }, (_, index) =>
+    index === categoryCount - 1
+      ? roundAutoWeight(technicalPool - baseWeight * (categoryCount - 1))
+      : baseWeight,
+  );
 }
 
 function normalizeGradeBand(raw: unknown, fallback: EvaluationGradeBand[]): EvaluationGradeBand[] {
@@ -169,53 +202,58 @@ export function normalizeEvaluationConfig(raw: unknown): EvaluationConfigV2 {
 
   const config = raw as Partial<EvaluationConfigV2>;
   const categories = Array.isArray(config.categories) ? config.categories : DEFAULT_EVALUATION_CONFIG_V2.categories;
+  const normalizedCategories = categories
+    .map((category, categoryIndex) => {
+      const safeCategory = category as Partial<EvaluationCategoryConfig>;
+      const label =
+        typeof safeCategory.label === "string" && safeCategory.label.trim()
+          ? safeCategory.label.trim()
+          : DEFAULT_EVALUATION_CONFIG_V2.categories[categoryIndex]?.label ?? `Kategori ${categoryIndex + 1}`;
+      const categoryId =
+        typeof safeCategory.id === "string" && safeCategory.id.trim()
+          ? safeCategory.id.trim()
+          : slugify(label);
+      const items = Array.isArray(safeCategory.items) ? safeCategory.items : [];
+
+      return {
+        id: categoryId,
+        label,
+        weight: 0,
+        items: items
+          .map((item, itemIndex) => {
+            const safeItem = item as Partial<EvaluationCategoryItem>;
+            const itemLabel =
+              typeof safeItem.label === "string" && safeItem.label.trim()
+                ? safeItem.label.trim()
+                : `Aspek ${itemIndex + 1}`;
+            return {
+              id:
+                typeof safeItem.id === "string" && safeItem.id.trim()
+                  ? safeItem.id.trim()
+                  : slugify(`${categoryId}-${itemLabel}`),
+              label: itemLabel,
+              maxScore: FIXED_ASPECT_MAX_SCORE,
+            };
+          })
+          .filter((item) => item.label),
+      };
+    })
+    .filter((category) => category.items.length > 0);
+  const categoryWeights = distributeAutoCategoryWeights(normalizedCategories.length);
 
   return {
     version: "v2",
-    categories: categories
-      .map((category, categoryIndex) => {
-        const safeCategory = category as Partial<EvaluationCategoryConfig>;
-        const label =
-          typeof safeCategory.label === "string" && safeCategory.label.trim()
-            ? safeCategory.label.trim()
-            : DEFAULT_EVALUATION_CONFIG_V2.categories[categoryIndex]?.label ?? `Kategori ${categoryIndex + 1}`;
-        const categoryId =
-          typeof safeCategory.id === "string" && safeCategory.id.trim()
-            ? safeCategory.id.trim()
-            : slugify(label);
-        const items = Array.isArray(safeCategory.items) ? safeCategory.items : [];
-
-        return {
-          id: categoryId,
-          label,
-          weight: Math.max(0, Math.min(100, toNumber(safeCategory.weight, DEFAULT_EVALUATION_CONFIG_V2.categories[categoryIndex]?.weight ?? 0))),
-          items: items
-            .map((item, itemIndex) => {
-              const safeItem = item as Partial<EvaluationCategoryItem>;
-              const itemLabel =
-                typeof safeItem.label === "string" && safeItem.label.trim()
-                  ? safeItem.label.trim()
-                  : `Aspek ${itemIndex + 1}`;
-              return {
-                id:
-                  typeof safeItem.id === "string" && safeItem.id.trim()
-                    ? safeItem.id.trim()
-                    : slugify(`${categoryId}-${itemLabel}`),
-                label: itemLabel,
-                maxScore: Math.max(1, toNumber(safeItem.maxScore, 10)),
-              };
-            })
-            .filter((item) => item.label),
-        };
-      })
-      .filter((category) => category.items.length > 0),
+    categories: normalizedCategories.map((category, index) => ({
+      ...category,
+      weight: categoryWeights[index] ?? 0,
+    })),
     attendance: {
-      enabled: config.attendance?.enabled ?? DEFAULT_EVALUATION_CONFIG_V2.attendance.enabled,
+      enabled: true,
       label:
         typeof config.attendance?.label === "string" && config.attendance.label.trim()
           ? config.attendance.label.trim()
           : DEFAULT_EVALUATION_CONFIG_V2.attendance.label,
-      weight: Math.max(0, Math.min(100, toNumber(config.attendance?.weight, DEFAULT_EVALUATION_CONFIG_V2.attendance.weight))),
+      weight: getAutoAttendanceWeight(normalizedCategories.length),
       statusScores: {
         HADIR: Math.max(0, Math.min(100, toNumber(config.attendance?.statusScores?.HADIR, DEFAULT_EVALUATION_CONFIG_V2.attendance.statusScores.HADIR))),
         IZIN: Math.max(0, Math.min(100, toNumber(config.attendance?.statusScores?.IZIN, DEFAULT_EVALUATION_CONFIG_V2.attendance.statusScores.IZIN))),
@@ -269,7 +307,7 @@ export function buildMetricValuesFromConfig(config: EvaluationConfigV2, metrics?
   values[buildMetricFieldKey("passing", "bounce-pass")] = metrics.passing.bouncePass;
   values[buildMetricFieldKey("passing", "overhead-pass")] = metrics.passing.overheadPass;
   values[buildMetricFieldKey("finishing", "lay-up")] = metrics.layUp;
-  values[buildMetricFieldKey("shooting", "shooting")] = metrics.shooting;
+  values[buildMetricFieldKey("finishing", "shooting")] = metrics.shooting;
 
   return values;
 }
@@ -326,18 +364,60 @@ export function getGradeFromBands(score: number, grading: EvaluationGradeBand[])
 
 export function getEvaluationSummary(metrics: MetricsJson | MetricsJsonV2) {
   if (!isMetricsJsonV2(metrics)) {
+    const legacyDribbleItems = [
+      { key: "inAndOut", label: "In & Out Dribble", shortLabel: "I&O", value: metrics.dribble.inAndOut, max: 10 },
+      { key: "crossover", label: "Crossover", shortLabel: "Cross", value: metrics.dribble.crossover, max: 10 },
+      { key: "vLeft", label: "V Dribble (Kiri)", shortLabel: "V-L", value: metrics.dribble.vLeft, max: 10 },
+      { key: "vRight", label: "V Dribble (Kanan)", shortLabel: "V-R", value: metrics.dribble.vRight, max: 10 },
+      { key: "betweenLegsLeft", label: "Between Legs (Kiri)", shortLabel: "BTL-L", value: metrics.dribble.betweenLegsLeft, max: 10 },
+      { key: "betweenLegsRight", label: "Between Legs (Kanan)", shortLabel: "BTL-R", value: metrics.dribble.betweenLegsRight, max: 10 },
+    ];
+    const legacyPassingItems = [
+      { key: "chestPass", label: "Chest Pass", shortLabel: "Chest", value: metrics.passing.chestPass, max: 10 },
+      { key: "bouncePass", label: "Bounce Pass", shortLabel: "Bounce", value: metrics.passing.bouncePass, max: 10 },
+      { key: "overheadPass", label: "Overhead Pass", shortLabel: "Over", value: metrics.passing.overheadPass, max: 10 },
+    ];
+    const legacyFinishingItems = [
+      { key: "layUp", label: "Lay Up", shortLabel: "Lay Up", value: metrics.layUp, max: 10 },
+      { key: "shooting", label: "Shooting", shortLabel: "Shoot", value: metrics.shooting, max: 10 },
+    ];
+
     const legacyRows: FlatMetricRow[] = [
-      { key: "inAndOut", label: "In & Out Dribble", shortLabel: "I&O", value: metrics.dribble.inAndOut, max: 99, categoryLabel: "Dribble" },
-      { key: "crossover", label: "Crossover", shortLabel: "Cross", value: metrics.dribble.crossover, max: 10, categoryLabel: "Dribble" },
-      { key: "vLeft", label: "V Dribble (Kiri)", shortLabel: "V-L", value: metrics.dribble.vLeft, max: 10, categoryLabel: "Dribble" },
-      { key: "vRight", label: "V Dribble (Kanan)", shortLabel: "V-R", value: metrics.dribble.vRight, max: 10, categoryLabel: "Dribble" },
-      { key: "betweenLegsLeft", label: "Between Legs (Kiri)", shortLabel: "BTL-L", value: metrics.dribble.betweenLegsLeft, max: 10, categoryLabel: "Dribble" },
-      { key: "betweenLegsRight", label: "Between Legs (Kanan)", shortLabel: "BTL-R", value: metrics.dribble.betweenLegsRight, max: 10, categoryLabel: "Dribble" },
-      { key: "chestPass", label: "Chest Pass", shortLabel: "Chest", value: metrics.passing.chestPass, max: 10, categoryLabel: "Passing" },
-      { key: "bouncePass", label: "Bounce Pass", shortLabel: "Bounce", value: metrics.passing.bouncePass, max: 10, categoryLabel: "Passing" },
-      { key: "overheadPass", label: "Overhead Pass", shortLabel: "Over", value: metrics.passing.overheadPass, max: 10, categoryLabel: "Passing" },
-      { key: "layUp", label: "Lay Up", shortLabel: "Lay Up", value: metrics.layUp, max: 10, categoryLabel: "Finishing" },
-      { key: "shooting", label: "Shooting", shortLabel: "Shoot", value: metrics.shooting, max: 10, categoryLabel: "Shooting" },
+      ...legacyDribbleItems.map((item) => ({ ...item, categoryLabel: "Dribble" })),
+      ...legacyPassingItems.map((item) => ({ ...item, categoryLabel: "Passing" })),
+      ...legacyFinishingItems.map((item) => ({ ...item, categoryLabel: "Finishing" })),
+    ];
+
+    const computeCategoryAvg = (items: Array<{ value: number; max: number }>) => {
+      if (items.length === 0) return 0;
+      return Math.round(items.reduce((sum, item) => sum + (item.value / item.max) * 100, 0) / items.length);
+    };
+
+    const legacyCategorySummaries = [
+      {
+        id: "dribble",
+        label: "Dribble",
+        weight: 30,
+        averageScore: computeCategoryAvg(legacyDribbleItems),
+        totalRawScore: legacyDribbleItems.reduce((sum, item) => sum + item.value, 0),
+        totalMaxScore: legacyDribbleItems.reduce((sum, item) => sum + item.max, 0),
+      },
+      {
+        id: "passing",
+        label: "Passing",
+        weight: 30,
+        averageScore: computeCategoryAvg(legacyPassingItems),
+        totalRawScore: legacyPassingItems.reduce((sum, item) => sum + item.value, 0),
+        totalMaxScore: legacyPassingItems.reduce((sum, item) => sum + item.max, 0),
+      },
+      {
+        id: "finishing",
+        label: "Finishing",
+        weight: 30,
+        averageScore: computeCategoryAvg(legacyFinishingItems),
+        totalRawScore: legacyFinishingItems.reduce((sum, item) => sum + item.value, 0),
+        totalMaxScore: legacyFinishingItems.reduce((sum, item) => sum + item.max, 0),
+      },
     ];
 
     const normalized = legacyRows.map((row) => (row.value / row.max) * 100);
@@ -351,7 +431,7 @@ export function getEvaluationSummary(metrics: MetricsJson | MetricsJsonV2) {
       notes: metrics.notes?.trim() || "",
       grade: getGradeFromBands(totalScore, DEFAULT_GRADING),
       flatRows: legacyRows,
-      categorySummaries: [],
+      categorySummaries: legacyCategorySummaries,
       attendance: null,
     };
   }
@@ -409,4 +489,3 @@ export function getEvaluationSummary(metrics: MetricsJson | MetricsJsonV2) {
     attendance: metrics.attendance ?? null,
   };
 }
-

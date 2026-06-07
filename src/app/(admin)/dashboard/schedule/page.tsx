@@ -85,8 +85,14 @@ export default function SchedulePage() {
   return (
     <>
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-6">
-        <div className="border-b border-border/50 pb-6">
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-2 border-b border-border/50 pb-6">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+            Agenda Klub
+          </p>
+          <h2 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+            Kalender dan Kontrol Agenda
+          </h2>
+          <p className="max-w-3xl text-sm text-muted-foreground">
             Kelola jadwal latihan, tanding, dan agenda resmi klub dari satu halaman kerja.
           </p>
         </div>
@@ -94,7 +100,7 @@ export default function SchedulePage() {
         <section className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
           <div className="border-b border-border/50 px-5 py-4">
             <div className="space-y-1">
-              <h2 className="text-sm font-semibold text-foreground">Kalender Agenda</h2>
+              <h3 className="text-base font-semibold text-foreground">Kalender Agenda</h3>
               <p className="text-sm text-muted-foreground">
                 Cek penyebaran jadwal dan potensi bentrok sebelum menambah atau mengubah agenda.
               </p>
@@ -110,7 +116,7 @@ export default function SchedulePage() {
 
             <aside className="flex flex-col gap-3 px-5 py-4">
               <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">Agenda Mendatang</h3>
+                <h3 className="text-base font-semibold text-foreground">Agenda Mendatang</h3>
                 <p className="text-sm text-muted-foreground">
                   Pantau agenda terdekat yang masih perlu ditinjau atau diubah.
                 </p>
@@ -140,11 +146,18 @@ export default function SchedulePage() {
                     const config = getEventConfig(event.type);
 
                     return (
-                      <button
+                      <div
                         key={event.id}
-                        type="button"
+                        role="button"
+                        tabIndex={0}
                         onClick={() => setUiState({ type: "preview", event })}
-                        className="w-full rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/20"
+                        onKeyDown={(eventObject) => {
+                          if (eventObject.key === "Enter" || eventObject.key === " ") {
+                            eventObject.preventDefault();
+                            setUiState({ type: "preview", event });
+                          }
+                        }}
+                        className="w-full rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                         style={{ borderLeftColor: config.color, borderLeftWidth: "4px" }}
                       >
                         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -212,7 +225,7 @@ export default function SchedulePage() {
                             </div>
                           </div>
                         </div>
-                      </button>
+                      </div>
                     );
                   })
                 )}

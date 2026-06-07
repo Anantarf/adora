@@ -47,6 +47,21 @@ const coachProfileSelect = {
   },
 } as const;
 
+const COACH_GENDER_OPTIONS = new Set(["Laki-laki", "Perempuan"]);
+
+function normalizeDateInput(value?: string) {
+  if (!value?.trim()) {
+    return null;
+  }
+
+  const parsedDate = new Date(value);
+  if (Number.isNaN(parsedDate.getTime())) {
+    throw new Error("Tanggal lahir coach tidak valid.");
+  }
+
+  return parsedDate;
+}
+
 function normalizeCoachProfilePayload(input: {
   userId: string;
   fullName: string;
@@ -60,11 +75,16 @@ function normalizeCoachProfilePayload(input: {
     throw new Error("Nama lengkap coach wajib diisi.");
   }
 
+  const normalizedGender = input.gender?.trim() || null;
+  if (normalizedGender && !COACH_GENDER_OPTIONS.has(normalizedGender)) {
+    throw new Error("Jenis kelamin coach tidak valid.");
+  }
+
   return {
     fullName: input.fullName.trim(),
     placeOfBirth: input.placeOfBirth?.trim() || null,
-    dateOfBirth: input.dateOfBirth ? new Date(input.dateOfBirth) : null,
-    gender: input.gender?.trim() || null,
+    dateOfBirth: normalizeDateInput(input.dateOfBirth),
+    gender: normalizedGender,
     photoUrl: normalizeExpectedPrivateUploadUrl(
       input.photoUrl,
       {
@@ -172,6 +192,13 @@ export async function upsertCoachProfileAction(input: CoachProfileInput) {
       },
     });
 
+    await tx.user.update({
+      where: { id: input.userId },
+      data: {
+        name: coachProfile.fullName,
+      },
+    });
+
     await tx.coachAssignment.deleteMany({
       where: {
         coachProfileId: coachProfile.id,
@@ -236,6 +263,13 @@ export async function upsertOwnCoachProfileAction(input: CoachSelfProfileInput) 
       },
     });
 
+    await tx.user.update({
+      where: { id: coachUser.id },
+      data: {
+        name: coachProfile.fullName,
+      },
+    });
+
     await createAuditLog(tx, "UPSERT", "coachProfile", coachProfile.id, auditUserId, {
       coachUsername: coachUser.username,
       selfService: true,
@@ -246,6 +280,7 @@ export async function upsertOwnCoachProfileAction(input: CoachSelfProfileInput) 
 
   revalidatePath("/coach");
   revalidatePath("/coach/profile");
+  revalidatePath("/dashboard/users");
   revalidatePath("/parent");
 
   return result;

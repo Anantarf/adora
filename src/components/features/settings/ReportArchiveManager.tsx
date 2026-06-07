@@ -35,15 +35,15 @@ async function uploadArchive(file: File, assetKey: string) {
 }
 
 export function ReportArchiveManager() {
-  const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string | null>(null);
+  const [selectedGroupId, setSelectedGroupId] = useState("");
+  const [selectedPeriodId, setSelectedPeriodId] = useState("");
   const [uploadingPlayerId, setUploadingPlayerId] = useState<string | null>(null);
   const [releasingArchiveId, setReleasingArchiveId] = useState<string | null>(null);
 
   const { data: groups } = useGroups();
   const { data: periods } = usePeriods();
   const { data: activePeriod } = useActivePeriod();
-  const { data: rows, isLoading } = useReportArchiveRows(selectedGroupId, selectedPeriodId);
+  const { data: rows, isLoading } = useReportArchiveRows(selectedGroupId || null, selectedPeriodId || null);
   const { mutateAsync: saveDraft } = useUpsertReportArchiveDraft();
   const { mutateAsync: releaseArchive } = useReleaseReportArchive();
 
@@ -96,7 +96,7 @@ export function ReportArchiveManager() {
         <div className="grid gap-3 md:grid-cols-2">
           <div className="space-y-1.5">
             <label className="ml-1 text-xs font-medium text-muted-foreground">Kelompok Latihan</label>
-            <Select value={selectedGroupId ?? undefined} onValueChange={setSelectedGroupId}>
+            <Select value={selectedGroupId} onValueChange={(value) => setSelectedGroupId(value ?? "")}>
               <SelectTrigger className="h-11 w-full border-border/50 bg-background/50">
                 <SelectValue placeholder="Pilih kelompok">{selectedGroupName}</SelectValue>
               </SelectTrigger>
@@ -112,7 +112,7 @@ export function ReportArchiveManager() {
 
           <div className="space-y-1.5">
             <label className="ml-1 text-xs font-medium text-muted-foreground">Periode</label>
-            <Select value={selectedPeriodId ?? undefined} onValueChange={setSelectedPeriodId}>
+            <Select value={selectedPeriodId} onValueChange={(value) => setSelectedPeriodId(value ?? "")}>
               <SelectTrigger className="h-11 w-full border-border/50 bg-background/50">
                 <SelectValue placeholder="Pilih periode">{selectedPeriodName}</SelectValue>
               </SelectTrigger>

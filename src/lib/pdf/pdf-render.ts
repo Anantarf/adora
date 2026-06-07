@@ -89,25 +89,52 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
         return [];
       }
 
-      return category.items.map((item, index) => [
-        index === 0
-          ? {
+      return category.items.map((item, index) => {
+        if (index === 0) {
+          return [
+            {
               content: category.label,
               rowSpan: category.items.length,
               styles: { valign: "middle" as const, halign: "center" as const, fontStyle: "bold" as const },
-            }
-          : "",
-        item.label,
-        { content: `${item.score} / ${item.maxScore}`, styles: { halign: "center" as const } },
-        index === 0
-          ? {
+            },
+            item.label,
+            { content: `${item.score} / ${item.maxScore}`, styles: { halign: "center" as const } },
+            {
               content: `${categorySummary.averageScore}`,
               rowSpan: category.items.length,
               styles: { valign: "middle" as const, halign: "center" as const, fontStyle: "bold" as const, fontSize: 11 },
-            }
-          : "",
-      ]);
+            },
+          ];
+        }
+        // Subsequent rows: DO NOT include cells for rowSpan columns (0 and 3)
+        return [
+          item.label,
+          { content: `${item.score} / ${item.maxScore}`, styles: { halign: "center" as const } },
+        ];
+      });
     });
+
+    if (metrics.attendance) {
+      const counts = metrics.attendance.counts;
+      const total = metrics.attendance.totalSessions;
+      const attendanceDetail = `Kehadiran (${counts.HADIR} / ${total} kegiatan dihadiri: ${counts.HADIR} Hadir, ${counts.IZIN} Izin, ${counts.SAKIT} Sakit, ${counts.ALPA} Alpa)`;
+
+      const attendanceScore10 = Math.round(metrics.attendance.score / 10);
+      bodyRows.push([
+        {
+          content: metrics.attendance.label,
+          rowSpan: 1,
+          styles: { valign: "middle" as const, halign: "center" as const, fontStyle: "bold" as const },
+        },
+        attendanceDetail,
+        { content: `${attendanceScore10} / 10`, styles: { halign: "center" as const } },
+        {
+          content: `${attendanceScore10}`,
+          rowSpan: 1,
+          styles: { valign: "middle" as const, halign: "center" as const, fontStyle: "bold" as const, fontSize: 11 },
+        },
+      ]);
+    }
 
     autoTable(doc, {
       startY: y,
@@ -171,10 +198,9 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       [{ content: "Passing", rowSpan: 3, styles: { valign: "middle", halign: "center", fontStyle: "bold" } }, "Chest Pass", { content: metrics.passing.chestPass, styles: { halign: "center" } }, { content: passTotal, rowSpan: 3, styles: { valign: "middle", halign: "center", fontStyle: "bold", fontSize: 11 } }],
       ["Bounce Pass", { content: metrics.passing.bouncePass, styles: { halign: "center" } }],
       ["Overhead Pass", { content: metrics.passing.overheadPass, styles: { halign: "center" } }],
-      // Lay Up: category spans both cols (no sub-item distinction)
-      [{ content: "Lay Up", colSpan: 2, styles: { halign: "center", fontStyle: "bold" } }, { content: metrics.layUp, styles: { halign: "center" } }, { content: metrics.layUp, styles: { halign: "center", fontStyle: "bold", fontSize: 11 } }],
-      // Shooting: same
-      [{ content: "Shooting", colSpan: 2, styles: { halign: "center", fontStyle: "bold" } }, { content: metrics.shooting, styles: { halign: "center" } }, { content: metrics.shooting, styles: { halign: "center", fontStyle: "bold", fontSize: 11 } }],
+      // Finishing: Lay Up + Shooting grouped under one category
+      [{ content: "Finishing", rowSpan: 2, styles: { valign: "middle", halign: "center", fontStyle: "bold" } }, "Lay Up", { content: metrics.layUp, styles: { halign: "center" } }, { content: metrics.layUp + metrics.shooting, rowSpan: 2, styles: { valign: "middle", halign: "center", fontStyle: "bold", fontSize: 11 } }],
+      ["Shooting", { content: metrics.shooting, styles: { halign: "center" } }],
     ],
     columnStyles: {
       0: { cellWidth: 35 },
@@ -381,9 +407,13 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
     if (!url || url.toLowerCase().endsWith(".pdf")) return;
 
     try {
-      const { data: b64, format } = await loadImageAsBase64(url);
+      const { data: b64, format } = await loadImageAsBase64(url, {
+        maxWidthPx: isStamp ? 500 : 700,
+        maxHeightPx: isStamp ? 500 : 240,
+        quality: 0.8,
+      });
       if (isStamp) {
-        doc.addImage(b64, format, PAGE_W / 2 - STAMP_SIZE / 2, yPos + 1, STAMP_SIZE, STAMP_SIZE);
+        doc.addImage(b64, format, PAGE_W / 2 - STAMP_SIZE / 2, yPos + 1, STAMP_SIZE, STAMP_SIZE, undefined, "FAST");
         return;
       }
 

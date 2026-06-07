@@ -2,6 +2,9 @@ export const TARGET_TABLE_DICT: Record<string, string> = {
   user: "Akun Admin",
   parent: "Akun Orang Tua",
   player: "Data Pemain",
+  player_batch: "Impor Pemain",
+  player_link: "Tautan Pemain ke Orang Tua",
+  player_unlink: "Pelepasan Tautan Pemain",
   group: "Kelompok Latihan",
   attendance: "Presensi Pemain",
   statistic: "Penilaian Pemain",
@@ -10,6 +13,8 @@ export const TARGET_TABLE_DICT: Record<string, string> = {
   clubsetting: "Pengaturan Klub",
   attendance_batch: "Presensi Massal",
   certificate: "Sertifikat Pemain",
+  reportarchive: "Arsip Rapor",
+  coachprofile: "Profil Pelatih",
 };
 
 export const FIELD_LABELS: Record<string, string> = {
@@ -86,11 +91,21 @@ export function getHumanReadableText(action: string, table: string): string {
   if (normalizedTable === "attendance" || normalizedTable === "attendance_batch") {
     if (normalizedAction.includes("CREATE")) return "Mencatat presensi pemain";
     if (normalizedAction.includes("UPDATE")) return "Mengubah data presensi pemain";
+    if (normalizedAction.includes("SUBMIT")) return "Mengirim presensi massal pemain";
+  }
+
+  if (normalizedTable === "reportarchive") {
+    if (normalizedAction.includes("UPSERT")) return "Menyimpan draf arsip rapor";
+    if (normalizedAction.includes("RELEASE")) return "Merilis arsip rapor ke parent";
   }
 
   if (normalizedAction === "RESET_PASSWORD") return `Mengatur ulang kata sandi ${tableLabel}`;
+  if (normalizedAction === "CHANGE_FORCED_PASSWORD") return "Mengganti kata sandi wajib akun";
   if (normalizedAction === "UPDATE_SELF") return "Memperbarui profil akun sendiri";
   if (normalizedAction === "SET_ACTIVE") return `Mengaktifkan ${tableLabel}`;
+  if (normalizedAction === "UPSERT") return `Menyimpan perubahan ${tableLabel}`;
+  if (normalizedAction === "SUBMIT_ATTENDANCE") return "Mengirim presensi massal pemain";
+  if (normalizedAction === "RELEASE") return `Merilis ${tableLabel}`;
 
   if (normalizedAction === "CREATE") return `Menambahkan ${tableLabel} ke sistem`;
   if (normalizedAction === "UPDATE") return `Mengubah informasi ${tableLabel}`;
@@ -98,6 +113,8 @@ export function getHumanReadableText(action: string, table: string): string {
 
   if (normalizedAction.includes("CREATE")) return `Menambahkan ${tableLabel}`;
   if (normalizedAction.includes("UPDATE")) return `Mengubah ${tableLabel}`;
+  if (normalizedAction.includes("UPSERT")) return `Menyimpan ${tableLabel}`;
+  if (normalizedAction.includes("RELEASE")) return `Merilis ${tableLabel}`;
 
   return `Melakukan perubahan pada ${tableLabel}`;
 }
