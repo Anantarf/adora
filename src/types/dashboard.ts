@@ -128,6 +128,7 @@ export interface Player {
       coachProfile?: {
         id: string;
         fullName: string;
+        signatureUrl?: string | null;
       } | null;
     } | null;
   } | null;
@@ -151,6 +152,7 @@ export interface PlayerSummary {
       coachProfile?: {
         id: string;
         fullName: string;
+        signatureUrl?: string | null;
       } | null;
     } | null;
   } | null;

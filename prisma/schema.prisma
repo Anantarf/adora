@@ -227,6 +227,7 @@ model coachProfile {
   gender       String?
   photoUrl     String?
   licenseUrl   String?
+  signatureUrl String?
   isDeleted    Boolean           @default(false)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
@@ -262,6 +263,7 @@ model reportArchive {
   homebaseNameSnapshot String?
   coachProfileIdSnapshot String?
   coachNameSnapshot String?
+  coachSignUrlSnapshot String?
   fileUrl      String
   status       report_archive_status @default(DRAFT)
   releasedAt   DateTime?
@@ -295,6 +297,7 @@ model statistic {
   homebaseNameSnapshot String?
   coachProfileIdSnapshot String?
   coachNameSnapshot String?
+  coachSignUrlSnapshot String?
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @default(now()) @updatedAt
 

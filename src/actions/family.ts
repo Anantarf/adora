@@ -3,6 +3,7 @@
 import { ensureOwnedPlayer } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
 import { requireSessionRole } from "@/lib/server-auth";
+import { getReportSignerResolverContext, resolveReportSignerSnapshotForGroup } from "@/lib/report-signer-resolver";
 
 async function requireSessionUserId(role: "PARENT" | "ADMIN") {
   const session = await requireSessionRole(role);
@@ -18,7 +19,7 @@ async function requireSessionUserId(role: "PARENT" | "ADMIN") {
 export async function getFamilyPlayersAction() {
   const userId = await requireSessionUserId("PARENT");
 
-  return prisma.player.findMany({
+  const players = await prisma.player.findMany({
     where: {
       parentId: userId,
       isDeleted: false,
@@ -35,6 +36,9 @@ export async function getFamilyPlayersAction() {
         select: {
           id: true,
           name: true,
+          homebase: {
+            select: { id: true, name: true }
+          },
           coachAssignment: {
             select: {
               coachProfile: {
@@ -43,6 +47,7 @@ export async function getFamilyPlayersAction() {
                   fullName: true,
                   photoUrl: true,
                   licenseUrl: true,
+                  signatureUrl: true,
                 },
               },
             },
@@ -51,6 +56,32 @@ export async function getFamilyPlayersAction() {
       },
     },
     orderBy: { createdAt: "asc" },
+  });
+
+  const signerContext = await getReportSignerResolverContext(prisma);
+
+  return players.map(player => {
+    const resolvedSigner = resolveReportSignerSnapshotForGroup(player.group, signerContext);
+    
+    // If it's a homebase fallback, we can get the basic profile info from mappedCoachProfiles
+    let fallbackCoachProfile = null;
+    if (resolvedSigner.resolutionSource === "HOMEBASE" && resolvedSigner.coachProfileIdSnapshot) {
+      const coach = signerContext.mappedCoachProfiles.get(resolvedSigner.coachProfileIdSnapshot);
+      if (coach) {
+        fallbackCoachProfile = {
+          id: coach.id,
+          fullName: coach.fullName,
+          photoUrl: coach.photoUrl,
+          licenseUrl: coach.licenseUrl,
+        };
+      }
+    }
+
+    return {
+      ...player,
+      resolvedSigner,
+      fallbackCoachProfile,
+    };
   });
 }
 

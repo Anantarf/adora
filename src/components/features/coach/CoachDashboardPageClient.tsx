@@ -140,7 +140,7 @@ export function CoachDashboardPageClient() {
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">{group.name}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {group.homebase?.name || "Tanpa homebase"} • {group.category === "KELOMPOK_UMUR" ? "Kelompok umur" : "Sekolah"}
+                      {group.homebase?.name || "Tanpa homebase"} | {group.category === "KELOMPOK_UMUR" ? "Kelompok umur" : "Sekolah"}
                     </p>
                   </div>
                   <div className="inline-flex w-fit rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
@@ -167,7 +167,7 @@ export function CoachDashboardPageClient() {
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground">{event.title}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {formatDate(event.date)}{event.location ? ` • ${event.location}` : ""}
+                        {formatDate(event.date)}{event.location ? ` | ${event.location}` : ""}
                       </p>
                     </div>
                     <span className="rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">

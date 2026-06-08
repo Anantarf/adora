@@ -24,6 +24,7 @@ export function useUpdateClubSetting() {
     mutationFn: ({ key, value }: { key: string; value: string }) => updateClubSettingAction(key, value),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["club-settings"] });
+      queryClient.invalidateQueries({ queryKey: ["report-settings"] });
     },
     onError: (error) => {
       toast.error(toUserErrorMessage(error, "Gagal memperbarui pengaturan."));

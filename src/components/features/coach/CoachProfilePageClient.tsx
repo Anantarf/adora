@@ -22,7 +22,8 @@ export function CoachProfilePageClient() {
   const [gender, setGender] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [licenseUrl, setLicenseUrl] = useState("");
-  const [uploadingKey, setUploadingKey] = useState<"photo" | "license" | null>(null);
+  const [signatureUrl, setSignatureUrl] = useState("");
+  const [uploadingKey, setUploadingKey] = useState<"photo" | "license" | "signature" | null>(null);
 
   useEffect(() => {
     if (!coachUser) {
@@ -36,12 +37,13 @@ export function CoachProfilePageClient() {
       setGender,
       setPhotoUrl,
       setLicenseUrl,
+      setSignatureUrl,
     });
   }, [coachUser]);
 
   const handleUpload = async (
     file: File,
-    kind: "photo" | "license",
+    kind: "photo" | "license" | "signature",
     setter: (value: string) => void,
   ) => {
     if (!coachUser?.id) {
@@ -54,7 +56,11 @@ export function CoachProfilePageClient() {
       const assetKey = `coach_${kind}_${coachUser.id}_${Date.now()}`;
       const url = await uploadCoachProfileAsset(file, assetKey);
       setter(url);
-      toast.success(`File ${kind === "photo" ? "foto" : "lisensi"} berhasil diunggah.`);
+      toast.success(
+        `File ${
+          kind === "photo" ? "foto" : kind === "license" ? "lisensi" : "tanda tangan"
+        } berhasil diunggah.`,
+      );
     } catch (error) {
       toast.error(toUserErrorMessage(error, "Upload gagal."));
     } finally {
@@ -75,6 +81,7 @@ export function CoachProfilePageClient() {
       gender,
       photoUrl,
       licenseUrl,
+      signatureUrl,
     });
   };
 
@@ -86,9 +93,10 @@ export function CoachProfilePageClient() {
     gender.trim(),
     photoUrl.trim(),
     licenseUrl.trim(),
+    signatureUrl.trim(),
   ].filter(Boolean).length;
   const profileCompletionLabel =
-    profileCompletionCount >= 5 ? "Siap ditampilkan" : profileCompletionCount >= 3 ? "Perlu dilengkapi" : "Masih minim";
+    profileCompletionCount >= 6 ? "Siap ditampilkan" : profileCompletionCount >= 4 ? "Perlu dilengkapi" : "Masih minim";
 
   if (isLoading) {
     return (
@@ -143,7 +151,7 @@ export function CoachProfilePageClient() {
             </p>
             <p className="mt-2 text-lg font-semibold text-foreground">{profileCompletionLabel}</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              {profileCompletionCount} dari 6 data inti sudah terisi.
+              {profileCompletionCount} dari 7 data inti sudah terisi.
             </p>
           </div>
           <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
@@ -169,7 +177,7 @@ export function CoachProfilePageClient() {
               <h2 className="text-lg font-semibold">Profil Coach</h2>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Perbarui biodata, foto profil, dan lisensi Anda. Assignment kelompok tetap dikelola admin.
+              Perbarui biodata, foto profil, lisensi, dan tanda tangan rapor Anda. Assignment kelompok tetap dikelola admin.
             </p>
           </div>
           <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
@@ -179,11 +187,19 @@ export function CoachProfilePageClient() {
 
         <div className="mt-5 space-y-5">
           <CoachProfileFields
-            values={{ fullName, placeOfBirth, dateOfBirth, gender, photoUrl, licenseUrl }}
+            values={{ fullName, placeOfBirth, dateOfBirth, gender, photoUrl, licenseUrl, signatureUrl }}
             onChange={{ setFullName, setPlaceOfBirth, setDateOfBirth, setGender }}
             uploadingKey={uploadingKey}
             onUpload={async (file, kind) =>
-              handleUpload(file, kind, kind === "photo" ? setPhotoUrl : setLicenseUrl)
+              handleUpload(
+                file,
+                kind,
+                kind === "photo"
+                  ? setPhotoUrl
+                  : kind === "license"
+                    ? setLicenseUrl
+                    : setSignatureUrl,
+              )
             }
           />
 

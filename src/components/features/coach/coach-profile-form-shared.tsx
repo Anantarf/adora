@@ -12,6 +12,7 @@ export type CoachProfileFormValues = {
   gender: string;
   photoUrl: string;
   licenseUrl: string;
+  signatureUrl: string;
 };
 
 export const COACH_GENDER_OPTIONS = ["Laki-laki", "Perempuan"] as const;
@@ -26,6 +27,7 @@ export function applyCoachProfileState(
       gender: string | null;
       photoUrl: string | null;
       licenseUrl: string | null;
+      signatureUrl: string | null;
     } | null;
   },
   setters: {
@@ -35,6 +37,7 @@ export function applyCoachProfileState(
     setGender: (value: string) => void;
     setPhotoUrl: (value: string) => void;
     setLicenseUrl: (value: string) => void;
+    setSignatureUrl: (value: string) => void;
   },
 ) {
   setters.setFullName(source.coachProfile?.fullName ?? source.name ?? "");
@@ -47,6 +50,7 @@ export function applyCoachProfileState(
   setters.setGender(source.coachProfile?.gender ?? "");
   setters.setPhotoUrl(source.coachProfile?.photoUrl ?? "");
   setters.setLicenseUrl(source.coachProfile?.licenseUrl ?? "");
+  setters.setSignatureUrl(source.coachProfile?.signatureUrl ?? "");
 }
 
 export async function uploadCoachProfileAsset(file: File, assetKey: string) {
@@ -81,8 +85,8 @@ export function CoachProfileFields({
     setDateOfBirth: (value: string) => void;
     setGender: (value: string) => void;
   };
-  uploadingKey: "photo" | "license" | null;
-  onUpload: (file: File, kind: "photo" | "license") => Promise<void>;
+  uploadingKey: "photo" | "license" | "signature" | null;
+  onUpload: (file: File, kind: "photo" | "license" | "signature") => Promise<void>;
   licenseAccept?: string;
 }) {
   return (
@@ -117,7 +121,7 @@ export function CoachProfileFields({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 md:grid-cols-3">
         <div className="space-y-2">
           <label className="ml-1 text-xs font-medium text-muted-foreground">Foto Profil Coach</label>
           <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-border/50 bg-background/40 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-primary/5">
@@ -180,6 +184,39 @@ export function CoachProfileFields({
           {values.licenseUrl ? (
             <a href={values.licenseUrl} target="_blank" rel="noreferrer" className="inline-flex text-[11px] font-medium text-primary hover:underline">
               Lihat lisensi terunggah
+            </a>
+          ) : null}
+        </div>
+
+        <div className="space-y-2">
+          <label className="ml-1 text-xs font-medium text-muted-foreground">Tanda Tangan Coach</label>
+          <label className="flex cursor-pointer items-center justify-between rounded-xl border border-dashed border-border/50 bg-background/40 px-4 py-3 transition-colors hover:border-primary/30 hover:bg-primary/5">
+            <div className="flex items-center gap-3">
+              {uploadingKey === "signature" ? (
+                <Loader2 className="size-4 animate-spin text-primary" />
+              ) : (
+                <Upload className="size-4 text-muted-foreground" />
+              )}
+              <span className="text-xs text-muted-foreground">
+                {values.signatureUrl ? "Ganti tanda tangan coach" : "Unggah tanda tangan coach"}
+              </span>
+            </div>
+            <span className="text-xs font-medium text-primary">Pilih File</span>
+            <input
+              type="file"
+              accept="image/png"
+              className="hidden"
+              onChange={async (event) => {
+                const file = event.target.files?.[0];
+                if (!file) return;
+                await onUpload(file, "signature");
+                event.target.value = "";
+              }}
+            />
+          </label>
+          {values.signatureUrl ? (
+            <a href={values.signatureUrl} target="_blank" rel="noreferrer" className="inline-flex text-[11px] font-medium text-primary hover:underline">
+              Lihat tanda tangan terunggah
             </a>
           ) : null}
         </div>

@@ -103,7 +103,7 @@ export function CoachPlayersPageClient() {
               className="pl-9 h-11 bg-background/50 border-border/50 rounded-xl focus-visible:ring-primary/30"
             />
           </div>
-          <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+          <Select value={selectedGroupId} onValueChange={(value) => setSelectedGroupId(value ?? "all")}>
             <SelectTrigger className="w-full sm:w-[200px] h-11 bg-background/50 border-border/50 rounded-xl focus-visible:ring-primary/30">
               <SelectValue placeholder="Semua Kelompok" />
             </SelectTrigger>
@@ -161,7 +161,7 @@ export function CoachPlayersPageClient() {
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground">{player.name}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {player.group.name} • Lahir {formatBirthDate(player.dateOfBirth)}
+                        {player.group.name} | Lahir {formatBirthDate(player.dateOfBirth)}
                       </p>
                     </div>
                     <div className="min-w-0">

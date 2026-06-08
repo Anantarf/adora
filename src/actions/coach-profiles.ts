@@ -15,6 +15,7 @@ type CoachProfileInput = {
   gender?: string;
   photoUrl?: string;
   licenseUrl?: string;
+  signatureUrl?: string;
   assignedGroupIds: string[];
 };
 
@@ -34,6 +35,7 @@ const coachProfileSelect = {
       gender: true,
       photoUrl: true,
       licenseUrl: true,
+      signatureUrl: true,
       isDeleted: true,
       assignments: {
         select: {
@@ -70,6 +72,7 @@ function normalizeCoachProfilePayload(input: {
   gender?: string;
   photoUrl?: string;
   licenseUrl?: string;
+  signatureUrl?: string;
 }) {
   if (!input.fullName.trim()) {
     throw new Error("Nama lengkap coach wajib diisi.");
@@ -100,6 +103,14 @@ function normalizeCoachProfilePayload(input: {
         allowedExtensions: [".png", ".jpg", ".jpeg"],
       },
       "Lisensi coach",
+    ),
+    signatureUrl: normalizeExpectedPrivateUploadUrl(
+      input.signatureUrl,
+      {
+        allowedPrefixes: [`coach_signature_${input.userId}_`],
+        allowedExtensions: [".png"],
+      },
+      "Tanda tangan coach",
     ),
     isDeleted: false,
   };

@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ReportArchiveManager } from "@/components/features/settings/ReportArchiveManager";
+import { ReportSignerAutomationManager } from "@/components/features/settings/ReportSignerAutomationManager";
 import { toUserErrorMessage } from "@/lib/utils";
 import { ASSET_KEYS, SIGNER_KEYS, getAssetPreviewMeta, type AssetKey } from "./constants";
 
@@ -76,7 +76,7 @@ export default function SettingsPage() {
           stampUrl: localValues.rapor_stamp_url || undefined,
         },
         signers: {
-          coachName: localValues.rapor_coach_name || "Head Coach",
+          coachName: localValues.rapor_coach_name || "Coach Global",
           ceoName: localValues.rapor_ceo_name || "CEO ADORA BBC",
         },
         printDate: new Date(),
@@ -152,7 +152,7 @@ export default function SettingsPage() {
           Aset dan Tanda Tangan Rapor
         </h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Kelola aset rapor PDF dan nama penandatangan tanpa mengubah alur dokumen.
+          Kelola template rapor, tanda tangan, stempel, dan nama penandatangan yang tampil di PDF rapor.
         </p>
       </div>
 
@@ -164,7 +164,8 @@ export default function SettingsPage() {
               <h3 className="text-base font-semibold text-foreground">Aset Rapor PDF</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Unggah aset yang dipakai di header, tanda tangan, dan stempel rapor.
+              Unggah aset visual yang dipakai saat rapor PDF digenerate. Tanda tangan coach global
+              akan dipakai sebagai fallback terakhir jika signer otomatis belum menemukan coach yang cocok.
             </p>
           </div>
           <Button
@@ -303,7 +304,8 @@ export default function SettingsPage() {
               <h3 className="text-base font-semibold text-foreground">Nama Penandatangan</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Nama ini akan dipakai di bagian tanda tangan rapor.
+              Nama ini akan tampil di area tanda tangan rapor sesuai peran masing-masing. Nama coach
+              global tetap dipakai sebagai fallback terakhir.
             </p>
           </div>
         </div>
@@ -345,18 +347,17 @@ export default function SettingsPage() {
         </div>
       </section>
 
-      <ReportArchiveManager />
+      <ReportSignerAutomationManager />
 
       <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/40 p-4">
         <Info className="mt-0.5 size-4 shrink-0 text-primary" />
         <div className="space-y-1">
-          <p className="text-xs font-medium text-foreground">Catatan</p>
+          <p className="text-xs font-medium text-foreground">Catatan Penggunaan</p>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Jika aset belum diunggah, bagian tersebut akan dikosongkan otomatis di rapor.
-            Thumbnail transparan seperti tanda tangan atau stempel bisa terlihat samar,
-            tetapi file aslinya tetap dipakai saat rapor dicetak. Untuk ukuran file rapor
-            yang lebih ringan, utamakan template header PDF dan hindari PNG/JPG full-page
-            beresolusi besar.
+            Jika tanda tangan coach atau nama coach belum diisi, bagian tersebut akan kosong
+            atau memakai fallback bawaan saat pratinjau dibuat. Untuk hasil rapor yang rapi
+            dan ukuran file tetap ringan, utamakan template header PDF dan hindari gambar
+            full-page beresolusi terlalu besar.
           </p>
         </div>
       </div>

@@ -25,6 +25,17 @@ export type FamilyPlayer = {
       };
     } | null;
   } | null;
+  resolvedSigner?: {
+    coachNameSnapshot: string | null;
+    coachSignUrlSnapshot: string | null;
+    resolutionSource: "GROUP" | "HOMEBASE" | "GLOBAL";
+  };
+  fallbackCoachProfile?: {
+    id: string;
+    fullName: string;
+    photoUrl: string | null;
+    licenseUrl: string | null;
+  } | null;
 };
 
 export type ParentUser = {

@@ -10,7 +10,26 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
   const [open, setOpen] = useState(false);
-  const coach = player.group?.coachAssignment?.coachProfile ?? null;
+  const groupCoach = player.group?.coachAssignment?.coachProfile ?? null;
+  const resolutionSource = player.resolvedSigner?.resolutionSource;
+  
+  // Decide which coach to show based on resolutionSource
+  let coach = groupCoach;
+  let coachLabel = "Pelatih Utama";
+  
+  if (!coach && resolutionSource === "HOMEBASE" && player.fallbackCoachProfile) {
+    coach = player.fallbackCoachProfile;
+    coachLabel = "Koordinator Wilayah";
+  } else if (!coach && resolutionSource === "GLOBAL") {
+    // For global, we only have the name from resolvedSigner (no photo/license)
+    coach = {
+      id: "global",
+      fullName: player.resolvedSigner?.coachNameSnapshot ?? "Head Coach Akademi",
+      photoUrl: null,
+      licenseUrl: null,
+    };
+    coachLabel = "Head Coach Akademi";
+  }
 
   return (
     <>
@@ -36,11 +55,21 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-1.5">
                 <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Pelatih Utama
+                  {coachLabel}
                 </span>
-                <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-500 border border-emerald-500/20">
-                  Live Active Assignment
-                </span>
+                {resolutionSource === "GROUP" || !resolutionSource ? (
+                  <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-500 border border-emerald-500/20">
+                    Live Active Assignment
+                  </span>
+                ) : resolutionSource === "HOMEBASE" ? (
+                  <span className="rounded-full bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-blue-500 border border-blue-500/20">
+                    Homebase Fallback
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-500 border border-amber-500/20">
+                    Global Fallback
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {coach?.fullName || "Belum tersedia"}

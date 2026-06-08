@@ -78,7 +78,14 @@ export async function getCoachWorkspaceAction() {
     throw new Error("Akun coach tidak ditemukan atau sudah tidak aktif.");
   }
 
-  const assignedGroups = coachUser.coachProfile?.assignments.map((assignment) => assignment.group) ?? [];
+  const assignedGroups = Array.from(
+    new Map(
+      (coachUser.coachProfile?.assignments ?? []).map((assignment) => [
+        assignment.group.id,
+        assignment.group,
+      ]),
+    ).values(),
+  );
   const assignedGroupIds = assignedGroups.map((group) => group.id);
 
   const upcomingEvents = assignedGroupIds.length
@@ -133,7 +140,23 @@ export async function getCoachWorkspaceAction() {
       })
     : 0;
 
-  const totalPlayers = assignedGroups.reduce((sum, group) => sum + group.player.length, 0);
+  const players = Array.from(
+    new Map(
+      assignedGroups.flatMap((group) =>
+        group.player.map((player) => [
+          player.id,
+          {
+            ...player,
+            group: {
+              id: group.id,
+              name: group.name,
+            },
+            homebase: group.homebase,
+          },
+        ]),
+      ),
+    ).values(),
+  );
 
   return {
     coach: {
@@ -145,21 +168,12 @@ export async function getCoachWorkspaceAction() {
     },
     summary: {
       totalGroups: assignedGroups.length,
-      totalPlayers,
+      totalPlayers: players.length,
       recentPublishedStatsCount,
       upcomingEventsCount: upcomingEvents.length,
     },
     groups: assignedGroups,
-    players: assignedGroups.flatMap((group) =>
-      group.player.map((player) => ({
-        ...player,
-        group: {
-          id: group.id,
-          name: group.name,
-        },
-        homebase: group.homebase,
-      })),
-    ),
+    players,
     upcomingEvents: upcomingEvents.map((event) => ({
       ...event,
       groups: event.eventGroups.map((eventGroup) => eventGroup.group),

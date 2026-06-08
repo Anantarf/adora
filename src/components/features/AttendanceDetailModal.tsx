@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { AttendanceStatus } from "@/types/dashboard";
 import { toYYYYMMDD } from "@/lib/date-utils";
 import { getEventConfig } from "@/lib/config/events";
+import { QUERY_KEYS } from "@/lib/constants";
 import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-configs";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -100,9 +101,9 @@ export function AttendanceDetailModal({ eventId, onClose }: AttendanceDetailModa
       }
 
       toast.success(`Presensi berhasil disimpan untuk ${result.savedCount} pemain.`);
-      queryClient.invalidateQueries({ queryKey: ["events-attendance"] });
-      queryClient.invalidateQueries({ queryKey: ["public-events"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard-metrics"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.EVENTS_WITH_ATTENDANCE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.PUBLIC_EVENTS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.DASHBOARD_METRICS });
       onClose();
     } catch {
       toast.error("Gagal menyimpan presensi. Coba lagi.");

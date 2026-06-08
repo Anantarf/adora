@@ -31,8 +31,9 @@ export function CoachProfileDialog({
   const [gender, setGender] = useState("");
   const [photoUrl, setPhotoUrl] = useState("");
   const [licenseUrl, setLicenseUrl] = useState("");
+  const [signatureUrl, setSignatureUrl] = useState("");
   const [assignedGroupIds, setAssignedGroupIds] = useState<string[]>([]);
-  const [uploadingKey, setUploadingKey] = useState<"photo" | "license" | null>(null);
+  const [uploadingKey, setUploadingKey] = useState<"photo" | "license" | "signature" | null>(null);
 
   const { data: coachUser, isLoading } = useCoachProfileByUser(user?.id ?? null, open);
   const { data: groups } = useGroups();
@@ -50,6 +51,7 @@ export function CoachProfileDialog({
       setGender,
       setPhotoUrl,
       setLicenseUrl,
+      setSignatureUrl,
     });
     setAssignedGroupIds(
       coachUser.coachProfile?.assignments.map((assignment) => assignment.group.id) ?? [],
@@ -62,7 +64,7 @@ export function CoachProfileDialog({
 
   const handleUpload = async (
     file: File,
-    kind: "photo" | "license",
+    kind: "photo" | "license" | "signature",
     setter: (value: string) => void,
   ) => {
     setUploadingKey(kind);
@@ -70,7 +72,11 @@ export function CoachProfileDialog({
       const assetKey = `coach_${kind}_${user.id}_${Date.now()}`;
       const url = await uploadCoachProfileAsset(file, assetKey);
       setter(url);
-      toast.success(`File ${kind === "photo" ? "foto" : "lisensi"} berhasil diunggah.`);
+      toast.success(
+        `File ${
+          kind === "photo" ? "foto" : kind === "license" ? "lisensi" : "tanda tangan"
+        } berhasil diunggah.`,
+      );
     } catch (error) {
       toast.error(toUserErrorMessage(error, "Upload gagal."));
     } finally {
@@ -87,6 +93,7 @@ export function CoachProfileDialog({
       gender,
       photoUrl,
       licenseUrl,
+      signatureUrl,
       assignedGroupIds,
     });
     onOpenChange(false);
@@ -101,7 +108,7 @@ export function CoachProfileDialog({
             Kelola Profil Coach
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Lengkapi biodata coach, file lisensi, dan assignment kelompok latihan.
+            Lengkapi biodata coach, lisensi, tanda tangan rapor, dan assignment kelompok latihan.
           </DialogDescription>
         </DialogHeader>
 
@@ -114,11 +121,19 @@ export function CoachProfileDialog({
           ) : (
             <div className="space-y-5">
               <CoachProfileFields
-                values={{ fullName, placeOfBirth, dateOfBirth, gender, photoUrl, licenseUrl }}
+                values={{ fullName, placeOfBirth, dateOfBirth, gender, photoUrl, licenseUrl, signatureUrl }}
                 onChange={{ setFullName, setPlaceOfBirth, setDateOfBirth, setGender }}
                 uploadingKey={uploadingKey}
                 onUpload={async (file, kind) =>
-                  handleUpload(file, kind, kind === "photo" ? setPhotoUrl : setLicenseUrl)
+                  handleUpload(
+                    file,
+                    kind,
+                    kind === "photo"
+                      ? setPhotoUrl
+                      : kind === "license"
+                        ? setLicenseUrl
+                        : setSignatureUrl,
+                  )
                 }
                 licenseAccept="image/png,image/jpeg"
               />

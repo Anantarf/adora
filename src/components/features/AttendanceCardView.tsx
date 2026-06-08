@@ -120,7 +120,7 @@ export function AttendanceCardView() {
           <p className="mt-1 text-xs text-muted-foreground/75">
             {searchQuery
               ? "Coba gunakan kata kunci pencarian yang berbeda."
-              : "Silakan buat agenda baru di menu Jadwal."}
+              : "Belum ada agenda yang tercatat untuk kelompok yang bisa Anda akses."}
           </p>
         </div>
       ) : (

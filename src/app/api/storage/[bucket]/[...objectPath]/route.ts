@@ -105,7 +105,7 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
           findCoachAsset: (value) =>
             prisma.coachProfile.findFirst({
               where: {
-                OR: [{ licenseUrl: value }, { photoUrl: value }],
+                OR: [{ licenseUrl: value }, { photoUrl: value }, { signatureUrl: value }],
                 isDeleted: false,
               },
               select: {
@@ -125,7 +125,7 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
           findCoachLicense: (value) =>
             prisma.coachProfile.findFirst({
               where: {
-                licenseUrl: value,
+                OR: [{ licenseUrl: value }, { signatureUrl: value }],
                 isDeleted: false,
               },
               select: { id: true },

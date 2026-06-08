@@ -16,6 +16,10 @@ import {
 } from "@/lib/evaluation-rules";
 import { prisma } from "@/lib/prisma";
 import { buildReportArchiveSnapshot, freezeHistoricalSnapshot } from "@/lib/report-signer";
+import {
+  getReportSignerResolverContext,
+  resolveReportSignerSnapshotForGroup,
+} from "@/lib/report-signer-resolver";
 import { requireAdmin, requireSessionRole, requireActiveUser } from "@/lib/server-auth";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
@@ -286,6 +290,7 @@ export async function submitAttendanceAction(data: {
   });
 
   revalidatePath("/dashboard/attendances");
+  revalidatePath("/coach/attendances");
   return { success: true as const, savedCount: dedupedStatuses.length };
 }
 
@@ -343,6 +348,7 @@ export async function submitStatisticAction(data: {
                   select: {
                     id: true,
                     fullName: true,
+                    signatureUrl: true,
                   },
                 },
               },
@@ -456,12 +462,17 @@ export async function submitStatisticAction(data: {
         homebaseNameSnapshot: true,
         coachProfileIdSnapshot: true,
         coachNameSnapshot: true,
+        coachSignUrlSnapshot: true,
         status: true,
       },
     });
 
+    const signerContext = await getReportSignerResolverContext(tx);
     const statisticSnapshot = player.group
-      ? buildReportArchiveSnapshot({ group: player.group })
+      ? buildReportArchiveSnapshot({
+          group: player.group,
+          signer: resolveReportSignerSnapshotForGroup(player.group, signerContext),
+        })
       : {
           groupId: null,
           groupNameSnapshot: null,
@@ -469,6 +480,7 @@ export async function submitStatisticAction(data: {
           homebaseNameSnapshot: null,
           coachProfileIdSnapshot: null,
           coachNameSnapshot: null,
+          coachSignUrlSnapshot: null,
         };
 
     const frozenStatisticSnapshot = freezeHistoricalSnapshot(
@@ -480,6 +492,7 @@ export async function submitStatisticAction(data: {
             homebaseNameSnapshot: existingStatistic.homebaseNameSnapshot,
             coachProfileIdSnapshot: existingStatistic.coachProfileIdSnapshot,
             coachNameSnapshot: existingStatistic.coachNameSnapshot,
+            coachSignUrlSnapshot: existingStatistic.coachSignUrlSnapshot,
           }
         : null,
       {
@@ -489,6 +502,7 @@ export async function submitStatisticAction(data: {
         homebaseNameSnapshot: statisticSnapshot.homebaseNameSnapshot,
         coachProfileIdSnapshot: statisticSnapshot.coachProfileIdSnapshot,
         coachNameSnapshot: statisticSnapshot.coachNameSnapshot,
+        coachSignUrlSnapshot: statisticSnapshot.coachSignUrlSnapshot,
       },
     );
 
@@ -565,22 +579,58 @@ export async function getStatsByPeriodAction(periodId: string) {
       homebaseNameSnapshot: true,
       coachProfileIdSnapshot: true,
       coachNameSnapshot: true,
+      coachSignUrlSnapshot: true,
       metricsJson: true,
       player: {
         select: {
           id: true,
           groupId: true,
-          group: { select: { id: true, name: true } },
+          group: {
+            select: {
+              id: true,
+              name: true,
+              homebase: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              coachAssignment: {
+                select: {
+                  coachProfile: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                      signatureUrl: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
     },
     orderBy: [{ player: { group: { name: "asc" } } }, { player: { name: "asc" } }],
   });
 
-  return statistics.map((statistic) => ({
-    ...statistic,
-    metricsJson: parseMetrics(statistic.metricsJson),
-  }));
+  const signerContext = await getReportSignerResolverContext(prisma);
+
+  return statistics.map((statistic) => {
+    const resolvedSigner = resolveReportSignerSnapshotForGroup(
+      statistic.player.group,
+      signerContext,
+    );
+
+    return {
+      ...statistic,
+      coachNameResolved: statistic.coachNameSnapshot ?? resolvedSigner.coachNameSnapshot,
+      coachSignUrlResolved:
+        statistic.coachSignUrlSnapshot ?? resolvedSigner.coachSignUrlSnapshot,
+      resolutionSource: statistic.coachNameSnapshot ? "SNAPSHOT" : resolvedSigner.resolutionSource,
+      metricsJson: parseMetrics(statistic.metricsJson),
+    };
+  });
 }
 
 export async function getStatHistoryAction(statisticId: string) {
@@ -660,12 +710,54 @@ export async function getPlayerStatsAction(playerId: string) {
       player: { isDeleted: false },
       ...(role === "PARENT" ? { status: "Published" } : {}),
     },
-    include: { period: { select: { id: true, name: true } } },
+    include: {
+      period: { select: { id: true, name: true } },
+      player: {
+        select: {
+          group: {
+            select: {
+              id: true,
+              name: true,
+              homebase: {
+                select: {
+                  id: true,
+                  name: true,
+                },
+              },
+              coachAssignment: {
+                select: {
+                  coachProfile: {
+                    select: {
+                      id: true,
+                      fullName: true,
+                      signatureUrl: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
     orderBy: { date: "desc" },
   });
 
-  return statistics.map((statistic) => ({
-    ...statistic,
-    metricsJson: parseMetrics(statistic.metricsJson),
-  }));
+  const signerContext = await getReportSignerResolverContext(prisma);
+
+  return statistics.map((statistic) => {
+    const resolvedSigner = resolveReportSignerSnapshotForGroup(
+      statistic.player.group,
+      signerContext,
+    );
+
+    return {
+      ...statistic,
+      coachNameResolved: statistic.coachNameSnapshot ?? resolvedSigner.coachNameSnapshot,
+      coachSignUrlResolved:
+        statistic.coachSignUrlSnapshot ?? resolvedSigner.coachSignUrlSnapshot,
+      resolutionSource: statistic.coachNameSnapshot ? "SNAPSHOT" : resolvedSigner.resolutionSource,
+      metricsJson: parseMetrics(statistic.metricsJson),
+    };
+  });
 }

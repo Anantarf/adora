@@ -295,7 +295,7 @@ export function AddStatDialog({
                           <div>
                             <p className="text-sm font-semibold text-foreground">{category.label}</p>
                             <p className="text-[11px] text-muted-foreground">
-                              Bobot {formatWeight(category.weight)}% • {category.items.length} aspek
+                              Bobot {formatWeight(category.weight)}% | {category.items.length} aspek
                             </p>
                           </div>
                         </div>

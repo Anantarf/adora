@@ -42,6 +42,12 @@ const UPLOAD_POLICIES: UploadPolicy[] = [
     allowedExtensions: IMAGE_EXTENSIONS,
   },
   {
+    allowedRoles: ["ADMIN", "COACH"],
+    match: (assetKey: string) => /^coach_signature_[A-Za-z0-9_-]+_\d+$/.test(assetKey),
+    allowedExtensions: [".png"] as const,
+    maxSizeBytes: 300 * 1024,
+  },
+  {
     allowedRoles: ["ADMIN"],
     match: (assetKey: string) => /^player_photo_\d+$/.test(assetKey),
     allowedExtensions: IMAGE_EXTENSIONS,

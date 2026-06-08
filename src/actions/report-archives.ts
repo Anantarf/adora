@@ -6,6 +6,10 @@ import { createAuditLog } from "@/actions/audit";
 import { ensureOwnedPlayer } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
 import { buildReportArchiveSnapshot, freezeHistoricalSnapshot } from "@/lib/report-signer";
+import {
+  getReportSignerResolverContext,
+  resolveReportSignerSnapshotForGroup,
+} from "@/lib/report-signer-resolver";
 import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 
 export async function getReportArchiveRowsAction(groupId: string, periodId: string) {
@@ -114,6 +118,7 @@ export async function upsertReportArchiveDraftAction(input: {
                   select: {
                     id: true,
                     fullName: true,
+                    signatureUrl: true,
                   },
                 },
               },
@@ -140,8 +145,10 @@ export async function upsertReportArchiveDraftAction(input: {
       throw new Error("Periode evaluasi tidak ditemukan.");
     }
 
+    const signerContext = await getReportSignerResolverContext(tx);
     const archiveSnapshot = buildReportArchiveSnapshot({
       group: player.group,
+      signer: resolveReportSignerSnapshotForGroup(player.group, signerContext),
     });
 
     const existingArchive = await tx.reportArchive.findUnique({
@@ -159,6 +166,7 @@ export async function upsertReportArchiveDraftAction(input: {
         homebaseNameSnapshot: true,
         coachProfileIdSnapshot: true,
         coachNameSnapshot: true,
+        coachSignUrlSnapshot: true,
       },
     });
 
@@ -171,6 +179,7 @@ export async function upsertReportArchiveDraftAction(input: {
             homebaseNameSnapshot: existingArchive.homebaseNameSnapshot,
             coachProfileIdSnapshot: existingArchive.coachProfileIdSnapshot,
             coachNameSnapshot: existingArchive.coachNameSnapshot,
+            coachSignUrlSnapshot: existingArchive.coachSignUrlSnapshot,
           }
         : null,
       archiveSnapshot,

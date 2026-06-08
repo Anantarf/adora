@@ -17,16 +17,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
+import type { CoachWorkspaceData } from "@/hooks/use-coach-workspace";
 import { usePeriods } from "@/hooks/use-evaluation-periods";
-import { useClubSettings } from "@/hooks/use-settings";
+import { useReportSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 import { PERIOD_STATUS_BADGE as STATUS_BADGE_CONFIG } from "@/lib/constants/badge-configs";
 import { averageScore } from "@/lib/metrics";
 import { DEFAULT_EVALUATION_CONFIG_V2, getEvaluationSummary, isMetricsJsonV2, normalizeEvaluationConfig, type MetricsJsonV2 } from "@/lib/evaluation-rules";
-import { resolveCoachSignerName } from "@/lib/report-signer";
+import { resolveCoachSignerAssetUrl, resolveCoachSignerName } from "@/lib/report-signer";
 import type { MetricsJson } from "@/types/dashboard";
 
-type PlayerSummary = ReturnType<typeof useCoachWorkspace>["data"] extends { players: Array<infer T> } ? T : any;
+type PlayerSummary = CoachWorkspaceData["players"][number];
 
 function getValidMetrics(metrics: unknown): MetricsJson | MetricsJsonV2 | null {
   let data = metrics;
@@ -179,6 +180,8 @@ const PlayerStatRow = React.memo(
       metricsJson: unknown;
       status: string;
       coachNameSnapshot?: string | null;
+      coachNameResolved?: string | null;
+      coachSignUrlResolved?: string | null;
     } | null;
     group: {
       id: string;
@@ -201,8 +204,12 @@ const PlayerStatRow = React.memo(
     const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
     const [isPdfLoading, setIsPdfLoading] = useState(false);
     const coachSignerName = resolveCoachSignerName(
-      stat?.coachNameSnapshot ?? settings?.rapor_coach_name,
+      stat?.coachNameResolved ?? stat?.coachNameSnapshot ?? settings?.rapor_coach_name,
       settings?.rapor_coach_name,
+    );
+    const coachSignerAssetUrl = resolveCoachSignerAssetUrl(
+      stat?.coachSignUrlResolved,
+      settings?.rapor_coach_sign_url,
     );
 
     const handleDownload = async () => {
@@ -222,7 +229,7 @@ const PlayerStatRow = React.memo(
           assets: {
             headerUrl: settings?.rapor_header_url ?? undefined,
             ceoSignUrl: settings?.rapor_ceo_sign_url ?? undefined,
-            coachSignUrl: settings?.rapor_coach_sign_url ?? undefined,
+            coachSignUrl: coachSignerAssetUrl,
             stampUrl: settings?.rapor_stamp_url ?? undefined,
           },
           signers: {
@@ -243,9 +250,27 @@ const PlayerStatRow = React.memo(
           {index + 1}
         </TableCell>
         <TableCell className="sticky left-12 z-20 min-w-40 max-w-50 bg-card py-3 font-semibold">
-          <div className="space-y-0.5">
-            <p className="text-[15px] font-semibold text-foreground">{player.name}</p>
-            <p className="text-[11px] text-muted-foreground">{group.name}</p>
+          <div className="space-y-1">
+            <div className="space-y-0.5">
+              <p className="text-[15px] font-semibold text-foreground">{player.name}</p>
+              <p className="text-[11px] text-muted-foreground">{group.name}</p>
+            </div>
+            {stat?.resolutionSource ? (
+              <span
+                className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ${
+                  stat.resolutionSource === "GROUP"
+                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
+                    : stat.resolutionSource === "HOMEBASE"
+                      ? "border-blue-500/20 bg-blue-500/10 text-blue-600"
+                      : stat.resolutionSource === "GLOBAL"
+                        ? "border-amber-500/20 bg-amber-500/10 text-amber-600"
+                        : "border-border/50 bg-background/50 text-muted-foreground"
+                }`}
+                title="Sumber Penandatangan Rapor"
+              >
+                Signer: {stat.resolutionSource}
+              </span>
+            ) : null}
           </div>
         </TableCell>
         <TableCell className="min-w-[360px] py-3">
@@ -320,7 +345,7 @@ export default function CoachStatisticsPage() {
   const { data: coachData, isLoading: coachLoading } = useCoachWorkspace();
   const { data: periods } = usePeriods();
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId || null);
-  const { data: settings } = useClubSettings();
+  const { data: settings } = useReportSettings();
 
   const initialized = React.useRef(false);
 
@@ -361,9 +386,16 @@ export default function CoachStatisticsPage() {
       .filter((entry) => entry.players.length > 0);
   }, [players, groups]);
 
+  const visiblePlayerIds = useMemo(() => new Set(players.map((player) => player.id)), [players]);
+
+  const visibleStats = useMemo(
+    () => (stats ?? []).filter((stat) => visiblePlayerIds.has(stat.player.id)),
+    [stats, visiblePlayerIds],
+  );
+
   const statsSummary = useMemo(
     () =>
-      (stats ?? []).reduce(
+      visibleStats.reduce(
         (summary, stat) => {
           if (stat.status === "Published") {
             summary.published += 1;
@@ -374,7 +406,7 @@ export default function CoachStatisticsPage() {
         },
         { published: 0, draft: 0 },
       ),
-    [stats],
+    [visibleStats],
   );
 
   const selectedPeriod = periods?.find((period) => period.id === selectedPeriodId);
@@ -583,18 +615,38 @@ export default function CoachStatisticsPage() {
                       const metrics = getValidMetrics(stat?.metricsJson);
                       const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
                       const coachSignerName = resolveCoachSignerName(
-                        stat?.coachNameSnapshot ?? settings?.rapor_coach_name,
+                        stat?.coachNameResolved ?? stat?.coachNameSnapshot ?? settings?.rapor_coach_name,
                         settings?.rapor_coach_name,
+                      );
+                      const coachSignerAssetUrl = resolveCoachSignerAssetUrl(
+                        stat?.coachSignUrlResolved,
+                        settings?.rapor_coach_sign_url,
                       );
 
                       return (
                         <article key={player.id} className="space-y-3 p-4">
                           <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="text-sm font-semibold leading-tight text-foreground">
                                 <span className="mr-1 text-muted-foreground">{index + 1}.</span>
                                 {player.name}
                               </p>
+                              {stat?.resolutionSource ? (
+                                <span
+                                  className={`mt-1.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ${
+                                    stat.resolutionSource === "GROUP"
+                                      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
+                                      : stat.resolutionSource === "HOMEBASE"
+                                        ? "border-blue-500/20 bg-blue-500/10 text-blue-600"
+                                        : stat.resolutionSource === "GLOBAL"
+                                          ? "border-amber-500/20 bg-amber-500/10 text-amber-600"
+                                          : "border-border/50 bg-background/50 text-muted-foreground"
+                                  }`}
+                                  title="Sumber Penandatangan Rapor"
+                                >
+                                  Signer: {stat.resolutionSource}
+                                </span>
+                              ) : null}
                             </div>
                             <div className="shrink-0">
                               <Badge
@@ -669,8 +721,7 @@ export default function CoachStatisticsPage() {
                                         assets: {
                                           headerUrl: settings?.rapor_header_url ?? undefined,
                                           ceoSignUrl: settings?.rapor_ceo_sign_url ?? undefined,
-                                          coachSignUrl:
-                                            settings?.rapor_coach_sign_url ?? undefined,
+                                          coachSignUrl: coachSignerAssetUrl,
                                           stampUrl: settings?.rapor_stamp_url ?? undefined,
                                         },
                                         signers: {

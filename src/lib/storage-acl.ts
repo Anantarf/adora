@@ -25,7 +25,11 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
 
   if (input.role === "COACH") {
     const isOwnCoachUpload = isExpectedPrivateUploadUrl(input.fileUrl, {
-      allowedPrefixes: [`coach_photo_${input.userId}_`, `coach_license_${input.userId}_`],
+      allowedPrefixes: [
+        `coach_photo_${input.userId}_`,
+        `coach_license_${input.userId}_`,
+        `coach_signature_${input.userId}_`,
+      ],
       allowedExtensions: [".png", ".jpg", ".jpeg"],
     });
 

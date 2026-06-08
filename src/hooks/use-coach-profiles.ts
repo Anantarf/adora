@@ -23,6 +23,7 @@ export type CoachUserWithProfile = {
     gender: string | null;
     photoUrl: string | null;
     licenseUrl: string | null;
+    signatureUrl: string | null;
     isDeleted: boolean;
     assignments: Array<{
       group: {
