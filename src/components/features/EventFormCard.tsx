@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CalendarDays, Loader2 } from "lucide-react";
@@ -86,15 +86,15 @@ export function EventFormCard({
     handleSubmit,
     reset,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<EventFormValues>({
     resolver: zodResolver(eventSchema),
     defaultValues: getBlankFormValues(),
   });
 
-  const selectedType = watch("type");
-  const homebaseId = watch("homebaseId");
+  const selectedType = useWatch({ control, name: "type" });
+  const homebaseId = useWatch({ control, name: "homebaseId" });
   const selectedEventConfig = selectedType ? getEventConfig(selectedType) : null;
   const SelectedEventIcon = selectedEventConfig?.icon ?? CalendarDays;
   const headingText = title ?? (isEditMode ? "Ubah Agenda" : "Tambah Agenda");

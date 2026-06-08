@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { CheckCircle2, Loader2, MapPinned, PenSquare, Users2 } from "lucide-react";
 
 import { useHomebases } from "@/hooks/use-homebases";
@@ -18,21 +18,27 @@ export function ReportSignerAutomationManager() {
   const { data: coachOptions, isLoading: coachOptionsLoading } = useReportSignerCoachOptions();
   const { data: mappings, isLoading: mappingsLoading } = useReportSignerHomebaseMappings();
   const { mutateAsync: saveMappings, isPending } = useUpdateReportSignerHomebaseMappings();
-  const [localMappings, setLocalMappings] = useState<Record<string, string>>({});
 
-  useEffect(() => {
-    if (!homebases) {
-      return;
-    }
-
-    const nextState: Record<string, string> = {};
+  // Hitung mappings dari server secara deklaratif — tidak ada setState dalam useEffect
+  const derivedMappings = useMemo<Record<string, string>>(() => {
+    if (!homebases) return {};
+    const result: Record<string, string> = {};
     for (const homebase of homebases) {
-      nextState[homebase.id] =
+      result[homebase.id] =
         mappings?.find((mapping) => mapping.homebaseId === homebase.id)?.coachProfileId ?? "";
     }
-
-    setLocalMappings(nextState);
+    return result;
   }, [homebases, mappings]);
+
+  // localMappings menyimpan perubahan pengguna secara lokal (sebelum disimpan)
+  const [localMappings, setLocalMappings] = useState<Record<string, string>>(derivedMappings);
+
+  // Sinkronkan dari server jika data berubah (tanpa useEffect)
+  const [prevDerived, setPrevDerived] = useState(derivedMappings);
+  if (prevDerived !== derivedMappings) {
+    setPrevDerived(derivedMappings);
+    setLocalMappings(derivedMappings);
+  }
 
   const coachOptionsById = useMemo(
     () => new Map((coachOptions ?? []).map((coach) => [coach.id, coach])),

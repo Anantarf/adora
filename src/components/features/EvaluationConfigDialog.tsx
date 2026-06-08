@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Info, Loader2, Plus, Settings2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -28,15 +28,21 @@ export function EvaluationConfigDialog() {
   const [open, setOpen] = useState(false);
   const { data } = useEvaluationConfig();
   const { mutateAsync, isPending } = useUpdateEvaluationConfig();
-  const [draft, setDraft] = useState<EvaluationConfigV2>(DEFAULT_EVALUATION_CONFIG_V2);
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
+  // Hitung nilai awal saat dialog dibuka. useMemo tidak memicu cascading render.
+  const initialDraft = useMemo(
+    () => normalizeEvaluationConfig(data ?? DEFAULT_EVALUATION_CONFIG_V2),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [open], // sengaja hanya bergantung pada `open` agar draft di-reset setiap kali dialog dibuka
+  );
+  const [draft, setDraft] = useState<EvaluationConfigV2>(initialDraft);
 
-    setDraft(normalizeEvaluationConfig(data ?? DEFAULT_EVALUATION_CONFIG_V2));
-  }, [data, open]);
+  // Sinkronkan state lokal jika initialDraft berubah (dialog dibuka kembali)
+  const [prevInitialDraft, setPrevInitialDraft] = useState(initialDraft);
+  if (prevInitialDraft !== initialDraft) {
+    setPrevInitialDraft(initialDraft);
+    setDraft(initialDraft);
+  }
 
   const updateDraft = (updater: (current: EvaluationConfigV2) => EvaluationConfigV2) => {
     setDraft((current) => normalizeEvaluationConfig(updater(current)));

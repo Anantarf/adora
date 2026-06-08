@@ -27,20 +27,20 @@ export function CoachPlayersPageClient() {
 
   const filteredPlayers = useMemo(() => {
     if (!data?.players) return [];
-    
+
     let result = data.players;
-    
+
     if (selectedGroupId !== "all") {
       result = result.filter(p => p.group.id === selectedGroupId);
     }
-    
+
     if (debouncedSearch.trim()) {
       const query = debouncedSearch.toLowerCase().trim();
       result = result.filter(p => p.name.toLowerCase().includes(query));
     }
-    
+
     return result;
-  }, [data?.players, selectedGroupId, debouncedSearch]);
+  }, [data, selectedGroupId, debouncedSearch]);
 
   if (isLoading) {
     return (
