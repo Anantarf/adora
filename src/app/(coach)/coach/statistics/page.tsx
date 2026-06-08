@@ -182,6 +182,7 @@ const PlayerStatRow = React.memo(
       coachNameSnapshot?: string | null;
       coachNameResolved?: string | null;
       coachSignUrlResolved?: string | null;
+      resolutionSource?: "GROUP" | "HOMEBASE" | "GLOBAL" | "SNAPSHOT";
     } | null;
     group: {
       id: string;

@@ -627,7 +627,7 @@ export async function getStatsByPeriodAction(periodId: string) {
       coachNameResolved: statistic.coachNameSnapshot ?? resolvedSigner.coachNameSnapshot,
       coachSignUrlResolved:
         statistic.coachSignUrlSnapshot ?? resolvedSigner.coachSignUrlSnapshot,
-      resolutionSource: statistic.coachNameSnapshot ? "SNAPSHOT" : resolvedSigner.resolutionSource,
+      resolutionSource: (statistic.coachNameSnapshot ? "SNAPSHOT" : resolvedSigner.resolutionSource) as "GROUP" | "HOMEBASE" | "GLOBAL" | "SNAPSHOT",
       metricsJson: parseMetrics(statistic.metricsJson),
     };
   });
@@ -756,7 +756,7 @@ export async function getPlayerStatsAction(playerId: string) {
       coachNameResolved: statistic.coachNameSnapshot ?? resolvedSigner.coachNameSnapshot,
       coachSignUrlResolved:
         statistic.coachSignUrlSnapshot ?? resolvedSigner.coachSignUrlSnapshot,
-      resolutionSource: statistic.coachNameSnapshot ? "SNAPSHOT" : resolvedSigner.resolutionSource,
+      resolutionSource: (statistic.coachNameSnapshot ? "SNAPSHOT" : resolvedSigner.resolutionSource) as "GROUP" | "HOMEBASE" | "GLOBAL" | "SNAPSHOT",
       metricsJson: parseMetrics(statistic.metricsJson),
     };
   });

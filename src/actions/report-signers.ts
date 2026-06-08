@@ -37,6 +37,8 @@ export async function getReportSignerCoachOptionsAction() {
       id: true,
       fullName: true,
       signatureUrl: true,
+      photoUrl: true,
+      licenseUrl: true,
       assignments: {
         select: {
           group: {

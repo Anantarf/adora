@@ -24,12 +24,11 @@ describe("Report signer helpers", () => {
           id: "homebase-1",
           name: "ADORA Gandul",
         },
-        coachAssignment: {
-          coachProfile: {
-            id: "coach-profile-1",
-            fullName: "Coach Rama",
-          },
-        },
+      },
+      signer: {
+        coachProfileIdSnapshot: "coach-profile-1",
+        coachNameSnapshot: "Coach Rama",
+        coachSignUrlSnapshot: "url-to-signature",
       },
     });
 
@@ -40,6 +39,7 @@ describe("Report signer helpers", () => {
       homebaseNameSnapshot: "ADORA Gandul",
       coachProfileIdSnapshot: "coach-profile-1",
       coachNameSnapshot: "Coach Rama",
+      coachSignUrlSnapshot: "url-to-signature",
     });
   });
 
