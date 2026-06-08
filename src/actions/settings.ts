@@ -10,6 +10,7 @@ const REPORT_SETTING_KEYS = [
   "rapor_ceo_sign_url",
   "rapor_coach_sign_url",
   "rapor_stamp_url",
+  "report_signer_global_coach_profile_id",
   "rapor_coach_name",
   "rapor_ceo_name",
 ] as const;
@@ -31,12 +32,68 @@ export async function getReportSettingsAction() {
     },
   });
 
-  return Object.fromEntries(settings.map((setting) => [setting.key, setting.value]));
+  const settingsMap = Object.fromEntries(settings.map((setting) => [setting.key, setting.value]));
+  const globalCoachProfileId = settingsMap.report_signer_global_coach_profile_id?.trim();
+
+  if (globalCoachProfileId) {
+    const globalCoachProfile = await prisma.coachProfile.findFirst({
+      where: {
+        id: globalCoachProfileId,
+        isDeleted: false,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        signatureUrl: true,
+      },
+    });
+
+    if (globalCoachProfile) {
+      settingsMap.rapor_coach_name = globalCoachProfile.fullName;
+      if (globalCoachProfile.signatureUrl?.trim()) {
+        settingsMap.rapor_coach_sign_url = globalCoachProfile.signatureUrl;
+      }
+    }
+  }
+
+  return settingsMap;
 }
 
 export async function updateClubSettingAction(key: string, value: string) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
+
+  if (key === "report_signer_global_coach_profile_id") {
+    const normalizedValue = value.trim();
+
+    if (!normalizedValue) {
+      const setting = await prisma.$transaction(async (tx) => {
+        const s = await tx.clubSetting.upsert({
+          where: { key },
+          create: { key, value: "" },
+          update: { value: "" },
+        });
+
+        await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key });
+        return s;
+      });
+
+      revalidatePath("/dashboard/settings");
+      return setting;
+    }
+
+    const coachProfile = await prisma.coachProfile.findFirst({
+      where: {
+        id: normalizedValue,
+        isDeleted: false,
+      },
+      select: { id: true },
+    });
+
+    if (!coachProfile) {
+      throw new Error("Coach umum yang dipilih tidak ditemukan.");
+    }
+  }
 
   const setting = await prisma.$transaction(async (tx) => {
     const s = await tx.clubSetting.upsert({

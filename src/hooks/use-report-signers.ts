@@ -43,13 +43,13 @@ export const useUpdateReportSignerHomebaseMappings = () => {
       queryClient.invalidateQueries({ queryKey: REPORT_SIGNER_QUERY_KEYS.COACH_OPTIONS });
       queryClient.invalidateQueries({ queryKey: ["club-settings"] });
       queryClient.invalidateQueries({ queryKey: ["report-settings"] });
-      toast.success("Fallback signer per homebase berhasil disimpan.");
+      toast.success("Coach cadangan per region berhasil disimpan.");
     },
     onError: (error) => {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Gagal menyimpan fallback signer per homebase.",
+          : "Gagal menyimpan coach cadangan per region.",
       );
     },
   });

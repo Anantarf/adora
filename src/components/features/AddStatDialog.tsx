@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LineChart, Loader2, Pencil, Plus } from "lucide-react";
+import { LineChart, Loader2, Pencil, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
+import { generateCoachNoteAction } from "@/actions/auto-notes";
 import { useSubmitStatistic } from "@/hooks/use-statistics";
 import {
   buildMetricFieldKey,
   buildMetricValuesFromConfig,
   FIXED_ASPECT_MAX_SCORE,
+  getEvaluationSummary,
   normalizeEvaluationConfig,
   type MetricsJsonV2,
 } from "@/lib/evaluation-rules";
@@ -70,6 +72,34 @@ function getLegacyMetricValue(metrics: MetricsJson, path: string) {
   return typeof current === "number" ? current : 0;
 }
 
+function getCategoryStatusMeta(score: number) {
+  if (score >= 80) {
+    return {
+      statusLabel: "Sangat Baik",
+      className: "border-emerald-500/20 bg-emerald-500/10 text-emerald-400",
+    };
+  }
+
+  if (score >= 70) {
+    return {
+      statusLabel: "Baik",
+      className: "border-sky-500/20 bg-sky-500/10 text-sky-400",
+    };
+  }
+
+  if (score >= 60) {
+    return {
+      statusLabel: "Cukup",
+      className: "border-amber-500/20 bg-amber-500/10 text-amber-400",
+    };
+  }
+
+  return {
+    statusLabel: "Perhatian",
+    className: "border-rose-500/20 bg-rose-500/10 text-rose-400",
+  };
+}
+
 export function AddStatDialog({
   player,
   periodId,
@@ -91,6 +121,7 @@ export function AddStatDialog({
   const isCoach = session?.user?.role === "COACH";
   const [open, setOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<"Draft" | "Published" | null>(null);
+  const [isGeneratingNote, setIsGeneratingNote] = useState(false);
   const scoreInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [legacyMetrics, setLegacyMetrics] = useState<MetricsJson>(
     (existingStat?.metrics as MetricsJson) ?? DEFAULT_LEGACY_METRICS,
@@ -153,6 +184,79 @@ export function AddStatDialog({
     }, 0);
   }, [dynamicConfig, dynamicValues]);
 
+  const categoryStatusRows = useMemo(() => {
+    if (dynamicConfig) {
+      const summary = getEvaluationSummary(
+        {
+          version: "v2",
+          categories: dynamicConfig.categories.map((category) => ({
+            id: category.id,
+            label: category.label,
+            weight: category.weight,
+            items: category.items.map((item) => ({
+              ...item,
+              score: clampScore(dynamicValues[buildMetricFieldKey(category.id, item.id)] ?? 0, item.maxScore),
+            })),
+          })),
+          attendance: null,
+          notes: "",
+          grading: dynamicConfig.grading,
+        } satisfies MetricsJsonV2,
+      );
+
+      return summary.categorySummaries.map((category) => ({
+        id: category.id,
+        categoryLabel: category.label,
+        score: category.averageScore,
+        ...getCategoryStatusMeta(category.averageScore),
+      }));
+    }
+
+    const legacyCategoryRows = [
+      {
+        id: "dribble",
+        label: "Dribble",
+        score: Math.round(
+          ([
+            legacyMetrics.dribble.inAndOut,
+            legacyMetrics.dribble.crossover,
+            legacyMetrics.dribble.vLeft,
+            legacyMetrics.dribble.vRight,
+            legacyMetrics.dribble.betweenLegsLeft,
+            legacyMetrics.dribble.betweenLegsRight,
+          ].reduce((sum, value) => sum + value, 0) /
+            60) *
+            100,
+        ),
+      },
+      {
+        id: "passing",
+        label: "Passing",
+        score: Math.round(
+          ([
+            legacyMetrics.passing.chestPass,
+            legacyMetrics.passing.bouncePass,
+            legacyMetrics.passing.overheadPass,
+          ].reduce((sum, value) => sum + value, 0) /
+            30) *
+            100,
+        ),
+      },
+      {
+        id: "finishing",
+        label: "Finishing",
+        score: Math.round(((legacyMetrics.layUp + legacyMetrics.shooting) / 20) * 100),
+      },
+    ];
+
+    return legacyCategoryRows.map((category) => ({
+      id: category.id,
+      categoryLabel: category.label,
+      score: category.score,
+      ...getCategoryStatusMeta(category.score),
+    }));
+  }, [dynamicConfig, dynamicValues, legacyMetrics]);
+
   const handleLegacyChange = (path: string, maxScore: number, nextValue: string) => {
     const score = parseScoreInput(nextValue, maxScore);
 
@@ -168,6 +272,34 @@ export function AddStatDialog({
       current[parts[parts.length - 1]] = score;
       return copy;
     });
+  };
+
+  const handleGenerateNote = async () => {
+    setIsGeneratingNote(true);
+    try {
+      const result = await generateCoachNoteAction({
+        playerName: player.name,
+        metrics: dynamicConfig
+          ? dynamicValues
+          : {
+              ...legacyMetrics,
+              notes: notes.trim(),
+            },
+        evaluationConfig: dynamicConfig,
+        values: dynamicConfig ? dynamicValues : undefined,
+      });
+
+      setNotes(result.note);
+      toast.success("Catatan pelatih berhasil dibuat. Silakan cek dan sesuaikan bila perlu.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Gagal membuat catatan pelatih otomatis.",
+      );
+    } finally {
+      setIsGeneratingNote(false);
+    }
   };
 
   const onSubmit = async (status: "Draft" | "Published") => {
@@ -407,9 +539,26 @@ export function AddStatDialog({
               )}
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-medium text-muted-foreground">
-                  Catatan / Saran Pelatih (Opsional)
-                </label>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">
+                    Catatan / Saran Pelatih (Opsional)
+                  </label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={isGeneratingNote}
+                    onClick={() => void handleGenerateNote()}
+                    className="h-8 gap-1.5 rounded-lg border-primary/20 bg-primary/5 px-3 text-[11px] font-semibold text-primary hover:bg-primary/10"
+                  >
+                    {isGeneratingNote ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="size-3.5" />
+                    )}
+                    Generate Catatan
+                  </Button>
+                </div>
                 <Textarea
                   value={notes}
                   maxLength={notesMaxLength}
@@ -420,6 +569,32 @@ export function AddStatDialog({
                 <p className="text-[11px] text-muted-foreground">
                   {notes.length}/{notesMaxLength} karakter
                 </p>
+                <div className="rounded-lg border border-border/50 bg-background/30 px-3 py-2 text-[11px] text-muted-foreground">
+                  Acuan catatan: tampilkan 1 kekuatan utama, 1 fokus perbaikan, dan presensi bila memang perlu
+                  disorot.
+                </div>
+                <div className="grid gap-2 md:grid-cols-3">
+                  {categoryStatusRows.map((category) => (
+                    <div
+                      key={category.id}
+                      className="rounded-lg border border-border/50 bg-background/20 px-3 py-2"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-[11px] font-semibold text-foreground">{category.categoryLabel}</p>
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${category.className}`}
+                        >
+                          {category.statusLabel}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+                        Skor saat ini <span className="font-medium text-foreground">{category.score}</span>/100,
+                        jadi kategori ini masuk level{" "}
+                        <span className="font-medium text-foreground">{category.statusLabel.toLowerCase()}</span>.
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </fieldset>
 

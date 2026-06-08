@@ -3,25 +3,30 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import {
+  AlertTriangle,
   CheckCircle2,
   FileImage,
   FileText,
   Info,
   Loader2,
+  ShieldCheck,
   Upload,
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
+import { useReportSignerCoachOptions } from "@/hooks/use-report-signers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ReportSignerAutomationManager } from "@/components/features/settings/ReportSignerAutomationManager";
 import { toUserErrorMessage } from "@/lib/utils";
 import { ASSET_KEYS, SIGNER_KEYS, getAssetPreviewMeta, type AssetKey } from "./constants";
 
 export default function SettingsPage() {
   const { data: settings } = useClubSettings();
+  const { data: coachOptions, isLoading: coachOptionsLoading } = useReportSignerCoachOptions();
   const updateSetting = useUpdateClubSetting();
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
   const [assetVersions, setAssetVersions] = useState<Record<string, number>>({});
@@ -29,6 +34,14 @@ export default function SettingsPage() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const selectedGlobalCoachId = localValues.report_signer_global_coach_profile_id ?? "";
+  const selectedGlobalCoach =
+    coachOptions?.find((coach) => coach.id === selectedGlobalCoachId) ?? null;
+  const previewCoachName = selectedGlobalCoach?.fullName || localValues.rapor_coach_name || "Coach Umum";
+  const previewCoachSignUrl =
+    selectedGlobalCoach?.signatureUrl || localValues.rapor_coach_sign_url || undefined;
+  const hasSelectedGlobalCoachSignature = Boolean(selectedGlobalCoach?.signatureUrl?.trim());
+  const hasManualCoachSignFallback = Boolean(localValues.rapor_coach_sign_url?.trim());
 
   useEffect(() => {
     if (settings) {
@@ -72,11 +85,11 @@ export default function SettingsPage() {
         assets: {
           headerUrl: localValues.rapor_header_url || undefined,
           ceoSignUrl: localValues.rapor_ceo_sign_url || undefined,
-          coachSignUrl: localValues.rapor_coach_sign_url || undefined,
+          coachSignUrl: previewCoachSignUrl,
           stampUrl: localValues.rapor_stamp_url || undefined,
         },
         signers: {
-          coachName: localValues.rapor_coach_name || "Coach Global",
+          coachName: previewCoachName,
           ceoName: localValues.rapor_ceo_name || "CEO ADORA BBC",
         },
         printDate: new Date(),
@@ -152,8 +165,33 @@ export default function SettingsPage() {
           Aset dan Tanda Tangan Rapor
         </h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Kelola template rapor, tanda tangan, stempel, dan nama penandatangan yang tampil di PDF rapor.
+          Kelola aset rapor, nama penandatangan, dan fallback tanda tangan supaya hasil PDF tetap
+          konsisten serta mudah dirawat.
         </p>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-3">
+        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 1</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">Coach Kelompok</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Jika kelompok latihan sudah punya coach aktif, rapor akan memakai coach itu lebih dulu.
+          </p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 2</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">Coach Cadangan Region</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Dipakai hanya jika kelompok belum punya coach yang jelas untuk penandatangan rapor.
+          </p>
+        </div>
+        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 3</p>
+          <p className="mt-1 text-sm font-semibold text-foreground">Coach Umum Rapor</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            Menjadi fallback terakhir agar rapor tetap bisa terbit walau mapping belum lengkap.
+          </p>
+        </div>
       </div>
 
       <section className="rounded-xl border border-border/50 bg-card shadow-sm">
@@ -164,8 +202,8 @@ export default function SettingsPage() {
               <h3 className="text-base font-semibold text-foreground">Aset Rapor PDF</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Unggah aset visual yang dipakai saat rapor PDF digenerate. Tanda tangan coach global
-              akan dipakai sebagai fallback terakhir jika signer otomatis belum menemukan coach yang cocok.
+              Unggah aset visual yang dipakai saat rapor PDF digenerate. Tanda tangan coach umum
+              hanya dipakai sebagai fallback terakhir jika coach kelompok dan region belum tersedia.
             </p>
           </div>
           <Button
@@ -304,13 +342,99 @@ export default function SettingsPage() {
               <h3 className="text-base font-semibold text-foreground">Nama Penandatangan</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Nama ini akan tampil di area tanda tangan rapor sesuai peran masing-masing. Nama coach
-              global tetap dipakai sebagai fallback terakhir.
+              Penandatangan rapor diatur dari sumber yang paling spesifik. Bagian coach umum di bawah
+              ini hanya dipakai sebagai fallback terakhir.
             </p>
           </div>
         </div>
 
         <div className="space-y-5 px-5 py-4">
+          <div className="space-y-2">
+            <label className="text-xs font-medium text-foreground">Coach Umum Rapor</label>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex-1">
+                <Select
+                  value={selectedGlobalCoachId || "__none__"}
+                  onValueChange={(value) =>
+                    setLocalValues((previous) => ({
+                      ...previous,
+                      report_signer_global_coach_profile_id:
+                        value === "__none__" ? "" : (value ?? ""),
+                    }))
+                  }
+                  disabled={coachOptionsLoading}
+                >
+                  <SelectTrigger className="h-10 border-border/50 bg-background/50">
+                    <SelectValue placeholder="Pilih coach umum">
+                      {selectedGlobalCoach ? selectedGlobalCoach.fullName : "Tanpa coach umum terpilih"}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">Tanpa coach umum terpilih</SelectItem>
+                    {(coachOptions ?? []).map((coach) => (
+                      <SelectItem key={coach.id} value={coach.id}>
+                        {coach.fullName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button
+                onClick={() => handleTextSave("report_signer_global_coach_profile_id", "Coach umum rapor")}
+                disabled={saving.report_signer_global_coach_profile_id}
+                size="xl"
+              >
+                {saving.report_signer_global_coach_profile_id ? (
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : (
+                  <CheckCircle2 className="size-3.5" />
+                )}
+                Simpan
+              </Button>
+            </div>
+            <div className="rounded-xl border border-border/50 bg-background/40 p-3 text-xs text-muted-foreground">
+              <div className="flex items-start gap-2">
+                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
+                <div className="space-y-1">
+                  <p className="font-medium text-foreground">Sumber coach umum aktif</p>
+                  <p>
+                    {selectedGlobalCoach
+                      ? `Nama dan tanda tangan akan mengikuti profil ${selectedGlobalCoach.fullName}.`
+                      : "Belum ada coach umum terpilih. Sistem akan memakai fallback cadangan manual jika tersedia."}
+                  </p>
+                </div>
+              </div>
+            </div>
+            {selectedGlobalCoach && !hasSelectedGlobalCoachSignature ? (
+              <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-100">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
+                  <div className="space-y-1">
+                    <p className="font-medium text-amber-300">Coach terpilih belum punya tanda tangan</p>
+                    <p className="text-amber-100/90">
+                      Rapor akan memakai file <span className="font-medium">Tanda Tangan Coach Umum Cadangan</span>{" "}
+                      jika tersedia. Jika tidak, area tanda tangan coach bisa kosong di PDF.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+            {!selectedGlobalCoach && !hasManualCoachSignFallback ? (
+              <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 p-3 text-xs text-rose-100">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-400" />
+                  <div className="space-y-1">
+                    <p className="font-medium text-rose-300">Belum ada fallback coach umum</p>
+                    <p className="text-rose-100/90">
+                      Pilih coach umum atau unggah tanda tangan cadangan agar rapor tetap siap terbit
+                      saat mapping kelompok dan region belum lengkap.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ) : null}
+          </div>
+
           {SIGNER_KEYS.map(({ key, label, placeholder }) => (
             <div key={key} className="space-y-2">
               <label htmlFor={`input-${key}`} className="text-xs font-medium text-foreground">
@@ -354,10 +478,10 @@ export default function SettingsPage() {
         <div className="space-y-1">
           <p className="text-xs font-medium text-foreground">Catatan Penggunaan</p>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            Jika tanda tangan coach atau nama coach belum diisi, bagian tersebut akan kosong
-            atau memakai fallback bawaan saat pratinjau dibuat. Untuk hasil rapor yang rapi
-            dan ukuran file tetap ringan, utamakan template header PDF dan hindari gambar
-            full-page beresolusi terlalu besar.
+            Pilih coach umum dari data coach aktif agar nama dan tanda tangannya konsisten. File
+            tanda tangan coach umum cadangan sebaiknya dipakai hanya sebagai pengaman. Untuk hasil
+            rapor yang rapi dan ukuran file tetap ringan, prioritaskan template header PDF dan
+            hindari gambar full-page beresolusi terlalu besar.
           </p>
         </div>
       </div>

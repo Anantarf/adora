@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, Loader2, MapPinned, PenSquare, Users2 } from "lucide-react";
 
 import { useHomebases } from "@/hooks/use-homebases";
@@ -19,26 +19,25 @@ export function ReportSignerAutomationManager() {
   const { data: mappings, isLoading: mappingsLoading } = useReportSignerHomebaseMappings();
   const { mutateAsync: saveMappings, isPending } = useUpdateReportSignerHomebaseMappings();
 
-  // Hitung mappings dari server secara deklaratif — tidak ada setState dalam useEffect
   const derivedMappings = useMemo<Record<string, string>>(() => {
-    if (!homebases) return {};
+    if (!homebases) {
+      return {};
+    }
+
     const result: Record<string, string> = {};
     for (const homebase of homebases) {
       result[homebase.id] =
         mappings?.find((mapping) => mapping.homebaseId === homebase.id)?.coachProfileId ?? "";
     }
+
     return result;
   }, [homebases, mappings]);
 
-  // localMappings menyimpan perubahan pengguna secara lokal (sebelum disimpan)
-  const [localMappings, setLocalMappings] = useState<Record<string, string>>(derivedMappings);
+  const [localMappings, setLocalMappings] = useState<Record<string, string>>({});
 
-  // Sinkronkan dari server jika data berubah (tanpa useEffect)
-  const [prevDerived, setPrevDerived] = useState(derivedMappings);
-  if (prevDerived !== derivedMappings) {
-    setPrevDerived(derivedMappings);
+  useEffect(() => {
     setLocalMappings(derivedMappings);
-  }
+  }, [derivedMappings]);
 
   const coachOptionsById = useMemo(
     () => new Map((coachOptions ?? []).map((coach) => [coach.id, coach])),
@@ -53,26 +52,26 @@ export function ReportSignerAutomationManager() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <MapPinned className="size-4 text-primary" />
-            <h3 className="text-base font-semibold text-foreground">Otomatisasi Signer Coach</h3>
+            <h3 className="text-base font-semibold text-foreground">Coach Cadangan per Region</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Prioritas signer rapor berjalan dari coach assignment per kelompok, lalu fallback ke
-            homebase, lalu terakhir ke fallback global.
+            Atur coach cadangan per region. Sistem tetap memprioritaskan coach yang memang
+            terpasang di kelompok latihan pemain.
           </p>
         </div>
       </div>
 
       <div className="space-y-5 px-5 py-4">
         <div className="rounded-xl border border-border/50 bg-background/40 p-4 text-xs leading-relaxed text-muted-foreground">
-          Jika satu region punya banyak coach, sistem tetap membaca coach assignment di kelompok
-          sebagai sumber utama. Mapping homebase di bawah ini hanya dipakai saat kelompok belum
-          punya coach signer yang jelas atau saat kamu butuh default signer per wilayah.
+          Gunakan bagian ini sebagai pengaman. Jika satu kelompok sudah punya coach aktif, rapor
+          tetap memakai coach tersebut. Coach cadangan region baru dipakai saat kelompok belum
+          punya penanggung jawab yang jelas.
         </div>
 
         {isLoading ? (
           <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/30 py-10 text-sm text-muted-foreground">
             <Loader2 className="size-4 animate-spin text-primary" />
-            Memuat aturan signer otomatis...
+            Memuat aturan coach cadangan...
           </div>
         ) : (
           <div className="space-y-4">
@@ -81,6 +80,16 @@ export function ReportSignerAutomationManager() {
               const selectedCoach = selectedCoachId
                 ? coachOptionsById.get(selectedCoachId)
                 : null;
+              const relevantCoachOptions = (coachOptions ?? []).filter((coach) =>
+                coach.assignments.some((assignment) => assignment.group.homebase?.id === homebase.id),
+              );
+              const orderedCoachOptions = [
+                ...relevantCoachOptions,
+                ...(coachOptions ?? []).filter(
+                  (coach) =>
+                    !relevantCoachOptions.some((relevantCoach) => relevantCoach.id === coach.id),
+                ),
+              ];
 
               return (
                 <div
@@ -94,8 +103,8 @@ export function ReportSignerAutomationManager() {
                         <p className="text-sm font-semibold text-foreground">{homebase.name}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Fallback signer untuk pemain di homebase ini jika signer per kelompok belum
-                        tersedia.
+                        Dipakai hanya jika kelompok di region ini belum punya coach aktif untuk
+                        rapor.
                       </p>
                     </div>
 
@@ -110,19 +119,31 @@ export function ReportSignerAutomationManager() {
                         }
                       >
                         <SelectTrigger className="h-11 border-border/50 bg-background/50">
-                          <SelectValue placeholder="Pilih coach fallback">
-                            {selectedCoach ? selectedCoach.fullName : "Belum ada fallback"}
+                          <SelectValue placeholder="Pilih coach cadangan">
+                            {selectedCoach ? selectedCoach.fullName : "Tanpa coach cadangan"}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={NO_HOMEBASE_FALLBACK}>Tanpa fallback homebase</SelectItem>
-                          {(coachOptions ?? []).map((coach) => (
-                            <SelectItem key={coach.id} value={coach.id}>
-                              {coach.fullName}
-                            </SelectItem>
-                          ))}
+                          <SelectItem value={NO_HOMEBASE_FALLBACK}>Tanpa coach cadangan</SelectItem>
+                          {orderedCoachOptions.map((coach) => {
+                            const isRelevantCoach = relevantCoachOptions.some(
+                              (relevantCoach) => relevantCoach.id === coach.id,
+                            );
+
+                            return (
+                              <SelectItem key={coach.id} value={coach.id}>
+                                {coach.fullName}
+                                {isRelevantCoach ? " - region ini" : ""}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
+                      <p className="mt-2 text-[11px] text-muted-foreground">
+                        {relevantCoachOptions.length > 0
+                          ? `${relevantCoachOptions.length} coach terhubung ke region ini dan ditampilkan lebih dulu.`
+                          : "Belum ada coach yang terhubung langsung ke region ini. Anda tetap bisa memilih coach aktif lain sebagai cadangan."}
+                      </p>
                     </div>
                   </div>
 
@@ -143,16 +164,16 @@ export function ReportSignerAutomationManager() {
                         <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
                           {selectedCoach.signatureUrl ? (
                             <span className="flex items-center gap-1 text-emerald-500">
-                              <CheckCircle2 className="size-3" /> Ada Tanda Tangan
+                              <CheckCircle2 className="size-3" /> Tanda tangan siap dipakai
                             </span>
                           ) : (
                             <span className="flex items-center gap-1 rounded-sm bg-amber-500/10 px-1.5 py-0.5 text-amber-500">
-                              <span className="text-[10px] font-bold">!</span> Belum Ada Tanda Tangan
+                              <span className="text-[10px] font-bold">!</span> Belum unggah tanda tangan
                             </span>
                           )}
-                          <span className="text-muted-foreground/40">•</span>
+                          <span className="text-muted-foreground/40">/</span>
                           <span className="text-muted-foreground">
-                            {selectedCoach.assignments.length} penugasan kelompok
+                            {selectedCoach.assignments.length} kelompok terhubung
                           </span>
                         </div>
                       </div>
@@ -185,18 +206,18 @@ export function ReportSignerAutomationManager() {
             ) : (
               <CheckCircle2 className="size-3.5" />
             )}
-            Simpan Aturan Homebase
+            Simpan Coach Cadangan Region
           </Button>
         </div>
 
         <div className="rounded-xl border border-dashed border-border/50 bg-background/30 p-4 text-xs text-muted-foreground">
           <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
             <PenSquare className="size-4 text-primary" />
-            Cara kerja signer otomatis
+            Urutan pemakaian tanda tangan
           </div>
-          <p>1. Jika kelompok punya coach assignment, rapor memakai coach itu.</p>
-          <p>2. Jika kelompok belum punya coach assignment, sistem cek fallback homebase.</p>
-          <p>3. Jika homebase juga belum punya fallback, sistem pakai fallback global di atas.</p>
+          <p>1. Coach aktif di kelompok latihan.</p>
+          <p>2. Coach cadangan region.</p>
+          <p>3. Coach umum rapor sebagai fallback terakhir.</p>
         </div>
       </div>
     </section>

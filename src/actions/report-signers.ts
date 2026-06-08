@@ -81,7 +81,7 @@ export async function updateReportSignerHomebaseMappingsAction(
   );
 
   if (uniqueHomebaseIds.length !== normalizedMappings.length) {
-    throw new Error("Setiap homebase hanya boleh memiliki satu signer fallback.");
+    throw new Error("Setiap region hanya boleh memiliki satu coach cadangan.");
   }
 
   const [homebases, coachProfiles] = await Promise.all([
@@ -99,11 +99,11 @@ export async function updateReportSignerHomebaseMappingsAction(
   ]);
 
   if (homebases.length !== uniqueHomebaseIds.length) {
-    throw new Error("Sebagian homebase signer tidak ditemukan.");
+    throw new Error("Sebagian region untuk coach cadangan tidak ditemukan.");
   }
 
   if (coachProfiles.length !== uniqueCoachProfileIds.length) {
-    throw new Error("Sebagian coach signer tidak ditemukan.");
+    throw new Error("Sebagian coach cadangan tidak ditemukan.");
   }
 
   const value = serializeReportSignerHomebaseMappings(normalizedMappings);

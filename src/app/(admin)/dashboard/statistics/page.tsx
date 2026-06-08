@@ -260,22 +260,6 @@ const PlayerStatRow = React.memo(
               <p className="text-[15px] font-semibold text-foreground">{player.name}</p>
               <p className="text-[11px] text-muted-foreground">{group.name}</p>
             </div>
-            {stat?.resolutionSource ? (
-              <span
-                className={`inline-flex items-center rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ${
-                  stat.resolutionSource === "GROUP"
-                    ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-                    : stat.resolutionSource === "HOMEBASE"
-                      ? "border-blue-500/20 bg-blue-500/10 text-blue-600"
-                      : stat.resolutionSource === "GLOBAL"
-                        ? "border-amber-500/20 bg-amber-500/10 text-amber-600"
-                        : "border-border/50 bg-background/50 text-muted-foreground"
-                }`}
-                title="Sumber Penandatangan Rapor"
-              >
-                Signer: {stat.resolutionSource}
-              </span>
-            ) : null}
           </div>
         </TableCell>
         <TableCell className="min-w-[360px] py-3">
@@ -736,22 +720,6 @@ export default function StatisticsPage() {
                                 <span className="mr-1 text-muted-foreground">{index + 1}.</span>
                                 {player.name}
                               </p>
-                              {stat?.resolutionSource ? (
-                                <span
-                                  className={`mt-1.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider ${
-                                    stat.resolutionSource === "GROUP"
-                                      ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-                                      : stat.resolutionSource === "HOMEBASE"
-                                        ? "border-blue-500/20 bg-blue-500/10 text-blue-600"
-                                        : stat.resolutionSource === "GLOBAL"
-                                          ? "border-amber-500/20 bg-amber-500/10 text-amber-600"
-                                          : "border-border/50 bg-background/50 text-muted-foreground"
-                                  }`}
-                                  title="Sumber Penandatangan Rapor"
-                                >
-                                  Signer: {stat.resolutionSource}
-                                </span>
-                              ) : null}
                             </div>
                             <div className="shrink-0">
                               <Badge

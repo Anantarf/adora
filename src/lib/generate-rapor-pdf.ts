@@ -11,7 +11,6 @@ import {
   renderPlayerInfo,
   renderAssessmentTable,
   renderConclusionAndGrades,
-  renderAchievements,
   renderSignatureArea,
   finalizePDF
 } from "./pdf/pdf-render";
@@ -77,7 +76,9 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
       const img = await loadImageAsBase64(assets.headerUrl, {
         maxWidthPx: 1400,
         maxHeightPx: 2000,
-        quality: 0.72,
+        quality: 0.68,
+        forceRasterize: true,
+        outputMimeType: "image/jpeg",
       });
       const props = doc.getImageProperties(img.data);
 
@@ -116,7 +117,7 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
   y = renderPlayerInfo(doc, y, { playerName, groupName, periodName, schoolOrigin, printDate });
   y = renderAssessmentTable(doc, y, metrics);
   y = renderConclusionAndGrades(doc, y, { playerName, periodName, metrics }, addNewPage);
-  y = renderAchievements(doc, y, { attendanceRate: effectiveAttendanceRate, certificates }, addNewPage);
+  y = Math.max(MARGIN, y - 8);
   await renderSignatureArea(doc, y, { assets, signers, printDate }, addNewPage);
 
   await finalizePDF(doc, {

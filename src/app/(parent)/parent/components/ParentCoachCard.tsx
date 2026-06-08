@@ -19,16 +19,15 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
   
   if (!coach && resolutionSource === "HOMEBASE" && player.fallbackCoachProfile) {
     coach = player.fallbackCoachProfile;
-    coachLabel = "Koordinator Wilayah";
+    coachLabel = "Coach Region";
   } else if (!coach && resolutionSource === "GLOBAL") {
-    // For global, we only have the name from resolvedSigner (no photo/license)
     coach = {
       id: "global",
       fullName: player.resolvedSigner?.coachNameSnapshot ?? "Head Coach Akademi",
       photoUrl: null,
       licenseUrl: null,
     };
-    coachLabel = "Head Coach Akademi";
+    coachLabel = "Coach Umum Akademi";
   }
 
   return (
@@ -53,24 +52,9 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
               )}
             </div>
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-1.5">
-                <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  {coachLabel}
-                </span>
-                {resolutionSource === "GROUP" || !resolutionSource ? (
-                  <span className="rounded-full bg-emerald-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-500 border border-emerald-500/20">
-                    Live Active Assignment
-                  </span>
-                ) : resolutionSource === "HOMEBASE" ? (
-                  <span className="rounded-full bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-blue-500 border border-blue-500/20">
-                    Homebase Fallback
-                  </span>
-                ) : (
-                  <span className="rounded-full bg-amber-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-amber-500 border border-amber-500/20">
-                    Global Fallback
-                  </span>
-                )}
-              </div>
+              <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                {coachLabel}
+              </span>
               <p className="mt-1 text-lg font-semibold text-foreground">
                 {coach?.fullName || "Belum tersedia"}
               </p>

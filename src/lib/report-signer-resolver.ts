@@ -2,7 +2,9 @@ import type { Prisma } from "@prisma/client";
 
 import {
   parseReportSignerHomebaseMappings,
+  REPORT_SIGNER_GLOBAL_COACH_PROFILE_SETTING_KEY,
   REPORT_SIGNER_HOMEBASE_SETTING_KEY,
+  resolveGlobalCoachFallback,
   type ReportSignerSnapshot,
 } from "@/lib/report-signer";
 
@@ -25,8 +27,14 @@ type GroupSignerInput = {
 };
 
 type ReportSignerResolverContext = {
+  fallbackCoachProfileId: string | null;
   fallbackCoachName: string | null;
   fallbackCoachSignUrl: string | null;
+  globalCoachProfile: {
+    id: string;
+    fullName: string;
+    signatureUrl: string | null;
+  } | null;
   homebaseMappings: Map<string, string>;
   mappedCoachProfiles: Map<
     string,
@@ -41,6 +49,7 @@ type ReportSignerResolverContext = {
 };
 
 const REPORT_SIGNER_SETTING_KEYS = [
+  REPORT_SIGNER_GLOBAL_COACH_PROFILE_SETTING_KEY,
   "rapor_coach_name",
   "rapor_coach_sign_url",
   REPORT_SIGNER_HOMEBASE_SETTING_KEY,
@@ -63,8 +72,15 @@ export async function getReportSignerResolverContext(tx: TransactionClientLike) 
   const homebaseMappings = parseReportSignerHomebaseMappings(
     settingsByKey.get(REPORT_SIGNER_HOMEBASE_SETTING_KEY),
   );
+  const fallbackCoachProfileId =
+    settingsByKey.get(REPORT_SIGNER_GLOBAL_COACH_PROFILE_SETTING_KEY)?.trim() || null;
   const mappedCoachProfileIds = Array.from(
-    new Set(homebaseMappings.map((mapping) => mapping.coachProfileId)),
+    new Set(
+      [
+        ...homebaseMappings.map((mapping) => mapping.coachProfileId),
+        ...(fallbackCoachProfileId ? [fallbackCoachProfileId] : []),
+      ].filter(Boolean),
+    ),
   );
 
   const mappedCoachProfiles = mappedCoachProfileIds.length
@@ -83,9 +99,15 @@ export async function getReportSignerResolverContext(tx: TransactionClientLike) 
       })
     : [];
 
+  const globalCoachProfile = fallbackCoachProfileId
+    ? mappedCoachProfiles.find((coachProfile) => coachProfile.id === fallbackCoachProfileId) ?? null
+    : null;
+
   return {
+    fallbackCoachProfileId,
     fallbackCoachName: settingsByKey.get("rapor_coach_name") ?? null,
     fallbackCoachSignUrl: settingsByKey.get("rapor_coach_sign_url") ?? null,
+    globalCoachProfile,
     homebaseMappings: new Map(
       homebaseMappings.map((mapping) => [mapping.homebaseId, mapping.coachProfileId]),
     ),
@@ -125,10 +147,16 @@ export function resolveReportSignerSnapshotForGroup(
     };
   }
 
+  const globalCoachFallback = resolveGlobalCoachFallback({
+    globalCoachProfile: context.globalCoachProfile,
+    fallbackCoachName: context.fallbackCoachName,
+    fallbackCoachSignUrl: context.fallbackCoachSignUrl,
+  });
+
   return {
-    coachProfileIdSnapshot: null,
-    coachNameSnapshot: context.fallbackCoachName ?? null,
-    coachSignUrlSnapshot: context.fallbackCoachSignUrl ?? null,
+    coachProfileIdSnapshot: globalCoachFallback.coachProfileId,
+    coachNameSnapshot: globalCoachFallback.coachName ?? null,
+    coachSignUrlSnapshot: globalCoachFallback.coachSignUrl ?? null,
     resolutionSource: "GLOBAL",
   };
 }

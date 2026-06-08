@@ -1,4 +1,5 @@
 export const REPORT_SIGNER_HOMEBASE_SETTING_KEY = "report_signer_homebase_json";
+export const REPORT_SIGNER_GLOBAL_COACH_PROFILE_SETTING_KEY = "report_signer_global_coach_profile_id";
 
 export type ReportSignerHomebaseMapping = {
   homebaseId: string;
@@ -9,6 +10,16 @@ export type ReportSignerSnapshot = {
   coachProfileIdSnapshot: string | null;
   coachNameSnapshot: string | null;
   coachSignUrlSnapshot: string | null;
+};
+
+export type ReportSignerGlobalFallbackInput = {
+  globalCoachProfile?: {
+    id: string;
+    fullName: string;
+    signatureUrl: string | null;
+  } | null;
+  fallbackCoachName?: string | null;
+  fallbackCoachSignUrl?: string | null;
 };
 
 export function resolveCoachSignerName(
@@ -35,6 +46,19 @@ export function resolveCoachSignerAssetUrl(
 
   const normalizedFallbackCoachSignUrl = fallbackCoachSignUrl?.trim();
   return normalizedFallbackCoachSignUrl || undefined;
+}
+
+export function resolveGlobalCoachFallback(input: ReportSignerGlobalFallbackInput) {
+  const profileName = input.globalCoachProfile?.fullName?.trim();
+  const profileSignUrl = input.globalCoachProfile?.signatureUrl?.trim() || null;
+  const fallbackCoachName = input.fallbackCoachName?.trim() || null;
+  const fallbackCoachSignUrl = input.fallbackCoachSignUrl?.trim() || null;
+
+  return {
+    coachProfileId: input.globalCoachProfile?.id ?? null,
+    coachName: profileName || fallbackCoachName,
+    coachSignUrl: profileSignUrl || fallbackCoachSignUrl,
+  };
 }
 
 export function parseReportSignerHomebaseMappings(rawValue: string | null | undefined) {

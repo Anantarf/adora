@@ -15,7 +15,6 @@ export const STAMP_SIZE = 34;
 export const SECTION_GAP = 5;
 
 export const SECTION_TITLE_COLOR: [number, number, number] = [203, 93, 24];
-export const PANEL_FILL: [number, number, number] = [250, 246, 241];
 export const PANEL_BORDER: [number, number, number] = [225, 214, 203];
 export const TABLE_HEAD_FILL: [number, number, number] = [243, 232, 222];
 
@@ -23,6 +22,8 @@ type PdfImageLoadOptions = {
   maxWidthPx?: number;
   maxHeightPx?: number;
   quality?: number;
+  forceRasterize?: boolean;
+  outputMimeType?: string;
 };
 
 function loadImageElement(src: string): Promise<HTMLImageElement> {
@@ -45,7 +46,7 @@ async function normalizeImageForPdf(blob: Blob, options: PdfImageLoadOptions) {
     const targetWidth = Math.max(1, Math.round(image.width * scale));
     const targetHeight = Math.max(1, Math.round(image.height * scale));
 
-    if (targetWidth === image.width && targetHeight === image.height) {
+    if (!options.forceRasterize && targetWidth === image.width && targetHeight === image.height) {
       return null;
     }
 
@@ -62,7 +63,7 @@ async function normalizeImageForPdf(blob: Blob, options: PdfImageLoadOptions) {
     context.imageSmoothingQuality = "high";
     context.drawImage(image, 0, 0, targetWidth, targetHeight);
 
-    const mimeType = blob.type || "image/png";
+    const mimeType = options.outputMimeType || blob.type || "image/png";
     const quality = options.quality ?? 0.82;
     return {
       data: canvas.toDataURL(mimeType, quality),
@@ -143,15 +144,16 @@ export function drawFitImage(doc: jsPDF, base64: string, format: string, x: numb
 
 export function drawSectionTitle(doc: jsPDF, title: string, y: number) {
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(10);
+  doc.setFontSize(9.5);
   doc.setTextColor(...SECTION_TITLE_COLOR);
   doc.text(title, MARGIN, y);
   doc.setTextColor(0, 0, 0);
 }
 
 export function drawPanel(doc: jsPDF, x: number, y: number, w: number, h: number) {
-  doc.setFillColor(...PANEL_FILL);
   doc.setDrawColor(...PANEL_BORDER);
-  doc.roundedRect(x, y, w, h, 3, 3, "FD");
+  doc.setLineWidth(0.35);
+  doc.roundedRect(x, y, w, h, 2.5, 2.5, "S");
   doc.setDrawColor(0, 0, 0);
+  doc.setLineWidth(0.2);
 }

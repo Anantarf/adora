@@ -46,6 +46,7 @@ export const FIELD_LABELS: Record<string, string> = {
   rapor_ceo_sign_url: "Tanda Tangan CEO",
   rapor_coach_sign_url: "Tanda Tangan Pelatih",
   rapor_stamp_url: "Stempel Klub",
+  report_signer_global_coach_profile_id: "Coach Umum Rapor",
   rapor_coach_name: "Nama Pelatih di Rapor",
   rapor_ceo_name: "Nama CEO di Rapor",
   report_signer_homebase_json: "Aturan Fallback Signer Homebase",

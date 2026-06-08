@@ -25,8 +25,8 @@ export const ASSET_KEYS: AssetConfig[] = [
   },
   {
     key: "rapor_coach_sign_url",
-    label: "Tanda Tangan Coach Global",
-    description: "Unggah tanda tangan coach global sebagai fallback terakhir saat signer otomatis tidak menemukan coach yang cocok.",
+    label: "Tanda Tangan Coach Umum Cadangan",
+    description: "Dipakai hanya jika coach umum belum dipilih dari data coach aktif atau coach terpilih belum punya tanda tangan.",
     accept: ".png",
     maxSizeLabel: "Maks 300KB",
   },
@@ -40,7 +40,6 @@ export const ASSET_KEYS: AssetConfig[] = [
 ];
 
 export const SIGNER_KEYS = [
-  { key: "rapor_coach_name", label: "Nama Coach Global di Rapor", placeholder: "Contoh: Danuri Akbar" },
   { key: "rapor_ceo_name", label: "Nama CEO", placeholder: "Contoh: M. Arief, S.Ak" },
 ];
 
