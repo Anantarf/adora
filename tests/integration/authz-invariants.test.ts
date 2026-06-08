@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test, vi } from "vitest";
 import { prisma as originalPrisma } from "@/lib/prisma";
 import type { PrismaClient } from "@prisma/client";
 import type { DeepMockProxy } from "vitest-mock-extended";
@@ -49,5 +49,62 @@ describe("Phase 2 Auth And Invariant Guards", () => {
         groupId: "missing-group",
       }),
     ).rejects.toThrow("Kelompok latihan tidak ditemukan.");
+  });
+});
+
+describe("Phase 1 Production Maturity: Storage ACL Ownership", () => {
+  const mockLookup = {
+    findCoachAsset: vi.fn(),
+    findCoachLicense: vi.fn(),
+    findPlayerAsset: vi.fn(),
+    findCertificate: vi.fn(),
+    findReportArchive: vi.fn(),
+    isCoachVisibleToParent: vi.fn(),
+    isPlayerOwnedByParent: vi.fn(),
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  test("mengembalikan 403 jika parent mengakses arsip rapor pemain milik parent lain", async () => {
+    const { authorizePrivateStorageAccess } = await import("@/lib/storage-acl");
+
+    mockLookup.findReportArchive.mockResolvedValue({ id: "rapor-1", playerId: "player-lain" });
+    // Simulasi isPlayerOwnedByParent me-return false
+    mockLookup.isPlayerOwnedByParent.mockResolvedValue(false);
+
+    const decision = await authorizePrivateStorageAccess({
+      role: "PARENT",
+      userId: "parent-1",
+      fileUrl: "https://example.com/rapor.pdf",
+      lookup: mockLookup,
+    });
+
+    expect(decision).toEqual({
+      allowed: false,
+      statusCode: 403,
+      message: "Arsip rapor ini bukan milik akun parent ini.",
+    });
+  });
+
+  test("mengembalikan 200 jika parent mengakses arsip rapor pemain miliknya sendiri", async () => {
+    const { authorizePrivateStorageAccess } = await import("@/lib/storage-acl");
+
+    mockLookup.findReportArchive.mockResolvedValue({ id: "rapor-2", playerId: "player-sendiri" });
+    mockLookup.isPlayerOwnedByParent.mockResolvedValue(true);
+
+    const decision = await authorizePrivateStorageAccess({
+      role: "PARENT",
+      userId: "parent-2",
+      fileUrl: "https://example.com/rapor2.pdf",
+      lookup: mockLookup,
+    });
+
+    expect(decision).toEqual({
+      allowed: true,
+      statusCode: 200,
+      message: "allowed",
+    });
   });
 });

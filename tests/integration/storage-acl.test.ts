@@ -86,7 +86,7 @@ describe("Private storage ACL", () => {
     const decision = await authorizePrivateStorageAccess({
       role: "COACH",
       userId: "coach-user-1",
-      fileUrl: "/api/storage/uploads/coach-license.pdf",
+      fileUrl: "/api/storage/uploads/coach_license_coach-user-1_123.jpg",
       lookup: {
         findCoachAsset: async () => ({
           id: "coach-profile-1",
@@ -110,7 +110,7 @@ describe("Private storage ACL", () => {
     const decision = await authorizePrivateStorageAccess({
       role: "COACH",
       userId: "coach-user-1",
-      fileUrl: "/api/storage/uploads/coach-license.pdf",
+      fileUrl: "/api/storage/uploads/coach_license_coach-user-1_123.jpg",
       lookup: {
         findCoachAsset: async () => ({
           id: "coach-profile-2",
