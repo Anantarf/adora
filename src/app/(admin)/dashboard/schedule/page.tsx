@@ -89,9 +89,9 @@ export default function SchedulePage() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
             Agenda Klub
           </p>
-          <h2 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Kalender dan Kontrol Agenda
-          </h2>
+          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+            Kalender Agenda
+          </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
             Kelola jadwal latihan, tanding, dan agenda resmi klub dari satu halaman kerja.
           </p>

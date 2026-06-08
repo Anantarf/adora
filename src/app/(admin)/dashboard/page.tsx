@@ -46,9 +46,9 @@ export default function AdminDashboardPage() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
             Dashboard Utama
           </p>
-          <h2 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
             Ringkasan Operasional Hari Ini
-          </h2>
+          </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">{summaryText}</p>
         </div>
         <div className="rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground md:text-sm">

@@ -83,7 +83,6 @@ model certificate {
   player     player   @relation(fields: [playerId], references: [id], onDelete: Cascade, map: "Certificate_playerId_fkey")
 
   @@index([playerId], map: "Certificate_playerId_idx")
-  @@index([fileUrl], map: "Certificate_fileUrl_idx")
 }
 
 model event {
@@ -190,8 +189,6 @@ model player {
   @@index([parentId], map: "Player_parentId_idx")
   @@index([preferredHomebaseId], map: "Player_preferred_homebaseId_idx")
   @@index([isDeleted], map: "Player_isDeleted_idx")
-  @@index([photoUrl], map: "Player_photoUrl_idx")
-  @@index([signatureUrl], map: "Player_signatureUrl_idx")
   @@unique([name, dateOfBirth, groupId], map: "Player_name_dateOfBirth_groupId_key")
   @@map("Player")
 }
