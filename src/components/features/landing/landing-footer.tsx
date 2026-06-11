@@ -9,7 +9,7 @@ export function LandingFooter() {
   return (
     <footer className="border-t-8 border-brand-purple bg-page-dark pt-20 pb-10">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-12 gap-12 mb-16">
+        <div className="grid md:grid-cols-12 gap-10 md:gap-12 mb-16">
           <div className="md:col-span-5">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-24 h-24 flex items-center justify-center">

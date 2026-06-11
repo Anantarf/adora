@@ -95,7 +95,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Buka rute ke ${name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi"} di Google Maps`}
-                          className="inline-flex items-center gap-1.5 text-[9px] min-h-12 md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
+                          className="inline-flex items-center gap-1.5 text-[9px] min-h-10 md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
                         >
                           Buka di Google Maps
                           <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />

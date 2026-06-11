@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -51,6 +51,16 @@ export default function PlayersPage() {
   const [playerSearchQuery, setPlayerSearchQuery] = useState("");
   const [debouncedPlayerSearch] = useDebounce(playerSearchQuery, 300);
   const [viewMode, setViewMode] = useState<"database" | "grid">("database");
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(max-width: 767px)");
+    const sync = () => {
+      if (mql.matches) setViewMode("grid");
+    };
+    sync();
+    mql.addEventListener("change", sync);
+    return () => mql.removeEventListener("change", sync);
+  }, []);
   const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
   const [uiState, setUiState] = useState<UIState>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -456,7 +466,7 @@ export default function PlayersPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1.5 self-end rounded-lg bg-muted/40 p-1 sm:self-auto">
+                  <div className="hidden items-center gap-1.5 self-end rounded-lg bg-muted/40 p-1 sm:flex sm:self-auto">
                     <button
                       type="button"
                       onClick={() => setViewMode("database")}
@@ -552,7 +562,7 @@ export default function PlayersPage() {
                                 {globalIndex}
                               </td>
                               <td className="px-4 py-2.5 font-bold text-foreground">
-                                <div className="flex max-w-[240px] items-center gap-2.5">
+                                <div className="flex max-w-[240px] items-center gap-2.5 wrap-break-word">
                                   {player.photoUrl ? (
                                     <div className="size-10 shrink-0 overflow-hidden rounded-xl border border-border/50 bg-background/40">
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -681,7 +691,7 @@ export default function PlayersPage() {
                     {paginatedPlayers.map((player: PlayerSummary) => (
                       <div
                         key={player.id}
-                        className="group flex cursor-pointer items-center rounded-xl border border-border/50 bg-card p-4 shadow-2xs transition-all hover:border-primary/35 hover:bg-muted/30"
+                        className="group flex cursor-pointer flex-col gap-3 rounded-xl border border-border/50 bg-card p-4 shadow-2xs transition-all hover:border-primary/35 hover:bg-muted/30"
                         onClick={() => setUiState({ type: "view-player", payload: player })}
                       >
                         <div className="flex min-w-0 items-center gap-3">
@@ -708,6 +718,29 @@ export default function PlayersPage() {
                               {player.group?.name || "Tanpa Kelompok"}
                             </span>
                           </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                          <span className="rounded-md border border-border/50 bg-background/50 px-2 py-0.5 font-medium text-foreground">
+                            {(() => {
+                              const age = player.dateOfBirth ? calculateAgeFromDate(new Date(player.dateOfBirth)) : null;
+                              const gender = player.gender === "Laki-laki" ? "L" : player.gender === "Perempuan" ? "P" : "-";
+                              return `${gender} - ${age ?? "-"} thn`;
+                            })()}
+                          </span>
+                          {player.hasMedicalCondition ? (
+                            <span className="rounded-md bg-rose-500/10 px-2 py-0.5 font-medium text-rose-500">
+                              Medis
+                            </span>
+                          ) : (
+                            <span className="rounded-md bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-500">
+                              Sehat
+                            </span>
+                          )}
+                          {player.phoneNumber ? (
+                            <span className="truncate font-mono text-emerald-500/80">
+                              {player.phoneNumber}
+                            </span>
+                          ) : null}
                         </div>
                       </div>
                     ))}
