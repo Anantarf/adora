@@ -4,13 +4,12 @@ import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 import { fileTypeFromBuffer } from "file-type";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
+import { withTimeout } from "@/lib/async-utils";
+import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import { buildPrivateStorageUrl, getPrivateUploadBucket } from "@/lib/supabase-storage";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
-const RATE_LIMIT = 30;
-const RATE_LIMIT_WINDOW_MS = 60_000;
-const UPLOAD_RATE_LIMIT_NAMESPACE = "upload-api";
 const STORAGE_TIMEOUT_MS = 15_000;
 
 const ALLOWED_TYPES = new Map<string, string>([
@@ -132,24 +131,6 @@ function resolveUploadTarget(
     objectKey: `${normalizedAssetKey}_${crypto.randomUUID()}${ext}`,
   };
 }
-
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutCode: string) {
-  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        timeoutHandle = setTimeout(() => reject(new Error(timeoutCode)), timeoutMs);
-      }),
-    ]);
-  } finally {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  }
-}
-
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
@@ -158,7 +139,7 @@ export async function POST(req: NextRequest) {
   }
 
   const ip = getClientIp(req);
-  const rateLimitResult = await consumeFixedWindowLimit(UPLOAD_RATE_LIMIT_NAMESPACE, ip, RATE_LIMIT, RATE_LIMIT_WINDOW_MS);
+  const rateLimitResult = await consumeFixedWindowLimit(RATE_LIMIT_POLICIES.upload.namespace, ip, RATE_LIMIT_POLICIES.upload.limit, RATE_LIMIT_POLICIES.upload.windowMs);
 
   if (!rateLimitResult.allowed) {
     await recordOperationalWarning({

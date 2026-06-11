@@ -4,10 +4,11 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { clearBucket, getActiveBucket, incrementBucket } from "@/lib/shared-rate-limit";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
+import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 
-const LOGIN_FAILURE_NAMESPACE = "login-failures";
-const MAX_FAILURES = 10;
-const LOCKOUT_MS = 15 * 60 * 1000;
+const LOGIN_FAILURE_NAMESPACE = RATE_LIMIT_POLICIES.loginFailures.namespace;
+const MAX_FAILURES = RATE_LIMIT_POLICIES.loginFailures.maxFailures;
+const LOCKOUT_MS = RATE_LIMIT_POLICIES.loginFailures.windowMs;
 const INVALID_CREDENTIALS_ERROR = "Username atau sandi tidak valid.";
 const LOGIN_TEMPORARY_ERROR = "Layanan login sedang bermasalah. Silakan coba lagi sebentar lagi.";
 

@@ -3,13 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { normalizeWebVitalPayload, shouldPersistWebVital, type WebVitalPayload } from "@/lib/analytics/web-vitals";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
+import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
-    const RATE_LIMIT = 120;
-    const RATE_WINDOW_MS = 60_000;
-    const limitResult = await consumeFixedWindowLimit("web-vitals", ip, RATE_LIMIT, RATE_WINDOW_MS);
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";    const limitResult = await consumeFixedWindowLimit(RATE_LIMIT_POLICIES.webVitals.namespace, ip, RATE_LIMIT_POLICIES.webVitals.limit, RATE_LIMIT_POLICIES.webVitals.windowMs);
     if (!limitResult.allowed) {
       await recordOperationalWarning({
         source: "web-vitals",

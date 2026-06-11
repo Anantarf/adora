@@ -22,27 +22,10 @@ import {
   idLocale,
 } from "@/lib/export/registrations-report";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
+import { withTimeout } from "@/lib/async-utils";
 
 const ALLOWED_EXPORT_FILTERS = new Set(["all", "daily", "monthly"]);
 const EXPORT_BUFFER_TIMEOUT_MS = 20_000;
-
-async function withTimeout<T>(promise: Promise<T>, timeoutMs: number, timeoutCode: string) {
-  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-
-  try {
-    return await Promise.race([
-      promise,
-      new Promise<T>((_, reject) => {
-        timeoutHandle = setTimeout(() => reject(new Error(timeoutCode)), timeoutMs);
-      }),
-    ]);
-  } finally {
-    if (timeoutHandle) {
-      clearTimeout(timeoutHandle);
-    }
-  }
-}
-
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);

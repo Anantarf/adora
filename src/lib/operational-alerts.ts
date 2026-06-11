@@ -1,7 +1,8 @@
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import type { OperationalSeverity } from "@/lib/observability";
+import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 
-const ALERT_NAMESPACE = "operational-alerts";
+const ALERT_NAMESPACE = RATE_LIMIT_POLICIES.operationalAlerts.namespace;
 const DEFAULT_ALERT_COOLDOWN_MS = 5 * 60 * 1000;
 const ALERT_TIMEOUT_MS = 1_500;
 
