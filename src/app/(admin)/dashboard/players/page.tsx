@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGroups, type Group } from "@/hooks/use-groups";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { usePlayersPage } from "@/hooks/use-players";
 import { getGroupCategoryLabel, getGroupDisplayDescription } from "@/lib/group-meta";
 import { buildPlayerFullName, calculateAgeFromDate } from "@/lib/player-profile";
@@ -51,16 +52,10 @@ export default function PlayersPage() {
   const [playerSearchQuery, setPlayerSearchQuery] = useState("");
   const [debouncedPlayerSearch] = useDebounce(playerSearchQuery, 300);
   const [viewMode, setViewMode] = useState<"database" | "grid">("database");
+  const isMobile = useIsMobile();
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const mql = window.matchMedia("(max-width: 767px)");
-    const sync = () => {
-      if (mql.matches) setViewMode("grid");
-    };
-    sync();
-    mql.addEventListener("change", sync);
-    return () => mql.removeEventListener("change", sync);
-  }, []);
+    if (isMobile) setViewMode("grid"); // eslint-disable-line react-hooks/set-state-in-effect
+  }, [isMobile]);
   const [isMobileDetailOpen, setIsMobileDetailOpen] = useState(false);
   const [uiState, setUiState] = useState<UIState>(null);
   const [currentPage, setCurrentPage] = useState(1);
