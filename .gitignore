@@ -52,3 +52,4 @@ next-env.d.ts
 /public/uploads/
 /scratch/
 /adora-bc.code-workspace
+.aider*

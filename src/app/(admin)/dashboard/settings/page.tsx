@@ -170,7 +170,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 1</p>
           <p className="mt-1 text-sm font-semibold text-foreground">Coach Kelompok</p>
@@ -243,7 +243,7 @@ export default function SettingsPage() {
                   <p className="text-xs text-muted-foreground">{asset.description}</p>
                 </div>
 
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-start">
+                <div className="flex flex-col gap-3 xl:flex-row xl:items-start">
                   <div className="flex-1">
                     <Input
                       type="file"
@@ -282,7 +282,7 @@ export default function SettingsPage() {
                   </div>
 
                   {assetUrl ? (
-                    <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2 lg:min-w-[18rem]">
+                    <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2 xl:min-w-[18rem]">
                       {isPdfAsset ? (
                         <div className="flex size-12 items-center justify-center rounded-lg border border-border/50 bg-background text-xs font-semibold text-muted-foreground">
                           PDF

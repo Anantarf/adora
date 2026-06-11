@@ -127,9 +127,18 @@ export function drawHorizontalRule(doc: jsPDF, y: number, weight = 0.3, color = 
   doc.setDrawColor(0);
 }
 
-export function drawFitImage(doc: jsPDF, base64: string, format: string, x: number, y: number, w: number, h: number) {
+export function drawFitImage(
+  doc: jsPDF,
+  base64: string,
+  format: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  scale = 1,
+) {
   const props = doc.getImageProperties(base64);
-  let finalW = w;
+  let finalW = w * Math.max(0.1, scale);
   let finalH = (props.height * finalW) / props.width;
 
   if (finalH > h) {
@@ -138,7 +147,7 @@ export function drawFitImage(doc: jsPDF, base64: string, format: string, x: numb
   }
 
   const dx = x + (w - finalW) / 2;
-  const dy = y + h - finalH;
+  const dy = y + (h - finalH) / 2;
   doc.addImage(base64, format, dx, dy, finalW, finalH, undefined, "FAST");
 }
 

@@ -378,102 +378,6 @@ export function renderConclusionAndGrades(
 
 // ─── Achievements ─────────────────────────────────────────────────────────────
 
-export function renderAchievements(
-  doc: jsPDF,
-  y: number,
-  info: { attendanceRate?: number | null; certificates?: RaporData["certificates"] },
-  addNewPage: () => number,
-): number {
-  const { attendanceRate, certificates } = info;
-  const hasAttendance = typeof attendanceRate === "number";
-  const hasCertificates = Boolean(certificates?.length);
-
-  if (!hasAttendance && !hasCertificates) {
-    return y;
-  }
-
-  const certificateEntries = certificates?.map((certificate, index) => {
-    const dateLabel = certificate.uploadedAt
-      ? new Date(certificate.uploadedAt).toLocaleDateString("id-ID", { month: "short", year: "numeric" })
-      : null;
-
-    return doc.splitTextToSize(`${index + 1}. ${certificate.title}${dateLabel ? ` (${dateLabel})` : ""}`, CONTENT_W - 14);
-  }) ?? [];
-  const certificateLines = certificateEntries.flat();
-
-  const attendanceHeight = hasAttendance ? 16 : 0;
-  const lineHeight = 4.2;
-  const firstPageCertificateArea = Math.max(10, PAGE_H - PDF_BOTTOM_SAFE_AREA - (y + 20 + attendanceHeight));
-  const certificateChunks = hasCertificates
-    ? splitLinesByAvailableHeight(certificateLines.length, lineHeight, firstPageCertificateArea)
-    : [];
-  const firstCertificateChunk = certificateChunks[0] ?? { start: 0, end: 0 };
-  const firstCertificateLines = certificateLines.slice(firstCertificateChunk.start, firstCertificateChunk.end);
-  const certificateHeight = Math.max(14, hasCertificates ? firstCertificateLines.length * lineHeight + 8 : 8);
-  const panelHeight = 8 + attendanceHeight + certificateHeight;
-
-  y = ensurePageCapacity(y, 4 + panelHeight, addNewPage);
-
-  drawSectionTitle(doc, "RINGKASAN PEMAIN", y);
-  y += 3.5;
-  drawPanel(doc, MARGIN, y, CONTENT_W, panelHeight);
-  const panelTop = y;
-  y += 8;
-
-  if (hasAttendance) {
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(8); // consistent sub-label
-    doc.setTextColor(...SECTION_TITLE_COLOR);
-    doc.text("KEHADIRAN", MARGIN + 6, y);
-    doc.setTextColor(0, 0, 0);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9); // consistent body
-    doc.text(`Tingkat kehadiran: ${attendanceRate}%`, MARGIN + 31, y);
-    y += 5.5;
-  }
-
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(8); // consistent sub-label
-  doc.setTextColor(...SECTION_TITLE_COLOR);
-  doc.text("RIWAYAT SERTIFIKAT", MARGIN + 6, y);
-  doc.setTextColor(0, 0, 0);
-  y += 3.5;
-
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9); // consistent body
-  if (hasCertificates) {
-    doc.text(firstCertificateLines, MARGIN + 6, y);
-  } else {
-    doc.text("Belum ada sertifikat yang tercatat pada periode ini.", MARGIN + 6, y);
-  }
-
-  let nextY = panelTop + panelHeight + SECTION_GAP;
-
-  if (!hasCertificates || certificateChunks.length <= 1) {
-    return nextY;
-  }
-
-  for (let chunkIndex = 1; chunkIndex < certificateChunks.length; chunkIndex += 1) {
-    const chunk = certificateChunks[chunkIndex];
-    nextY = addNewPage();
-    drawSectionTitle(doc, "LANJUTAN RIWAYAT SERTIFIKAT", nextY);
-    nextY += 4;
-
-    const chunkLines = certificateLines.slice(chunk.start, chunk.end);
-    const continuationHeight = Math.max(20, 10 + chunkLines.length * lineHeight);
-    drawPanel(doc, MARGIN, nextY, CONTENT_W, continuationHeight);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
-    doc.setTextColor(0, 0, 0);
-    doc.text(chunkLines, MARGIN + 6, nextY + 8);
-
-    nextY += continuationHeight + SECTION_GAP;
-  }
-
-  return nextY;
-}
-
 // ─── Signature Area ───────────────────────────────────────────────────────────
 
 export interface SignatureParam {
@@ -488,10 +392,10 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   const columnWidth = (CONTENT_W - columnGap) / 2;
   const leftX = MARGIN;
   const rightX = MARGIN + columnWidth + columnGap;
-  const signatureTopGap = 5;
-  const lineGap = 5;
-  const footerGap = 8;
-  const blockHeight = signatureTopGap + SIG_BOX_H + lineGap + footerGap + 10;
+  const signatureTopGap = 3;
+  const lineGap = 4;
+  const footerGap = 7;
+  const blockHeight = signatureTopGap + SIG_BOX_H + lineGap + footerGap + 9;
 
   y = ensurePageCapacity(y, blockHeight, addNewPage);
   const lineY = y + signatureTopGap + SIG_BOX_H + lineGap;
@@ -501,7 +405,7 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.text(dateStr, MARGIN + CONTENT_W / 2, y, { align: "center" });
-  y += 5.5;
+  y += 4.5;
 
   const renderSingle = async (url: string | undefined, x: number, yPos: number, width: number, height: number, isStamp = false) => {
     if (!url || url.toLowerCase().endsWith(".pdf")) return;
@@ -518,7 +422,7 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
         return;
       }
 
-      drawFitImage(doc, b64, format, x, yPos, width * 1.75, height * 1.75);
+      drawFitImage(doc, b64, format, x, yPos, width, height, 1.75);
     } catch (error) {
       console.error("[PDF Gen] Error rendering signature asset:", error);
     }
@@ -527,8 +431,8 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8); // consistent sub-label
   doc.setTextColor(...SECTION_TITLE_COLOR);
-  doc.text("COACH", leftX + columnWidth / 2, y + 3.5, { align: "center" });
-  doc.text("CEO ADORA BBC", rightX + columnWidth / 2, y + 3.5, { align: "center" });
+  doc.text("COACH", leftX + columnWidth / 2, y + 2.8, { align: "center" });
+  doc.text("CEO ADORA BBC", rightX + columnWidth / 2, y + 2.8, { align: "center" });
   doc.setTextColor(0, 0, 0);
 
   await Promise.all([

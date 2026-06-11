@@ -218,8 +218,9 @@ export default function CertificatesPage() {
             ))}
           </div>
 
-          <div className="hidden overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm md:block">
-            <Table className="min-w-[42rem]">
+curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash
+          <div className="hidden overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm md:block custom-scrollbar">
+            <Table className="min-w-[48rem]">
               <TableHeader className="bg-muted/20">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">
                   <TableHead className="w-10 text-center text-[10px] font-medium text-muted-foreground">
@@ -248,10 +249,10 @@ export default function CertificatesPage() {
                     <TableCell className="text-center text-xs font-medium text-muted-foreground">
                       {(clampedPage - 1) * ITEMS_PER_PAGE + index + 1}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-[18rem]">
                       <div className="flex items-center gap-2">
                         <FileBadge className="size-4 shrink-0 text-primary" />
-                        <span className="font-semibold text-foreground">{certificate.title}</span>
+                        <span className="truncate font-semibold text-foreground">{certificate.title}</span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -267,7 +268,7 @@ export default function CertificatesPage() {
                         year: "numeric",
                       })}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="w-36 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <a
                           href={certificate.fileUrl}

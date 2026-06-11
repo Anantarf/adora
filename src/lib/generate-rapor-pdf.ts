@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import type { MetricsJson } from "@/types/dashboard";
-import { isMetricsJsonV2, type MetricsJsonV2 } from "@/lib/evaluation-rules";
+import type { MetricsJsonV2 } from "@/lib/evaluation-rules";
 import {
   PAGE_W, PAGE_H, MARGIN, CONTENT_W,
   HEADER_MAX_H, HEADER_BOTTOM_TRIM, HEADER_SEP_GAP, PDF_TEMPLATE_SKIP,
@@ -47,8 +47,6 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
     schoolOrigin,
     periodName,
     metrics,
-    attendanceRate,
-    certificates,
     printDate = new Date(),
     assets,
     signers,
@@ -108,16 +106,9 @@ export async function generateRaporPDF(data: RaporData): Promise<void> {
 
   y = renderMainTitle(doc, y, periodName);
 
-  const effectiveAttendanceRate = typeof attendanceRate === "number"
-    ? attendanceRate
-    : (isMetricsJsonV2(metrics) && metrics.attendance)
-      ? metrics.attendance.score
-      : null;
-
   y = renderPlayerInfo(doc, y, { playerName, groupName, periodName, schoolOrigin, printDate });
   y = renderAssessmentTable(doc, y, metrics);
   y = renderConclusionAndGrades(doc, y, { playerName, periodName, metrics }, addNewPage);
-  y = Math.max(MARGIN, y - 8);
   await renderSignatureArea(doc, y, { assets, signers, printDate }, addNewPage);
 
   await finalizePDF(doc, {

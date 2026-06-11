@@ -506,8 +506,8 @@ export default function PlayersPage() {
                     </p>
                   </div>
                 ) : viewMode === "database" ? (
-                  <div className="overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
-                    <table className="w-full text-left text-xs">
+                  <div className="-mx-1 overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
+                    <table className="min-w-[64rem] w-full text-left text-xs">
                       <thead className="border-b border-border/50 bg-muted/40 text-[10px] font-medium text-muted-foreground">
                         <tr>
                           <th scope="col" className="w-10 px-4 py-3 text-center">

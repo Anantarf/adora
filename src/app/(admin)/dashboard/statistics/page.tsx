@@ -850,16 +850,16 @@ export default function StatisticsPage() {
 
       {selectedPeriodId ? (
         <div className="hidden overflow-x-auto rounded-2xl border border-border/50 bg-card shadow-sm md:block">
-          <Table className="min-w-[980px]">
+          <Table className="min-w-[920px]">
               <TableHeader className="bg-muted/[0.16]">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">
                 <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-[10px] font-medium text-muted-foreground">
                   No
                 </TableHead>
-                <TableHead className="sticky left-12 z-20 min-w-44 max-w-56 bg-muted/20 text-[10px] font-medium text-muted-foreground">
+                <TableHead className="sticky left-12 z-20 min-w-40 max-w-52 bg-muted/20 text-[10px] font-medium text-muted-foreground">
                   Nama Pemain
                 </TableHead>
-                <TableHead className="min-w-[360px] px-3 text-left text-[10px] font-medium text-muted-foreground">
+                <TableHead className="min-w-[320px] px-3 text-left text-[10px] font-medium text-muted-foreground">
                   Ringkasan Kategori
                 </TableHead>
                 <TableHead className="w-20 text-center text-[10px] font-medium text-muted-foreground">
