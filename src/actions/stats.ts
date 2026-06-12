@@ -20,7 +20,7 @@ import {
   getReportSignerResolverContext,
   resolveReportSignerSnapshotForGroup,
 } from "@/lib/report-signer-resolver";
-import { requireAdmin, requireSessionRole, requireActiveUser } from "@/lib/server-auth";
+import { requireSessionRole, requireActiveUser } from "@/lib/server-auth";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
 const EMPTY_METRICS: MetricsJson = {
@@ -510,6 +510,12 @@ export async function submitStatisticAction(data: {
       if (role === "COACH" && existingStatistic.status === "Published") {
         throw new Error(
           "Akses Ditolak: Nilai yang sudah diterbitkan tidak dapat diubah oleh Pelatih."
+        );
+      }
+
+      if (existingStatistic.status === "Published" && payload.status === "Draft") {
+        throw new Error(
+          "Nilai yang sudah diterbitkan tidak dapat disimpan ulang sebagai draf. Gunakan Simpan & Terbitkan untuk memperbarui rapor.",
         );
       }
 

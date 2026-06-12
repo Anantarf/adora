@@ -163,7 +163,7 @@ export function AccountDetailDialog({
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground">Profil Coach</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Lengkapi biodata, lisensi, foto, dan assignment kelompok latihan coach ini.
+                          Lengkapi biodata, lisensi, foto, dan penugasan kelompok latihan coach ini.
                         </p>
                       </div>
                     </div>

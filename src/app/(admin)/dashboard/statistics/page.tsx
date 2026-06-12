@@ -206,6 +206,7 @@ const PlayerStatRow = React.memo(
     const metrics = getValidMetrics(stat?.metricsJson);
     const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
     const [isPdfLoading, setIsPdfLoading] = useState(false);
+    const canDownloadReport = Boolean(metrics && stat?.status === "Published");
     const coachSignerName = resolveCoachSignerName(
       stat?.coachNameResolved ??
         stat?.coachNameSnapshot ??
@@ -288,7 +289,7 @@ const PlayerStatRow = React.memo(
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-2">
-            {metrics ? (
+            {canDownloadReport ? (
               <button
                 title="Download Rapor PDF"
                 onClick={handleDownload}
@@ -773,7 +774,7 @@ export default function StatisticsPage() {
 
                           <div className="-mx-4 mt-1 border-t border-border/40 px-4 pt-3">
                             <div className="flex items-center justify-end gap-2">
-                              {metrics ? (
+                              {metrics && stat?.status === "Published" ? (
                                 <button
                                   title="Download Rapor PDF"
                                   disabled={loadingPlayerId === player.id}

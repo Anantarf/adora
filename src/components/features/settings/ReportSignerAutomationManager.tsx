@@ -124,7 +124,7 @@ export function ReportSignerAutomationManager() {
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={NO_HOMEBASE_FALLBACK}>Tanpa coach cadangan</SelectItem>
+                          <SelectItem value={NO_HOMEBASE_FALLBACK}>Tanpa pelatih cadangan</SelectItem>
                           {orderedCoachOptions.map((coach) => {
                             const isRelevantCoach = relevantCoachOptions.some(
                               (relevantCoach) => relevantCoach.id === coach.id,
@@ -215,9 +215,9 @@ export function ReportSignerAutomationManager() {
             <PenSquare className="size-4 text-primary" />
             Urutan pemakaian tanda tangan
           </div>
-          <p>1. Coach aktif di kelompok latihan.</p>
-          <p>2. Coach cadangan region.</p>
-          <p>3. Coach umum rapor sebagai fallback terakhir.</p>
+          <p>1. Pelatih aktif di kelompok latihan.</p>
+          <p>2. Pelatih cadangan region.</p>
+          <p>3. Pelatih umum rapor sebagai cadangan terakhir.</p>
         </div>
       </div>
     </section>

@@ -18,7 +18,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
       return { coach: groupCoach, label: "Pelatih Utama" };
     }
     if (resolutionSource === "HOMEBASE" && player.fallbackCoachProfile) {
-      return { coach: player.fallbackCoachProfile, label: "Coach Region" };
+      return { coach: player.fallbackCoachProfile, label: "Pelatih Region" };
     }
     if (resolutionSource === "GLOBAL") {
       return {
@@ -28,7 +28,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
           photoUrl: null,
           licenseUrl: null,
         },
-        label: "Coach Umum Akademi",
+        label: "Pelatih Umum Akademi",
       };
     }
     return { coach: null, label: "Pelatih Utama" };

@@ -108,7 +108,7 @@ export function CoachProfileDialog({
             Kelola Profil Coach
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Lengkapi biodata coach, lisensi, tanda tangan rapor, dan assignment kelompok latihan.
+            Lengkapi biodata coach, lisensi, tanda tangan rapor, dan penugasan kelompok latihan.
           </DialogDescription>
         </DialogHeader>
 
@@ -140,7 +140,7 @@ export function CoachProfileDialog({
 
               <div className="space-y-3">
                 <div>
-                  <h4 className="text-sm font-semibold text-foreground">Assignment Kelompok</h4>
+                  <h4 className="text-sm font-semibold text-foreground">Penugasan Kelompok</h4>
                   <p className="mt-1 text-xs text-muted-foreground">
                     Pilih kelompok latihan yang saat ini ditangani coach ini.
                   </p>

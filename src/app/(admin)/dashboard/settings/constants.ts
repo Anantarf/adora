@@ -25,8 +25,8 @@ export const ASSET_KEYS: AssetConfig[] = [
   },
   {
     key: "rapor_coach_sign_url",
-    label: "Tanda Tangan Coach Umum Cadangan",
-    description: "Dipakai hanya jika coach umum belum dipilih dari data coach aktif atau coach terpilih belum punya tanda tangan.",
+    label: "Tanda Tangan Pelatih Umum Cadangan",
+    description: "Dipakai hanya jika pelatih umum belum dipilih dari data coach aktif atau pelatih terpilih belum punya tanda tangan.",
     accept: ".png",
     maxSizeLabel: "Maks 300KB",
   },

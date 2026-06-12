@@ -24,7 +24,7 @@ export function UsersManagementHeader({
     role === "PARENT"
       ? "Kelola akun orang tua dan akses mereka ke portal pemain."
       : role === "COACH"
-        ? "Kelola akun coach, profil coach, dan kesiapan data assignment mereka."
+        ? "Kelola akun coach, profil coach, dan kesiapan penugasan mereka."
         : "Kelola akun admin yang memiliki akses ke sistem klub.";
 
   return (

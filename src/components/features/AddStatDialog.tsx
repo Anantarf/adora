@@ -142,6 +142,7 @@ export function AddStatDialog({
   );
   const { mutateAsync, isPending } = useSubmitStatistic();
   const isEdit = !!existingStat;
+  const isPublishedStat = existingStat?.status === "Published";
 
   useEffect(() => {
     if (dynamicConfig) {
@@ -589,21 +590,23 @@ export function AddStatDialog({
                         "Simpan & Terbitkan"
                       )}
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => void onSubmit("Draft")}
-                      disabled={isPending}
-                      className="h-11 w-full border-primary/30 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:text-primary"
-                    >
-                      {pendingStatus === "Draft" ? (
-                        <>
-                          <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan Draf...
-                        </>
-                      ) : (
-                        "Simpan sebagai Draf"
-                      )}
-                    </Button>
+                    {!isPublishedStat ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => void onSubmit("Draft")}
+                        disabled={isPending}
+                        className="h-11 w-full border-primary/30 text-sm font-semibold text-primary transition-colors hover:bg-primary/10 hover:text-primary"
+                      >
+                        {pendingStatus === "Draft" ? (
+                          <>
+                            <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan Draf...
+                          </>
+                        ) : (
+                          "Simpan sebagai Draf"
+                        )}
+                      </Button>
+                    ) : null}
                   </>
                 )}
               </div>

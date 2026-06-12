@@ -59,7 +59,7 @@ export function CoachPlayersPageClient() {
           <AlertCircle className="size-6" />
         </div>
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">Data pemain coach gagal dimuat</h2>
+          <h2 className="text-lg font-semibold text-foreground">Data pemain gagal dimuat</h2>
           <p className="max-w-md text-sm text-muted-foreground">
             {error instanceof Error ? error.message : "Terjadi kendala saat memuat daftar pemain."}
           </p>
@@ -80,10 +80,10 @@ export function CoachPlayersPageClient() {
             Pemain Saya
           </p>
           <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Daftar Pemain Berdasarkan Assignment
+            Daftar Pemain Berdasarkan Penugasan
           </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab coach Anda. Belum ada kontrol edit agar regulasi data tetap jelas.
+            Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab Anda. Perubahan data pemain tetap dikelola admin agar alur data tetap jelas.
           </p>
         </div>
         <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground md:text-sm">
@@ -146,7 +146,7 @@ export function CoachPlayersPageClient() {
 
       <Card className="border border-border/50 shadow-sm bg-transparent sm:bg-card">
         <CardHeader className="border-b border-border/40 bg-card rounded-t-xl hidden sm:block">
-          <CardTitle>Roster Coach</CardTitle>
+          <CardTitle>Daftar Pemain Coach</CardTitle>
           <CardDescription>Daftar pemain yang sesuai dengan filter pencarian dan kelompok.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 p-0 sm:p-6 sm:pt-6">
@@ -223,7 +223,7 @@ export function CoachPlayersPageClient() {
               <p className="text-xs text-muted-foreground max-w-[250px]">
                 {searchQuery || selectedGroupId !== "all" 
                   ? "Coba ubah filter pencarian atau kelompok untuk melihat hasil."
-                  : "Belum ada pemain aktif yang terhubung ke assignment coach ini."}
+                  : "Belum ada pemain aktif yang terhubung ke penugasan coach ini."}
               </p>
               {(searchQuery || selectedGroupId !== "all") && (
                 <Button 

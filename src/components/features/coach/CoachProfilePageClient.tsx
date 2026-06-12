@@ -118,7 +118,7 @@ export function CoachProfilePageClient() {
           <p className="max-w-md text-sm text-muted-foreground">
             {error instanceof Error
               ? error.message
-              : "Terjadi kendala saat mengambil data coach. Coba muat ulang halaman."}
+              : "Terjadi kendala saat mengambil data profil coach. Coba muat ulang halaman."}
           </p>
         </div>
         <Button type="button" onClick={() => refetch()}>
@@ -140,7 +140,7 @@ export function CoachProfilePageClient() {
             Profil dan Identitas Coach
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-            Rapikan biodata coach agar tampilan admin, parent, dan dokumen rapor membaca identitas yang sama secara konsisten.
+            Rapikan biodata coach agar tampilan admin, orang tua, dan dokumen rapor membaca identitas yang sama secara konsisten.
           </p>
         </div>
 
@@ -156,14 +156,14 @@ export function CoachProfilePageClient() {
           </div>
           <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-              Assignment Aktif
+              Penugasan Aktif
             </p>
             <div className="mt-2 flex items-center gap-2 text-foreground">
               <Users className="size-4 text-primary" />
               <p className="text-lg font-semibold">{assignmentCount} kelompok</p>
             </div>
             <p className="mt-1 text-xs text-muted-foreground">
-              Assignment tetap dikelola admin, tetapi ditampilkan di sini sebagai referensi kerja coach.
+              Penugasan tetap dikelola admin, tetapi ditampilkan di sini sebagai referensi kerja coach.
             </p>
           </div>
         </div>
@@ -177,7 +177,7 @@ export function CoachProfilePageClient() {
               <h2 className="text-lg font-semibold">Profil Coach</h2>
             </div>
             <p className="mt-1 text-sm text-muted-foreground">
-              Perbarui biodata, foto profil, lisensi, dan tanda tangan rapor Anda. Assignment kelompok tetap dikelola admin.
+              Perbarui biodata, foto profil, lisensi, dan tanda tangan rapor Anda. Penugasan kelompok tetap dikelola admin.
             </p>
           </div>
           <div className="rounded-xl border border-primary/20 bg-primary/5 px-3 py-2 text-xs text-primary">
@@ -207,7 +207,7 @@ export function CoachProfilePageClient() {
             <div>
               <h3 className="text-sm font-semibold text-foreground">Kelompok Saat Ini</h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                Informasi ini ditampilkan sebagai referensi. Perubahan assignment tetap dilakukan admin.
+                Informasi ini ditampilkan sebagai referensi. Perubahan penugasan tetap dilakukan admin.
               </p>
             </div>
 
@@ -222,7 +222,7 @@ export function CoachProfilePageClient() {
                   </span>
                 ))
               ) : (
-                <span className="text-sm text-muted-foreground">Belum ada kelompok yang di-assign admin.</span>
+                <span className="text-sm text-muted-foreground">Belum ada kelompok yang ditugaskan admin.</span>
               )}
             </div>
           </div>

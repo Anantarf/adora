@@ -40,9 +40,9 @@ export function CoachDashboardPageClient() {
           <AlertCircle className="size-6" />
         </div>
         <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">Workspace coach gagal dimuat</h2>
+          <h2 className="text-lg font-semibold text-foreground">Portal coach gagal dimuat</h2>
           <p className="max-w-md text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Terjadi kendala saat memuat data coach."}
+            {error instanceof Error ? error.message : "Terjadi kendala saat memuat data pelatih."}
           </p>
         </div>
         <Button type="button" onClick={() => refetch()}>
@@ -57,13 +57,13 @@ export function CoachDashboardPageClient() {
     {
       label: "Kelompok Aktif",
       value: data.summary.totalGroups,
-      helper: "Assignment group yang saat ini Anda pegang",
+      helper: "Kelompok latihan yang saat ini Anda pegang",
       icon: UsersRound,
     },
     {
       label: "Pemain Dipantau",
       value: data.summary.totalPlayers,
-      helper: "Total pemain dari semua assignment aktif",
+      helper: "Total pemain dari semua penugasan aktif",
       icon: Users,
     },
     {
@@ -75,7 +75,7 @@ export function CoachDashboardPageClient() {
     {
       label: "Nilai Terbit",
       value: data.summary.recentPublishedStatsCount,
-      helper: "Total statistik published dari kelompok Anda",
+      helper: "Total statistik yang sudah diterbitkan dari kelompok Anda",
       icon: FileCheck2,
     },
   ];
@@ -91,7 +91,7 @@ export function CoachDashboardPageClient() {
             Ringkasan Kelompok dan Pemain
           </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Pantau assignment aktif, pemain yang Anda dampingi, dan agenda terdekat tanpa bercampur dengan area admin.
+            Pantau penugasan aktif, pemain yang Anda dampingi, dan agenda terdekat tanpa bercampur dengan area admin.
           </p>
         </div>
         <div className="rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground md:text-sm">
@@ -149,7 +149,7 @@ export function CoachDashboardPageClient() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Belum ada kelompok yang di-assign admin ke coach ini.</p>
+              <p className="text-sm text-muted-foreground">Belum ada kelompok yang ditugaskan admin ke coach ini.</p>
             )}
           </CardContent>
         </Card>
@@ -180,7 +180,7 @@ export function CoachDashboardPageClient() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Belum ada agenda mendatang untuk assignment coach ini.</p>
+              <p className="text-sm text-muted-foreground">Belum ada agenda mendatang untuk penugasan coach ini.</p>
             )}
           </CardContent>
         </Card>
