@@ -15,7 +15,7 @@ import {
   normalizeEvaluationConfig,
   type MetricsJsonV2,
 } from "@/lib/evaluation-rules";
-import { FLAT_METRIC_DEFS } from "@/lib/metrics";
+import { FLAT_METRIC_DEFS, getLegacyCategoryScores, groupFlatMetricDefs } from "@/lib/metrics";
 import type { MetricsJson, PlayerSummary } from "@/types/dashboard";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -122,7 +122,7 @@ export function AddStatDialog({
   const [open, setOpen] = useState(false);
   const [pendingStatus, setPendingStatus] = useState<"Draft" | "Published" | null>(null);
   const [isGeneratingNote, setIsGeneratingNote] = useState(false);
-  const scoreInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+  const scoreInputRefs = useRef<HTMLInputElement[]>([]);
   const [legacyMetrics, setLegacyMetrics] = useState<MetricsJson>(
     (existingStat?.metrics as MetricsJson) ?? DEFAULT_LEGACY_METRICS,
   );
@@ -212,42 +212,7 @@ export function AddStatDialog({
       }));
     }
 
-    const legacyCategoryRows = [
-      {
-        id: "dribble",
-        label: "Dribble",
-        score: Math.round(
-          ([
-            legacyMetrics.dribble.inAndOut,
-            legacyMetrics.dribble.crossover,
-            legacyMetrics.dribble.vLeft,
-            legacyMetrics.dribble.vRight,
-            legacyMetrics.dribble.betweenLegsLeft,
-            legacyMetrics.dribble.betweenLegsRight,
-          ].reduce((sum, value) => sum + value, 0) /
-            60) *
-            100,
-        ),
-      },
-      {
-        id: "passing",
-        label: "Passing",
-        score: Math.round(
-          ([
-            legacyMetrics.passing.chestPass,
-            legacyMetrics.passing.bouncePass,
-            legacyMetrics.passing.overheadPass,
-          ].reduce((sum, value) => sum + value, 0) /
-            30) *
-            100,
-        ),
-      },
-      {
-        id: "finishing",
-        label: "Finishing",
-        score: Math.round(((legacyMetrics.layUp + legacyMetrics.shooting) / 20) * 100),
-      },
-    ];
+    const legacyCategoryRows = getLegacyCategoryScores(legacyMetrics);
 
     return legacyCategoryRows.map((category) => ({
       id: category.id,
@@ -346,21 +311,25 @@ export function AddStatDialog({
   };
 
   const notesMaxLength = dynamicConfig?.notesMaxLength ?? 160;
-  let scoreInputIndex = 0;
+  const legacyGroups = useMemo(() => groupFlatMetricDefs(), []);
 
-  const registerScoreInputRef = (index: number) => (node: HTMLInputElement | null) => {
-    scoreInputRefs.current[index] = node;
-  };
+  scoreInputRefs.current = [];
 
-  const handleScoreInputEnter = (event: React.KeyboardEvent<HTMLInputElement>, currentIndex: number) => {
-    if (event.key !== "Enter") {
-      return;
+  const registerScoreInputRef = (node: HTMLInputElement | null) => {
+    if (node && !scoreInputRefs.current.includes(node)) {
+      scoreInputRefs.current.push(node);
     }
-
-    event.preventDefault();
-    scoreInputRefs.current[currentIndex + 1]?.focus();
-    scoreInputRefs.current[currentIndex + 1]?.select();
   };
+
+  const handleScoreInputEnter = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    const currentIndex = scoreInputRefs.current.indexOf(event.currentTarget);
+    const next = scoreInputRefs.current[currentIndex + 1];
+    next?.focus();
+    next?.select();
+  };
+
   if (isCoach && isEdit && existingStat?.status === "Published") {
     return null;
   }
@@ -434,13 +403,11 @@ export function AddStatDialog({
                         <div className="grid gap-3 md:grid-cols-2">
                           {category.items.map((item) => {
                             const fieldKey = buildMetricFieldKey(category.id, item.id);
-                            const inputIndex = scoreInputIndex;
-                            scoreInputIndex += 1;
                             return (
                               <div key={fieldKey} className="space-y-1">
                                 <label className="text-xs font-medium text-muted-foreground">{item.label}</label>
                                 <Input
-                                  ref={registerScoreInputRef(inputIndex)}
+                                  ref={registerScoreInputRef}
                                   type="text"
                                   inputMode="numeric"
                                   pattern="[0-9]*"
@@ -451,7 +418,7 @@ export function AddStatDialog({
                                       [fieldKey]: parseScoreInput(event.target.value, item.maxScore),
                                     }))
                                   }
-                                  onKeyDown={(event) => handleScoreInputEnter(event, inputIndex)}
+                                  onKeyDown={handleScoreInputEnter}
                                   className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
                                 />
                                 <p className="text-[10px] text-muted-foreground">Skala 0-{FIXED_ASPECT_MAX_SCORE}</p>
@@ -472,68 +439,41 @@ export function AddStatDialog({
                     </span>
                   </div>
                   <div className="space-y-4 p-3">
-                    {(() => {
-                      // Group FLAT_METRIC_DEFS by category
-                      const categoryGroups: Array<{
-                        label: string;
-                        definitions: typeof FLAT_METRIC_DEFS;
-                      }> = [];
-                      let currentCategory = "";
-                      for (const def of FLAT_METRIC_DEFS) {
-                        const categoryLabel = def.path.includes(".")
-                          ? def.path.split(".")[0]
-                          : "finishing"; // layUp and shooting both belong to Finishing
-                        const displayLabel =
-                          categoryLabel === "dribble"
-                            ? "Dribble"
-                            : categoryLabel === "passing"
-                              ? "Passing"
-                              : "Finishing";
-                        if (displayLabel !== currentCategory) {
-                          categoryGroups.push({ label: displayLabel, definitions: [] });
-                          currentCategory = displayLabel;
-                        }
-                        categoryGroups[categoryGroups.length - 1].definitions.push(def);
-                      }
-
-                      return categoryGroups.map((group) => (
-                        <div key={group.label} className="space-y-2 rounded-xl border border-border/40 bg-background/40 p-3">
-                          <div className="flex items-center gap-2 pb-0.5">
-                            <span className="text-xs font-semibold uppercase tracking-wide text-primary/80">
-                              {group.label}
-                            </span>
-                            <span className="h-px flex-1 bg-border/40" />
-                            <span className="text-[10px] font-medium text-muted-foreground">
-                              {group.definitions.length} aspek
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-2 gap-2">
-                            {group.definitions.map((definition) => {
-                              const inputIndex = scoreInputIndex;
-                              scoreInputIndex += 1;
-                              return (
-                                <div key={definition.key} className="flex flex-col gap-1">
-                                  <label className="text-xs font-medium text-muted-foreground">{definition.label}</label>
-                                  <Input
-                                    ref={registerScoreInputRef(inputIndex)}
-                                    type="text"
-                                    inputMode="numeric"
-                                    pattern="[0-9]*"
-                                    value={String(getLegacyMetricValue(legacyMetrics, definition.path))}
-                                    onChange={(event) =>
-                                      handleLegacyChange(definition.path, definition.max, event.target.value)
-                                    }
-                                    onKeyDown={(event) => handleScoreInputEnter(event, inputIndex)}
-                                    className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
-                                  />
-                                  <p className="text-[10px] text-muted-foreground">Skala 0-{definition.max}</p>
-                                </div>
-                              );
-                            })}
-                          </div>
+                    {legacyGroups.map((group) => (
+                      <div key={group.label} className="space-y-2 rounded-xl border border-border/40 bg-background/40 p-3">
+                        <div className="flex items-center gap-2 pb-0.5">
+                          <span className="text-xs font-semibold uppercase tracking-wide text-primary/80">
+                            {group.label}
+                          </span>
+                          <span className="h-px flex-1 bg-border/40" />
+                          <span className="text-[10px] font-medium text-muted-foreground">
+                            {group.definitions.length} aspek
+                          </span>
                         </div>
-                      ));
-                    })()}
+                        <div className="grid grid-cols-2 gap-2">
+                          {group.definitions.map((definition) => {
+                            return (
+                              <div key={definition.key} className="flex flex-col gap-1">
+                                <label className="text-xs font-medium text-muted-foreground">{definition.label}</label>
+                                <Input
+                                  ref={registerScoreInputRef}
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={String(getLegacyMetricValue(legacyMetrics, definition.path))}
+                                  onChange={(event) =>
+                                    handleLegacyChange(definition.path, definition.max, event.target.value)
+                                  }
+                                  onKeyDown={handleScoreInputEnter}
+                                  className="h-10 rounded-xl border-primary/10 bg-black/20 text-center font-bold tabular-nums shadow-inner transition-all focus:border-primary/40 focus:bg-black/30"
+                                />
+                                <p className="text-[10px] text-muted-foreground">Skala 0-{definition.max}</p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

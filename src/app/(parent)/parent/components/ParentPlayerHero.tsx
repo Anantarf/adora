@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, UserRound, VenusAndMars } from "lucide-react";
+import { MapPin, UserRound } from "lucide-react";
 
 import type { FamilyPlayer } from "@/hooks/use-family";
 import { Card, CardContent } from "@/components/ui/card";
@@ -51,30 +51,18 @@ export function ParentPlayerHero({ player }: { player: FamilyPlayer }) {
                 </span>
               ) : null}
             </div>
-            <h2 className="text-2xl font-heading uppercase tracking-wide text-foreground md:text-[2rem]">
+            <h2 className="truncate text-2xl font-heading uppercase tracking-wide text-foreground md:text-[2rem]">
               {player.name}
             </h2>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="flex items-start gap-2 rounded-xl border border-border/50 bg-background/40 px-3 py-3">
-              <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Tempat / Tanggal Lahir
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">{formatBirthLabel(player)}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2 rounded-xl border border-border/50 bg-background/40 px-3 py-3">
-              <VenusAndMars className="mt-0.5 size-4 shrink-0 text-primary" />
-              <div className="min-w-0">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-                  Jenis Kelamin
-                </p>
-                <p className="mt-1 text-sm font-medium text-foreground">{player.gender || "-"}</p>
-              </div>
+          <div className="flex items-start gap-2 rounded-xl border border-border/50 bg-background/40 px-3 py-3">
+            <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Tempat / Tanggal Lahir
+              </p>
+              <p className="mt-1 text-sm font-medium text-foreground">{formatBirthLabel(player)}</p>
             </div>
           </div>
         </div>

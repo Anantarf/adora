@@ -97,3 +97,50 @@ export const letterGrade = (score: number): Grade => {
   if (score >= 60) return { letter: "C", label: "CUKUP BAIK" };
   return { letter: "D", label: "KURANG BAIK" };
 };
+
+// Group flat metrics into Dribble / Passing / Finishing buckets for legacy UI render.
+// Pure: order preserved by FLAT_METRIC_DEFS declaration order.
+export type FlatMetricGroup = {
+  label: "Dribble" | "Passing" | "Finishing";
+  definitions: FlatMetricDef[];
+};
+
+const LEGACY_CATEGORY_BY_PATH_PREFIX: Record<string, FlatMetricGroup["label"]> = {
+  dribble: "Dribble",
+  passing: "Passing",
+};
+
+export function groupFlatMetricDefs(defs: FlatMetricDef[] = FLAT_METRIC_DEFS): FlatMetricGroup[] {
+  const groups: FlatMetricGroup[] = [];
+  for (const def of defs) {
+    const prefix = def.path.includes(".") ? def.path.split(".")[0] : "";
+    const label: FlatMetricGroup["label"] = LEGACY_CATEGORY_BY_PATH_PREFIX[prefix] ?? "Finishing";
+    const last = groups[groups.length - 1];
+    if (last && last.label === label) {
+      last.definitions.push(def);
+    } else {
+      groups.push({ label, definitions: [def] });
+    }
+  }
+  return groups;
+}
+
+export function getLegacyCategoryScores(legacyMetrics: MetricsJson) {
+  return [
+    {
+      id: "dribble",
+      label: "Dribble",
+      score: Math.round((dribbleTotal(legacyMetrics.dribble) / 60) * 100),
+    },
+    {
+      id: "passing",
+      label: "Passing",
+      score: Math.round((passingTotal(legacyMetrics.passing) / 30) * 100),
+    },
+    {
+      id: "finishing",
+      label: "Finishing",
+      score: Math.round(((legacyMetrics.layUp + legacyMetrics.shooting) / 20) * 100),
+    },
+  ];
+}

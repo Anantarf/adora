@@ -3,6 +3,7 @@
 import { FileText } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatFullDate } from "@/lib/date-utils";
 
 type ArchiveItem = {
   id: string;
@@ -48,16 +49,10 @@ export function ParentReportArchivesCard({
               className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-4 md:flex-row md:items-center md:justify-between"
             >
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">{archive.period.name}</p>
+                <p className="truncate text-sm font-semibold text-foreground">{archive.period.name}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Tersedia sejak{" "}
-                  {archive.releasedAt
-                    ? new Date(archive.releasedAt).toLocaleDateString("id-ID", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
-                    : "-"}
+                  {archive.releasedAt ? formatFullDate(archive.releasedAt) : "-"}
                 </p>
               </div>
               <a

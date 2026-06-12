@@ -10,25 +10,32 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
   const [open, setOpen] = useState(false);
-  const groupCoach = player.group?.coachAssignment?.coachProfile ?? null;
   const resolutionSource = player.resolvedSigner?.resolutionSource;
-  
-  // Decide which coach to show based on resolutionSource
-  let coach = groupCoach;
-  let coachLabel = "Pelatih Utama";
-  
-  if (!coach && resolutionSource === "HOMEBASE" && player.fallbackCoachProfile) {
-    coach = player.fallbackCoachProfile;
-    coachLabel = "Coach Region";
-  } else if (!coach && resolutionSource === "GLOBAL") {
-    coach = {
-      id: "global",
-      fullName: player.resolvedSigner?.coachNameSnapshot ?? "Head Coach Akademi",
-      photoUrl: null,
-      licenseUrl: null,
-    };
-    coachLabel = "Coach Umum Akademi";
-  }
+
+  const coachResolution = (() => {
+    const groupCoach = player.group?.coachAssignment?.coachProfile;
+    if (groupCoach) {
+      return { coach: groupCoach, label: "Pelatih Utama" };
+    }
+    if (resolutionSource === "HOMEBASE" && player.fallbackCoachProfile) {
+      return { coach: player.fallbackCoachProfile, label: "Coach Region" };
+    }
+    if (resolutionSource === "GLOBAL") {
+      return {
+        coach: {
+          id: "global",
+          fullName: player.resolvedSigner?.coachNameSnapshot ?? "Head Coach Akademi",
+          photoUrl: null,
+          licenseUrl: null,
+        },
+        label: "Coach Umum Akademi",
+      };
+    }
+    return { coach: null, label: "Pelatih Utama" };
+  })();
+
+  const coach = coachResolution.coach;
+  const coachLabel = coachResolution.label;
 
   return (
     <>
@@ -51,11 +58,11 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
                 <UserRound className="size-8 text-muted-foreground/35" />
               )}
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 {coachLabel}
               </span>
-              <p className="mt-1 text-lg font-semibold text-foreground">
+              <p className="mt-1 truncate text-lg font-semibold text-foreground">
                 {coach?.fullName || "Belum tersedia"}
               </p>
             </div>

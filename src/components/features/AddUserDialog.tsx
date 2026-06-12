@@ -11,17 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 
-const userSchema = z.object({
-  name: z.string().min(1, "Nama tidak boleh kosong"),
-  username: z
-    .string()
-    .min(4, "Username minimal 4 karakter")
-    .regex(/^[a-z0-9_]+$/, "Hanya huruf kecil, angka, dan underscore"),
-  email: z.string().email("Email tidak valid").optional().or(z.literal("")),
-  password: z.string().optional(),
-});
+function buildUserSchema(role: ManagedUserRole) {
+  const requirePassword = role !== "PARENT";
+  return z.object({
+    name: z.string().min(1, "Nama tidak boleh kosong"),
+    username: z
+      .string()
+      .min(4, "Username minimal 4 karakter")
+      .regex(/^[a-z0-9_]+$/, "Hanya huruf kecil, angka, dan underscore"),
+    email: z.string().email("Email tidak valid").optional().or(z.literal("")),
+    password: requirePassword
+      ? z.string().min(6, `Password ${role === "COACH" ? "coach" : "admin"} minimal 6 karakter.`)
+      : z.string().optional(),
+  });
+}
 
-type UserForm = z.infer<typeof userSchema>;
+type UserForm = z.infer<ReturnType<typeof buildUserSchema>>;
 
 type ManagedUserRole = "PARENT" | "ADMIN" | "COACH";
 
@@ -45,7 +50,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: ManagedUserRole }) {
     formState: { errors },
     reset,
   } = useForm<UserForm>({
-    resolver: zodResolver(userSchema),
+    resolver: zodResolver(buildUserSchema(role)),
     defaultValues: {
       name: "",
       username: "",
@@ -56,11 +61,6 @@ export function AddUserDialog({ role = "PARENT" }: { role?: ManagedUserRole }) {
   });
 
   const onSubmit = async (data: UserForm) => {
-    if (!isParent && (!data.password || data.password.length < 6)) {
-      toast.error(`Password ${isCoach ? "coach" : "admin"} minimal 6 karakter.`);
-      return;
-    }
-
     try {
       await addUser({
         name: data.name,

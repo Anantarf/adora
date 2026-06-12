@@ -3,6 +3,7 @@
 import { Award } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatFullDate } from "@/lib/date-utils";
 
 type CertificateItem = {
   id: string;
@@ -51,14 +52,10 @@ export function ParentCertificatesCard({
                 <Award className="size-4 text-primary" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-semibold text-foreground">{certificate.title}</p>
+                <p className="truncate text-sm font-semibold text-foreground">{certificate.title}</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   Ditambahkan pada{" "}
-                  {new Date(certificate.uploadedAt).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {formatFullDate(certificate.uploadedAt)}
                 </p>
               </div>
             </a>

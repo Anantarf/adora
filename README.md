@@ -1,98 +1,97 @@
 # ADORA Basketball Club
 
-Sistem manajemen klub basket untuk ADORA Basketball Club. Proyek ini mencakup landing page publik, formulir pendaftaran, portal orang tua, dan dashboard admin untuk operasional klub.
+🌐 **Live Preview:** [https://adorabbc.com](https://adorabbc.com)
 
-## Cakupan Fitur
+Sistem manajemen klub basket komprehensif untuk ADORA Basketball Club. Proyek ini mencakup landing page publik, formulir pendaftaran, portal orang tua (Parent Portal), dan dashboard admin (Coach/Admin Portal) untuk mempermudah operasional klub sehari-hari.
 
-- Landing page klub dengan program latihan, homebase, galeri, dan CTA pendaftaran.
-- Form pendaftaran online untuk calon pemain baru.
-- Dashboard admin untuk pemain, kelompok, jadwal, absensi, statistik, sertifikat, audit log, pengaturan, dan akun pengguna.
-- Parent portal untuk melihat evaluasi, kehadiran, sertifikat, dan unduh rapor PDF.
-- Upload asset rapor dan generator PDF berbasis data evaluasi pemain.
+## 🌟 Fitur Utama
 
-## Tech Stack
+### 🏢 Publik & Pendaftaran
+- **Landing Page**: Informasi program latihan, homebase, galeri kegiatan, dan CTA pendaftaran.
+- **Formulir Pendaftaran Online**: Pendaftaran pemain baru yang terintegrasi langsung ke sistem admin.
 
-- Next.js 16 App Router
-- React 19
-- TypeScript
-- PostgreSQL
-- Prisma ORM
-- NextAuth
-- Tailwind CSS 4
-- React Query
-- Zod + React Hook Form
-- Playwright + Vitest
+### 🛡️ Admin & Coach Dashboard
+- **Manajemen Tim**: Pengelolaan data pemain, penempatan kelompok/roster, dan manajemen jadwal latihan & pertandingan.
+- **Sistem Presensi**: Pencatatan absensi yang terintegrasi otomatis dengan skor kedisiplinan pemain.
+- **Evaluasi Dinamis (V2)**: Sistem metrik penilaian fleksibel dan dinamis (Dribble, Passing, Finishing) dengan bobot skor yang bisa dikonfigurasi. Mendukung metrik *legacy*.
+- **AI Coach Notes**: Pembuatan catatan pelatih dan evaluasi otomatis secara cerdas berbasis statistik pemain menggunakan AI.
+- **Sertifikat & Rapor**: Generator rapor PDF tingkat lanjut menggunakan integrasi data evaluasi.
+- **Audit & Keamanan**: Log audit operasional dan manajemen pengguna terpusat.
 
-## Struktur Singkat
+### 👨‍👩‍👧 Parent Portal
+- **Dashboard Akses Orang Tua**: Portal khusus bagi orang tua untuk memantau performa anak.
+- **Rapor & Evaluasi**: Akses ke evaluasi pelatih, statistik kehadiran, sertifikat, dan fitur unduh rapor dalam format PDF.
+
+---
+
+## 🛠️ Tech Stack
+
+- **Framework:** Next.js 16 (App Router), React 19
+- **Bahasa:** TypeScript
+- **Database:** PostgreSQL (Supabase) + Prisma ORM
+- **Autentikasi:** NextAuth.js
+- **Styling & UI:** Tailwind CSS 4, shadcn/ui, Lucide React
+- **State Management:** React Query, Zod, React Hook Form
+- **Testing:** Playwright (E2E), Vitest (Integration)
+
+---
+
+## 📂 Struktur Proyek
 
 ```text
 src/
-  app/                 route App Router
-  actions/             server actions
-  components/          UI dan feature components
-  hooks/               react-query hooks dan utilitas client
-  lib/                 auth, prisma, pdf, constants, helpers
+  app/                 Routing App Router (Public, Admin, Parent)
+  actions/             Server Actions (Mutasi Data, AI Notes, dll)
+  components/          UI reusables (shadcn/ui) dan Feature Components
+  hooks/               React Query hooks & utilitas sisi Client
+  lib/                 Konfigurasi utilitas (Auth, Prisma, Evaluasi, Metrik, PDF)
 prisma/
-  migrations/          riwayat migrasi database
-  seed.ts              seed data awal
+  migrations/          Riwayat migrasi skema database
+  seed.ts              Seed data awal
 tests/
-  integration/         test Vitest
-  *.spec.ts            test Playwright
-public/
-  assets statis publik
+  integration/         Vitest (Integration Tests)
+  *.spec.ts            Playwright (E2E Tests)
+public/                Aset statis (Gambar, Template PDF, dll)
 ```
 
-## Menjalankan Project
+---
+
+## 🚀 Panduan Memulai (Development)
 
 ### Prasyarat
-
-- Node.js 20 atau lebih baru
+- Node.js 20+
 - npm
-- PostgreSQL atau Supabase Postgres
+- PostgreSQL (Lokal atau Supabase Postgres)
 
 ### Instalasi
 
 ```bash
+git clone <repository-url>
+cd adora-bc
 npm install
 ```
 
-### Environment
+### Konfigurasi Environment
 
-Salin `.env.example` menjadi `.env`, lalu isi nilainya sesuai environment Anda.
+Salin file `.env.example` menjadi `.env` dan sesuaikan kredensial Anda.
 
 ```bash
-copy .env.example .env
+cp .env.example .env
 ```
 
-Variable yang dipakai:
+**Variabel Utama:**
+- `DATABASE_URL`: Koneksi runtime aplikasi.
+- `DIRECT_URL`: Koneksi direct untuk eksekusi Prisma CLI & Migrasi.
+- `SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_URL`: URL project Supabase.
+- `SUPABASE_SERVICE_ROLE_KEY`: Service role (Wajib dijaga kerahasiaannya, untuk akses storage private).
+- `NEXTAUTH_SECRET`: Secret token untuk sesi otentikasi.
+- `NEXTAUTH_URL`: URL utama aplikasi (misal: `http://localhost:3000`).
 
-- `DATABASE_URL`: koneksi aplikasi/runtime
-- `DIRECT_URL`: koneksi direct untuk Prisma CLI dan migration
-- `SUPABASE_URL`: URL project Supabase untuk server-side, wajib di production
-- `NEXT_PUBLIC_SUPABASE_URL`: URL publik Supabase
-- `SUPABASE_SERVICE_ROLE_KEY`: service role key untuk upload asset, hanya dipakai di server dan tidak boleh dibagikan ke client
-- `NEXTAUTH_SECRET`: secret NextAuth
-- `NEXTAUTH_URL`: base URL aplikasi, untuk production gunakan `https://adorabbc.com`
-- `DEFAULT_RESET_PASSWORD`: password default reset akun
-- `HEALTH_CHECK_TOKEN`: token untuk endpoint health check
-- `PRISMA_SLOW_QUERY_THRESHOLD_MS`: threshold slow query observability dalam milidetik
-- `SMOKE_BASE_URL`: URL yang dipakai smoke test, untuk production gunakan `https://adorabbc.com`
-- `ALERT_WEBHOOK_URL`: webhook opsional untuk alert observability eksternal
-- `ALERT_MIN_SEVERITY`: batas minimum severity alert (`WARN` atau `ERROR`)
-- `ALERT_COOLDOWN_MS`: cooldown deduplikasi alert agar webhook tidak spam
-- `RESTORE_REHEARSAL_DATABASE_URL`: database non-production untuk latihan restore
-- `RESTORE_REHEARSAL_CONFIRM`: konfirmasi eksplisit untuk restore rehearsal destruktif pada target non-production
-- `E2E_ADMIN_USERNAME` dan `E2E_ADMIN_PASSWORD`: opsional, untuk menyalakan E2E login admin pada environment seeded
-- `E2E_PARENT_USERNAME` dan `E2E_PARENT_PASSWORD`: opsional, untuk menyalakan E2E login parent pada environment seeded
-
-Catatan Supabase:
-
-- untuk server production, `SUPABASE_URL` harus diisi secara eksplisit
-- file upload disimpan ke bucket private `uploads` dan dilayani lewat route internal `/api/storage/uploads/...`
-- bila file yang diupload bersifat sensitif, ini sudah lebih aman daripada public bucket karena URL aplikasi yang disimpan tidak membuka bucket langsung
-- keputusan ACL dan pembagian akses file ada di [docs/SUPABASE_STORAGE_AND_ACL.md](docs/SUPABASE_STORAGE_AND_ACL.md)
+*(Silakan merujuk pada file `.env.example` untuk daftar lengkap variabel opsional seperti E2E credentials, Observability, dll).*
 
 ### Setup Database
+
+Jalankan perintah berikut untuk menginisialisasi database lokal:
 
 ```bash
 npx prisma generate
@@ -100,66 +99,46 @@ npx prisma migrate deploy
 npm run seed
 ```
 
-Untuk development lokal yang membuat migrasi baru:
+*Catatan: Gunakan `npx prisma migrate dev` jika Anda ingin membuat file migrasi baru setelah mengubah `schema.prisma`.*
 
-```bash
-npx prisma migrate dev
-```
-
-### Menjalankan App
+### Menjalankan Aplikasi
 
 ```bash
 npm run dev
 ```
 
-Buka `http://localhost:3000`.
+Aplikasi dapat diakses melalui `http://localhost:3000`.
 
-## Script Penting
+---
 
-```bash
-npm run dev
-npm run build
-npm run start
-npm run lint
-npm run release:check
-npm run smoke:check
-npm run ops:alert-check
-npm run ops:backup-rehearsal
-npm run test:integration
-npm run test:critical
-npm run test:e2e
-npm run seed
-npm run repair:group-meta:dry
-npm run repair:group-meta
-```
+## 📜 Script Utama
 
-## Kualitas Repo
+| Perintah | Deskripsi |
+| --- | --- |
+| `npm run dev` | Menjalankan *development server*. |
+| `npm run build` | Membuat *production build*. |
+| `npm run start` | Menjalankan *production server*. |
+| `npm run lint` | Melakukan pengecekan linter pada kode. |
+| `npm run test:integration`| Menjalankan *integration tests* via Vitest. |
+| `npm run test:e2e` | Menjalankan *End-to-End tests* via Playwright. |
+| `npm run smoke:check` | Verifikasi *smoke test* pada *production/staging*. |
+| `npm run seed` | Mengisi database dengan data awal / *dummy*. |
 
-Kondisi repo sekarang sudah lebih rapi:
+---
 
-- file eksperimen lokal di root sudah dibuang
-- artefak hasil Playwright di `output/` tidak lagi disimpan di git
-- lint sudah bersih
-- integration test aktif dan terpisah dari Playwright
-- Prisma migration untuk shared rate limit sudah ada dan dipakai repo
+## 🔒 Standar Keamanan & Praktik Terbaik
+- **Role-Based Access Control (RBAC)** diimplementasikan di sisi *Client* maupun *Server* untuk mengunci fungsi khusus Admin/Coach.
+- **Penyimpanan Terproteksi**: File rahasia / unggahan menggunakan integrasi **Private Supabase Storage ACL**, dilayani lewat *proxy* internal (`/api/storage/...`) tanpa mengekspos *bucket URL* secara langsung ke luar. Aturan ACL tercatat pada `docs/SUPABASE_STORAGE_AND_ACL.md`.
+- **Anti-Injection**: Seluruh input formulir disanitasi dan divalidasi secara kuat & *type-safe* menggunakan ekosistem **Zod** dan utilitas *clamp* internal.
 
-## Catatan Pengembangan
-
-- Untuk operasi Prisma CLI, repo ini memprioritaskan `DIRECT_URL` lewat `prisma.config.ts`.
-- Asset PDF template yang memang dipakai aplikasi disimpan di `public/`.
-- Folder seperti `.next/`, `playwright-report/`, `test-results/`, dan `output/` dianggap artefak lokal dan tidak perlu di-commit.
-
-## Verifikasi Disarankan
-
-Sebelum push perubahan besar:
+## ✅ Verifikasi Pra-Commit
+Sangat disarankan untuk selalu menjalankan perintah berikut sebelum melakukan integrasi (*Push/Merge*):
 
 ```bash
 npm run lint
 npm run test:integration
 ```
-
-Kalau ada perubahan alur UI penting, lanjutkan dengan:
-
+Jika terdapat perubahan UI yang krusial atau major, pastikan E2E berjalan mulus:
 ```bash
 npm run test:e2e
 ```

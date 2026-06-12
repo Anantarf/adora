@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Loader2, ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-configs";
@@ -5,6 +6,13 @@ import type { AttendanceStatus, Attendance } from "@/types/dashboard";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { getEventConfig } from "@/lib/config/events";
+
+
+function getAttendanceRateColor(rate: number): string {
+  if (rate >= 75) return "text-emerald-500";
+  if (rate >= 50) return "text-amber-500";
+  return "text-destructive";
+}
 
 export function ParentAttendanceSummary({ 
   attendanceSummary, 
@@ -17,6 +25,11 @@ export function ParentAttendanceSummary({
   attendanceLoading: boolean; 
   activeChildName: string;
 }) {
+  const attendanceRateColor = useMemo(
+    () => getAttendanceRateColor(attendanceSummary?.rate ?? 0),
+    [attendanceSummary?.rate],
+  );
+
   return (
     <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
       <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
@@ -24,7 +37,7 @@ export function ParentAttendanceSummary({
           <ClipboardCheck className="size-5 text-primary" />
           <div>
             <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Rekap Kehadiran</CardTitle>
-            <CardDescription className="text-xs">Ringkasan kehadiran {activeChildName} dari 50 agenda terakhir.</CardDescription>
+            <CardDescription className="text-xs">Ringkasan kehadiran {activeChildName} dari {attendances?.length ?? 0} agenda terakhir.</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -50,7 +63,7 @@ export function ParentAttendanceSummary({
               ))}
               <div className="flex w-full items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-1.5 sm:ml-auto sm:w-auto sm:justify-start">
                 <span className="text-micro text-muted-foreground">Persentase Kehadiran</span>
-                <span className={`text-sm font-black tabular-nums ${(attendanceSummary?.rate ?? 0) >= 75 ? "text-emerald-500" : (attendanceSummary?.rate ?? 0) >= 50 ? "text-amber-500" : "text-destructive"}`}>
+                <span className={`text-sm font-black tabular-nums ${attendanceRateColor}`}>
                   {attendanceSummary?.rate ?? 0}%
                 </span>
               </div>
