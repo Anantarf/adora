@@ -218,7 +218,7 @@ export default function CertificatesPage() {
             ))}
           </div>
 
-curl -fsSL https://raw.githubusercontent.com/opencode-ai/opencode/refs/heads/main/install | bash
+
           <div className="hidden overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm md:block custom-scrollbar">
             <Table className="min-w-[48rem]">
               <TableHeader className="bg-muted/20">

@@ -59,9 +59,6 @@ export default async function ParentLayout({
                 <span className="truncate text-sm font-black uppercase tracking-[0.24em] text-foreground">
                   ADORA
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/70">
-                  Area Orang Tua
-                </span>
               </div>
               <p className="truncate text-xs font-medium text-muted-foreground md:text-sm">
                 Portal Orang Tua
