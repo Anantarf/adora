@@ -54,7 +54,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                   {/* Pop-out Shadow Box */}
                   <div className="absolute inset-0 bg-brand-yellow rounded-2xl transform translate-x-2 translate-y-2 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform duration-300 z-0 opacity-0 group-hover:opacity-100"></div>
 
-                  <div className="relative z-10 border-2 border-white/10 group-hover:border-brand-yellow rounded-2xl overflow-hidden shadow-xl transition-all duration-300 block w-full aspect-3/2 bg-surface-dark">
+                  <div className="relative z-10 border-2 border-white/10 group-hover:border-brand-yellow rounded-2xl overflow-hidden shadow-xl transition-all duration-300 block w-full aspect-photo bg-surface-dark">
                     {/* Background Layer */}
                     <div className="absolute inset-0 z-0">
                       {imageUrl ? (

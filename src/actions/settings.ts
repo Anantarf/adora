@@ -4,16 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
+import { CLUB_SETTING_KEYS, formatZodErrors, updateClubSettingSchema } from "@/lib/validation/club-setting";
 
-const REPORT_SETTING_KEYS = [
-  "rapor_header_url",
-  "rapor_ceo_sign_url",
-  "rapor_coach_sign_url",
-  "rapor_stamp_url",
-  "report_signer_global_coach_profile_id",
-  "rapor_coach_name",
-  "rapor_ceo_name",
-] as const;
+const REPORT_SETTING_KEYS = CLUB_SETTING_KEYS;
 
 export async function getClubSettingsAction() {
   await requireSessionRole("ADMIN");
@@ -60,21 +53,29 @@ export async function getReportSettingsAction() {
 }
 
 export async function updateClubSettingAction(key: string, value: string) {
+  const parsed = updateClubSettingSchema.safeParse({ key, value });
+  if (!parsed.success) {
+    throw new Error(formatZodErrors(parsed.error));
+  }
+
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
 
-  if (key === "report_signer_global_coach_profile_id") {
+  // Re-bind to the validated values for type narrowing below.
+  const validatedKey = parsed.data.key;
+
+  if (validatedKey === "report_signer_global_coach_profile_id") {
     const normalizedValue = value.trim();
 
     if (!normalizedValue) {
       const setting = await prisma.$transaction(async (tx) => {
         const s = await tx.clubSetting.upsert({
-          where: { key },
-          create: { key, value: "" },
+          where: { key: validatedKey },
+          create: { key: validatedKey, value: "" },
           update: { value: "" },
         });
 
-        await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key });
+        await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key: validatedKey });
         return s;
       });
 
@@ -97,12 +98,12 @@ export async function updateClubSettingAction(key: string, value: string) {
 
   const setting = await prisma.$transaction(async (tx) => {
     const s = await tx.clubSetting.upsert({
-      where: { key },
-      create: { key, value },
-      update: { value },
+      where: { key: validatedKey },
+      create: { key: validatedKey, value: parsed.data.value },
+      update: { value: parsed.data.value },
     });
 
-    await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key });
+    await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key: validatedKey });
     return s;
   });
 

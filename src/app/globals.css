@@ -89,6 +89,11 @@
   /* Custom Spacing Scale */
   --spacing-4.5: 1.125rem;
   --spacing-18: 4.5rem;
+
+  /* Semantic Aspect Ratios */
+  --aspect-card: 4 / 3;
+  --aspect-card-wide: 16 / 10;
+  --aspect-photo: 3 / 2;
 }
 
 /* Event type color tokens — konsisten di light & dark mode */

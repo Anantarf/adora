@@ -22,7 +22,7 @@ export function LandingProgramsSection() {
             <StaggerItem key={label} className="w-full sm:w-[calc(50%-1rem)] lg:w-[calc(33.333%-1.5rem)] max-w-md relative group">
               <div className="absolute inset-0 bg-brand-purple rounded-card transform translate-x-1.5 translate-y-1.5 sm:translate-x-3 sm:translate-y-3 group-hover:translate-x-4 group-hover:translate-y-4 transition-transform z-0"></div>
 
-              <div className="relative z-10 bg-surface-dark border-2 border-white/10 group-hover:border-brand-yellow rounded-card transition-all flex flex-col overflow-hidden shadow-xl w-full aspect-16/10 sm:aspect-4/3 block">
+              <div className="relative z-10 bg-surface-dark border-2 border-white/10 group-hover:border-brand-yellow rounded-card transition-all flex flex-col overflow-hidden shadow-xl w-full aspect-card-wide sm:aspect-card block">
                 <div className="absolute inset-0 bg-black">
                   {image ? (
                     <Image

@@ -27,3 +27,23 @@ export async function withTimeout<T>(
     }
   }
 }
+
+/**
+ * Read the originating client IP from the current request, falling back to
+ * a stable identifier. Safe to call from server actions and API routes; on
+ * the server-action side it relies on `next/headers` `headers()` which Next.js
+ * populates for the duration of the action.
+ */
+export async function getRequestIp(): Promise<string> {
+  try {
+    const { headers } = await import("next/headers");
+    const h = await headers();
+    return (
+      h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      h.get("x-real-ip") ??
+      "unknown"
+    );
+  } catch {
+    return "unknown";
+  }
+}

@@ -36,7 +36,7 @@ export function AutoFadeCarousel({ images }: AutoFadeCarouselProps) {
   }, [slots.length]);
 
   return (
-    <div className="relative w-full aspect-4/3 rounded-3xl overflow-hidden bg-page-dark border border-white/10 shadow-2xl">
+    <div className="relative w-full aspect-card rounded-3xl overflow-hidden bg-page-dark border border-white/10 shadow-2xl">
       {slots.map((slot, idx) => (
         <div key={idx} className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${idx === currentIndex ? "opacity-100 z-10" : "opacity-0 z-0"}`}>
           {isPlaceholder ? (

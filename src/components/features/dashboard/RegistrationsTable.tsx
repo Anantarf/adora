@@ -10,8 +10,10 @@ import { RegistrationActions } from "@/components/features/dashboard/Registratio
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pagination } from "@/components/ui/pagination";
 import { sanitizePhone, toUserErrorMessage } from "@/lib/utils";
-
-type RegistrationStatus = "PENDING" | "REVIEWED" | "COMPLETED";
+import {
+  REGISTRATION_STATUS_META,
+  type RegistrationStatus,
+} from "@/lib/registration-status";
 
 type Registration = {
   id: string;
@@ -29,31 +31,6 @@ type Registration = {
 interface RegistrationsTableProps {
   registrations: Registration[];
 }
-
-const STATUS_META: Record<
-  RegistrationStatus,
-  {
-    badgeClassName: string;
-    label: string;
-    nextStep: string;
-  }
-> = {
-  PENDING: {
-    badgeClassName: "border-amber-500/30 bg-amber-500/10 text-amber-500",
-    label: "Belum Bayar",
-    nextStep: "Hubungi via WhatsApp untuk konfirmasi pembayaran.",
-  },
-  REVIEWED: {
-    badgeClassName: "border-emerald-500/30 bg-emerald-500/10 text-emerald-500",
-    label: "Sudah Bayar",
-    nextStep: "Lanjut input pemain ke menu Kelompok Latihan.",
-  },
-  COMPLETED: {
-    badgeClassName: "border-sky-500/30 bg-sky-500/10 text-sky-500",
-    label: "Selesai",
-    nextStep: "Pendaftaran sudah selesai diproses.",
-  },
-};
 
 export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
@@ -148,7 +125,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
             <div className="flex flex-col gap-3 md:hidden">
               {paginatedRegistrations.map((registration, index) => {
                 const sanitizedPhone = sanitizePhone(registration.phone);
-                const statusMeta = STATUS_META[registration.status];
+                const statusMeta = REGISTRATION_STATUS_META[registration.status];
                 const waContactUrl = `https://wa.me/${sanitizedPhone}?text=Halo%20Bapak/Ibu,%20ini%20admin%20ADORA%20BBC.%20Terkait%20pendaftaran%20ananda%20${encodeURIComponent(registration.playerName)}%20di%20${encodeURIComponent(registration.homebase.name)},%20apakah%20sudah%20melakukan%20pembayaran?`;
 
                 return (
@@ -255,7 +232,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                 <tbody className="divide-y divide-border/50">
                   {paginatedRegistrations.map((registration, index) => {
                     const sanitizedPhone = sanitizePhone(registration.phone);
-                    const statusMeta = STATUS_META[registration.status];
+                    const statusMeta = REGISTRATION_STATUS_META[registration.status];
                     const waContactUrl = `https://wa.me/${sanitizedPhone}?text=Halo%20Bapak/Ibu,%20ini%20admin%20ADORA%20BBC.%20Terkait%20pendaftaran%20ananda%20${encodeURIComponent(registration.playerName)}%20di%20${encodeURIComponent(registration.homebase.name)},%20apakah%20sudah%20melakukan%20pembayaran?`;
 
                     return (

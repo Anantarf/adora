@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CheckCircle2, Clock, Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   AlertDialog,
@@ -14,10 +14,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { markRegistrationPaid, markRegistrationUnpaid, deleteRegistration } from "@/actions/register";
+import {
+  REGISTRATION_STATUS_META,
+  type RegistrationStatus,
+} from "@/lib/registration-status";
 
 type Props = {
   regId: string;
-  status: "PENDING" | "REVIEWED" | "COMPLETED";
+  status: RegistrationStatus;
 };
 
 export function RegistrationActions({ regId, status }: Props) {
@@ -48,58 +52,47 @@ export function RegistrationActions({ regId, status }: Props) {
     setShowDeleteDialog(false);
   };
 
-  const isUnpaid = status === "PENDING";
 
   return (
     <>
       <div className="flex items-center gap-2 ml-2">
         <Select disabled={isPending} value={status} onValueChange={handleStatusChange}>
           <SelectTrigger
-            className={`h-8 w-[155px] text-[10px] font-medium transition-colors ${
-              isUnpaid
-                ? "bg-amber-500/10 text-amber-500 border-amber-500/30"
-                : "bg-emerald-500/10 text-emerald-500 border-emerald-500/30"
-            }`}
+            className={`h-8 w-[155px] text-[10px] font-medium transition-colors ${REGISTRATION_STATUS_META[status].badgeClassName}`}
           >
             <SelectValue>
-              <div className="flex items-center gap-1.5">
-                {isPending ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin" />
-                    <span>Menyimpan...</span>
-                  </>
-                ) : status === "PENDING" ? (
-                  <>
-                    <Clock className="size-3.5" />
-                    <span>Belum Bayar</span>
-                  </>
-                ) : status === "REVIEWED" ? (
-                  <>
-                    <CheckCircle2 className="size-3.5" />
-                    <span>Sudah Bayar</span>
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="size-3.5" />
-                    <span>Batal Daftar</span>
-                  </>
-                )}
-              </div>
+              {(() => {
+                if (isPending) {
+                  return (
+                    <div className="flex items-center gap-1.5">
+                      <Loader2 className="size-3.5 animate-spin" />
+                      <span>Menyimpan...</span>
+                    </div>
+                  );
+                }
+                const meta = REGISTRATION_STATUS_META[status];
+                const Icon = meta.icon;
+                return (
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="size-3.5" />
+                    <span>{meta.label}</span>
+                  </div>
+                );
+              })()}
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="rounded-xl border-border/50 min-w-[155px]">
-            <SelectItem value="PENDING" className="cursor-pointer text-[10px] font-medium text-amber-500 focus:bg-amber-500/10 focus:text-amber-600">
-              <div className="flex items-center gap-1.5">
-                <Clock className="size-3.5" />
-                <span>Belum Bayar</span>
-              </div>
-            </SelectItem>
-            <SelectItem value="REVIEWED" className="cursor-pointer text-[10px] font-medium text-emerald-500 focus:bg-emerald-500/10 focus:text-emerald-600">
-              <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="size-3.5" />
-                <span>Sudah Bayar</span>
-              </div>
-            </SelectItem>
+            {(Object.entries(REGISTRATION_STATUS_META) as [RegistrationStatus, typeof REGISTRATION_STATUS_META[RegistrationStatus]][]).map(([key, meta]) => {
+              const Icon = meta.icon;
+              return (
+                <SelectItem key={key} value={key} className={`cursor-pointer text-[10px] font-medium ${meta.selectClassName}`}>
+                  <div className="flex items-center gap-1.5">
+                    <Icon className="size-3.5" />
+                    <span>{meta.label}</span>
+                  </div>
+                </SelectItem>
+              );
+            })}
             <SelectItem value="DELETED" className="cursor-pointer text-[10px] font-medium text-destructive focus:bg-destructive/10 focus:text-destructive">
               <div className="flex items-center gap-1.5">
                 <Trash2 className="size-3.5" />

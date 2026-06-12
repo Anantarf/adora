@@ -11,6 +11,7 @@ export const RATE_LIMIT_NAMESPACES = {
   WEB_VITALS: "web-vitals",
   LOGIN_FAILURES: "login-failures",
   OPERATIONAL_ALERTS: "operational-alerts",
+  SUBMIT_REGISTRATION: "submit-registration",
 } as const;
 
 export type RateLimitNamespace =
@@ -43,5 +44,10 @@ export const RATE_LIMIT_POLICIES = {
     // Cooldown is supplied per-dispatch by the alert config; this is a
     // fallback when the config is unavailable.
     windowMs: 5 * 60 * 1000,
+  },
+  submitRegistration: {
+    namespace: RATE_LIMIT_NAMESPACES.SUBMIT_REGISTRATION,
+    limit: 5,
+    windowMs: RATE_LIMIT_WINDOWS.ONE_MINUTE_MS,
   },
 } as const;

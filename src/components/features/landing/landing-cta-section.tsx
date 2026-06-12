@@ -29,7 +29,7 @@ export function LandingCtaSection() {
                 <div className="text-brand-orange font-heading font-black text-2xl md:text-3xl italic drop-shadow-sm shrink-0 transition-transform group-hover:scale-110">0{step}</div>
                 <div className="text-left">
                   <h3 className="font-heading font-black text-xs md:text-sm text-white uppercase tracking-widest leading-none mb-1 italic group-hover:text-brand-yellow transition-colors">{title}</h3>
-                  <p className="text-white/60 text-xs font-medium max-w-37.5 md:max-w-45 leading-tight">{desc}</p>
+                  <p className="text-white/60 text-xs font-medium max-w-[150px] md:max-w-[180px] leading-tight">{desc}</p>
                 </div>
                 {step !== "3" && <div className="hidden md:block w-px h-8 bg-brand-orange/30 ml-8"></div>}
               </StaggerItem>
