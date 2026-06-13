@@ -65,7 +65,11 @@ export default function ParentDashboard() {
     }
 
     return [...stats].reverse().map((stat) => {
-      const metrics = stat.metricsJson as MetricsJson;
+      const metrics = stat.metricsJson;
+      const score = isMetricsJsonV2(metrics)
+        ? getEvaluationSummary(metrics).overallScore
+        : averageScore(metrics as MetricsJson);
+
       return {
         name:
           stat.period?.name ??
@@ -73,7 +77,7 @@ export default function ParentDashboard() {
             month: "short",
             year: "2-digit",
           }),
-        Overall: averageScore(metrics),
+        Overall: Math.max(0, Math.min(100, Math.round(score))),
       };
     });
   }, [stats]);
