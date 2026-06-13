@@ -163,7 +163,6 @@ export function ReportSignerAutomationManager() {
                             return (
                               <SelectItem key={coach.id} value={coach.id}>
                                 {coach.fullName}
-                                {isRelevantCoach ? " - lokasi ini" : ""}
                               </SelectItem>
                             );
                           })}
