@@ -7,7 +7,8 @@ import { AlertCircle, ClipboardCheck, FilePenLine, HeartPulse, RefreshCcw, Schoo
 
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
@@ -154,18 +155,20 @@ export function CoachPlayersPageClient() {
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 lg:justify-end">
-                    <Button asChild variant="outline" size="sm" className="h-9 rounded-xl">
-                      <Link href="/coach/attendances">
+                    <Link
+                      href="/coach/attendances"
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-xl")}
+                    >
                         <ClipboardCheck className="mr-2 size-3.5" />
                         Presensi
-                      </Link>
-                    </Button>
-                    <Button asChild size="sm" className="h-9 rounded-xl">
-                      <Link href="/coach/statistics">
+                    </Link>
+                    <Link
+                      href="/coach/statistics"
+                      className={cn(buttonVariants({ size: "sm" }), "h-9 rounded-xl")}
+                    >
                         <FilePenLine className="mr-2 size-3.5" />
                         Nilai
-                      </Link>
-                    </Button>
+                    </Link>
                   </div>
                 </div>
               ))}

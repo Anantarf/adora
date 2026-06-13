@@ -31,6 +31,10 @@ export default async function ParentLayout({
     redirect("/dashboard");
   }
 
+  if (session.user.role === "COACH") {
+    redirect("/coach");
+  }
+
   if (session.user.role !== "PARENT") {
     redirect("/login");
   }

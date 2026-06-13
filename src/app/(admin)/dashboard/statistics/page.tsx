@@ -621,7 +621,7 @@ export default function StatisticsPage() {
       ) : null}
 
       {selectedPeriodId ? (
-        <div className="space-y-4 md:hidden">
+        <div className="space-y-4 lg:hidden">
           {playersLoading || statsLoading ? (
             <div className="space-y-4 animate-pulse">
               {[1, 2].map((groupIndex) => (
@@ -850,7 +850,7 @@ export default function StatisticsPage() {
       ) : null}
 
       {selectedPeriodId ? (
-        <div className="hidden overflow-x-auto rounded-2xl border border-border/50 bg-card shadow-sm md:block">
+        <div className="hidden overflow-x-auto rounded-2xl border border-border/50 bg-card shadow-sm lg:block">
           <Table className="min-w-[920px]">
               <TableHeader className="bg-muted/[0.16]">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">

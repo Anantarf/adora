@@ -99,11 +99,11 @@ export default async function proxy(request: NextRequest) {
     }
 
     if (pathname.startsWith("/dashboard") && token.role !== "ADMIN") {
-      return handleUnauthorized(token.role === "PARENT" ? "/parent" : "/login");
+      return handleUnauthorized(token.role === "COACH" ? "/coach" : "/parent");
     }
 
     if (pathname.startsWith("/coach") && token.role !== "COACH") {
-      return handleUnauthorized(token.role === "ADMIN" ? "/dashboard" : "/login");
+      return handleUnauthorized(token.role === "ADMIN" ? "/dashboard" : "/parent");
     }
 
     if (
@@ -111,7 +111,7 @@ export default async function proxy(request: NextRequest) {
       token.role !== "PARENT" &&
       token.role !== "ADMIN"
     ) {
-      return handleUnauthorized("/login");
+      return handleUnauthorized("/coach");
     }
 
     securedResponse.headers.set(

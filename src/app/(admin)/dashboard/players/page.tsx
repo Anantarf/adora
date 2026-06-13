@@ -188,9 +188,9 @@ export default function PlayersPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 items-start gap-6 md:grid-cols-12">
+      <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
         <div
-          className={`flex flex-col gap-4 md:col-span-4 ${isMobileDetailOpen ? "hidden md:flex" : "flex"}`}
+          className={`flex flex-col gap-4 lg:col-span-4 ${isMobileDetailOpen ? "hidden lg:flex" : "flex"}`}
         >
           <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 shadow-xs">
             <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-3">
@@ -319,7 +319,7 @@ export default function PlayersPage() {
         </div>
 
         <div
-          className={`flex flex-col gap-4 md:col-span-8 ${isMobileDetailOpen ? "flex" : "hidden md:flex"}`}
+          className={`flex flex-col gap-4 lg:col-span-8 ${isMobileDetailOpen ? "flex" : "hidden lg:flex"}`}
         >
           <AnimatePresence mode="wait">
             {!effectiveGroupId ? (
@@ -357,7 +357,7 @@ export default function PlayersPage() {
                             variant="outline"
                             size="icon"
                             onClick={() => setIsMobileDetailOpen(false)}
-                            className="size-8 shrink-0 rounded-lg md:hidden"
+                            className="size-8 shrink-0 rounded-lg lg:hidden"
                           >
                             <ChevronLeft className="size-4" />
                           </Button>

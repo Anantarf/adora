@@ -11,6 +11,19 @@ const MAX_FAILURES = RATE_LIMIT_POLICIES.loginFailures.maxFailures;
 const LOCKOUT_MS = RATE_LIMIT_POLICIES.loginFailures.windowMs;
 const INVALID_CREDENTIALS_ERROR = "Username atau sandi tidak valid.";
 const LOGIN_TEMPORARY_ERROR = "Layanan login sedang bermasalah. Silakan coba lagi sebentar lagi.";
+type AppRole = "ADMIN" | "PARENT" | "COACH";
+
+function normalizeAppRole(role: unknown): AppRole | null {
+  if (role === "ADMIN" || role === "SUPERADMIN") {
+    return "ADMIN";
+  }
+
+  if (role === "PARENT" || role === "COACH") {
+    return role;
+  }
+
+  return null;
+}
 
 async function checkFailureLimit(identifier: string) {
   try {
@@ -181,7 +194,7 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       if (user) {
-        token.role = user.role;
+        token.role = normalizeAppRole(user.role) ?? user.role;
         token.id = user.id;
         token.username = user.username;
         token.mustChangePassword = user.mustChangePassword;
@@ -204,7 +217,7 @@ export const authOptions: NextAuthOptions = {
           if (!freshUser || freshUser.isDeleted) {
             token.error = "UserDeleted";
           } else {
-            token.role = freshUser.role;
+            token.role = normalizeAppRole(freshUser.role) ?? freshUser.role;
             token.username = freshUser.username;
             token.mustChangePassword = freshUser.mustChangePassword;
             token.lastChecked = Date.now();
@@ -218,11 +231,14 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token?.error === "UserDeleted") {
-        return { ...session, user: undefined as any };
+        return { ...session, user: undefined as unknown as typeof session.user };
       }
 
       if (token && session.user) {
-        session.user.role = token.role as any;
+        const normalizedRole = normalizeAppRole(token.role);
+        if (normalizedRole) {
+          session.user.role = normalizedRole;
+        }
         session.user.id = token.id as string;
         session.user.username = token.username as string;
         session.user.mustChangePassword = token.mustChangePassword as boolean | undefined;

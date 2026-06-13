@@ -19,6 +19,38 @@ const loginSchema = z.object({
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
+function getPortalPathByRole(role: unknown) {
+  if (role === "ADMIN" || role === "SUPERADMIN") {
+    return "/dashboard";
+  }
+
+  if (role === "PARENT") {
+    return "/parent";
+  }
+
+  if (role === "COACH") {
+    return "/coach";
+  }
+
+  return null;
+}
+
+function getLoginErrorMessage(error?: string | null) {
+  if (
+    !error ||
+    error === "CredentialsSignin" ||
+    error === "Role akun tidak dikenali. Silakan hubungi admin." ||
+    error.toLowerCase().includes("credential") ||
+    error.toLowerCase().includes("username") ||
+    error.toLowerCase().includes("sandi") ||
+    error.toLowerCase().includes("password")
+  ) {
+    return "Username atau password salah.";
+  }
+
+  return error;
+}
+
 export function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -47,32 +79,29 @@ export function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error("Autentikasi Gagal", {
-          description: result.error || "Username atau kata sandi tidak sesuai.",
+        toast.error("Login gagal", {
+          description: getLoginErrorMessage(result.error),
           icon: <AlertCircle className="size-4" />,
         });
       } else {
         // updateSession() has a race condition, fetch directly to get the committed JWT.
-        const res = await fetch("/api/auth/session");
+        const res = await fetch("/api/auth/session", {
+          cache: "no-store",
+          credentials: "same-origin",
+        });
         const session = await res.json();
         const role = (session?.user as { role?: string })?.role;
-        if (role === "ADMIN") {
-          router.push("/dashboard");
-          return;
-        }
-
-        if (role === "PARENT") {
-          router.push("/parent");
-          return;
-        }
-
-        if (role === "COACH") {
-          router.push("/coach");
+        const portalPath = getPortalPathByRole(role);
+        if (portalPath) {
+          router.push(portalPath);
           return;
         }
 
         await signOut({ redirect: false });
-        toast.error("Role akun tidak dikenali. Silakan hubungi admin.");
+        toast.error("Login gagal", {
+          description: "Username atau password salah.",
+          icon: <AlertCircle className="size-4" />,
+        });
       }
     } catch {
       toast.error("Kesalahan Sistem", {

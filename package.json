@@ -21,6 +21,8 @@
     "repair:group-meta": "tsx prisma/repair-group-meta.ts",
     "test:e2e:critical": "tsx scripts/run-e2e-critical.ts",
     "test:e2e": "playwright test",
+    "preview:responsive": "playwright test tests/responsive-critical-paths.spec.ts --headed",
+    "preview:ui": "playwright test --ui",
     "test:integration": "vitest run",
     "test:critical": "npm run test:integration && npm run test:e2e:critical"
   },
