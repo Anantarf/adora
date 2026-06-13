@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, ChevronDown, Loader2, MapPinned, PenSquare, Users2 } from "lucide-react";
+import { CheckCircle2, Loader2, MapPinned, Users2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { useHomebases } from "@/hooks/use-homebases";
 import {
   useReportSignerCoachOptions,
   useReportSignerHomebaseMappings,
+  useUpdateReportSignerCoachSignature,
   useUpdateReportSignerHomebaseMappings,
 } from "@/hooks/use-report-signers";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { toUserErrorMessage } from "@/lib/utils";
 
 export function ReportSignerAutomationManager() {
   const NO_HOMEBASE_FALLBACK = "__none__";
@@ -18,6 +21,8 @@ export function ReportSignerAutomationManager() {
   const { data: coachOptions, isLoading: coachOptionsLoading } = useReportSignerCoachOptions();
   const { data: mappings, isLoading: mappingsLoading } = useReportSignerHomebaseMappings();
   const { mutateAsync: saveMappings, isPending } = useUpdateReportSignerHomebaseMappings();
+  const { mutateAsync: updateCoachSignature, isPending: isSavingSignature } = useUpdateReportSignerCoachSignature();
+  const [uploadingCoachId, setUploadingCoachId] = useState<string | null>(null);
 
   const derivedMappings = useMemo<Record<string, string>>(() => {
     if (!homebases) {
@@ -46,31 +51,62 @@ export function ReportSignerAutomationManager() {
 
   const isLoading = coachOptionsLoading || mappingsLoading;
 
+  const handleSignatureUpload = async (coachProfile: { id: string; userId: string; fullName: string }, file: File) => {
+    if (file.size > 300 * 1024) {
+      toast.error("Ukuran file tanda tangan maksimal 300KB.");
+      return;
+    }
+
+    setUploadingCoachId(coachProfile.id);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("assetKey", `coach_signature_${coachProfile.userId}_${Date.now()}`);
+
+    try {
+      const response = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Upload tanda tangan gagal.");
+      }
+
+      await updateCoachSignature({
+        coachProfileId: coachProfile.id,
+        signatureUrl: data.url,
+      });
+    } catch (error) {
+      toast.error(toUserErrorMessage(error, "Gagal mengunggah tanda tangan pelatih."));
+    } finally {
+      setUploadingCoachId(null);
+    }
+  };
+
   return (
     <section className="rounded-xl border border-border/50 bg-card shadow-sm">
-      <details className="group">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <MapPinned className="size-4 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Pelatih Cadangan per Region</h3>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Opsional. Dipakai kalau kelompok belum punya pelatih aktif.
-            </p>
+      <div className="border-b border-border/50 px-5 py-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <MapPinned className="size-4 text-primary" />
+            <h3 className="text-base font-semibold text-foreground">Tanda Tangan Rapor per Lokasi</h3>
           </div>
-          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
-        </summary>
+          <p className="text-sm text-muted-foreground">
+            Pilih tanda tangan pelatih yang dipakai untuk rapor di ADORA Gandul dan ADORA Cibubur.
+          </p>
+        </div>
+      </div>
 
-        <div className="space-y-4 border-t border-border/50 px-5 py-4">
-          {isLoading ? (
-            <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/30 py-10 text-sm text-muted-foreground">
-              <Loader2 className="size-4 animate-spin text-primary" />
-              Memuat pelatih cadangan...
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {(homebases ?? []).map((homebase) => {
+      <div className="space-y-4 px-5 py-4">
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/30 py-10 text-sm text-muted-foreground">
+            <Loader2 className="size-4 animate-spin text-primary" />
+            Memuat pilihan tanda tangan...
+          </div>
+        ) : (
+          <div className="grid gap-3 md:grid-cols-2">
+            {(homebases ?? []).map((homebase) => {
               const selectedCoachId = localMappings[homebase.id] ?? "";
               const selectedCoach = selectedCoachId
                 ? coachOptionsById.get(selectedCoachId)
@@ -89,20 +125,20 @@ export function ReportSignerAutomationManager() {
               return (
                 <div
                   key={homebase.id}
-                  className="rounded-xl border border-border/50 bg-background/30 p-4"
+                  className="flex flex-col gap-4 rounded-xl border border-border/50 bg-background/30 p-4"
                 >
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                  <div className="space-y-3">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Users2 className="size-4 text-primary" />
                         <p className="text-sm font-semibold text-foreground">{homebase.name}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Cadangan tanda tangan untuk region ini.
+                        Tanda tangan rapor untuk lokasi ini.
                       </p>
                     </div>
 
-                    <div className="w-full lg:max-w-sm">
+                    <div className="w-full">
                       <Select
                         value={selectedCoachId || NO_HOMEBASE_FALLBACK}
                         onValueChange={(value) =>
@@ -113,12 +149,12 @@ export function ReportSignerAutomationManager() {
                         }
                       >
                         <SelectTrigger className="h-11 border-border/50 bg-background/50">
-                          <SelectValue placeholder="Pilih coach cadangan">
-                            {selectedCoach ? selectedCoach.fullName : "Tanpa coach cadangan"}
+                          <SelectValue placeholder="Pilih pelatih">
+                            {selectedCoach ? selectedCoach.fullName : "Belum dipilih"}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value={NO_HOMEBASE_FALLBACK}>Tanpa pelatih cadangan</SelectItem>
+                          <SelectItem value={NO_HOMEBASE_FALLBACK}>Belum dipilih</SelectItem>
                           {orderedCoachOptions.map((coach) => {
                             const isRelevantCoach = relevantCoachOptions.some(
                               (relevantCoach) => relevantCoach.id === coach.id,
@@ -127,7 +163,7 @@ export function ReportSignerAutomationManager() {
                             return (
                               <SelectItem key={coach.id} value={coach.id}>
                                 {coach.fullName}
-                                {isRelevantCoach ? " - region ini" : ""}
+                                {isRelevantCoach ? " - lokasi ini" : ""}
                               </SelectItem>
                             );
                           })}
@@ -135,8 +171,8 @@ export function ReportSignerAutomationManager() {
                       </Select>
                       <p className="mt-2 text-[11px] text-muted-foreground">
                         {relevantCoachOptions.length > 0
-                          ? `${relevantCoachOptions.length} pelatih region ini ditampilkan lebih dulu.`
-                          : "Belum ada pelatih khusus region ini."}
+                          ? "Pelatih di lokasi ini ditampilkan lebih dulu."
+                          : "Pilih pelatih yang tanda tangannya ingin dipakai."}
                       </p>
                     </div>
                   </div>
@@ -158,7 +194,7 @@ export function ReportSignerAutomationManager() {
                         <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
                           {selectedCoach.signatureUrl ? (
                             <span className="flex items-center gap-1 text-emerald-500">
-                              <CheckCircle2 className="size-3" /> Tanda tangan siap dipakai
+                              <CheckCircle2 className="size-3" /> Tanda tangan siap
                             </span>
                           ) : (
                             <span className="flex items-center gap-1 rounded-sm bg-amber-500/10 px-1.5 py-0.5 text-amber-500">
@@ -171,50 +207,63 @@ export function ReportSignerAutomationManager() {
                           </span>
                         </div>
                       </div>
+                      {!selectedCoach.signatureUrl ? (
+                        <div className="shrink-0">
+                          <input
+                            id={`signature-${selectedCoach.id}`}
+                            type="file"
+                            accept=".png"
+                            className="hidden"
+                            disabled={uploadingCoachId === selectedCoach.id || isSavingSignature}
+                            onChange={(event) => {
+                              const file = event.target.files?.[0];
+                              if (file) {
+                                void handleSignatureUpload(selectedCoach, file);
+                              }
+                              event.target.value = "";
+                            }}
+                          />
+                          <label
+                            htmlFor={`signature-${selectedCoach.id}`}
+                            className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg border border-primary/30 bg-primary/10 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
+                          >
+                            {uploadingCoachId === selectedCoach.id ? "Mengunggah..." : "Upload TTD"}
+                          </label>
+                        </div>
+                      ) : null}
                     </div>
                   ) : null}
                 </div>
               );
             })}
-            </div>
-          )}
-
-          <div className="flex justify-end">
-            <Button
-              type="button"
-              disabled={isPending || isLoading}
-              onClick={() =>
-                void saveMappings(
-                  Object.entries(localMappings)
-                    .filter(([, coachProfileId]) => coachProfileId.trim())
-                    .map(([homebaseId, coachProfileId]) => ({
-                      homebaseId,
-                      coachProfileId,
-                    })),
-                )
-              }
-              size="xl"
-            >
-              {isPending ? (
-                <Loader2 className="size-3.5 animate-spin" />
-              ) : (
-                <CheckCircle2 className="size-3.5" />
-              )}
-              Simpan Pelatih Cadangan
-            </Button>
           </div>
+        )}
 
-          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 p-4 text-xs text-muted-foreground">
-            <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
-              <PenSquare className="size-4 text-primary" />
-              Urutan tanda tangan
-            </div>
-            <p>1. Pelatih aktif di kelompok.</p>
-            <p>2. Pelatih cadangan region.</p>
-            <p>3. Pelatih cadangan umum.</p>
-          </div>
+        <div className="flex justify-end">
+          <Button
+            type="button"
+            disabled={isPending || isLoading}
+            onClick={() =>
+              void saveMappings(
+                Object.entries(localMappings)
+                  .filter(([, coachProfileId]) => coachProfileId.trim())
+                  .map(([homebaseId, coachProfileId]) => ({
+                    homebaseId,
+                    coachProfileId,
+                  })),
+              )
+            }
+            size="xl"
+          >
+            {isPending ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <CheckCircle2 className="size-3.5" />
+            )}
+            Simpan Tanda Tangan Lokasi
+          </Button>
         </div>
-      </details>
+      </div>
     </section>
   );
 }

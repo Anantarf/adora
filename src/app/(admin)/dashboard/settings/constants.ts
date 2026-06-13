@@ -1,4 +1,4 @@
-export type AssetKey = "rapor_header_url" | "rapor_ceo_sign_url" | "rapor_coach_sign_url" | "rapor_stamp_url";
+export type AssetKey = "rapor_header_url" | "rapor_ceo_sign_url" | "rapor_stamp_url";
 
 export type AssetConfig = {
   key: AssetKey;
@@ -20,13 +20,6 @@ export const ASSET_KEYS: AssetConfig[] = [
     key: "rapor_ceo_sign_url",
     label: "Tanda Tangan CEO",
     description: "Unggah tanda tangan CEO dalam format PNG transparan.",
-    accept: ".png",
-    maxSizeLabel: "Maks 300KB",
-  },
-  {
-    key: "rapor_coach_sign_url",
-    label: "Tanda Tangan Pelatih Cadangan",
-    description: "Dipakai jika pelatih dari data coach belum punya tanda tangan.",
     accept: ".png",
     maxSizeLabel: "Maks 300KB",
   },

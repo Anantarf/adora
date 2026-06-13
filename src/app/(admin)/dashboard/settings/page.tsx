@@ -8,24 +8,23 @@ import {
   FileImage,
   FileText,
   Loader2,
-  ShieldCheck,
   Upload,
   UserCheck,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
-import { useReportSignerCoachOptions } from "@/hooks/use-report-signers";
+import { useReportSignerCoachOptions, useReportSignerHomebaseMappings } from "@/hooks/use-report-signers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ReportSignerAutomationManager } from "@/components/features/settings/ReportSignerAutomationManager";
 import { toUserErrorMessage } from "@/lib/utils";
 import { ASSET_KEYS, SIGNER_KEYS, getAssetPreviewMeta, type AssetKey } from "./constants";
 
 export default function SettingsPage() {
   const { data: settings } = useClubSettings();
-  const { data: coachOptions, isLoading: coachOptionsLoading } = useReportSignerCoachOptions();
+  const { data: coachOptions } = useReportSignerCoachOptions();
+  const { data: signerMappings } = useReportSignerHomebaseMappings();
   const updateSetting = useUpdateClubSetting();
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
   const [assetVersions, setAssetVersions] = useState<Record<string, number>>({});
@@ -33,14 +32,14 @@ export default function SettingsPage() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
-  const selectedGlobalCoachId = localValues.report_signer_global_coach_profile_id ?? "";
-  const selectedGlobalCoach =
-    coachOptions?.find((coach) => coach.id === selectedGlobalCoachId) ?? null;
-  const previewCoachName = selectedGlobalCoach?.fullName || localValues.rapor_coach_name || "Pelatih Umum";
-  const previewCoachSignUrl =
-    selectedGlobalCoach?.signatureUrl || localValues.rapor_coach_sign_url || undefined;
-  const hasSelectedGlobalCoachSignature = Boolean(selectedGlobalCoach?.signatureUrl?.trim());
-  const hasManualCoachSignFallback = Boolean(localValues.rapor_coach_sign_url?.trim());
+  const previewCoachName = localValues.rapor_coach_name || "Pelatih ADORA BBC";
+  const mappedCoachIds = new Set((signerMappings ?? []).map((mapping) => mapping.coachProfileId).filter(Boolean));
+  const selectedLocationCoaches = (coachOptions ?? []).filter((coach) => mappedCoachIds.has(coach.id));
+  const hasLocationCoachMappings = (signerMappings ?? []).length > 0;
+  const areLocationCoachSignaturesReady =
+    hasLocationCoachMappings &&
+    selectedLocationCoaches.length === mappedCoachIds.size &&
+    selectedLocationCoaches.every((coach) => coach.signatureUrl?.trim());
   const readinessItems = [
     {
       label: "Template",
@@ -56,15 +55,11 @@ export default function SettingsPage() {
           : "Lengkapi nama dan tanda tangan",
     },
     {
-      label: "Pelatih",
-      ready: Boolean(
-        selectedGlobalCoach?.signatureUrl?.trim() ||
-          localValues.rapor_coach_sign_url?.trim(),
-      ),
-      helper:
-        selectedGlobalCoach?.signatureUrl?.trim() || localValues.rapor_coach_sign_url?.trim()
-          ? "Tanda tangan siap"
-          : "Butuh tanda tangan cadangan",
+      label: "TTD Coach",
+      ready: areLocationCoachSignaturesReady,
+      helper: areLocationCoachSignaturesReady
+        ? "Tanda tangan lokasi siap"
+        : "Lengkapi tanda tangan lokasi",
     },
     {
       label: "Stempel",
@@ -115,7 +110,7 @@ export default function SettingsPage() {
         assets: {
           headerUrl: localValues.rapor_header_url || undefined,
           ceoSignUrl: localValues.rapor_ceo_sign_url || undefined,
-          coachSignUrl: previewCoachSignUrl,
+          coachSignUrl: undefined,
           stampUrl: localValues.rapor_stamp_url || undefined,
         },
         signers: {
@@ -361,95 +356,11 @@ export default function SettingsPage() {
               <UserCheck className="size-4 text-primary" />
               <h3 className="text-base font-semibold text-foreground">Nama Penandatangan</h3>
             </div>
-            <p className="text-sm text-muted-foreground">Atur nama CEO dan pelatih cadangan untuk rapor.</p>
+            <p className="text-sm text-muted-foreground">Atur nama CEO yang tampil di rapor.</p>
           </div>
         </div>
 
         <div className="space-y-5 px-5 py-4">
-          <div className="space-y-2">
-            <label className="text-xs font-medium text-foreground">Pelatih Umum Rapor</label>
-            <div className="flex flex-col gap-3 sm:flex-row">
-              <div className="flex-1">
-                <Select
-                  value={selectedGlobalCoachId || "__none__"}
-                  onValueChange={(value) =>
-                    setLocalValues((previous) => ({
-                      ...previous,
-                      report_signer_global_coach_profile_id:
-                        value === "__none__" ? "" : (value ?? ""),
-                    }))
-                  }
-                  disabled={coachOptionsLoading}
-                >
-                  <SelectTrigger className="h-10 border-border/50 bg-background/50">
-                    <SelectValue placeholder="Pilih pelatih umum">
-                      {selectedGlobalCoach ? selectedGlobalCoach.fullName : "Tanpa pelatih umum terpilih"}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">Tanpa pelatih umum terpilih</SelectItem>
-                    {(coachOptions ?? []).map((coach) => (
-                      <SelectItem key={coach.id} value={coach.id}>
-                        {coach.fullName}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button
-                onClick={() => handleTextSave("report_signer_global_coach_profile_id", "Pelatih umum rapor")}
-                disabled={saving.report_signer_global_coach_profile_id}
-                size="xl"
-              >
-                {saving.report_signer_global_coach_profile_id ? (
-                  <Loader2 className="size-3.5 animate-spin" />
-                ) : (
-                  <CheckCircle2 className="size-3.5" />
-                )}
-                Simpan
-              </Button>
-            </div>
-            <div className="rounded-xl border border-border/50 bg-background/40 p-3 text-xs text-muted-foreground">
-              <div className="flex items-start gap-2">
-                <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
-                <div className="space-y-1">
-                  <p className="font-medium text-foreground">Pelatih cadangan aktif</p>
-                  <p>
-                    {selectedGlobalCoach
-                      ? `Nama dan tanda tangan akan mengikuti profil ${selectedGlobalCoach.fullName}.`
-                      : "Belum ada pelatih cadangan terpilih. Sistem akan memakai file manual jika tersedia."}
-                  </p>
-                </div>
-              </div>
-            </div>
-            {selectedGlobalCoach && !hasSelectedGlobalCoachSignature ? (
-              <div className="rounded-xl border border-amber-500/25 bg-amber-500/10 p-3 text-xs text-amber-100">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-amber-400" />
-                  <div className="space-y-1">
-                    <p className="font-medium text-amber-300">Pelatih terpilih belum punya tanda tangan</p>
-                    <p className="text-amber-100/90">
-                      Rapor akan memakai file tanda tangan pelatih cadangan jika tersedia.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-            {!selectedGlobalCoach && !hasManualCoachSignFallback ? (
-              <div className="rounded-xl border border-rose-500/25 bg-rose-500/10 p-3 text-xs text-rose-100">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-400" />
-                  <div className="space-y-1">
-                    <p className="font-medium text-rose-300">Tanda tangan pelatih belum siap</p>
-                    <p className="text-rose-100/90">
-                      Pilih pelatih cadangan atau unggah tanda tangan manual.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ) : null}
-          </div>
-
           {SIGNER_KEYS.map(({ key, label, placeholder }) => (
             <div key={key} className="space-y-2">
               <label htmlFor={`input-${key}`} className="text-xs font-medium text-foreground">

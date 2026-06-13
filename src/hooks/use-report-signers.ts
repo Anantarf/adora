@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   getReportSignerCoachOptionsAction,
   getReportSignerHomebaseMappingsAction,
+  updateReportSignerCoachSignatureAction,
   updateReportSignerHomebaseMappingsAction,
 } from "@/actions/report-signers";
 import { parseReportSignerHomebaseMappings, type ReportSignerHomebaseMapping } from "@/lib/report-signer";
@@ -43,13 +44,33 @@ export const useUpdateReportSignerHomebaseMappings = () => {
       queryClient.invalidateQueries({ queryKey: REPORT_SIGNER_QUERY_KEYS.COACH_OPTIONS });
       queryClient.invalidateQueries({ queryKey: ["club-settings"] });
       queryClient.invalidateQueries({ queryKey: ["report-settings"] });
-      toast.success("Coach cadangan per region berhasil disimpan.");
+      toast.success("Tanda tangan per lokasi berhasil disimpan.");
     },
     onError: (error) => {
       toast.error(
         error instanceof Error
           ? error.message
-          : "Gagal menyimpan coach cadangan per region.",
+          : "Gagal menyimpan tanda tangan per lokasi.",
+      );
+    },
+  });
+};
+
+export const useUpdateReportSignerCoachSignature = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ coachProfileId, signatureUrl }: { coachProfileId: string; signatureUrl: string }) =>
+      updateReportSignerCoachSignatureAction(coachProfileId, signatureUrl),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: REPORT_SIGNER_QUERY_KEYS.COACH_OPTIONS });
+      toast.success("Tanda tangan pelatih berhasil diunggah.");
+    },
+    onError: (error) => {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Gagal menyimpan tanda tangan pelatih.",
       );
     },
   });

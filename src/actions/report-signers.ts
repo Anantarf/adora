@@ -36,6 +36,7 @@ export async function getReportSignerCoachOptionsAction() {
     select: {
       id: true,
       fullName: true,
+      userId: true,
       signatureUrl: true,
       photoUrl: true,
       licenseUrl: true,
@@ -62,6 +63,59 @@ export async function getReportSignerCoachOptionsAction() {
   });
 }
 
+export async function updateReportSignerCoachSignatureAction(
+  coachProfileId: string,
+  signatureUrl: string,
+) {
+  const session = await requireAdmin();
+  const userId = session.user.id ?? null;
+
+  const coachProfile = await prisma.coachProfile.findFirst({
+    where: {
+      id: coachProfileId,
+      isDeleted: false,
+      user: {
+        isDeleted: false,
+        role: "COACH",
+      },
+    },
+    select: {
+      id: true,
+      userId: true,
+      fullName: true,
+    },
+  });
+
+  if (!coachProfile) {
+    throw new Error("Pelatih tidak ditemukan.");
+  }
+
+  const normalizedUrl = signatureUrl.trim();
+  if (!normalizedUrl.includes(`/coach_signature_${coachProfile.userId}_`)) {
+    throw new Error("File tanda tangan tidak sesuai dengan pelatih yang dipilih.");
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.coachProfile.update({
+      where: { id: coachProfile.id },
+      data: { signatureUrl: normalizedUrl },
+    });
+
+    await createAuditLog(tx, "UPDATE", "coachProfile", coachProfile.id, userId, {
+      changedFields: ["signatureUrl"],
+      fullName: coachProfile.fullName,
+      source: "report-signer-settings",
+    });
+  });
+
+  revalidatePath("/dashboard/settings");
+  revalidatePath("/dashboard/statistics");
+  revalidatePath("/coach/profile");
+  revalidatePath("/parent");
+
+  return { success: true as const };
+}
+
 export async function updateReportSignerHomebaseMappingsAction(
   mappings: ReportSignerHomebaseMapping[],
 ) {
@@ -81,7 +135,7 @@ export async function updateReportSignerHomebaseMappingsAction(
   );
 
   if (uniqueHomebaseIds.length !== normalizedMappings.length) {
-    throw new Error("Setiap region hanya boleh memiliki satu coach cadangan.");
+    throw new Error("Setiap lokasi hanya boleh memiliki satu tanda tangan pelatih.");
   }
 
   const [homebases, coachProfiles] = await Promise.all([
@@ -99,11 +153,11 @@ export async function updateReportSignerHomebaseMappingsAction(
   ]);
 
   if (homebases.length !== uniqueHomebaseIds.length) {
-    throw new Error("Sebagian region untuk coach cadangan tidak ditemukan.");
+    throw new Error("Sebagian lokasi tidak ditemukan.");
   }
 
   if (coachProfiles.length !== uniqueCoachProfileIds.length) {
-    throw new Error("Sebagian coach cadangan tidak ditemukan.");
+    throw new Error("Sebagian pelatih tidak ditemukan.");
   }
 
   const value = serializeReportSignerHomebaseMappings(normalizedMappings);
