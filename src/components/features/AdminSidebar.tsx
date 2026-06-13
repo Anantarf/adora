@@ -12,9 +12,9 @@ import { cn } from "@/lib/utils";
 export const adminNavItems = [
   { title: "Dashboard Utama", url: "/dashboard", icon: LayoutDashboard },
   { title: "Agenda Klub", url: "/schedule", icon: CalendarDays },
-  { title: "Kelompok Latihan", url: "/players", icon: Layers },
-  { title: "Presensi Pemain", url: "/attendances", icon: CheckSquare },
-  { title: "Input Penilaian", url: "/statistics", icon: LineChart },
+  { title: "Data Pemain", url: "/players", icon: Layers },
+  { title: "Data Presensi", url: "/attendances", icon: CheckSquare },
+  { title: "Penilaian & Rapor", url: "/statistics", icon: LineChart },
   { title: "Manajemen Sertifikat", url: "/certificates", icon: FileBadge },
   { title: "Manajemen Akun", url: "/users", icon: Users },
   { title: "Pendaftar Baru", url: "/registrations", icon: UserPlus },

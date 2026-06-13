@@ -25,9 +25,9 @@ import { cn } from "@/lib/utils";
 
 export const coachNavItems = [
   { title: "Dashboard Coach", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Pemain Saya", url: "/players", icon: Users },
-  { title: "Presensi Latihan", url: "/attendances", icon: CalendarCheck2 },
-  { title: "Penilaian & Statistik", url: "/statistics", icon: Star },
+  { title: "Data Pemain", url: "/players", icon: Users },
+  { title: "Data Presensi", url: "/attendances", icon: CalendarCheck2 },
+  { title: "Penilaian & Rapor", url: "/statistics", icon: Star },
   { title: "Profil Coach", url: "/profile", icon: UserRoundCog },
 ];
 

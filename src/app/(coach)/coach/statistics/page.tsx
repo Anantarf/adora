@@ -5,7 +5,7 @@ import {
   Loader2,
   LayoutList as SelectIcon,
   CalendarRange,
-  FileDown,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -212,7 +212,7 @@ const PlayerStatRow = React.memo(
       settings?.rapor_coach_sign_url,
     );
 
-    const handleDownload = async () => {
+    const handleViewReport = async () => {
       if (!metrics) {
         return;
       }
@@ -236,9 +236,10 @@ const PlayerStatRow = React.memo(
             coachName: coachSignerName,
             ceoName: settings?.rapor_ceo_name ?? undefined,
           },
+          action: "preview",
         });
       } catch {
-        toast.error("Gagal membuat rapor PDF. Coba lagi.");
+        toast.error("Gagal membuka rapor PDF. Coba lagi.");
       } finally {
         setIsPdfLoading(false);
       }
@@ -285,15 +286,15 @@ const PlayerStatRow = React.memo(
           <div className="flex items-center justify-end gap-2">
             {metrics ? (
               <button
-                title="Download Rapor PDF"
-                onClick={handleDownload}
+                title="Lihat Rapor PDF"
+                onClick={handleViewReport}
                 disabled={isPdfLoading}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/40 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/50 bg-background/40 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:opacity-50"
               >
                 {isPdfLoading ? (
                   <Loader2 className="size-4 animate-spin text-primary" />
                 ) : (
-                  <FileDown className="size-4" />
+                  <FileText className="size-4" />
                 )}
               </button>
             ) : null}
@@ -417,7 +418,7 @@ export default function CoachStatisticsPage() {
             Penilaian Pemain
           </p>
           <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Input Nilai Pemain
+            Penilaian & Rapor
           </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
             Pilih periode dan kelompok, lalu isi penilaian pemain. Pelatih menyimpan draf; admin yang menerbitkan rapor.
@@ -675,7 +676,7 @@ export default function CoachStatisticsPage() {
                             <div className="flex items-center justify-end gap-2">
                               {metrics ? (
                                 <button
-                                  title="Download Rapor PDF"
+                                  title="Lihat Rapor PDF"
                                   disabled={loadingPlayerId === player.id}
                                   onClick={async () => {
                                     setLoadingPlayerId(player.id);
@@ -701,10 +702,11 @@ export default function CoachStatisticsPage() {
                                           coachName: coachSignerName,
                                           ceoName: settings?.rapor_ceo_name ?? undefined,
                                         },
+                                        action: "preview",
                                       });
                                     } catch {
                                       toast.error(
-                                        "Gagal membuat rapor PDF. Coba lagi.",
+                                        "Gagal membuka rapor PDF. Coba lagi.",
                                       );
                                     } finally {
                                       setLoadingPlayerId(null);
@@ -715,7 +717,7 @@ export default function CoachStatisticsPage() {
                                   {loadingPlayerId === player.id ? (
                                     <Loader2 className="size-4 animate-spin text-primary" />
                                   ) : (
-                                    <FileDown className="size-4" />
+                                    <FileText className="size-4" />
                                   )}
                                 </button>
                               ) : null}

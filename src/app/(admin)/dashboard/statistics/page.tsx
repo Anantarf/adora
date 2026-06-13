@@ -5,7 +5,7 @@ import {
   Loader2,
   LayoutList as SelectIcon,
   CalendarRange,
-  FileDown,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -206,7 +206,7 @@ const PlayerStatRow = React.memo(
     const metrics = getValidMetrics(stat?.metricsJson);
     const metricSummary = metrics ? getEvaluationSummary(metrics) : null;
     const [isPdfLoading, setIsPdfLoading] = useState(false);
-    const canDownloadReport = Boolean(metrics && stat?.status === "Published");
+    const canViewReport = Boolean(metrics && stat?.status === "Published");
     const coachSignerName = resolveCoachSignerName(
       stat?.coachNameResolved ??
         stat?.coachNameSnapshot ??
@@ -218,7 +218,7 @@ const PlayerStatRow = React.memo(
       settings?.rapor_coach_sign_url,
     );
 
-    const handleDownload = async () => {
+    const handleViewReport = async () => {
       if (!metrics) {
         return;
       }
@@ -242,9 +242,10 @@ const PlayerStatRow = React.memo(
             coachName: coachSignerName,
             ceoName: settings?.rapor_ceo_name ?? undefined,
           },
+          action: "preview",
         });
       } catch {
-        toast.error("Gagal membuat rapor PDF. Coba lagi.");
+        toast.error("Gagal membuka rapor PDF. Coba lagi.");
       } finally {
         setIsPdfLoading(false);
       }
@@ -289,17 +290,17 @@ const PlayerStatRow = React.memo(
         </TableCell>
         <TableCell className="text-right">
           <div className="flex items-center justify-end gap-2">
-            {canDownloadReport ? (
+            {canViewReport ? (
               <button
-                title="Download Rapor PDF"
-                onClick={handleDownload}
+                title="Lihat Rapor PDF"
+                onClick={handleViewReport}
                 disabled={isPdfLoading}
-                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-border/50 bg-background/40 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/50 bg-background/40 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:opacity-50"
               >
                 {isPdfLoading ? (
                   <Loader2 className="size-4 animate-spin text-primary" />
                 ) : (
-                  <FileDown className="size-4" />
+                  <FileText className="size-4" />
                 )}
               </button>
             ) : null}
@@ -431,9 +432,17 @@ export default function StatisticsPage() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain.
-        </p>
+        <div className="space-y-1">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
+            Penilaian Pemain
+          </p>
+          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
+            Penilaian & Rapor
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain.
+          </p>
+        </div>
         <div className="flex items-center gap-2">
           <EvaluationConfigDialog />
           <AddPeriodDialog />
@@ -776,7 +785,7 @@ export default function StatisticsPage() {
                             <div className="flex items-center justify-end gap-2">
                               {metrics && stat?.status === "Published" ? (
                                 <button
-                                  title="Download Rapor PDF"
+                                  title="Lihat Rapor PDF"
                                   disabled={loadingPlayerId === player.id}
                                   onClick={async () => {
                                     setLoadingPlayerId(player.id);
@@ -802,10 +811,11 @@ export default function StatisticsPage() {
                                           coachName: coachSignerName,
                                           ceoName: settings?.rapor_ceo_name ?? undefined,
                                         },
+                                        action: "preview",
                                       });
                                     } catch {
                                       toast.error(
-                                        "Gagal membuat rapor PDF. Coba lagi.",
+                                        "Gagal membuka rapor PDF. Coba lagi.",
                                       );
                                     } finally {
                                       setLoadingPlayerId(null);
@@ -816,7 +826,7 @@ export default function StatisticsPage() {
                                   {loadingPlayerId === player.id ? (
                                     <Loader2 className="size-4 animate-spin text-primary" />
                                   ) : (
-                                    <FileDown className="size-4" />
+                                    <FileText className="size-4" />
                                   )}
                                 </button>
                               ) : null}

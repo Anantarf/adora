@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Loader2, MapPinned, Users2 } from "lucide-react";
+import { CheckCircle2, Loader2, MapPinned, Upload, Users2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { useHomebases } from "@/hooks/use-homebases";
@@ -23,6 +23,7 @@ export function ReportSignerAutomationManager() {
   const { mutateAsync: saveMappings, isPending } = useUpdateReportSignerHomebaseMappings();
   const { mutateAsync: updateCoachSignature, isPending: isSavingSignature } = useUpdateReportSignerCoachSignature();
   const [uploadingCoachId, setUploadingCoachId] = useState<string | null>(null);
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Record<string, boolean>>({});
 
   const derivedMappings = useMemo<Record<string, string>>(() => {
     if (!homebases) {
@@ -78,7 +79,7 @@ export function ReportSignerAutomationManager() {
         signatureUrl: data.url,
       });
     } catch (error) {
-      toast.error(toUserErrorMessage(error, "Gagal mengunggah tanda tangan pelatih."));
+      toast.error(toUserErrorMessage(error, "Gagal mengunggah tanda tangan coach."));
     } finally {
       setUploadingCoachId(null);
     }
@@ -90,10 +91,10 @@ export function ReportSignerAutomationManager() {
         <div className="space-y-1">
           <div className="flex items-center gap-2">
             <MapPinned className="size-4 text-primary" />
-            <h3 className="text-base font-semibold text-foreground">Tanda Tangan Rapor per Lokasi</h3>
+            <h3 className="text-base font-semibold text-foreground">Tanda Tangan Coach per Lokasi</h3>
           </div>
           <p className="text-sm text-muted-foreground">
-            Pilih tanda tangan pelatih yang dipakai untuk rapor di ADORA Gandul dan ADORA Cibubur.
+            Pilih coach yang tanda tangannya dipakai untuk ADORA Gandul dan ADORA Cibubur.
           </p>
         </div>
       </div>
@@ -134,7 +135,7 @@ export function ReportSignerAutomationManager() {
                         <p className="text-sm font-semibold text-foreground">{homebase.name}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Tanda tangan rapor untuk lokasi ini.
+                        Coach yang tanda tangannya dipakai untuk lokasi ini.
                       </p>
                     </div>
 
@@ -149,89 +150,152 @@ export function ReportSignerAutomationManager() {
                         }
                       >
                         <SelectTrigger className="h-11 border-border/50 bg-background/50">
-                          <SelectValue placeholder="Pilih pelatih">
+                          <SelectValue placeholder="Pilih coach">
                             {selectedCoach ? selectedCoach.fullName : "Belum dipilih"}
                           </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value={NO_HOMEBASE_FALLBACK}>Belum dipilih</SelectItem>
-                          {orderedCoachOptions.map((coach) => {
-                            const isRelevantCoach = relevantCoachOptions.some(
-                              (relevantCoach) => relevantCoach.id === coach.id,
-                            );
-
-                            return (
-                              <SelectItem key={coach.id} value={coach.id}>
-                                {coach.fullName}
-                              </SelectItem>
-                            );
-                          })}
+                          {orderedCoachOptions.map((coach) => (
+                            <SelectItem key={coach.id} value={coach.id}>
+                              {coach.fullName}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                       <p className="mt-2 text-[11px] text-muted-foreground">
-                        {relevantCoachOptions.length > 0
-                          ? "Pelatih di lokasi ini ditampilkan lebih dulu."
-                          : "Pilih pelatih yang tanda tangannya ingin dipakai."}
+                        Simpan setelah memilih coach.
                       </p>
                     </div>
                   </div>
 
                   {selectedCoach ? (
-                    <div className="mt-3 flex items-center gap-3 rounded-lg border border-border/50 bg-card p-3 shadow-xs">
-                      <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/50 bg-muted/30">
-                        {selectedCoach.photoUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img src={selectedCoach.photoUrl} alt={selectedCoach.fullName} className="size-full object-cover" />
-                        ) : (
-                          <Users2 className="size-5 text-muted-foreground/50" />
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1 space-y-0.5">
-                        <p className="truncate text-xs font-semibold text-foreground">
-                          {selectedCoach.fullName}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
-                          {selectedCoach.signatureUrl ? (
-                            <span className="flex items-center gap-1 text-emerald-500">
-                              <CheckCircle2 className="size-3" /> Tanda tangan siap
-                            </span>
+                    <div className="mt-3 w-full min-w-0 rounded-lg border border-border/50 bg-card p-3 shadow-xs">
+                      <div className="flex items-start gap-3">
+                        <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border/50 bg-muted/30">
+                          {selectedCoach.photoUrl && !failedPhotoIds[selectedCoach.id] ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={selectedCoach.photoUrl}
+                              alt={selectedCoach.fullName}
+                              className="size-full object-cover"
+                              onError={() =>
+                                setFailedPhotoIds((previous) => ({
+                                  ...previous,
+                                  [selectedCoach.id]: true,
+                                }))
+                              }
+                            />
                           ) : (
-                            <span className="flex items-center gap-1 rounded-sm bg-amber-500/10 px-1.5 py-0.5 text-amber-500">
-                              <span className="text-[10px] font-bold">!</span> Belum unggah tanda tangan
+                            <span className="text-xs font-bold text-muted-foreground">
+                              {selectedCoach.fullName.slice(0, 2).toUpperCase()}
                             </span>
                           )}
-                          <span className="text-muted-foreground/40">/</span>
-                          <span className="text-muted-foreground">
-                            {selectedCoach.assignments.length} kelompok terhubung
-                          </span>
+                        </div>
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <p className="truncate text-xs font-semibold text-foreground">
+                            {selectedCoach.fullName}
+                          </p>
+                          <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px]">
+                            {selectedCoach.signatureUrl ? (
+                              <span className="flex items-center gap-1 text-emerald-500">
+                                <CheckCircle2 className="size-3" /> Tanda tangan siap
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1 rounded-sm bg-amber-500/10 px-1.5 py-0.5 text-amber-500">
+                                <span className="text-[10px] font-bold">!</span> Belum unggah tanda tangan
+                              </span>
+                            )}
+                            <span className="text-muted-foreground/40">/</span>
+                            <span className="text-muted-foreground">
+                              {selectedCoach.assignments.length} kelompok terhubung
+                            </span>
+                          </div>
                         </div>
                       </div>
-                      {!selectedCoach.signatureUrl ? (
-                        <div className="shrink-0">
-                          <input
-                            id={`signature-${selectedCoach.id}`}
-                            type="file"
-                            accept=".png"
-                            className="hidden"
-                            disabled={uploadingCoachId === selectedCoach.id || isSavingSignature}
-                            onChange={(event) => {
-                              const file = event.target.files?.[0];
-                              if (file) {
-                                void handleSignatureUpload(selectedCoach, file);
-                              }
-                              event.target.value = "";
-                            }}
-                          />
-                          <label
-                            htmlFor={`signature-${selectedCoach.id}`}
-                            className="inline-flex h-9 cursor-pointer items-center justify-center rounded-lg border border-primary/30 bg-primary/10 px-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/15"
-                          >
-                            {uploadingCoachId === selectedCoach.id ? "Mengunggah..." : "Upload TTD"}
-                          </label>
+
+                      <div className="mt-3 space-y-3 border-t border-border/40 pt-3">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="text-xs font-medium text-foreground">File tanda tangan</p>
+                            <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
+                              PNG, maks. 300KB
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground">
+                            Gunakan latar transparan atau putih polos agar jelas di rapor.
+                          </p>
                         </div>
-                      ) : null}
+
+                        <div className="flex w-full min-w-0 flex-col gap-3">
+                          <div className="flex-1">
+                            <input
+                              id={`signature-${selectedCoach.id}`}
+                              type="file"
+                              accept=".png"
+                              className="hidden"
+                              disabled={uploadingCoachId === selectedCoach.id || isSavingSignature}
+                              onChange={(event) => {
+                                const file = event.target.files?.[0];
+                                if (file) {
+                                  void handleSignatureUpload(selectedCoach, file);
+                                }
+                                event.target.value = "";
+                              }}
+                            />
+                            <label
+                              htmlFor={`signature-${selectedCoach.id}`}
+                              className="flex h-11 cursor-pointer items-center justify-between rounded-lg border border-dashed border-border/50 bg-background/50 px-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+                            >
+                              <div className="flex min-w-0 flex-1 items-center gap-3">
+                                {uploadingCoachId === selectedCoach.id ? (
+                                  <Loader2 className="size-4 shrink-0 animate-spin text-primary" />
+                                ) : selectedCoach.signatureUrl ? (
+                                  <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                                ) : (
+                                  <Upload className="size-4 shrink-0 text-muted-foreground" />
+                                )}
+                                <span className="min-w-0 truncate text-xs text-muted-foreground">
+                                  {uploadingCoachId === selectedCoach.id
+                                    ? "Mengunggah file..."
+                                    : selectedCoach.signatureUrl
+                                      ? "File tanda tangan sudah diunggah"
+                                      : "Pilih file tanda tangan"}
+                                </span>
+                              </div>
+                              <span className="ml-3 shrink-0 text-xs font-medium text-primary">
+                                {selectedCoach.signatureUrl ? "Ganti File" : "Pilih File"}
+                              </span>
+                            </label>
+                          </div>
+
+                          {selectedCoach.signatureUrl ? (
+                            <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2">
+                              <div className="flex size-12 items-center justify-center rounded-lg border border-border/50 bg-background text-xs font-semibold text-muted-foreground">
+                                PNG
+                              </div>
+                              <div className="min-w-0 flex-1 space-y-0.5">
+                                <p className="truncate text-xs font-medium text-foreground">Tanda Tangan</p>
+                                <p className="text-[11px] text-muted-foreground">Dipakai untuk rapor lokasi ini</p>
+                                <a
+                                  href={selectedCoach.signatureUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[11px] font-medium text-primary hover:underline"
+                                >
+                                  Lihat File
+                                </a>
+                              </div>
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
                     </div>
-                  ) : null}
+                  ) : (
+                    <div className="mt-3 rounded-lg border border-dashed border-border/50 bg-card/60 px-3 py-4 text-center text-xs font-medium text-muted-foreground">
+                      Pilih coach untuk lokasi ini.
+                    </div>
+                  )}
                 </div>
               );
             })}

@@ -40,6 +40,8 @@ export default function SettingsPage() {
     hasLocationCoachMappings &&
     selectedLocationCoaches.length === mappedCoachIds.size &&
     selectedLocationCoaches.every((coach) => coach.signatureUrl?.trim());
+  const ceoSignatureAsset = ASSET_KEYS.find((asset) => asset.key === "rapor_ceo_sign_url");
+  const reportFileAssets = ASSET_KEYS.filter((asset) => asset.key !== "rapor_ceo_sign_url");
   const readinessItems = [
     {
       label: "Template",
@@ -55,11 +57,11 @@ export default function SettingsPage() {
           : "Lengkapi nama dan tanda tangan",
     },
     {
-      label: "TTD Coach",
+      label: "Coach",
       ready: areLocationCoachSignaturesReady,
       helper: areLocationCoachSignaturesReady
-        ? "Tanda tangan lokasi siap"
-        : "Lengkapi tanda tangan lokasi",
+        ? "Tanda tangan siap"
+        : "Lengkapi tanda tangan",
     },
     {
       label: "Stempel",
@@ -230,13 +232,13 @@ export default function SettingsPage() {
               <h3 className="text-base font-semibold text-foreground">File Rapor</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Unggah template, tanda tangan, dan stempel yang tampil di PDF rapor.
+              Unggah template dan stempel yang tampil di PDF rapor.
             </p>
           </div>
         </div>
 
         <div className="space-y-4 px-5 py-4">
-          {ASSET_KEYS.map((asset) => {
+          {reportFileAssets.map((asset) => {
             const previewMeta = getAssetPreviewMeta(asset.key);
             const assetUrl = localValues[asset.key];
             const isPdfAsset = assetUrl?.toLowerCase().endsWith(".pdf");
@@ -252,7 +254,7 @@ export default function SettingsPage() {
                       {asset.label}
                     </label>
                     <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
-                      Maks. {asset.maxSizeLabel}
+                      {asset.maxSizeLabel}
                     </span>
                   </div>
                   <p className="text-xs text-muted-foreground">{asset.description}</p>
@@ -354,9 +356,9 @@ export default function SettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <UserCheck className="size-4 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Nama Penandatangan</h3>
+              <h3 className="text-base font-semibold text-foreground">CEO Rapor</h3>
             </div>
-            <p className="text-sm text-muted-foreground">Atur nama CEO yang tampil di rapor.</p>
+            <p className="text-sm text-muted-foreground">Atur nama dan tanda tangan CEO yang tampil di rapor.</p>
           </div>
         </div>
 
@@ -394,6 +396,113 @@ export default function SettingsPage() {
               </div>
             </div>
           ))}
+
+          {ceoSignatureAsset ? (() => {
+            const asset = ceoSignatureAsset;
+            const previewMeta = getAssetPreviewMeta(asset.key);
+            const assetUrl = localValues[asset.key];
+
+            return (
+              <div className="space-y-3 border-t border-border/40 pt-4">
+                <div className="space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label
+                      htmlFor={`file-${asset.key}`}
+                      className="text-xs font-medium text-foreground"
+                    >
+                      {asset.label}
+                    </label>
+                    <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
+                      {asset.maxSizeLabel}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{asset.description}</p>
+                </div>
+
+                <div className="flex flex-col gap-3 xl:flex-row xl:items-start">
+                  <div className="flex-1">
+                    <Input
+                      type="file"
+                      accept={asset.accept}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        if (file) {
+                          handleFileUpload(asset.key, file, asset.label);
+                        }
+                      }}
+                      className="hidden"
+                      id={`file-${asset.key}`}
+                    />
+                    <label
+                      htmlFor={`file-${asset.key}`}
+                      className="flex h-11 cursor-pointer items-center justify-between rounded-lg border border-dashed border-border/50 bg-background/50 px-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        {uploading[asset.key] ? (
+                          <Loader2 className="size-4 shrink-0 animate-spin text-primary" />
+                        ) : assetUrl ? (
+                          <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                        ) : (
+                          <Upload className="size-4 shrink-0 text-muted-foreground" />
+                        )}
+                        <span className="truncate text-xs text-muted-foreground">
+                          {uploading[asset.key]
+                            ? "Mengunggah file..."
+                            : assetUrl
+                              ? "File sudah diunggah"
+                              : "Pilih file untuk diunggah"}
+                        </span>
+                      </div>
+                      <span className="text-xs font-medium text-primary">
+                        {assetUrl ? "Ganti File" : "Pilih File"}
+                      </span>
+                    </label>
+                  </div>
+
+                  {assetUrl ? (
+                    <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2 xl:min-w-[18rem]">
+                      <div className={`relative flex size-12 items-center justify-center overflow-hidden rounded-lg border border-border/50 ${previewMeta.frameClass}`}>
+                        {failedImages[asset.key] ? (
+                          <div className={`flex size-full items-center justify-center ${previewMeta.fallbackClass}`}>
+                            <span className="text-[10px] font-semibold">PNG</span>
+                          </div>
+                        ) : (
+                          <Image
+                            src={getPreviewUrl(asset.key, assetUrl)}
+                            alt={`Preview ${asset.label}`}
+                            width={48}
+                            height={48}
+                            unoptimized
+                            className="max-h-full max-w-full object-contain"
+                            onError={() =>
+                              setFailedImages((previous) => ({ ...previous, [asset.key]: true }))
+                            }
+                          />
+                        )}
+                      </div>
+
+                      <div className="min-w-0 space-y-0.5">
+                        <p className="truncate text-xs font-medium text-foreground">
+                          {previewMeta.badge}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          {previewMeta.helperText}
+                        </p>
+                        <a
+                          href={assetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-[11px] font-medium text-primary hover:underline"
+                        >
+                          Lihat File
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            );
+          })() : null}
         </div>
       </section>
 
