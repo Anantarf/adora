@@ -9,6 +9,7 @@ import {
   upsertCoachProfileAction,
   upsertOwnCoachProfileAction,
 } from "@/actions/coach-profiles";
+import { QUERY_KEYS } from "@/lib/constants";
 
 export type CoachUserWithProfile = {
   id: string;
@@ -62,8 +63,10 @@ export const useUpsertCoachProfile = () => {
     mutationFn: upsertCoachProfileAction,
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["coach-profile", variables.userId] });
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.USERS_BASE });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.GROUPS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAMILY_PLAYERS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COACH_WORKSPACE });
       toast.success("Profil coach berhasil disimpan.");
     },
     onError: (error) => {
@@ -79,6 +82,8 @@ export const useUpsertOwnCoachProfile = () => {
     mutationFn: upsertOwnCoachProfileAction,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["coach-profile", "me"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.FAMILY_PLAYERS });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.COACH_WORKSPACE });
       toast.success("Profil coach berhasil diperbarui.");
     },
     onError: (error) => {
