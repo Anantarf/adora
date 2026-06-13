@@ -32,16 +32,16 @@ export function ParentAttendanceSummary({
 
   return (
     <Card className="border-border/50 bg-card overflow-hidden shadow-sm lg:col-span-2">
-      <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+      <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
         <div className="flex items-center gap-2">
-          <ClipboardCheck className="size-5 text-primary" />
+          <ClipboardCheck className="size-4 text-primary" />
           <div>
             <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Rekap Kehadiran</CardTitle>
-            <CardDescription className="text-xs">Ringkasan kehadiran {activeChildName} dari {attendances?.length ?? 0} agenda terakhir.</CardDescription>
+            <CardDescription className="text-xs">{activeChildName} dari {attendances?.length ?? 0} agenda terakhir.</CardDescription>
           </div>
         </div>
       </CardHeader>
-      <CardContent className="p-4 sm:p-5">
+      <CardContent className="p-3 sm:p-4">
         {attendanceLoading ? (
           <div className="flex items-center justify-center gap-2 py-8 text-primary font-bold text-xs uppercase tracking-widest">
             <Loader2 className="size-4 animate-spin" /> Memuat data kehadiran...
@@ -53,29 +53,29 @@ export function ParentAttendanceSummary({
             <p className="text-xs text-muted-foreground/75">Riwayat kehadiran akan tampil di sini setelah kehadiran dicatat untuk agenda latihan atau pertandingan.</p>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
-            <div className="flex flex-wrap items-center gap-2.5">
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)] xl:items-start">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex w-full items-center justify-between gap-2 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                <span className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Persentase Kehadiran</span>
+                <span className={`text-2xl font-black tabular-nums ${attendanceRateColor}`}>
+                  {attendanceSummary?.rate ?? 0}%
+                </span>
+              </div>
               {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
-                <div key={s} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
+                <div key={s} className={`flex flex-1 items-center justify-between gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
                   <span className="text-micro">{STATUS_STYLE[s].label}</span>
                   <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
                 </div>
               ))}
-              <div className="flex w-full items-center justify-between gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-1.5 sm:ml-auto sm:w-auto sm:justify-start">
-                <span className="text-micro text-muted-foreground">Persentase Kehadiran</span>
-                <span className={`text-sm font-black tabular-nums ${attendanceRateColor}`}>
-                  {attendanceSummary?.rate ?? 0}%
-                </span>
-              </div>
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <p className="text-micro text-muted-foreground/50 px-1 mb-1">10 Kehadiran Terbaru</p>
-              {attendances.slice(0, 10).map((a) => {
+              <p className="text-micro text-muted-foreground/50 px-1">3 Kehadiran Terbaru</p>
+              {attendances.slice(0, 3).map((a) => {
                 const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
                 const eventTitle = a.event?.title ?? eventLabel;
                 return (
-                  <div key={a.id} className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
+                  <div key={a.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
                     <div className="flex flex-col min-w-0">
                       <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
                       <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>

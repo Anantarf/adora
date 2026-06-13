@@ -141,6 +141,19 @@ export default function ParentDashboard() {
     children.find((child: FamilyPlayer) => child.id === effectiveChildId) || children[0];
   const latestStat = stats?.[0];
   const latestMetrics = latestStat?.metricsJson as MetricsJson | undefined;
+  const latestOverallScore = latestMetrics
+    ? Math.max(
+        0,
+        Math.min(
+          100,
+          Math.round(
+            isMetricsJsonV2(latestMetrics)
+              ? getEvaluationSummary(latestMetrics).overallScore
+              : averageScore(latestMetrics),
+          ),
+        ),
+      )
+    : null;
   const currentPeriodLabel =
     latestStat?.period?.name ??
     (latestStat
@@ -202,7 +215,11 @@ export default function ParentDashboard() {
         )}
       </div>
 
-      <ParentPlayerHero player={activeChild} />
+      <ParentPlayerHero
+        player={activeChild}
+        latestScore={latestOverallScore}
+        periodLabel={latestStat ? currentPeriodLabel : null}
+      />
 
       {statsLoading ? (
         <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
@@ -273,39 +290,39 @@ export default function ParentDashboard() {
         </div>
       ) : (
         <div className="flex flex-col gap-6">
-          <div className="grid w-full grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className="grid w-full grid-cols-1 gap-6">
             {latestMetrics ? (
               <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
                 <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-                  <div className="flex items-start justify-between gap-4">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
                       <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-                        Ringkasan Nilai
+                        Evaluasi Terbaru
                       </CardTitle>
                       <CardDescription className="text-xs">
-                        {currentPeriodLabel}
+                        Ringkasan nilai dan catatan pelatih untuk {currentPeriodLabel}.
                       </CardDescription>
                     </div>
-                    <GradeBadge score={averageScore(latestMetrics)} variant="full" />
+                    <GradeBadge score={latestOverallScore ?? averageScore(latestMetrics)} variant="full" />
                   </div>
                 </CardHeader>
-                <CardContent className="p-3 md:p-4">
+                <CardContent className="space-y-4 p-3 md:p-4">
                   {isMetricsJsonV2(latestMetrics) ? (
                     // V2: tampilkan ringkasan per kategori
-                    <div className="space-y-3">
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                       {getEvaluationSummary(latestMetrics).categorySummaries.map((category) => (
                         <div
                           key={category.id}
-                          className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/30 px-4 py-3"
+                          className="flex items-center justify-between rounded-xl border border-border/40 bg-muted/25 px-3.5 py-3"
                         >
                           <div className="min-w-0">
-                            <p className="text-sm font-semibold text-foreground">{category.label}</p>
+                            <p className="truncate text-sm font-semibold text-foreground">{category.label}</p>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
                               Bobot {formatWeight(category.weight)}%
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold tabular-nums text-primary">
+                            <p className="text-xl font-bold tabular-nums text-primary">
                               {category.averageScore}
                             </p>
                             <p className="text-[10px] text-muted-foreground">/100</p>
@@ -313,7 +330,7 @@ export default function ParentDashboard() {
                         </div>
                       ))}
                       {getEvaluationSummary(latestMetrics).attendance ? (
-                        <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                        <div className="flex items-center justify-between rounded-xl border border-primary/20 bg-primary/5 px-3.5 py-3">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-foreground">
                               {getEvaluationSummary(latestMetrics).attendance!.label}
@@ -323,7 +340,7 @@ export default function ParentDashboard() {
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="text-2xl font-bold tabular-nums text-primary">
+                            <p className="text-xl font-bold tabular-nums text-primary">
                               {getEvaluationSummary(latestMetrics).attendance!.score}
                             </p>
                             <p className="text-[10px] text-muted-foreground">/100</p>
@@ -337,47 +354,30 @@ export default function ParentDashboard() {
                       {flattenMetrics(latestMetrics).map((item) => (
                         <div
                           key={item.key}
-                          className="flex min-h-18 flex-col justify-center rounded-lg border border-border/40 bg-muted/30 p-2.5 text-center md:min-h-20 md:p-3"
+                          className="flex min-h-16 flex-col justify-center rounded-lg border border-border/40 bg-muted/25 p-2.5 text-center"
                         >
                           <p className="mb-1 text-xs leading-tight text-muted-foreground">
                             {item.label}
                           </p>
-                          <p className="text-xl font-bold tabular-nums text-foreground md:text-2xl">
+                          <p className="text-xl font-bold tabular-nums text-foreground">
                             {item.value}
                           </p>
                         </div>
                       ))}
                     </div>
                   )}
+                  <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+                      Catatan Pelatih
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-foreground/85">
+                      {latestMetrics.notes ||
+                        "Belum ada catatan khusus dari pelatih pada evaluasi terbaru."}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             ) : null}
-
-            <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
-              <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-                      Catatan Pelatih
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Ringkasan masukan pelatih dari evaluasi terbaru.
-                    </CardDescription>
-                  </div>
-                  <span className="rounded-full border border-border/50 bg-background px-3 py-2 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
-                    {currentPeriodLabel}
-                  </span>
-                </div>
-              </CardHeader>
-              <CardContent className="p-4 md:p-5">
-                <div className="rounded-xl border border-primary/10 bg-primary/5 p-4">
-                  <p className="text-sm leading-relaxed text-foreground/85">
-                    {latestMetrics?.notes ||
-                      "Belum ada catatan khusus dari pelatih pada evaluasi terbaru."}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           <ParentAttendanceSummary
@@ -387,9 +387,8 @@ export default function ParentDashboard() {
             activeChildName={activeChild.name}
           />
 
-          <ParentReportArchivesCard archives={releasedArchives} playerName={activeChild.name} />
-
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+            <ParentReportArchivesCard archives={releasedArchives} playerName={activeChild.name} />
             <ParentCoachCard player={activeChild} />
             <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
           </div>

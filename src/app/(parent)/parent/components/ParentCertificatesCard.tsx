@@ -21,7 +21,7 @@ export function ParentCertificatesCard({
 }) {
   return (
     <Card className="border-border/50 bg-card shadow-sm">
-      <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+      <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
         <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
           Sertifikat Prestasi
         </CardTitle>
@@ -29,9 +29,9 @@ export function ParentCertificatesCard({
           Sertifikat dan penghargaan yang pernah diterima {playerName}.
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3 p-5">
+      <CardContent className="space-y-3 p-4">
         {!certificates?.length ? (
-          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-7 text-center">
+          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-6 text-center">
             <p className="text-sm font-medium text-muted-foreground">
               Belum ada sertifikat yang tersedia.
             </p>
@@ -46,7 +46,7 @@ export function ParentCertificatesCard({
               href={certificate.fileUrl}
               target="_blank"
               rel="noreferrer"
-              className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-4 transition-colors hover:bg-muted/20"
+              className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-3.5 transition-colors hover:bg-muted/20"
             >
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
                 <Award className="size-4 text-primary" />

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
   const [open, setOpen] = useState(false);
+  const [photoFailed, setPhotoFailed] = useState(false);
   const resolutionSource = player.resolvedSigner?.resolutionSource;
 
   const coachResolution = (() => {
@@ -40,7 +41,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
   return (
     <>
       <Card className="border-border/50 bg-card shadow-sm">
-        <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
+        <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
           <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
             Informasi Pelatih
           </CardTitle>
@@ -48,12 +49,17 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
             Pelatih utama yang saat ini mendampingi kelompok latihan {player.group?.name || "anak Anda"}.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4 p-5">
-          <div className="flex items-center gap-4">
-            <div className="flex size-18 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/30">
-              {coach?.photoUrl ? (
+        <CardContent className="space-y-3 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex size-16 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/30">
+              {coach?.photoUrl && !photoFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={coach.photoUrl} alt={coach.fullName} className="h-full w-full object-cover" />
+                <img
+                  src={coach.photoUrl}
+                  alt={coach.fullName}
+                  className="h-full w-full object-cover"
+                  onError={() => setPhotoFailed(true)}
+                />
               ) : (
                 <UserRound className="size-8 text-muted-foreground/35" />
               )}
@@ -71,7 +77,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
           <Button
             type="button"
             variant="outline"
-            className="h-10 w-full rounded-xl border-border/50 bg-background/30"
+            className="h-9 w-full rounded-xl border-border/50 bg-background/30 text-xs font-semibold"
             disabled={!coach?.licenseUrl}
             onClick={() => setOpen(true)}
           >
