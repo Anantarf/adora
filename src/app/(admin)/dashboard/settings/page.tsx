@@ -32,9 +32,13 @@ export default function SettingsPage() {
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
-  const previewCoachName = localValues.rapor_coach_name || "Pelatih ADORA BBC";
   const mappedCoachIds = new Set((signerMappings ?? []).map((mapping) => mapping.coachProfileId).filter(Boolean));
   const selectedLocationCoaches = (coachOptions ?? []).filter((coach) => mappedCoachIds.has(coach.id));
+  
+  const previewCoach = selectedLocationCoaches.find(c => c.signatureUrl) || (coachOptions ?? []).find(c => c.signatureUrl);
+  const previewCoachName = previewCoach?.fullName || "Pelatih ADORA BBC";
+  const previewCoachSignUrl = previewCoach?.signatureUrl || undefined;
+
   const hasLocationCoachMappings = (signerMappings ?? []).length > 0;
   const areLocationCoachSignaturesReady =
     hasLocationCoachMappings &&
@@ -112,7 +116,7 @@ export default function SettingsPage() {
         assets: {
           headerUrl: localValues.rapor_header_url || undefined,
           ceoSignUrl: localValues.rapor_ceo_sign_url || undefined,
-          coachSignUrl: undefined,
+          coachSignUrl: previewCoachSignUrl,
           stampUrl: localValues.rapor_stamp_url || undefined,
         },
         signers: {
