@@ -67,7 +67,7 @@ export function ParentAttendanceSummary({
               </div>
               {(["HADIR", "IZIN", "SAKIT", "ALPA"] as AttendanceStatus[]).map((s) => (
                 <div key={s} className={`flex flex-1 items-center justify-between gap-2 px-3 py-1.5 rounded-lg border ${STATUS_STYLE[s].badge}`}>
-                  <span className="text-micro">{STATUS_STYLE[s].label}</span>
+                  <span className="text-xs font-semibold">{STATUS_STYLE[s].label}</span>
                   <span className="text-sm font-black tabular-nums">{attendanceSummary?.counts[s] ?? 0}</span>
                 </div>
               ))}
@@ -75,8 +75,8 @@ export function ParentAttendanceSummary({
 
             <div className="flex min-h-0 flex-col gap-1.5">
               <div className="flex items-center justify-between gap-3 px-1">
-                <p className="text-micro text-muted-foreground/50">Agenda Periode Ini</p>
-                <p className="text-[10px] font-medium text-muted-foreground">{attendances.length} agenda</p>
+                <p className="text-xs font-semibold text-muted-foreground/70">Agenda Periode Ini</p>
+                <p className="text-xs font-medium text-muted-foreground">{attendances.length} agenda</p>
               </div>
               <div className="scrollbar-compact flex max-h-56 flex-col gap-1.5 overflow-y-auto pr-1">
                 {attendances.map((a) => {
@@ -86,9 +86,9 @@ export function ParentAttendanceSummary({
                     <div key={a.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
                       <div className="flex flex-col min-w-0">
                         <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
-                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>
+                        <span className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>
                       </div>
-                      <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>{STATUS_STYLE[a.status as AttendanceStatus].label}</span>
+                      <span className={`shrink-0 rounded-lg border px-2.5 py-1 text-xs font-semibold ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>{STATUS_STYLE[a.status as AttendanceStatus].label}</span>
                     </div>
                   );
                 })}

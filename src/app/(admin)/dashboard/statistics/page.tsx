@@ -149,13 +149,13 @@ function CategorySummaryChips({
             }`}
             title={definition.label}
           >
-            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
               {definition.shortLabel ?? definition.label}
             </p>
             <span className="h-3.5 w-px bg-border/60" />
             <p className={`${compact ? "text-sm" : "text-base"} font-bold tabular-nums text-primary`}>
               {value != null ? value : "-"}
-              <span className="ml-1 text-[10px] font-medium text-muted-foreground">/100</span>
+              <span className="ml-1 text-[11px] font-medium text-muted-foreground">/100</span>
             </p>
           </div>
         );
@@ -725,7 +725,7 @@ export default function StatisticsPage() {
                             <div className="shrink-0">
                               <Badge
                                 variant="outline"
-                                className={`text-[10px] font-semibold ${
+                                className={`text-xs font-semibold ${
                                   stat
                                     ? STATUS_BADGE_CONFIG[
                                         stat.status as keyof typeof STATUS_BADGE_CONFIG
@@ -749,7 +749,7 @@ export default function StatisticsPage() {
 
                           <div className="grid grid-cols-2 gap-2">
                             <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1.5 text-center">
-                              <p className="text-[9px] font-medium text-muted-foreground">
+                              <p className="text-[11px] font-medium text-muted-foreground">
                                 Nilai
                               </p>
                               <div className="mt-1 flex justify-center">
@@ -761,7 +761,7 @@ export default function StatisticsPage() {
                               </div>
                             </div>
                             <div className="rounded-md border border-border/50 bg-background/40 px-2 py-1.5 text-center">
-                              <p className="text-[9px] font-medium text-muted-foreground">
+                              <p className="text-[11px] font-medium text-muted-foreground">
                                 Skor Terisi
                               </p>
                               <p className="mt-1 text-sm font-bold tabular-nums text-foreground">

@@ -56,14 +56,14 @@ export function ParentProgressionChart({
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted-foreground)" strokeOpacity={0.1} />
             <XAxis
               dataKey="shortName"
-              tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 600 }}
+              tick={{ fontSize: 11, fill: "var(--muted-foreground)", fontWeight: 700 }}
               tickLine={false}
               axisLine={false}
               interval={0}
               minTickGap={0}
               dy={10}
             />
-            <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
+            <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fontSize: 11, fill: "var(--muted-foreground)", fontWeight: 600 }} axisLine={false} tickLine={false} />
             <Tooltip
               formatter={(value) => [`${value}/100`, "Nilai Evaluasi"]}
               labelFormatter={(_, payload) => `Periode: ${payload[0]?.payload?.name ?? "-"}`}
@@ -75,12 +75,12 @@ export function ParentProgressionChart({
               stroke="var(--primary)"
               strokeOpacity={0.2}
               strokeDasharray="4 4"
-              label={{ value: "Acuan baik 75", position: "insideTopRight", fill: "var(--muted-foreground)", fontSize: 10 }}
+              label={{ value: "Acuan baik 75", position: "insideTopRight", fill: "var(--muted-foreground)", fontSize: 11, fontWeight: 600 }}
             />
             <Line type="monotone" name="Nilai Evaluasi" dataKey="Overall" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4, strokeWidth: 2, fill: "var(--background)" }} activeDot={{ r: 6 }} />
           </LineChart>
         </ResponsiveContainer>
-        <p className="mt-2 text-center text-[11px] font-medium text-muted-foreground">
+        <p className="mt-2 text-center text-xs font-medium text-muted-foreground">
           Semakin tinggi garis, semakin baik hasil evaluasi. Angka dibaca dari 0 sampai 100.
         </p>
       </CardContent>
