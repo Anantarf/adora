@@ -18,12 +18,14 @@ export function ParentAttendanceSummary({
   attendanceSummary, 
   attendances, 
   attendanceLoading, 
-  activeChildName 
+  activeChildName,
+  periodLabel,
 }: { 
   attendanceSummary: { counts: Record<AttendanceStatus, number>; rate: number } | null; 
   attendances: (Omit<Attendance, "event"> & { event?: { title: string; type: string } | null })[] | undefined; 
   attendanceLoading: boolean; 
   activeChildName: string;
+  periodLabel?: string | null;
 }) {
   const attendanceRateColor = useMemo(
     () => getAttendanceRateColor(attendanceSummary?.rate ?? 0),
@@ -37,7 +39,9 @@ export function ParentAttendanceSummary({
           <ClipboardCheck className="size-4 text-primary" />
           <div>
             <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">Rekap Kehadiran</CardTitle>
-            <CardDescription className="text-xs">{activeChildName} dari {attendances?.length ?? 0} agenda terakhir.</CardDescription>
+            <CardDescription className="text-xs">
+              {activeChildName} dari {attendances?.length ?? 0} agenda{periodLabel ? ` pada ${periodLabel}` : " terakhir"}.
+            </CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -69,21 +73,26 @@ export function ParentAttendanceSummary({
               ))}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <p className="text-micro text-muted-foreground/50 px-1">3 Kehadiran Terbaru</p>
-              {attendances.slice(0, 3).map((a) => {
-                const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
-                const eventTitle = a.event?.title ?? eventLabel;
-                return (
-                  <div key={a.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
-                    <div className="flex flex-col min-w-0">
-                      <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
-                      <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>
+            <div className="flex min-h-0 flex-col gap-1.5">
+              <div className="flex items-center justify-between gap-3 px-1">
+                <p className="text-micro text-muted-foreground/50">Agenda Periode Ini</p>
+                <p className="text-[10px] font-medium text-muted-foreground">{attendances.length} agenda</p>
+              </div>
+              <div className="scrollbar-compact flex max-h-56 flex-col gap-1.5 overflow-y-auto pr-1">
+                {attendances.map((a) => {
+                  const eventLabel = a.event ? getEventConfig(a.event.type).label : "Agenda";
+                  const eventTitle = a.event?.title ?? eventLabel;
+                  return (
+                    <div key={a.id} className="flex items-center justify-between gap-3 px-3 py-2.5 rounded-xl border border-border/40 bg-muted/10 hover:bg-muted/20 transition-colors">
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-sm font-semibold text-foreground truncate">{eventTitle}</span>
+                        <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{format(new Date(a.date), "EEEE, dd MMM yyyy", { locale: idLocale })}</span>
+                      </div>
+                      <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>{STATUS_STYLE[a.status as AttendanceStatus].label}</span>
                     </div>
-                    <span className={`shrink-0 text-micro px-2.5 py-1 rounded-lg border ${STATUS_STYLE[a.status as AttendanceStatus].badge}`}>{STATUS_STYLE[a.status as AttendanceStatus].label}</span>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

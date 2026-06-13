@@ -717,7 +717,7 @@ export async function getPlayerStatsAction(playerId: string) {
       ...(role === "PARENT" ? { status: "Published" } : {}),
     },
     include: {
-      period: { select: { id: true, name: true } },
+      period: { select: { id: true, name: true, startDate: true, endDate: true } },
       player: {
         select: {
           group: {

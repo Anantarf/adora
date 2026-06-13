@@ -302,6 +302,7 @@ export async function getReleasedReportArchivesForPlayerAction(playerId: string)
       fileUrl: true,
       releasedAt: true,
       coachNameSnapshot: true,
+      coachSignUrlSnapshot: true,
       groupNameSnapshot: true,
       homebaseNameSnapshot: true,
       period: {

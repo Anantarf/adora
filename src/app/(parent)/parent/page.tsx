@@ -16,6 +16,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { useReleasedReportArchives } from "@/hooks/use-report-archives";
+import { useReportSettings } from "@/hooks/use-settings";
 import { usePlayerStats } from "@/hooks/use-player-stats";
 import { averageScore, flattenMetrics } from "@/lib/metrics";
 import { getEvaluationSummary, isMetricsJsonV2 } from "@/lib/evaluation-rules";
@@ -41,6 +42,33 @@ function formatWeight(value: number) {
   return Number.isInteger(value) ? value.toString() : value.toFixed(2).replace(/\.?0+$/, "");
 }
 
+function formatShortPeriodLabel(period?: {
+  name: string;
+  startDate: Date | string;
+  endDate: Date | string;
+} | null) {
+  if (!period?.startDate || !period.endDate) {
+    return period?.name;
+  }
+
+  const startDate = new Date(period.startDate);
+  const endDate = new Date(period.endDate);
+
+  if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    return period.name;
+  }
+
+  const startMonth = startDate.toLocaleDateString("id-ID", { month: "short" });
+  const endMonth = endDate.toLocaleDateString("id-ID", { month: "short" });
+  const year = endDate.toLocaleDateString("id-ID", { year: "2-digit" });
+
+  if (startMonth === endMonth) {
+    return `${startMonth} '${year}`;
+  }
+
+  return `${startMonth}-${endMonth}`;
+}
+
 export default function ParentDashboard() {
   const { data: children, isLoading: familyLoading } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -58,6 +86,7 @@ export default function ParentDashboard() {
     usePlayerAttendance(effectiveChildId);
   const { data: certificates } = usePlayerCertificates(effectiveChildId);
   const { data: releasedArchives } = useReleasedReportArchives(effectiveChildId);
+  const { data: reportSettings } = useReportSettings();
 
   const progressionData = useMemo(() => {
     if (!stats?.length) {
@@ -77,17 +106,50 @@ export default function ParentDashboard() {
             month: "short",
             year: "2-digit",
           }),
+        shortName:
+          formatShortPeriodLabel(stat.period) ??
+          new Date(stat.date).toLocaleDateString("id-ID", {
+            month: "short",
+            year: "2-digit",
+          }),
         Overall: Math.max(0, Math.min(100, Math.round(score))),
       };
     });
   }, [stats]);
 
-  const attendanceSummary = useMemo(() => {
+  const latestStat = stats?.[0];
+  const latestMetrics = latestStat?.metricsJson as MetricsJson | undefined;
+  const periodStartDate = latestStat?.period?.startDate;
+  const periodEndDate = latestStat?.period?.endDate;
+  const periodAttendance = useMemo(() => {
     if (!attendances?.length) {
+      return [];
+    }
+
+    if (!periodStartDate || !periodEndDate) {
+      return attendances;
+    }
+
+    const startDate = new Date(periodStartDate);
+    const endDate = new Date(periodEndDate);
+    endDate.setHours(23, 59, 59, 999);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return attendances;
+    }
+
+    return attendances.filter((attendance) => {
+      const attendanceDate = new Date(attendance.date);
+      return attendanceDate >= startDate && attendanceDate <= endDate;
+    });
+  }, [attendances, periodEndDate, periodStartDate]);
+
+  const attendanceSummary = useMemo(() => {
+    if (!periodAttendance.length) {
       return null;
     }
 
-    const counts = attendances.reduce(
+    const counts = periodAttendance.reduce(
       (summary, attendance) => {
         summary[attendance.status as AttendanceStatus] += 1;
         return summary;
@@ -95,10 +157,10 @@ export default function ParentDashboard() {
       { HADIR: 0, IZIN: 0, SAKIT: 0, ALPA: 0 } as Record<AttendanceStatus, number>,
     );
 
-    const total = attendances.length;
+    const total = periodAttendance.length;
     const rate = Math.round((counts.HADIR / total) * 100);
     return { counts, total, rate };
-  }, [attendances]);
+  }, [periodAttendance]);
 
   if (familyLoading) {
     return (
@@ -139,8 +201,6 @@ export default function ParentDashboard() {
 
   const activeChild =
     children.find((child: FamilyPlayer) => child.id === effectiveChildId) || children[0];
-  const latestStat = stats?.[0];
-  const latestMetrics = latestStat?.metricsJson as MetricsJson | undefined;
   const latestOverallScore = latestMetrics
     ? Math.max(
         0,
@@ -382,13 +442,19 @@ export default function ParentDashboard() {
 
           <ParentAttendanceSummary
             attendanceSummary={attendanceSummary}
-            attendances={attendances}
+            attendances={periodAttendance}
             attendanceLoading={attendanceLoading}
             activeChildName={activeChild.name}
+            periodLabel={latestStat ? currentPeriodLabel : null}
           />
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <ParentReportArchivesCard archives={releasedArchives} playerName={activeChild.name} />
+            <ParentReportArchivesCard
+              archives={releasedArchives}
+              player={activeChild}
+              reportSettings={reportSettings}
+              stats={stats}
+            />
             <ParentCoachCard player={activeChild} />
             <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
           </div>

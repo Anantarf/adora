@@ -18,7 +18,7 @@ export type PlayerStatRecord = {
   periodId: string | null;
   createdAt: Date;
   updatedAt: Date;
-  period?: { id: string; name: string } | null;
+  period?: { id: string; name: string; startDate: Date | string; endDate: Date | string } | null;
   history?: StatisticHistory[];
 };
 

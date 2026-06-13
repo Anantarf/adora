@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { useDebounce } from "use-debounce";
-import { AlertCircle, HeartPulse, RefreshCcw, School, Users, Search, LayoutGrid, Table as TableIcon } from "lucide-react";
+import { AlertCircle, ClipboardCheck, FilePenLine, HeartPulse, RefreshCcw, School, Search, Users } from "lucide-react";
 
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,7 +24,6 @@ export function CoachPlayersPageClient() {
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearch] = useDebounce(searchQuery, 300);
   const [selectedGroupId, setSelectedGroupId] = useState<string>("all");
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
 
   const filteredPlayers = useMemo(() => {
     if (!data?.players) return [];
@@ -92,8 +92,8 @@ export function CoachPlayersPageClient() {
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex flex-1 flex-col sm:flex-row items-center gap-3">
+      <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -117,103 +117,59 @@ export function CoachPlayersPageClient() {
             </SelectContent>
           </Select>
         </div>
-        
-        <div className="flex w-full sm:w-auto items-center gap-2 rounded-xl border border-border/50 bg-background/50 p-1">
-          <button
-            onClick={() => setViewMode("list")}
-            className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              viewMode === "list"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            <TableIcon className="size-4" />
-            <span className="inline">List</span>
-          </button>
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`flex flex-1 sm:flex-none justify-center items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-              viewMode === "grid"
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            <LayoutGrid className="size-4" />
-            <span className="inline">Grid</span>
-          </button>
-        </div>
       </div>
 
-      <Card className="border border-border/50 shadow-sm bg-transparent sm:bg-card">
+      <Card className="border border-border/50 bg-transparent shadow-sm sm:bg-card">
         <CardHeader className="border-b border-border/40 bg-card rounded-t-xl hidden sm:block">
-          <CardTitle>Daftar Pemain Coach</CardTitle>
-          <CardDescription>Daftar pemain yang sesuai dengan filter pencarian dan kelompok.</CardDescription>
+          <CardTitle>Daftar Pemain</CardTitle>
+          <CardDescription>Gunakan aksi cepat untuk presensi atau penilaian pemain.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 p-0 sm:p-6 sm:pt-6">
           {filteredPlayers.length > 0 ? (
-            viewMode === "list" ? (
-              <div className="space-y-3">
-                {filteredPlayers.map((player) => (
-                  <div
-                    key={player.id}
-                    className="grid gap-3 rounded-2xl border border-border/50 bg-card sm:bg-background/40 p-4 md:grid-cols-[minmax(0,1.2fr)_minmax(10rem,0.7fr)_minmax(12rem,0.8fr)] md:items-center"
-                  >
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-foreground">{player.name}</p>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {player.group.name} | Lahir {formatBirthDate(player.dateOfBirth)}
-                      </p>
-                    </div>
-                    <div className="min-w-0">
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <School className="size-3.5 text-primary" />
-                        <span className="truncate">{player.schoolOrigin || "Sekolah belum diisi"}</span>
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        Homebase: {player.homebase?.name || "Belum ditetapkan"}
-                      </p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium text-foreground">
-                        Orang tua: <span className="text-muted-foreground">{player.parentName || "Belum ditautkan"}</span>
-                      </p>
-                      <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                        <HeartPulse className="size-3.5 text-primary" />
-                        <span>{player.gender || "Gender belum diisi"}</span>
-                      </div>
+            <div className="space-y-3">
+              {filteredPlayers.map((player) => (
+                <div
+                  key={player.id}
+                  className="grid gap-3 rounded-2xl border border-border/50 bg-card p-4 sm:bg-background/40 lg:grid-cols-[minmax(0,1.1fr)_minmax(10rem,0.7fr)_auto] lg:items-center"
+                >
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">{player.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {player.group.name} | Lahir {formatBirthDate(player.dateOfBirth)}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground lg:hidden">
+                      <span>{player.schoolOrigin || "Sekolah belum diisi"}</span>
+                      <span>•</span>
+                      <span>{player.parentName || "Orang tua belum ditautkan"}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {filteredPlayers.map((player) => (
-                  <div key={player.id} className="flex flex-col rounded-2xl border border-border/50 bg-card shadow-sm p-4 hover:border-primary/30 transition-colors">
-                    <div className="flex-1 min-w-0 mb-4">
-                      <p className="text-sm font-semibold text-foreground line-clamp-1" title={player.name}>{player.name}</p>
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{player.group.name}</p>
+                  <div className="hidden min-w-0 lg:block">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <School className="size-3.5 text-primary" />
+                      <span className="truncate">{player.schoolOrigin || "Sekolah belum diisi"}</span>
                     </div>
-                    <div className="space-y-2 mt-auto text-xs">
-                      <div className="flex items-center gap-2 text-muted-foreground bg-muted/20 p-2 rounded-lg">
-                        <School className="size-3.5 shrink-0 text-primary" />
-                        <span className="truncate" title={player.schoolOrigin || "Sekolah belum diisi"}>
-                          {player.schoolOrigin || "Sekolah belum diisi"}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between text-muted-foreground bg-muted/20 p-2 rounded-lg">
-                        <span className="font-medium text-foreground truncate max-w-[120px]" title={player.parentName || "Belum ditautkan"}>
-                          {player.parentName || "Tidak ditautkan"}
-                        </span>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <HeartPulse className="size-3.5 text-primary" />
-                          <span>{player.gender ? player.gender.substring(0,1).toUpperCase() : "-"}</span>
-                        </div>
-                      </div>
+                    <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                      <HeartPulse className="size-3.5 text-primary" />
+                      <span>{player.gender || "Gender belum diisi"}</span>
                     </div>
                   </div>
-                ))}
-              </div>
-            )
+                  <div className="flex flex-wrap gap-2 lg:justify-end">
+                    <Button asChild variant="outline" size="sm" className="h-9 rounded-xl">
+                      <Link href="/coach/attendances">
+                        <ClipboardCheck className="mr-2 size-3.5" />
+                        Presensi
+                      </Link>
+                    </Button>
+                    <Button asChild size="sm" className="h-9 rounded-xl">
+                      <Link href="/coach/statistics">
+                        <FilePenLine className="mr-2 size-3.5" />
+                        Nilai
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="flex flex-col items-center justify-center gap-2 py-12 px-4 text-center border border-dashed border-border/60 rounded-2xl bg-card">
               <Users className="size-8 text-muted-foreground/30 mb-2" />

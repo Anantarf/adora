@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   FileImage,
   FileText,
-  Info,
   Loader2,
   ShieldCheck,
   Upload,
@@ -42,6 +41,37 @@ export default function SettingsPage() {
     selectedGlobalCoach?.signatureUrl || localValues.rapor_coach_sign_url || undefined;
   const hasSelectedGlobalCoachSignature = Boolean(selectedGlobalCoach?.signatureUrl?.trim());
   const hasManualCoachSignFallback = Boolean(localValues.rapor_coach_sign_url?.trim());
+  const readinessItems = [
+    {
+      label: "Template",
+      ready: Boolean(localValues.rapor_header_url?.trim()),
+      helper: localValues.rapor_header_url?.trim() ? "Siap dipakai" : "Belum diunggah",
+    },
+    {
+      label: "CEO",
+      ready: Boolean(localValues.rapor_ceo_name?.trim() && localValues.rapor_ceo_sign_url?.trim()),
+      helper:
+        localValues.rapor_ceo_name?.trim() && localValues.rapor_ceo_sign_url?.trim()
+          ? "Nama dan tanda tangan siap"
+          : "Lengkapi nama dan tanda tangan",
+    },
+    {
+      label: "Pelatih",
+      ready: Boolean(
+        selectedGlobalCoach?.signatureUrl?.trim() ||
+          localValues.rapor_coach_sign_url?.trim(),
+      ),
+      helper:
+        selectedGlobalCoach?.signatureUrl?.trim() || localValues.rapor_coach_sign_url?.trim()
+          ? "Tanda tangan siap"
+          : "Butuh tanda tangan cadangan",
+    },
+    {
+      label: "Stempel",
+      ready: Boolean(localValues.rapor_stamp_url?.trim()),
+      helper: localValues.rapor_stamp_url?.trim() ? "Siap dipakai" : "Opsional",
+    },
+  ];
 
   useEffect(() => {
     if (settings) {
@@ -156,8 +186,9 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 pb-12">
-      <div className="space-y-2 border-b border-border/50 pb-6 md:pb-8">
+    <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-12">
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end">
+        <div className="space-y-2">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
           Pengaturan
         </p>
@@ -165,33 +196,35 @@ export default function SettingsPage() {
           Aset dan Tanda Tangan Rapor
         </h1>
         <p className="max-w-3xl text-sm text-muted-foreground">
-          Kelola aset rapor, nama penandatangan, dan cadangan tanda tangan supaya hasil PDF tetap
-          konsisten serta mudah dirawat.
+          Lengkapi template, nama, dan tanda tangan yang dipakai saat rapor diterbitkan.
         </p>
+        </div>
+        <Button onClick={handlePreviewPdf} disabled={isPreviewLoading} size="xl">
+          {isPreviewLoading ? (
+            <Loader2 className="size-3.5 animate-spin" />
+          ) : (
+            <FileText className="size-3.5" />
+          )}
+          Pratinjau Rapor
+        </Button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 1</p>
-          <p className="mt-1 text-sm font-semibold text-foreground">Pelatih Kelompok</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Jika kelompok latihan sudah punya pelatih aktif, rapor akan memakai pelatih itu lebih dulu.
-          </p>
-        </div>
-        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 2</p>
-          <p className="mt-1 text-sm font-semibold text-foreground">Pelatih Cadangan Region</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Dipakai hanya jika kelompok belum punya pelatih yang jelas untuk penandatangan rapor.
-          </p>
-        </div>
-        <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary/80">Prioritas 3</p>
-          <p className="mt-1 text-sm font-semibold text-foreground">Pelatih Umum Rapor</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            Menjadi cadangan terakhir agar rapor tetap bisa terbit walau pemetaan belum lengkap.
-          </p>
-        </div>
+      <div className="grid gap-2 md:grid-cols-4">
+        {readinessItems.map((item) => (
+          <div key={item.label} className="rounded-xl border border-border/50 bg-card px-4 py-3 shadow-sm">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                {item.label}
+              </p>
+              {item.ready ? (
+                <CheckCircle2 className="size-4 text-emerald-500" />
+              ) : (
+                <AlertTriangle className="size-4 text-amber-500" />
+              )}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">{item.helper}</p>
+          </div>
+        ))}
       </div>
 
       <section className="rounded-xl border border-border/50 bg-card shadow-sm">
@@ -199,35 +232,22 @@ export default function SettingsPage() {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <FileImage className="size-4 text-primary" />
-              <h3 className="text-base font-semibold text-foreground">Aset Rapor PDF</h3>
+              <h3 className="text-base font-semibold text-foreground">File Rapor</h3>
             </div>
             <p className="text-sm text-muted-foreground">
-              Unggah aset visual yang dipakai saat rapor PDF dibuat. Tanda tangan pelatih umum
-              hanya dipakai sebagai cadangan terakhir jika pelatih kelompok dan region belum tersedia.
+              Unggah template, tanda tangan, dan stempel yang tampil di PDF rapor.
             </p>
           </div>
-          <Button
-            onClick={handlePreviewPdf}
-            disabled={isPreviewLoading}
-            size="xl"
-          >
-            {isPreviewLoading ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <FileText className="size-3.5" />
-            )}
-            Pratinjau Rapor
-          </Button>
         </div>
 
-        <div className="space-y-6 px-5 py-4">
+        <div className="space-y-4 px-5 py-4">
           {ASSET_KEYS.map((asset) => {
             const previewMeta = getAssetPreviewMeta(asset.key);
             const assetUrl = localValues[asset.key];
             const isPdfAsset = assetUrl?.toLowerCase().endsWith(".pdf");
 
             return (
-              <div key={asset.key} className="space-y-3 border-b border-border/40 pb-6 last:border-0 last:pb-0">
+              <div key={asset.key} className="space-y-3 border-b border-border/40 pb-4 last:border-0 last:pb-0">
                 <div className="space-y-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <label
@@ -341,10 +361,7 @@ export default function SettingsPage() {
               <UserCheck className="size-4 text-primary" />
               <h3 className="text-base font-semibold text-foreground">Nama Penandatangan</h3>
             </div>
-            <p className="text-sm text-muted-foreground">
-              Penandatangan rapor diatur dari sumber yang paling spesifik. Bagian pelatih umum di bawah
-              ini hanya dipakai sebagai cadangan terakhir.
-            </p>
+            <p className="text-sm text-muted-foreground">Atur nama CEO dan pelatih cadangan untuk rapor.</p>
           </div>
         </div>
 
@@ -396,11 +413,11 @@ export default function SettingsPage() {
               <div className="flex items-start gap-2">
                 <ShieldCheck className="mt-0.5 size-4 shrink-0 text-primary" />
                 <div className="space-y-1">
-                  <p className="font-medium text-foreground">Sumber pelatih umum aktif</p>
+                  <p className="font-medium text-foreground">Pelatih cadangan aktif</p>
                   <p>
                     {selectedGlobalCoach
                       ? `Nama dan tanda tangan akan mengikuti profil ${selectedGlobalCoach.fullName}.`
-                      : "Belum ada pelatih umum terpilih. Sistem akan memakai cadangan manual jika tersedia."}
+                      : "Belum ada pelatih cadangan terpilih. Sistem akan memakai file manual jika tersedia."}
                   </p>
                 </div>
               </div>
@@ -412,8 +429,7 @@ export default function SettingsPage() {
                   <div className="space-y-1">
                     <p className="font-medium text-amber-300">Pelatih terpilih belum punya tanda tangan</p>
                     <p className="text-amber-100/90">
-                      Rapor akan memakai file <span className="font-medium">Tanda Tangan Pelatih Umum Cadangan</span>{" "}
-                      jika tersedia. Jika tidak, area tanda tangan pelatih bisa kosong di PDF.
+                      Rapor akan memakai file tanda tangan pelatih cadangan jika tersedia.
                     </p>
                   </div>
                 </div>
@@ -424,10 +440,9 @@ export default function SettingsPage() {
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="mt-0.5 size-4 shrink-0 text-rose-400" />
                   <div className="space-y-1">
-                    <p className="font-medium text-rose-300">Belum ada cadangan pelatih umum</p>
+                    <p className="font-medium text-rose-300">Tanda tangan pelatih belum siap</p>
                     <p className="text-rose-100/90">
-                      Pilih pelatih umum atau unggah tanda tangan cadangan agar rapor tetap siap terbit
-                      saat mapping kelompok dan region belum lengkap.
+                      Pilih pelatih cadangan atau unggah tanda tangan manual.
                     </p>
                   </div>
                 </div>
@@ -472,19 +487,6 @@ export default function SettingsPage() {
       </section>
 
       <ReportSignerAutomationManager />
-
-      <div className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/40 p-4">
-        <Info className="mt-0.5 size-4 shrink-0 text-primary" />
-        <div className="space-y-1">
-          <p className="text-xs font-medium text-foreground">Catatan Penggunaan</p>
-          <p className="text-xs leading-relaxed text-muted-foreground">
-            Pilih pelatih umum dari data coach aktif agar nama dan tanda tangannya konsisten. File
-            tanda tangan pelatih umum cadangan sebaiknya dipakai hanya sebagai pengaman. Untuk hasil
-            rapor yang rapi dan ukuran file tetap ringan, prioritaskan template header PDF dan
-            hindari gambar full-page beresolusi terlalu besar.
-          </p>
-        </div>
-      </div>
     </div>
   );
 }

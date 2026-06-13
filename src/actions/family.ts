@@ -98,7 +98,6 @@ export async function getPlayerAttendanceAction(playerId: string) {
       event: { select: { title: true, type: true } },
     },
     orderBy: { date: "desc" },
-    take: 50,
   });
 }
 

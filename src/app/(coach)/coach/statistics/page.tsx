@@ -12,7 +12,6 @@ import { toast } from "sonner";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -346,7 +345,7 @@ export default function CoachStatisticsPage() {
     }
   }, [periods]);
 
-  const groups = coachData?.groups ?? [];
+  const groups = useMemo(() => coachData?.groups ?? [], [coachData?.groups]);
   const players = useMemo(() => {
     if (!coachData?.players) return [];
     if (activeGroup === "all") return coachData.players;
@@ -418,12 +417,17 @@ export default function CoachStatisticsPage() {
             Penilaian Pemain
           </p>
           <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Input Nilai & Statistik
+            Input Nilai Pemain
           </h1>
           <p className="max-w-3xl text-sm text-muted-foreground">
-            Pilih periode evaluasi aktif dan kelompok Anda, lalu isi nilai draf untuk pemain.
+            Pilih periode dan kelompok, lalu isi penilaian pemain. Pelatih menyimpan draf; admin yang menerbitkan rapor.
           </p>
         </div>
+      </div>
+
+      <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 text-sm text-muted-foreground">
+        <span className="font-semibold text-foreground">Alur kerja:</span>{" "}
+        isi atau perbarui nilai sebagai draf, lalu admin meninjau dan menerbitkan rapor untuk orang tua.
       </div>
 
       <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
@@ -508,7 +512,7 @@ export default function CoachStatisticsPage() {
           {selectedPeriodId && !statsLoading ? (
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Selesai/Terbit</span>
+                <span className="text-[11px] font-medium text-muted-foreground">Nilai Terbit</span>
                 <span className="text-sm font-semibold tabular-nums text-primary">
                   {statsSummary.published}
                 </span>

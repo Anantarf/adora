@@ -1,6 +1,7 @@
 "use client";
 
-import { AlertCircle, CalendarDays, FileCheck2, RefreshCcw, Users, UsersRound } from "lucide-react";
+import Link from "next/link";
+import { AlertCircle, CalendarDays, ClipboardCheck, FileCheck2, RefreshCcw, Users, UsersRound } from "lucide-react";
 
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -80,6 +81,27 @@ export function CoachDashboardPageClient() {
     },
   ];
 
+  const quickActions = [
+    {
+      title: "Isi Presensi",
+      description: "Catat kehadiran setelah latihan selesai.",
+      href: "/coach/attendances",
+      icon: ClipboardCheck,
+    },
+    {
+      title: "Input Nilai",
+      description: "Simpan penilaian pemain sebagai draf.",
+      href: "/coach/statistics",
+      icon: FileCheck2,
+    },
+    {
+      title: "Cek Pemain",
+      description: "Lihat daftar pemain di kelompok Anda.",
+      href: "/coach/players",
+      icon: Users,
+    },
+  ];
+
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
@@ -123,6 +145,28 @@ export function CoachDashboardPageClient() {
           </Card>
         ))}
       </div>
+
+      <Card className="border border-border/50 bg-card/90 shadow-sm">
+        <CardHeader className="border-b border-border/40 pb-3">
+          <CardTitle>Mulai dari sini</CardTitle>
+          <CardDescription>Aksi utama yang paling sering dipakai pelatih.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 md:grid-cols-3">
+          {quickActions.map((action) => (
+            <Link
+              key={action.title}
+              href={action.href}
+              className="group rounded-2xl border border-border/50 bg-background/40 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+            >
+              <div className="mb-3 flex size-10 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
+                <action.icon className="size-4" />
+              </div>
+              <p className="text-sm font-semibold text-foreground group-hover:text-primary">{action.title}</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{action.description}</p>
+            </Link>
+          ))}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <Card className="border border-border/50 shadow-sm">

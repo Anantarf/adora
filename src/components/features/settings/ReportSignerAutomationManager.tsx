@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, Loader2, MapPinned, PenSquare, Users2 } from "lucide-react";
+import { CheckCircle2, ChevronDown, Loader2, MapPinned, PenSquare, Users2 } from "lucide-react";
 
 import { useHomebases } from "@/hooks/use-homebases";
 import {
@@ -48,34 +48,29 @@ export function ReportSignerAutomationManager() {
 
   return (
     <section className="rounded-xl border border-border/50 bg-card shadow-sm">
-      <div className="border-b border-border/50 px-5 py-4">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <MapPinned className="size-4 text-primary" />
-            <h3 className="text-base font-semibold text-foreground">Coach Cadangan per Region</h3>
+      <details className="group">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <MapPinned className="size-4 text-primary" />
+              <h3 className="text-base font-semibold text-foreground">Pelatih Cadangan per Region</h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Opsional. Dipakai kalau kelompok belum punya pelatih aktif.
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Atur coach cadangan per region. Sistem tetap memprioritaskan coach yang memang
-            terpasang di kelompok latihan pemain.
-          </p>
-        </div>
-      </div>
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+        </summary>
 
-      <div className="space-y-5 px-5 py-4">
-        <div className="rounded-xl border border-border/50 bg-background/40 p-4 text-xs leading-relaxed text-muted-foreground">
-          Gunakan bagian ini sebagai pengaman. Jika satu kelompok sudah punya coach aktif, rapor
-          tetap memakai coach tersebut. Coach cadangan region baru dipakai saat kelompok belum
-          punya penanggung jawab yang jelas.
-        </div>
-
-        {isLoading ? (
-          <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/30 py-10 text-sm text-muted-foreground">
-            <Loader2 className="size-4 animate-spin text-primary" />
-            Memuat aturan coach cadangan...
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {(homebases ?? []).map((homebase) => {
+        <div className="space-y-4 border-t border-border/50 px-5 py-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/30 py-10 text-sm text-muted-foreground">
+              <Loader2 className="size-4 animate-spin text-primary" />
+              Memuat pelatih cadangan...
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {(homebases ?? []).map((homebase) => {
               const selectedCoachId = localMappings[homebase.id] ?? "";
               const selectedCoach = selectedCoachId
                 ? coachOptionsById.get(selectedCoachId)
@@ -103,8 +98,7 @@ export function ReportSignerAutomationManager() {
                         <p className="text-sm font-semibold text-foreground">{homebase.name}</p>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Dipakai hanya jika kelompok di region ini belum punya coach aktif untuk
-                        rapor.
+                        Cadangan tanda tangan untuk region ini.
                       </p>
                     </div>
 
@@ -141,8 +135,8 @@ export function ReportSignerAutomationManager() {
                       </Select>
                       <p className="mt-2 text-[11px] text-muted-foreground">
                         {relevantCoachOptions.length > 0
-                          ? `${relevantCoachOptions.length} coach terhubung ke region ini dan ditampilkan lebih dulu.`
-                          : "Belum ada coach yang terhubung langsung ke region ini. Anda tetap bisa memilih coach aktif lain sebagai cadangan."}
+                          ? `${relevantCoachOptions.length} pelatih region ini ditampilkan lebih dulu.`
+                          : "Belum ada pelatih khusus region ini."}
                       </p>
                     </div>
                   </div>
@@ -182,44 +176,45 @@ export function ReportSignerAutomationManager() {
                 </div>
               );
             })}
-          </div>
-        )}
+            </div>
+          )}
 
-        <div className="flex justify-end">
-          <Button
-            type="button"
-            disabled={isPending || isLoading}
-            onClick={() =>
-              void saveMappings(
-                Object.entries(localMappings)
-                  .filter(([, coachProfileId]) => coachProfileId.trim())
-                  .map(([homebaseId, coachProfileId]) => ({
-                    homebaseId,
-                    coachProfileId,
-                  })),
-              )
-            }
-            size="xl"
-          >
-            {isPending ? (
-              <Loader2 className="size-3.5 animate-spin" />
-            ) : (
-              <CheckCircle2 className="size-3.5" />
-            )}
-            Simpan Coach Cadangan Region
-          </Button>
-        </div>
-
-        <div className="rounded-xl border border-dashed border-border/50 bg-background/30 p-4 text-xs text-muted-foreground">
-          <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
-            <PenSquare className="size-4 text-primary" />
-            Urutan pemakaian tanda tangan
+          <div className="flex justify-end">
+            <Button
+              type="button"
+              disabled={isPending || isLoading}
+              onClick={() =>
+                void saveMappings(
+                  Object.entries(localMappings)
+                    .filter(([, coachProfileId]) => coachProfileId.trim())
+                    .map(([homebaseId, coachProfileId]) => ({
+                      homebaseId,
+                      coachProfileId,
+                    })),
+                )
+              }
+              size="xl"
+            >
+              {isPending ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <CheckCircle2 className="size-3.5" />
+              )}
+              Simpan Pelatih Cadangan
+            </Button>
           </div>
-          <p>1. Pelatih aktif di kelompok latihan.</p>
-          <p>2. Pelatih cadangan region.</p>
-          <p>3. Pelatih umum rapor sebagai cadangan terakhir.</p>
+
+          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 p-4 text-xs text-muted-foreground">
+            <div className="mb-2 flex items-center gap-2 font-medium text-foreground">
+              <PenSquare className="size-4 text-primary" />
+              Urutan tanda tangan
+            </div>
+            <p>1. Pelatih aktif di kelompok.</p>
+            <p>2. Pelatih cadangan region.</p>
+            <p>3. Pelatih cadangan umum.</p>
+          </div>
         </div>
-      </div>
+      </details>
     </section>
   );
 }

@@ -227,6 +227,23 @@ input[type="number"] {
   .mask-fade {
     mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
   }
+  .scrollbar-compact {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--primary) 45%, var(--muted)) transparent;
+  }
+  .scrollbar-compact::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-compact::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-compact::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--primary) 38%, var(--muted));
+    border-radius: 999px;
+  }
+  .scrollbar-compact::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--primary) 62%, var(--muted));
+  }
   @keyframes bounce-subtle {
     0%,
     100% {

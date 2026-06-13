@@ -1,11 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, Line, ReferenceLine } from "recharts";
 
-function shortenPeriodLabel(label: string) {
-  return label.length > 18 ? `${label.slice(0, 18)}...` : label;
-}
-
-export function ParentProgressionChart({ data }: { data: { name: string; Overall: number }[] }) {
+export function ParentProgressionChart({
+  data,
+}: {
+  data: { name: string; shortName?: string; Overall: number }[];
+}) {
   if (data.length === 0) {
     return null;
   }
@@ -55,18 +55,18 @@ export function ParentProgressionChart({ data }: { data: { name: string; Overall
           <LineChart data={data} margin={{ top: 8, right: 12, left: -20, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--muted-foreground)" strokeOpacity={0.1} />
             <XAxis
-              dataKey="name"
+              dataKey="shortName"
               tick={{ fontSize: 10, fill: "var(--muted-foreground)", fontWeight: 600 }}
-              tickFormatter={shortenPeriodLabel}
               tickLine={false}
               axisLine={false}
-              minTickGap={12}
+              interval={0}
+              minTickGap={0}
               dy={10}
             />
             <YAxis domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} axisLine={false} tickLine={false} />
             <Tooltip
               formatter={(value) => [`${value}/100`, "Nilai Evaluasi"]}
-              labelFormatter={(label) => `Periode: ${label}`}
+              labelFormatter={(_, payload) => `Periode: ${payload[0]?.payload?.name ?? "-"}`}
               contentStyle={{ borderRadius: "12px", border: "1px solid var(--border)", background: "var(--card)", color: "var(--card-foreground)" }}
               itemStyle={{ fontSize: "12px", fontWeight: "bold" }}
             />
