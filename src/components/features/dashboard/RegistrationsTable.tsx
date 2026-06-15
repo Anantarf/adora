@@ -77,25 +77,25 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
     <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
       <div className="border-b border-border/50 px-4 py-4 sm:px-5">
         <div className="flex items-start justify-between gap-3">
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             <h3 className="text-sm font-semibold text-foreground">Antrean Pendaftaran</h3>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Konfirmasi pembayaran lalu lanjutkan data pemain ke menu berikutnya.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
             {registrations.length > 0 ? (
-              <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-xs font-medium text-muted-foreground">
+              <span className="rounded-full border border-border/50 bg-muted/30 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                 {registrations.length} menunggu
               </span>
             ) : null}
             <DropdownMenu>
-              <DropdownMenuTrigger className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-border/50 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary">
-                <Download className="size-3.5" />
+              <DropdownMenuTrigger className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border/50 bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary">
+                <Download className="size-3" />
                 Export
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
+              <DropdownMenuContent align="end" className="w-40">
                 <DropdownMenuItem onClick={() => handleExport("all")} className="cursor-pointer text-xs font-medium">
                   Semua Data
                 </DropdownMenuItem>
@@ -111,7 +111,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
         </div>
       </div>
 
-      <div className="p-4 sm:p-5">
+      <div className="px-4 pb-4 pt-0 sm:px-5">
         {registrations.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 text-center text-muted-foreground/75">
             <Users className="size-10 text-muted-foreground/30" />
@@ -122,7 +122,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-3 md:hidden">
+            <div className="flex flex-col gap-2.5 pt-4 md:hidden">
               {paginatedRegistrations.map((registration, index) => {
                 const sanitizedPhone = sanitizePhone(registration.phone);
                 const statusMeta = REGISTRATION_STATUS_META[registration.status];
@@ -131,51 +131,42 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                 return (
                   <div
                     key={registration.id}
-                    className="space-y-3 rounded-xl border border-border/50 bg-background/40 p-4"
+                    className="space-y-3 rounded-lg border border-border/50 bg-background/40 p-3.5"
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
-                        <span className="truncate text-sm font-semibold text-foreground">
-                          {registration.playerName}
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="truncate text-sm font-semibold text-foreground">
+                            {registration.playerName}
+                          </span>
+                          <span className="shrink-0 rounded border border-border/50 bg-muted/30 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                            {registration.ageGroup}
+                          </span>
+                        </div>
                         {registration.email ? (
-                          <p className="truncate text-xs text-muted-foreground">
+                          <p className="mt-0.5 truncate text-xs text-muted-foreground">
                             {registration.email}
                           </p>
                         ) : null}
                       </div>
-                      <span className="shrink-0 text-[10px] font-medium text-muted-foreground/60">
+                      <span className="shrink-0 text-[10px] font-medium text-muted-foreground/50">
                         #{(clampedPage - 1) * ITEMS_PER_PAGE + index + 1}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      <span
-                        className={`rounded-md border px-2 py-1 font-medium ${statusMeta.badgeClassName}`}
-                      >
+                    <div className="flex flex-wrap gap-1.5 text-xs">
+                      <span className={`rounded border px-2 py-0.5 font-medium ${statusMeta.badgeClassName}`}>
                         {statusMeta.label}
                       </span>
-                      <span className="rounded-md border border-border/50 bg-background px-2 py-1 font-medium text-foreground">
-                        {registration.ageGroup}
-                      </span>
-                      <span className="rounded-md border border-border/50 bg-background px-2 py-1">
+                      <span className="rounded border border-border/50 bg-background px-2 py-0.5 text-muted-foreground">
                         {registration.homebase.name}
                       </span>
-                      <span>
-                        {format(new Date(registration.createdAt), "dd MMM yyyy", {
-                          locale: idLocale,
-                        })}
+                      <span className="px-1 py-0.5 text-muted-foreground/60">
+                        {format(new Date(registration.createdAt), "dd MMM yyyy", { locale: idLocale })}
                       </span>
                     </div>
 
-                    <div className="rounded-md border border-border/40 bg-background/50 px-3 py-2">
-                      <p className="text-[11px] font-medium text-muted-foreground">Tindak lanjut</p>
-                      <p className="mt-1 text-xs leading-relaxed text-foreground/85">
-                        {statusMeta.nextStep}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-2">
+                    <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-2.5">
                       <a
                         href={`https://wa.me/${sanitizedPhone}`}
                         target="_blank"
@@ -184,12 +175,12 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                       >
                         {registration.phone}
                       </a>
-                      <div className="flex shrink-0 items-center gap-2">
+                      <div className="flex shrink-0 items-center gap-1.5">
                         <a
                           href={waContactUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-[11px] font-medium text-white transition-colors hover:bg-green-700"
+                          className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-green-700"
                         >
                           <MessageCircle className="size-3" />
                           Hubungi
@@ -203,90 +194,99 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
             </div>
 
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted/20 text-[10px] font-medium text-muted-foreground">
-                  <tr>
-                    <th scope="col" className="w-10 rounded-l-lg px-4 py-3 text-center">
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-border/40">
+                    <th scope="col" className="w-8 py-3 pl-1 pr-3 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       No
                     </th>
-                    <th scope="col" className="px-4 py-3">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       Tanggal
                     </th>
-                    <th scope="col" className="px-4 py-3">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       Nama Pemain
                     </th>
-                    <th scope="col" className="px-4 py-3">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       WhatsApp
                     </th>
-                    <th scope="col" className="px-4 py-3">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       Status
                     </th>
-                    <th scope="col" className="px-4 py-3">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       Lokasi
                     </th>
-                    <th scope="col" className="rounded-r-lg px-4 py-3 text-right">
+                    <th scope="col" className="py-3 pl-3 pr-1 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                       Aksi
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/50">
+                <tbody className="divide-y divide-border/25">
                   {paginatedRegistrations.map((registration, index) => {
                     const sanitizedPhone = sanitizePhone(registration.phone);
                     const statusMeta = REGISTRATION_STATUS_META[registration.status];
                     const waContactUrl = `https://wa.me/${sanitizedPhone}?text=Halo%20Bapak/Ibu,%20ini%20admin%20ADORA%20BBC.%20Terkait%20pendaftaran%20ananda%20${encodeURIComponent(registration.playerName)}%20di%20${encodeURIComponent(registration.homebase.name)},%20apakah%20sudah%20melakukan%20pembayaran?`;
 
                     return (
-                      <tr key={registration.id} className="transition-colors hover:bg-muted/20">
-                        <td className="px-4 py-3 text-center text-xs font-medium text-muted-foreground">
+                      <tr key={registration.id} className="group transition-colors hover:bg-muted/10">
+                        <td className="py-3 pl-1 pr-3 text-center text-xs font-medium text-muted-foreground/50">
                           {(clampedPage - 1) * ITEMS_PER_PAGE + index + 1}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 text-xs text-muted-foreground">
-                          {format(new Date(registration.createdAt), "dd MMM yyyy, HH:mm", {
-                            locale: idLocale,
-                          })}
-                        </td>
-                        <td className="px-4 py-3 text-foreground">
-                          <div className="flex max-w-[260px] flex-col gap-1">
-                            <span className="font-semibold">{registration.playerName}</span>
-                            {registration.email ? (
-                              <span className="text-xs font-normal text-muted-foreground">
-                                {registration.email}
-                              </span>
-                            ) : null}
-                            <span className="inline-flex w-fit rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] font-medium text-foreground">
-                              {registration.ageGroup}
+                        <td className="whitespace-nowrap px-3 py-3">
+                          <div className="flex flex-col">
+                            <span className="text-xs text-foreground/80">
+                              {format(new Date(registration.createdAt), "dd MMM yyyy", { locale: idLocale })}
+                            </span>
+                            <span className="text-[10px] text-muted-foreground/50">
+                              {format(new Date(registration.createdAt), "HH:mm", { locale: idLocale })}
                             </span>
                           </div>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3">
+                        <td className="px-3 py-3">
+                          <div className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-foreground leading-tight">
+                                {registration.playerName}
+                              </span>
+                              <span className="shrink-0 rounded border border-border/50 bg-muted/30 px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                {registration.ageGroup}
+                              </span>
+                            </div>
+                            {registration.email ? (
+                              <span className="text-[11px] text-muted-foreground/60">
+                                {registration.email}
+                              </span>
+                            ) : null}
+                          </div>
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-3">
                           <a
                             href={`https://wa.me/${sanitizedPhone}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-sm font-medium text-green-500 transition-colors hover:text-green-400"
+                            className="text-xs font-semibold text-green-500 transition-colors hover:text-green-400"
                           >
                             {registration.phone}
                           </a>
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-3 py-3">
                           <span
-                            className={`inline-flex rounded-md border px-2 py-1 text-[11px] font-medium ${statusMeta.badgeClassName}`}
+                            className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${statusMeta.badgeClassName}`}
                           >
                             {statusMeta.label}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-muted-foreground">
+                        <td className="px-3 py-3 text-xs text-muted-foreground">
                           {registration.homebase.name}
                         </td>
-                        <td className="px-4 py-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
+                        <td className="py-3 pl-3 pr-1">
+                          <div className="flex items-center justify-end gap-1.5">
                             <a
                               href={waContactUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-green-600 px-3 py-2 text-[11px] font-medium text-white transition-colors hover:bg-green-700"
+                              className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-green-700"
                             >
-                              <MessageCircle className="size-3.5" />
+                              <MessageCircle className="size-3" />
                               Hubungi
                             </a>
                             <RegistrationActions regId={registration.id} status={registration.status} />
