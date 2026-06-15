@@ -2,20 +2,20 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
-import { CLUB_SETTING_KEYS, formatZodErrors, updateClubSettingSchema } from "@/lib/validation/club-setting";
+import { CLUB_SETTING_KEYS, formatZodErrors, normalizeClubSettingValue, updateClubSettingSchema, type ClubSettingKey } from "@/lib/validation/club-setting";
 
 const REPORT_SETTING_KEYS = CLUB_SETTING_KEYS;
 
 export async function getClubSettingsAction() {
-  await requireSessionRole("ADMIN");
+  await requireAdmin();
   const settings = await prisma.clubSetting.findMany();
   return Object.fromEntries(settings.map((s) => [s.key, s.value]));
 }
 
 export async function getReportSettingsAction() {
-  await requireSessionRole();
+  await requireActiveUser();
 
   const settings = await prisma.clubSetting.findMany({
     where: {
@@ -66,11 +66,10 @@ export async function updateClubSettingAction(key: string, value: string) {
   const userId = session.user.id ?? null;
 
   // Re-bind to the validated values for type narrowing below.
-  const validatedKey = parsed.data.key;
+  const validatedKey = parsed.data.key as ClubSettingKey;
+  const normalizedValue = normalizeClubSettingValue(validatedKey, parsed.data.value);
 
   if (validatedKey === "report_signer_global_coach_profile_id") {
-    const normalizedValue = value.trim();
-
     if (!normalizedValue) {
       const setting = await prisma.$transaction(async (tx) => {
         const s = await tx.clubSetting.upsert({
@@ -107,8 +106,8 @@ export async function updateClubSettingAction(key: string, value: string) {
   const setting = await prisma.$transaction(async (tx) => {
     const s = await tx.clubSetting.upsert({
       where: { key: validatedKey },
-      create: { key: validatedKey, value: parsed.data.value },
-      update: { value: parsed.data.value },
+      create: { key: validatedKey, value: normalizedValue },
+      update: { value: normalizedValue },
     });
 
     await createAuditLog(tx, "UPDATE", "clubSetting", s.id, userId, { key: validatedKey });

@@ -3,7 +3,6 @@ import type { NextConfig } from "next";
 const disableOptimizePackageImports = process.env.NEXT_DISABLE_OPTIMIZE_PACKAGE_IMPORTS === "1";
 
 const nextConfig: NextConfig = {
-  allowedDevOrigins: ["192.168.1.11"],
   serverExternalPackages: ["@prisma/client", "prisma", "bcryptjs", "bcrypt", "sharp"],
   experimental: disableOptimizePackageImports
     ? {}

@@ -21,7 +21,7 @@ import {
   resolveReportSignerSnapshotForGroup,
 } from "@/lib/report-signer-resolver";
 import { FLAT_METRIC_DEFS } from "@/lib/metrics";
-import { requireSessionRole, requireActiveUser } from "@/lib/server-auth";
+import { requireActiveUser } from "@/lib/server-auth";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
 const EMPTY_METRICS: MetricsJson = {
@@ -575,7 +575,7 @@ export async function submitStatisticAction(data: {
 }
 
 export async function getStatsByPeriodAction(periodId: string) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
   const { role, id: userId } = session.user;
   if (role !== "ADMIN" && role !== "COACH") {
     throw new Error("Akses ditolak");
@@ -663,7 +663,7 @@ export async function getStatsByPeriodAction(periodId: string) {
 }
 
 export async function getStatHistoryAction(statisticId: string) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
   const { role, id: userId } = session.user;
   if (role !== "ADMIN" && role !== "COACH") {
     throw new Error("Akses ditolak");
@@ -700,7 +700,7 @@ export async function getStatHistoryAction(statisticId: string) {
 }
 
 export async function getPlayerStatsAction(playerId: string) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
   const { role, id: userId } = session.user;
 
   if (role !== "PARENT" && role !== "ADMIN" && role !== "COACH") {

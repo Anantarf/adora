@@ -10,7 +10,7 @@ import {
   getReportSignerResolverContext,
   resolveReportSignerSnapshotForGroup,
 } from "@/lib/report-signer-resolver";
-import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
 
 export async function getReportArchiveRowsAction(groupId: string, periodId: string) {
   await requireAdmin();
@@ -282,7 +282,7 @@ export async function releaseReportArchiveAction(reportArchiveId: string) {
 }
 
 export async function getReleasedReportArchivesForPlayerAction(playerId: string) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
 
   if (session.user.role === "PARENT") {
     await prisma.$transaction(async (tx) => {

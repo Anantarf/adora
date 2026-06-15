@@ -4,8 +4,10 @@ import {
   buildReportArchiveSnapshot,
   freezeHistoricalSnapshot,
   resolveCoachSignerName,
+  serializeReportSignerHomebaseMappings,
 } from "@/lib/report-signer";
 import { getReportSignerResolverContext } from "@/lib/report-signer-resolver";
+import { normalizeClubSettingValue } from "@/lib/validation/club-setting";
 
 describe("Report signer helpers", () => {
   test("mengutamakan nama coach dari assignment grup untuk signer", () => {
@@ -61,6 +63,20 @@ describe("Report signer helpers", () => {
       coachNameSnapshot: "Coach Lama",
     });
   });
+
+  test("mengizinkan coach yang sama menangani lebih dari satu lokasi", () => {
+    expect(
+      serializeReportSignerHomebaseMappings([
+        { homebaseId: "homebase-1", coachProfileId: "coach-profile-1" },
+        { homebaseId: "homebase-2", coachProfileId: "coach-profile-1" },
+      ]),
+    ).toBe(
+      JSON.stringify([
+        { homebaseId: "homebase-1", coachProfileId: "coach-profile-1" },
+        { homebaseId: "homebase-2", coachProfileId: "coach-profile-1" },
+      ]),
+    );
+  });
 });
 
 describe("Report signer resolver", () => {
@@ -103,5 +119,17 @@ describe("Report signer resolver", () => {
     );
     expect(context.globalCoachProfile).toBeNull();
     expect(context.mappedCoachProfiles.size).toBe(0);
+  });
+});
+
+describe("Club setting value validation", () => {
+  test("menolak URL aset rapor yang bukan dari upload privat sesuai key", () => {
+    expect(() =>
+      normalizeClubSettingValue("rapor_ceo_sign_url", "/api/storage/uploads/rapor_header_url_x.png"),
+    ).toThrow("Tanda tangan CEO tidak valid");
+  });
+
+  test("menormalisasi nama signer", () => {
+    expect(normalizeClubSettingValue("rapor_ceo_name", "  CEO ADORA BBC  ")).toBe("CEO ADORA BBC");
   });
 });

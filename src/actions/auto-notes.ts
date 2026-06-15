@@ -9,7 +9,7 @@ import {
   normalizeEvaluationConfig,
   type MetricsJsonV2,
 } from "@/lib/evaluation-rules";
-import { requireSessionRole } from "@/lib/server-auth";
+import { requireActiveUser } from "@/lib/server-auth";
 import type { MetricsJson } from "@/types/dashboard";
 
 const generateCoachNoteSchema = z.object({
@@ -176,7 +176,7 @@ export async function generateCoachNoteAction(input: {
   evaluationConfig?: unknown;
   values?: Record<string, number>;
 }) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
   if (session.user.role !== "ADMIN" && session.user.role !== "COACH") {
     throw new Error("Akses ditolak untuk generate catatan pelatih.");
   }

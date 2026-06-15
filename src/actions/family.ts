@@ -2,11 +2,11 @@
 
 import { ensureOwnedPlayer } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
-import { requireSessionRole } from "@/lib/server-auth";
+import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
 import { getReportSignerResolverContext, resolveReportSignerSnapshotForGroup } from "@/lib/report-signer-resolver";
 
 async function requireSessionUserId(role: "PARENT" | "ADMIN") {
-  const session = await requireSessionRole(role);
+  const session = await requireActiveUser(role);
   const userId = session.user.id;
 
   if (!userId) {
@@ -102,7 +102,7 @@ export async function getPlayerAttendanceAction(playerId: string) {
 }
 
 export async function getParentsAction() {
-  await requireSessionRole("ADMIN");
+  await requireAdmin();
 
   return prisma.user.findMany({
     where: { role: "PARENT", isDeleted: false },

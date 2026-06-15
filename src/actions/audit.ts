@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { DEFAULT_AUDIT_PAGE_SIZE } from "@/lib/constants";
 import { prisma } from "@/lib/prisma";
-import { requireSessionRole } from "@/lib/server-auth";
+import { requireAdmin } from "@/lib/server-auth";
 
 export type AuditLogRecord = {
   id: string;
@@ -19,7 +19,7 @@ export type AuditLogRecord = {
 };
 
 export async function getAuditLogsAction(options?: { take?: number; cursor?: string }): Promise<{ logs: AuditLogRecord[]; nextCursor: string | null }> {
-  await requireSessionRole("ADMIN");
+  await requireAdmin();
 
   const take = options?.take || DEFAULT_AUDIT_PAGE_SIZE;
   const logs = await prisma.auditlog.findMany({

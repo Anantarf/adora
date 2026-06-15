@@ -92,14 +92,19 @@ export function parseReportSignerHomebaseMappings(rawValue: string | null | unde
 }
 
 export function serializeReportSignerHomebaseMappings(mappings: ReportSignerHomebaseMapping[]) {
-  return JSON.stringify(
-    mappings
-      .map((mapping) => ({
-        homebaseId: mapping.homebaseId.trim(),
-        coachProfileId: mapping.coachProfileId.trim(),
-      }))
-      .filter((mapping) => mapping.homebaseId && mapping.coachProfileId),
-  );
+  const normalizedMappings = mappings
+    .map((mapping) => ({
+      homebaseId: mapping.homebaseId.trim(),
+      coachProfileId: mapping.coachProfileId.trim(),
+    }))
+    .filter((mapping) => mapping.homebaseId && mapping.coachProfileId);
+  const uniqueHomebaseIds = new Set(normalizedMappings.map((mapping) => mapping.homebaseId));
+
+  if (uniqueHomebaseIds.size !== normalizedMappings.length) {
+    throw new Error("Setiap lokasi hanya boleh memiliki satu tanda tangan pelatih.");
+  }
+
+  return JSON.stringify(normalizedMappings);
 }
 
 export function buildReportArchiveSnapshot(input: {

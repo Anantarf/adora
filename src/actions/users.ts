@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { createAuditLog } from "./audit";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireSessionRole } from "@/lib/server-auth";
+import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
 import { buildUpdateData } from "@/lib/utils";
 import { DEFAULT_USER_PAGE_SIZE, userListArgsSchema } from "@/lib/validation/user";
 
@@ -35,7 +35,7 @@ function sortSuperadminFirst<T extends { username: string | null }>(items: T[]) 
 }
 
 export async function getUsersAction(role: ManagedUserRole = "PARENT") {
-  await requireSessionRole("ADMIN");
+  await requireAdmin();
 
   const users = await prisma.user.findMany({
     where: buildUserListWhere(role),
@@ -62,7 +62,7 @@ export async function getUsersPageAction(input?: {
   page?: number;
   pageSize?: number;
 }) {
-  await requireSessionRole("ADMIN");
+  await requireAdmin();
 
   const parsed = userListArgsSchema.parse(input ?? {});
   const requestedPage = parsed.page ?? 1;
@@ -272,7 +272,7 @@ export async function deleteUserAction(id: string) {
 }
 
 export async function getParentUsersAction() {
-  await requireSessionRole("ADMIN");
+  await requireAdmin();
 
   return prisma.user.findMany({
     where: { role: "PARENT", isDeleted: false },
@@ -282,7 +282,7 @@ export async function getParentUsersAction() {
 }
 
 export async function updateSelfAction(data: { name?: string; email?: string; password?: string }) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
   const userId = session.user.id ?? null;
 
   const result = await prisma.$transaction(async (tx) => {
@@ -321,7 +321,7 @@ export async function updateSelfAction(data: { name?: string; email?: string; pa
 }
 
 export async function changeForcedPasswordAction(newPassword: string) {
-  const session = await requireSessionRole();
+  const session = await requireActiveUser();
   const userId = session.user.id;
   if (!userId) throw new Error("Tidak terautentikasi.");
 

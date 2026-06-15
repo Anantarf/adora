@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { createAuditLog } from "@/actions/audit";
+import { normalizeExpectedPrivateUploadUrl } from "@/lib/private-upload";
 import { prisma } from "@/lib/prisma";
 import {
   REPORT_SIGNER_HOMEBASE_SETTING_KEY,
@@ -90,9 +91,16 @@ export async function updateReportSignerCoachSignatureAction(
     throw new Error("Pelatih tidak ditemukan.");
   }
 
-  const normalizedUrl = signatureUrl.trim();
-  if (!normalizedUrl.includes(`/coach_signature_${coachProfile.userId}_`)) {
-    throw new Error("File tanda tangan tidak sesuai dengan pelatih yang dipilih.");
+  const normalizedUrl = normalizeExpectedPrivateUploadUrl(
+    signatureUrl,
+    {
+      allowedPrefixes: [`coach_signature_${coachProfile.userId}_`],
+      allowedExtensions: [".png"],
+    },
+    "Tanda tangan pelatih",
+  );
+  if (!normalizedUrl) {
+    throw new Error("Tanda tangan pelatih wajib diunggah.");
   }
 
   await prisma.$transaction(async (tx) => {
@@ -130,9 +138,7 @@ export async function updateReportSignerHomebaseMappingsAction(
     .filter((mapping) => mapping.homebaseId && mapping.coachProfileId);
 
   const uniqueHomebaseIds = Array.from(new Set(normalizedMappings.map((mapping) => mapping.homebaseId)));
-  const uniqueCoachProfileIds = Array.from(
-    new Set(normalizedMappings.map((mapping) => mapping.coachProfileId)),
-  );
+  const uniqueCoachProfileIds = Array.from(new Set(normalizedMappings.map((mapping) => mapping.coachProfileId)));
 
   if (uniqueHomebaseIds.length !== normalizedMappings.length) {
     throw new Error("Setiap lokasi hanya boleh memiliki satu tanda tangan pelatih.");

@@ -6,7 +6,7 @@ import { createAuditLog } from "./audit";
 import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { ensureActiveGroup, ensureActiveHomebase } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
-import { requireAdmin, requireSessionRole, requireActiveUser } from "@/lib/server-auth";
+import { requireAdmin, requireActiveUser } from "@/lib/server-auth";
 import { ScheduleEvent } from "@/types/dashboard";
 
 function parseEventDate(input: string): Date {
@@ -30,7 +30,7 @@ async function validateEventRelations(
 
 export async function getEventsAction() {
   try {
-    await requireSessionRole("ADMIN");
+    await requireAdmin();
 
     const events = await prisma.event.findMany({
       orderBy: { date: "asc" },
@@ -343,5 +343,4 @@ export async function getEventAttendanceDetailAction(eventId: string) {
     throw new Error("Gagal mengambil detail presensi agenda");
   }
 }
-
 
