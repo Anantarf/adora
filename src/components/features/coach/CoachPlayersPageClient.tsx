@@ -125,10 +125,10 @@ export function CoachPlayersPageClient() {
               {filteredPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="grid gap-3 rounded-2xl border border-border/50 bg-card p-4 sm:bg-background/40 lg:grid-cols-[minmax(0,1.1fr)_minmax(10rem,0.7fr)_auto] lg:items-center"
+                  className="group grid gap-3 rounded-2xl border border-border/50 bg-card p-4 sm:bg-background/40 lg:grid-cols-[minmax(0,1.1fr)_minmax(10rem,0.7fr)_auto] lg:items-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30"
                 >
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">{player.name}</p>
+                    <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-primary">{player.name}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {player.group.name} | Lahir {formatBirthDate(player.dateOfBirth)}
                     </p>
@@ -140,27 +140,27 @@ export function CoachPlayersPageClient() {
                   </div>
                   <div className="hidden min-w-0 lg:block">
                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <School className="size-3.5 text-primary" />
+                      <School className="size-3.5 text-primary/70" />
                       <span className="truncate">{player.schoolOrigin || "Sekolah belum diisi"}</span>
                     </div>
                     <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-                      <HeartPulse className="size-3.5 text-primary" />
+                      <HeartPulse className="size-3.5 text-primary/70" />
                       <span>{player.gender || "Gender belum diisi"}</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 lg:justify-end">
                     <Link
-                      href="/coach/attendances"
-                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-xl")}
+                      href={`/coach/attendances?q=${encodeURIComponent(player.group.name)}`}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-xl group/btn transition-all hover:bg-primary/5 hover:border-primary/30")}
                     >
-                        <ClipboardCheck className="mr-2 size-3.5" />
+                        <ClipboardCheck className="mr-2 size-3.5 transition-transform group-hover/btn:scale-110" />
                         Presensi
                     </Link>
                     <Link
-                      href="/coach/statistics"
-                      className={cn(buttonVariants({ size: "sm" }), "h-9 rounded-xl")}
+                      href={`/coach/statistics?groupId=${player.group.id}`}
+                      className={cn(buttonVariants({ size: "sm" }), "h-9 rounded-xl group/btn transition-all hover:shadow-[0_0_12px_rgba(var(--primary),0.3)] hover:brightness-105")}
                     >
-                        <FilePenLine className="mr-2 size-3.5" />
+                        <FilePenLine className="mr-2 size-3.5 transition-transform group-hover/btn:rotate-6" />
                         Nilai
                     </Link>
                   </div>

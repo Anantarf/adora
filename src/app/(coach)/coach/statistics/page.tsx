@@ -322,9 +322,12 @@ const PlayerStatRow = React.memo(
 
 PlayerStatRow.displayName = "PlayerStatRow";
 
+import { useSearchParams } from "next/navigation";
+
 export default function CoachStatisticsPage() {
+  const searchParams = useSearchParams();
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
-  const [activeGroup, setActiveGroup] = useState<string>("all");
+  const [activeGroup, setActiveGroup] = useState<string>(searchParams.get("groupId") || "all");
   const [loadingPlayerId, setLoadingPlayerId] = useState<string | null>(null);
 
   const { data: coachData, isLoading: coachLoading } = useCoachWorkspace();

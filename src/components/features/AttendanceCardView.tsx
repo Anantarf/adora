@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { CalendarDays, Search } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { getEventConfig } from "@/lib/config/events";
@@ -16,8 +17,9 @@ import type { getEventsWithAttendanceAction } from "@/actions/schedule";
 type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[number];
 
 export function AttendanceCardView() {
+  const searchParams = useSearchParams();
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 20;
 
