@@ -5,7 +5,7 @@ import { Users, Layers, TrendingUp, FileCheck } from "lucide-react";
 
 import type { DashboardMetrics } from "@/actions/dashboard";
 import { Card, CardContent } from "@/components/ui/card";
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type MetricCard = {
   key: keyof DashboardMetrics;
@@ -84,8 +84,20 @@ interface MetricCardsProps {
 export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
   if (isLoading) {
     return (
-      <div className="w-full py-8 border border-border/50 bg-card rounded-xl flex items-center justify-center min-h-[140px]">
-        <BrandLoader minHeight="min-h-[80px]" />
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4 md:gap-4">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="rounded-xl border border-border/50 bg-card p-4 sm:p-5 shadow-sm">
+            <div className="mb-3 flex items-start justify-between gap-3">
+              <div className="space-y-2 flex-1">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-2.5 w-16" />
+              </div>
+              <Skeleton className="size-9 rounded-xl shrink-0" />
+            </div>
+            <Skeleton className="h-8 w-14 mb-3" />
+            <Skeleton className="h-3 w-32 mt-3 border-t border-border/40 pt-3" />
+          </div>
+        ))}
       </div>
     );
   }

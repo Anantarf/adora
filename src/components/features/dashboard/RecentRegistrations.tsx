@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Clock, UserPlus } from "lucide-react";
 import { formatFullDate } from "@/lib/date-utils";
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type RegistrationProps = {
   registrations: {
@@ -17,8 +17,24 @@ type RegistrationProps = {
 export function RecentRegistrations({ registrations, isLoading }: RegistrationProps) {
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm min-h-[350px] justify-center">
-        <BrandLoader minHeight="min-h-[200px]" />
+      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm min-h-[350px]">
+        <div className="flex items-start justify-between gap-3 border-b border-border/50 px-5 py-4">
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-28" />
+            <Skeleton className="h-2.5 w-48" />
+          </div>
+        </div>
+        <div className="flex flex-1 flex-col gap-2.5 px-5 py-4">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg border border-border/50 bg-background/60 px-4 py-3">
+              <div className="space-y-2">
+                <Skeleton className="h-3.5 w-36" />
+                <Skeleton className="h-2.5 w-24" />
+              </div>
+              <Skeleton className="h-7 w-16 rounded-md" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
