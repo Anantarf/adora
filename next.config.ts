@@ -1,13 +1,26 @@
 import type { NextConfig } from "next";
 
 const disableOptimizePackageImports = process.env.NEXT_DISABLE_OPTIMIZE_PACKAGE_IMPORTS === "1";
+const supabaseOrigin = (() => {
+  const configuredUrl = process.env.SUPABASE_URL?.trim();
+  if (!configuredUrl) {
+    return null;
+  }
+
+  try {
+    return new URL(configuredUrl).origin;
+  } catch {
+    return null;
+  }
+})();
+const remoteStorageSources = ["https://*.supabase.co", supabaseOrigin].filter(Boolean).join(" ");
 
 const staticCsp = [
   "default-src 'self'",
   "script-src 'self'",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co",
-  "connect-src 'self' https://*.supabase.co",
+  `img-src 'self' data: blob: ${remoteStorageSources}`,
+  `connect-src 'self' ${remoteStorageSources}`,
   "font-src 'self'",
   "frame-src 'none'",
   "object-src 'none'",

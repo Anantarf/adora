@@ -106,6 +106,18 @@ describe("Private storage ACL", () => {
     expect(decision.statusCode).toBe(200);
   });
 
+  test("coach dapat preview file upload miliknya sebelum profil disimpan", async () => {
+    const decision = await authorizePrivateStorageAccess({
+      role: "COACH",
+      userId: "coach-user-1",
+      fileUrl: "/api/storage/uploads/coach_photo_coach-user-1_123.jpg",
+      lookup: baseLookup,
+    });
+
+    expect(decision.allowed).toBe(true);
+    expect(decision.statusCode).toBe(200);
+  });
+
   test("coach tidak dapat membuka file coach lain", async () => {
     const decision = await authorizePrivateStorageAccess({
       role: "COACH",

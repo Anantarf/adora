@@ -10,8 +10,27 @@ const SECURITY_HEADER_VALUES = {
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 
+function getSupabaseOrigin() {
+  const configuredUrl = process.env.SUPABASE_URL?.trim();
+  if (!configuredUrl) {
+    return null;
+  }
+
+  try {
+    return new URL(configuredUrl).origin;
+  } catch {
+    return null;
+  }
+}
+
 function buildCsp(nonce: string) {
   const scriptSrc = ["'self'", `'nonce-${nonce}'`];
+  const supabaseOrigin = getSupabaseOrigin();
+  const remoteStorageSources = ["https://*.supabase.co"];
+
+  if (supabaseOrigin && !remoteStorageSources.includes(supabaseOrigin)) {
+    remoteStorageSources.push(supabaseOrigin);
+  }
 
   if (process.env.NODE_ENV !== "production") {
     scriptSrc.push("'unsafe-inline'");
@@ -22,8 +41,8 @@ function buildCsp(nonce: string) {
     "default-src 'self'",
     `script-src ${scriptSrc.join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob: https://*.supabase.co",
-    "connect-src 'self' ws: wss: https://*.supabase.co",
+    `img-src 'self' data: blob: ${remoteStorageSources.join(" ")}`,
+    `connect-src 'self' ws: wss: ${remoteStorageSources.join(" ")}`,
     "font-src 'self'",
     "frame-src 'none'",
     "object-src 'none'",

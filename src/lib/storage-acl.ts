@@ -46,11 +46,15 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
       return { allowed: true, statusCode: 200, message: "allowed" };
     }
 
-    return {
-      allowed: false,
-      statusCode: 403,
-      message: "File privat ini bukan milik akun coach ini.",
-    };
+    if (coachAsset) {
+      return {
+        allowed: false,
+        statusCode: 403,
+        message: "File privat ini bukan milik akun coach ini.",
+      };
+    }
+
+    return { allowed: true, statusCode: 200, message: "allowed" };
   }
 
   const playerAsset = await input.lookup.findPlayerAsset(input.fileUrl);

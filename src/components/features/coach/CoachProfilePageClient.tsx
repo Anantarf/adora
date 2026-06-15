@@ -63,6 +63,7 @@ export function CoachProfilePageClient() {
   const [savedProfile, setSavedProfile] = useState<CoachProfileFormValues>(EMPTY_PROFILE);
   const [uploadingKey, setUploadingKey] = useState<"photo" | "license" | "signature" | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
 
   const updateDraftProfile = (field: keyof CoachProfileFormValues, value: string) => {
     setDraftProfile((current) => ({ ...current, [field]: value }));
@@ -108,6 +109,7 @@ export function CoachProfilePageClient() {
     });
     setSavedProfile(nextProfile);
     setDraftProfile(nextProfile);
+    setFailedPhotoUrl(null);
   }, [coachUser]);
 
   const handleEditToggle = () => {
@@ -180,6 +182,7 @@ export function CoachProfilePageClient() {
   const profileCompletionLabel =
     profileCompletionCount >= 6 ? "Siap ditampilkan" : profileCompletionCount >= 4 ? "Perlu dilengkapi" : "Masih minim";
   const assignedGroups = coachUser?.coachProfile?.assignments ?? [];
+  const showSavedPhoto = Boolean(savedProfile.photoUrl && failedPhotoUrl !== savedProfile.photoUrl);
 
   if (isLoading) {
     return (
@@ -237,9 +240,14 @@ export function CoachProfilePageClient() {
             <div className="border-b border-border/50 bg-muted/[0.16] p-5 lg:border-b-0 lg:border-r">
               <div className="mx-auto flex max-w-60 flex-col items-center text-center">
                 <div className="flex size-36 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/60">
-                  {savedProfile.photoUrl ? (
+                  {showSavedPhoto ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={savedProfile.photoUrl} alt={savedProfile.fullName || "Foto coach"} className="h-full w-full object-cover" />
+                    <img
+                      src={savedProfile.photoUrl}
+                      alt={savedProfile.fullName || "Foto coach"}
+                      className="h-full w-full object-cover"
+                      onError={() => setFailedPhotoUrl(savedProfile.photoUrl)}
+                    />
                   ) : (
                     <UserRound className="size-14 text-muted-foreground/35" />
                   )}
