@@ -63,10 +63,6 @@ export default function PlayersPage() {
 
   const { data: groups, isLoading: isGroupsLoading } = useGroups();
 
-  const availableCategories = useMemo(
-    () => Array.from(new Set((groups ?? []).map((group) => group.category))),
-    [groups],
-  );
 
   const groupsInCategory = useMemo(() => {
     return (groups ?? []).filter((group) => {
@@ -126,11 +122,7 @@ export default function PlayersPage() {
     setCurrentPage(1);
   }, [effectiveGroupId, debouncedPlayerSearch]);
 
-  React.useEffect(() => {
-    if (!availableCategories.includes(selectedCategory) && availableCategories.length > 0) {
-      setSelectedCategory(availableCategories[0] as "SEKOLAH" | "KELOMPOK_UMUR");
-    }
-  }, [availableCategories, selectedCategory]);
+
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-20">
