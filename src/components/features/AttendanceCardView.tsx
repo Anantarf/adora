@@ -21,7 +21,7 @@ function AttendanceCardViewInner() {
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [currentPage, setCurrentPage] = useState(1);
-  const ITEMS_PER_PAGE = 20;
+  const ITEMS_PER_PAGE = 5;
 
   const { data: events = [], isLoading } = useEventsWithAttendance();
 
