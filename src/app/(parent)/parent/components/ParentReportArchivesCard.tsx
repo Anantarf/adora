@@ -1,15 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatFullDate } from "@/lib/date-utils";
 import type { FamilyPlayer } from "@/hooks/use-family";
-import type { PlayerStatRecord } from "@/hooks/use-player-stats";
-import type { MetricsJson } from "@/types/dashboard";
-import type { MetricsJsonV2 } from "@/lib/evaluation-rules";
 
 type ArchiveItem = {
   id: string;
@@ -29,55 +26,21 @@ type ArchiveItem = {
 export function ParentReportArchivesCard({
   archives,
   player,
-  reportSettings,
-  stats,
 }: {
   archives: ArchiveItem[] | undefined;
   player: FamilyPlayer;
-  reportSettings?: Record<string, string> | null;
-  stats: PlayerStatRecord[] | undefined;
 }) {
   const [loadingArchiveId, setLoadingArchiveId] = useState<string | null>(null);
-  const statsByPeriodId = useMemo(
-    () => new Map((stats ?? []).map((stat) => [stat.periodId, stat])),
-    [stats],
-  );
 
   const handleOpenRealReport = async (archive: ArchiveItem) => {
-    const stat = statsByPeriodId.get(archive.period.id);
-
-    if (!stat?.metricsJson) {
-      if (archive.fileUrl) {
-        window.open(archive.fileUrl, "_blank", "noopener,noreferrer");
-        return;
-      }
-
-      toast.error("Data penilaian rapor belum tersedia.");
+    if (!archive.fileUrl) {
+      toast.error("File rapor belum tersedia.");
       return;
     }
 
     setLoadingArchiveId(archive.id);
     try {
-      const { generateRaporPDF } = await import("@/lib/generate-rapor-pdf");
-      await generateRaporPDF({
-        playerName: player.name,
-        groupName: archive.groupNameSnapshot ?? player.group?.name ?? "-",
-        schoolOrigin: player.schoolOrigin ?? "-",
-        periodName: archive.period.name,
-        metrics: stat.metricsJson as MetricsJson | MetricsJsonV2,
-        assets: {
-          headerUrl: reportSettings?.rapor_header_url ?? undefined,
-          ceoSignUrl: reportSettings?.rapor_ceo_sign_url ?? undefined,
-          coachSignUrl:
-            archive.coachSignUrlSnapshot ?? reportSettings?.rapor_coach_sign_url ?? undefined,
-          stampUrl: reportSettings?.rapor_stamp_url ?? undefined,
-        },
-        signers: {
-          coachName: archive.coachNameSnapshot ?? reportSettings?.rapor_coach_name ?? undefined,
-          ceoName: reportSettings?.rapor_ceo_name ?? undefined,
-        },
-        action: "preview",
-      });
+      window.open(archive.fileUrl, "_blank", "noopener,noreferrer");
     } catch {
       toast.error("Gagal membuka rapor. Coba lagi.");
     } finally {

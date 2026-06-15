@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { useReleasedReportArchives } from "@/hooks/use-report-archives";
-import { useReportSettings } from "@/hooks/use-settings";
 import { usePlayerStats } from "@/hooks/use-player-stats";
 import { averageScore, flattenMetrics } from "@/lib/metrics";
 import { getEvaluationSummary, isMetricsJsonV2 } from "@/lib/evaluation-rules";
@@ -86,7 +85,6 @@ export default function ParentDashboard() {
     usePlayerAttendance(effectiveChildId);
   const { data: certificates } = usePlayerCertificates(effectiveChildId);
   const { data: releasedArchives } = useReleasedReportArchives(effectiveChildId);
-  const { data: reportSettings } = useReportSettings();
 
   const progressionData = useMemo(() => {
     if (!stats?.length) {
@@ -452,8 +450,6 @@ export default function ParentDashboard() {
             <ParentReportArchivesCard
               archives={releasedArchives}
               player={activeChild}
-              reportSettings={reportSettings}
-              stats={stats}
             />
             <ParentCoachCard player={activeChild} />
             <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />

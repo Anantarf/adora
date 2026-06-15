@@ -20,6 +20,7 @@ import {
   getReportSignerResolverContext,
   resolveReportSignerSnapshotForGroup,
 } from "@/lib/report-signer-resolver";
+import { FLAT_METRIC_DEFS } from "@/lib/metrics";
 import { requireSessionRole, requireActiveUser } from "@/lib/server-auth";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
@@ -139,6 +140,30 @@ function normalizeDynamicMetricInput(config: ReturnType<typeof normalizeEvaluati
   return values;
 }
 
+function getLegacyMetricValue(metrics: MetricsJson, path: string) {
+  return path.split(".").reduce<unknown>((current, part) => {
+    return current && typeof current === "object"
+      ? (current as Record<string, unknown>)[part]
+      : undefined;
+  }, metrics);
+}
+
+function normalizeLegacyMetricInput(rawMetrics: unknown) {
+  const parsed = metricsSchema.safeParse(rawMetrics);
+  if (!parsed.success) {
+    throw new Error("Payload nilai legacy tidak valid.");
+  }
+
+  for (const definition of FLAT_METRIC_DEFS) {
+    const value = getLegacyMetricValue(parsed.data, definition.path);
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0 || value > definition.max) {
+      throw new Error(`Nilai aspek "${definition.label}" harus berada dalam rentang 0-${definition.max}.`);
+    }
+  }
+
+  return parsed.data;
+}
+
 export async function submitAttendanceAction(data: {
   date: string;
   playerStatuses: { playerId: string; status: AttendanceStatus }[];
@@ -220,11 +245,12 @@ export async function submitAttendanceAction(data: {
       }
     }
 
+    const eventGroupIds = event.eventGroups.map((eventGroup) => eventGroup.groupId);
     const existingPlayers = await tx.player.findMany({
       where: {
         id: { in: playerIds },
         isDeleted: false,
-        ...(role === "COACH" ? { groupId: { in: assignedGroupIds } } : {}),
+        groupId: { in: role === "COACH" ? eventGroupIds.filter((groupId) => assignedGroupIds.includes(groupId)) : eventGroupIds },
       },
       select: { id: true },
     });
@@ -430,7 +456,6 @@ export async function submitStatisticAction(data: {
       ? calculateAttendanceScore(attendanceCounts, evaluationConfig.attendance)
       : null;
 
-    const legacyMetrics = metricsSchema.safeParse(payload.metrics);
     const dynamicMetricValues = evaluationConfig
       ? normalizeDynamicMetricInput(evaluationConfig, payload.metrics)
       : null;
@@ -442,9 +467,7 @@ export async function submitStatisticAction(data: {
             notes: payload.notes,
             attendance: attendanceSnapshot,
           })
-        : legacyMetrics.success
-          ? legacyMetrics.data
-          : EMPTY_METRICS;
+        : normalizeLegacyMetricInput(payload.metrics);
     const serializedMetricsJson = JSON.parse(JSON.stringify(metricsJson));
 
     const existingStatistic = await tx.statistic.findUnique({

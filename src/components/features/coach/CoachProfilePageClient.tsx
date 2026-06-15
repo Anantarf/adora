@@ -24,6 +24,7 @@ import { toUserErrorMessage } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   applyCoachProfileState,
+  type CoachProfileFormValues,
   CoachProfileFields,
   uploadCoachProfileAsset,
 } from "@/components/features/coach/coach-profile-form-shared";
@@ -45,39 +46,85 @@ function formatDateLabel(value: string) {
   });
 }
 
+const EMPTY_PROFILE: CoachProfileFormValues = {
+  fullName: "",
+  placeOfBirth: "",
+  dateOfBirth: "",
+  gender: "",
+  photoUrl: "",
+  licenseUrl: "",
+  signatureUrl: "",
+};
+
 export function CoachProfilePageClient() {
   const { data: coachUser, isLoading, isError, refetch, error } = useMyCoachProfile();
   const { mutateAsync: saveCoachProfile, isPending } = useUpsertOwnCoachProfile();
-  const [fullName, setFullName] = useState("");
-  const [placeOfBirth, setPlaceOfBirth] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [gender, setGender] = useState("");
-  const [photoUrl, setPhotoUrl] = useState("");
-  const [licenseUrl, setLicenseUrl] = useState("");
-  const [signatureUrl, setSignatureUrl] = useState("");
+  const [draftProfile, setDraftProfile] = useState<CoachProfileFormValues>(EMPTY_PROFILE);
+  const [savedProfile, setSavedProfile] = useState<CoachProfileFormValues>(EMPTY_PROFILE);
   const [uploadingKey, setUploadingKey] = useState<"photo" | "license" | "signature" | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+
+  const updateDraftProfile = (field: keyof CoachProfileFormValues, value: string) => {
+    setDraftProfile((current) => ({ ...current, [field]: value }));
+  };
 
   useEffect(() => {
     if (!coachUser) {
       return;
     }
 
+    const nextProfile: CoachProfileFormValues = {
+      fullName: "",
+      placeOfBirth: "",
+      dateOfBirth: "",
+      gender: "",
+      photoUrl: "",
+      licenseUrl: "",
+      signatureUrl: "",
+    };
+
     applyCoachProfileState(coachUser, {
-      setFullName,
-      setPlaceOfBirth,
-      setDateOfBirth,
-      setGender,
-      setPhotoUrl,
-      setLicenseUrl,
-      setSignatureUrl,
+      setFullName: (value) => {
+        nextProfile.fullName = value;
+      },
+      setPlaceOfBirth: (value) => {
+        nextProfile.placeOfBirth = value;
+      },
+      setDateOfBirth: (value) => {
+        nextProfile.dateOfBirth = value;
+      },
+      setGender: (value) => {
+        nextProfile.gender = value;
+      },
+      setPhotoUrl: (value) => {
+        nextProfile.photoUrl = value;
+      },
+      setLicenseUrl: (value) => {
+        nextProfile.licenseUrl = value;
+      },
+      setSignatureUrl: (value) => {
+        nextProfile.signatureUrl = value;
+      },
     });
+    setSavedProfile(nextProfile);
+    setDraftProfile(nextProfile);
   }, [coachUser]);
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      setDraftProfile(savedProfile);
+      setIsEditing(false);
+      return;
+    }
+
+    setDraftProfile(savedProfile);
+    setIsEditing(true);
+  };
 
   const handleUpload = async (
     file: File,
     kind: "photo" | "license" | "signature",
-    setter: (value: string) => void,
+    field: "photoUrl" | "licenseUrl" | "signatureUrl",
   ) => {
     if (!coachUser?.id) {
       toast.error("Profil coach belum siap. Muat ulang halaman lalu coba lagi.");
@@ -88,7 +135,7 @@ export function CoachProfilePageClient() {
     try {
       const assetKey = `coach_${kind}_${coachUser.id}_${Date.now()}`;
       const url = await uploadCoachProfileAsset(file, assetKey);
-      setter(url);
+      updateDraftProfile(field, url);
       toast.success(
         `File ${
           kind === "photo" ? "foto" : kind === "license" ? "lisensi" : "tanda tangan"
@@ -108,26 +155,27 @@ export function CoachProfilePageClient() {
     }
 
     await saveCoachProfile({
-      fullName,
-      placeOfBirth,
-      dateOfBirth,
-      gender,
-      photoUrl,
-      licenseUrl,
-      signatureUrl,
+      fullName: draftProfile.fullName,
+      placeOfBirth: draftProfile.placeOfBirth,
+      dateOfBirth: draftProfile.dateOfBirth,
+      gender: draftProfile.gender,
+      photoUrl: draftProfile.photoUrl,
+      licenseUrl: draftProfile.licenseUrl,
+      signatureUrl: draftProfile.signatureUrl,
     });
+    setSavedProfile(draftProfile);
     setIsEditing(false);
   };
 
   const assignmentCount = coachUser?.coachProfile?.assignments.length ?? 0;
   const profileCompletionCount = [
-    fullName.trim(),
-    placeOfBirth.trim(),
-    dateOfBirth.trim(),
-    gender.trim(),
-    photoUrl.trim(),
-    licenseUrl.trim(),
-    signatureUrl.trim(),
+    savedProfile.fullName.trim(),
+    savedProfile.placeOfBirth.trim(),
+    savedProfile.dateOfBirth.trim(),
+    savedProfile.gender.trim(),
+    savedProfile.photoUrl.trim(),
+    savedProfile.licenseUrl.trim(),
+    savedProfile.signatureUrl.trim(),
   ].filter(Boolean).length;
   const profileCompletionLabel =
     profileCompletionCount >= 6 ? "Siap ditampilkan" : profileCompletionCount >= 4 ? "Perlu dilengkapi" : "Masih minim";
@@ -189,15 +237,15 @@ export function CoachProfilePageClient() {
             <div className="border-b border-border/50 bg-muted/[0.16] p-5 lg:border-b-0 lg:border-r">
               <div className="mx-auto flex max-w-60 flex-col items-center text-center">
                 <div className="flex size-36 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/60">
-                  {photoUrl ? (
+                  {savedProfile.photoUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img src={photoUrl} alt={fullName || "Foto coach"} className="h-full w-full object-cover" />
+                    <img src={savedProfile.photoUrl} alt={savedProfile.fullName || "Foto coach"} className="h-full w-full object-cover" />
                   ) : (
                     <UserRound className="size-14 text-muted-foreground/35" />
                   )}
                 </div>
-                <p className="mt-4 text-lg font-semibold text-foreground">{fullName || coachUser?.name || "Nama coach belum diisi"}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{gender || "Jenis kelamin belum diisi"}</p>
+                <p className="mt-4 text-lg font-semibold text-foreground">{savedProfile.fullName || coachUser?.name || "Nama coach belum diisi"}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{savedProfile.gender || "Jenis kelamin belum diisi"}</p>
                 <div className="mt-4 inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
                   {profileCompletionLabel}
                 </div>
@@ -212,7 +260,7 @@ export function CoachProfilePageClient() {
                     Data ini menjadi identitas utama coach di portal, tampilan orang tua, dan rapor.
                   </p>
                 </div>
-                <Button type="button" variant={isEditing ? "outline" : "default"} onClick={() => setIsEditing((value) => !value)}>
+                <Button type="button" variant={isEditing ? "outline" : "default"} onClick={handleEditToggle}>
                   {isEditing ? (
                     <>
                       <X className="mr-2 size-4" />
@@ -233,55 +281,55 @@ export function CoachProfilePageClient() {
                     <IdCard className="size-4 text-primary" />
                     Nama Lengkap
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{fullName || "-"}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{savedProfile.fullName || "-"}</p>
                 </div>
                 <div className="rounded-xl border border-border/50 bg-background/40 p-4">
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <MapPin className="size-4 text-primary" />
                     Tempat Lahir
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{placeOfBirth || "-"}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{savedProfile.placeOfBirth || "-"}</p>
                 </div>
                 <div className="rounded-xl border border-border/50 bg-background/40 p-4">
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <CalendarDays className="size-4 text-primary" />
                     Tanggal Lahir
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{formatDateLabel(dateOfBirth)}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{formatDateLabel(savedProfile.dateOfBirth)}</p>
                 </div>
                 <div className="rounded-xl border border-border/50 bg-background/40 p-4">
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <UserRound className="size-4 text-primary" />
                     Jenis Kelamin
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{gender || "-"}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{savedProfile.gender || "-"}</p>
                 </div>
               </div>
 
               <div className="mt-4 grid gap-3 md:grid-cols-2">
                 <a
-                  href={licenseUrl || undefined}
+                  href={savedProfile.licenseUrl || undefined}
                   target="_blank"
                   rel="noreferrer"
-                  className={`rounded-xl border border-border/50 bg-background/40 p-4 ${licenseUrl ? "transition-colors hover:border-primary/30 hover:bg-primary/5" : "pointer-events-none"}`}
+                  className={`rounded-xl border border-border/50 bg-background/40 p-4 ${savedProfile.licenseUrl ? "transition-colors hover:border-primary/30 hover:bg-primary/5" : "pointer-events-none"}`}
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <FileBadge className="size-4 text-primary" />
                     Lisensi Coach
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{licenseUrl ? "File lisensi tersedia" : "Belum diunggah"}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{savedProfile.licenseUrl ? "File lisensi tersedia" : "Belum diunggah"}</p>
                 </a>
                 <a
-                  href={signatureUrl || undefined}
+                  href={savedProfile.signatureUrl || undefined}
                   target="_blank"
                   rel="noreferrer"
-                  className={`rounded-xl border border-border/50 bg-background/40 p-4 ${signatureUrl ? "transition-colors hover:border-primary/30 hover:bg-primary/5" : "pointer-events-none"}`}
+                  className={`rounded-xl border border-border/50 bg-background/40 p-4 ${savedProfile.signatureUrl ? "transition-colors hover:border-primary/30 hover:bg-primary/5" : "pointer-events-none"}`}
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <Signature className="size-4 text-primary" />
                     Tanda Tangan Rapor
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-foreground">{signatureUrl ? "File tanda tangan tersedia" : "Belum diunggah"}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{savedProfile.signatureUrl ? "File tanda tangan tersedia" : "Belum diunggah"}</p>
                 </a>
               </div>
             </div>
@@ -323,73 +371,78 @@ export function CoachProfilePageClient() {
       </section>
 
       {isEditing ? (
-      <section className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
-        <div className="mt-5 space-y-5">
-          <div className="flex items-center gap-2 border-b border-border/50 pb-4 text-foreground">
-            <UserRoundCog className="size-5 text-primary" />
-            <div>
-              <h2 className="text-lg font-semibold">Setting Profile / Edit</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Perbarui biodata, foto profil, lisensi, dan tanda tangan rapor Anda.
-              </p>
-            </div>
-          </div>
-
-          <CoachProfileFields
-            values={{ fullName, placeOfBirth, dateOfBirth, gender, photoUrl, licenseUrl, signatureUrl }}
-            onChange={{ setFullName, setPlaceOfBirth, setDateOfBirth, setGender }}
-            uploadingKey={uploadingKey}
-            onUpload={async (file, kind) =>
-              handleUpload(
-                file,
-                kind,
-                kind === "photo"
-                  ? setPhotoUrl
-                  : kind === "license"
-                    ? setLicenseUrl
-                    : setSignatureUrl,
-              )
-            }
-          />
-
-          <div className="rounded-2xl border border-border/50 bg-background/40 p-4">
-            <div>
-              <h3 className="text-sm font-semibold text-foreground">Kelompok Saat Ini</h3>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Informasi ini ditampilkan sebagai referensi. Perubahan penugasan tetap dilakukan admin.
-              </p>
+        <section className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+          <div className="mt-5 space-y-5">
+            <div className="flex items-center gap-2 border-b border-border/50 pb-4 text-foreground">
+              <UserRoundCog className="size-5 text-primary" />
+              <div>
+                <h2 className="text-lg font-semibold">Setting Profile / Edit</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Perbarui biodata, foto profil, lisensi, dan tanda tangan rapor Anda.
+                </p>
+              </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap gap-2">
-              {assignedGroups.length > 0 ? (
-                assignedGroups.map((assignment) => (
-                  <span
-                    key={assignment.group.id}
-                    className="inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary"
-                  >
-                    {assignment.group.name}
-                  </span>
-                ))
-              ) : (
-                <span className="text-sm text-muted-foreground">Belum ada kelompok yang ditugaskan admin.</span>
-              )}
+            <CoachProfileFields
+              values={draftProfile}
+              onChange={{
+                setFullName: (value) => updateDraftProfile("fullName", value),
+                setPlaceOfBirth: (value) => updateDraftProfile("placeOfBirth", value),
+                setDateOfBirth: (value) => updateDraftProfile("dateOfBirth", value),
+                setGender: (value) => updateDraftProfile("gender", value),
+              }}
+              uploadingKey={uploadingKey}
+              onUpload={async (file, kind) =>
+                handleUpload(
+                  file,
+                  kind,
+                  kind === "photo"
+                    ? "photoUrl"
+                    : kind === "license"
+                      ? "licenseUrl"
+                      : "signatureUrl",
+                )
+              }
+            />
+
+            <div className="rounded-2xl border border-border/50 bg-background/40 p-4">
+              <div>
+                <h3 className="text-sm font-semibold text-foreground">Kelompok Saat Ini</h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Informasi ini ditampilkan sebagai referensi. Perubahan penugasan tetap dilakukan admin.
+                </p>
+              </div>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+                {assignedGroups.length > 0 ? (
+                  assignedGroups.map((assignment) => (
+                    <span
+                      key={assignment.group.id}
+                      className="inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary"
+                    >
+                      {assignment.group.name}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-muted-foreground">Belum ada kelompok yang ditugaskan admin.</span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Button type="button" disabled={isPending || uploadingKey !== null} onClick={handleSubmit}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" />
+                    Menyimpan...
+                  </>
+                ) : (
+                  "Simpan Profil Coach"
+                )}
+              </Button>
             </div>
           </div>
-
-          <div className="flex justify-end">
-            <Button type="button" disabled={isPending || uploadingKey !== null} onClick={handleSubmit}>
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                "Simpan Profil Coach"
-              )}
-            </Button>
-          </div>
-        </div>
-      </section>
+        </section>
       ) : null}
     </div>
   );

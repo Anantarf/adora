@@ -72,4 +72,68 @@ describe("Statistics And Attendance Failure Paths", () => {
       }),
     ).rejects.toThrow("Payload nilai tidak valid. Periksa pemain, periode, dan nilai yang dikirim.");
   });
+
+  test("menggagalkan submit presensi jika pemain bukan bagian dari agenda", async () => {
+    prisma.event.findUnique.mockResolvedValue({
+      id: "event-1",
+      eventGroups: [{ groupId: "group-event" }],
+    } as never);
+    prisma.player.findMany.mockResolvedValue([]);
+
+    await expect(
+      submitAttendanceAction({
+        date: "2025-05-27",
+        eventId: "event-1",
+        playerStatuses: [{ playerId: "player-outside-event", status: "HADIR" }],
+      }),
+    ).rejects.toThrow("Pemain tidak ditemukan atau sudah dihapus: player-outside-event");
+  });
+
+  test("menggagalkan submit nilai legacy jika skor di luar rentang", async () => {
+    prisma.player.findUnique.mockResolvedValue({
+      id: "player-1",
+      isDeleted: false,
+      group: {
+        id: "group-1",
+        name: "KU-10",
+        homebase: null,
+        coachAssignment: null,
+      },
+    } as never);
+    prisma.evaluationPeriod.findUnique.mockResolvedValue({
+      id: "period-1",
+      name: "Periode 1",
+      createdAt: new Date("2025-01-01"),
+      startDate: new Date("2025-01-01"),
+      endDate: new Date("2025-01-31"),
+      isActive: true,
+      evaluationConfigJson: null,
+    } as never);
+    prisma.attendance.findMany.mockResolvedValue([]);
+
+    await expect(
+      submitStatisticAction({
+        playerId: "player-1",
+        periodId: "period-1",
+        status: "Draft",
+        metrics: {
+          dribble: {
+            inAndOut: 11,
+            crossover: 1,
+            vLeft: 1,
+            vRight: 1,
+            betweenLegsLeft: 1,
+            betweenLegsRight: 1,
+          },
+          passing: {
+            chestPass: 1,
+            bouncePass: 1,
+            overheadPass: 1,
+          },
+          layUp: 1,
+          shooting: 1,
+        },
+      }),
+    ).rejects.toThrow('Nilai aspek "In & Out Dribble" harus berada dalam rentang 0-10.');
+  });
 });

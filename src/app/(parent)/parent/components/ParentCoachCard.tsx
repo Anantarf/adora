@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 
 export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
   const [open, setOpen] = useState(false);
-  const [photoFailed, setPhotoFailed] = useState(false);
+  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
   const resolutionSource = player.resolvedSigner?.resolutionSource;
 
   const coachResolution = (() => {
@@ -37,6 +37,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
 
   const coach = coachResolution.coach;
   const coachLabel = coachResolution.label;
+  const photoFailed = Boolean(coach?.photoUrl && failedPhotoUrl === coach.photoUrl);
 
   return (
     <>
@@ -58,7 +59,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
                   src={coach.photoUrl}
                   alt={coach.fullName}
                   className="h-full w-full object-cover"
-                  onError={() => setPhotoFailed(true)}
+                  onError={() => setFailedPhotoUrl(coach.photoUrl)}
                 />
               ) : (
                 <UserRound className="size-8 text-muted-foreground/35" />

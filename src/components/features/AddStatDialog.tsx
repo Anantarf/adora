@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LineChart, Loader2, Pencil, Plus, Sparkles } from "lucide-react";
+import { LineChart, Loader2, LockKeyhole, Pencil, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 
@@ -332,7 +332,18 @@ export function AddStatDialog({
   };
 
   if (isCoach && isEdit && existingStat?.status === "Published") {
-    return null;
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        disabled
+        title="Rapor sudah diterbitkan admin. Minta admin mengembalikan ke draf jika perlu revisi."
+        className={`h-8 gap-1.5 text-xs font-semibold ${triggerClassName ?? ""}`}
+      >
+        <LockKeyhole className="size-3" />
+        <span className={alwaysShowLabel ? "" : "hidden sm:inline"}>Terkunci</span>
+      </Button>
+    );
   }
 
   return (
