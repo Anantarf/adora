@@ -41,14 +41,21 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
 
   return (
     <>
-      <Card className="border-border/50 bg-card shadow-sm">
+      <Card className="h-full border-border/50 bg-card shadow-sm">
         <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
-          <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-            Informasi Pelatih
-          </CardTitle>
-          <CardDescription className="text-xs">
-            Pelatih utama yang saat ini mendampingi kelompok latihan {player.group?.name || "anak Anda"}.
-          </CardDescription>
+          <div className="flex items-start gap-3">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+              <UserRound className="size-4 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
+                Informasi Pelatih
+              </CardTitle>
+              <CardDescription className="text-xs">
+                Pendamping kelompok latihan {player.group?.name || "anak Anda"}.
+              </CardDescription>
+            </div>
+          </div>
         </CardHeader>
         <CardContent className="space-y-3 p-4">
           <div className="flex items-center gap-3">

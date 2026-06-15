@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { CalendarDays, MapPin, UserRound } from "lucide-react";
 
 import type { FamilyPlayer } from "@/hooks/use-family";
@@ -34,14 +35,23 @@ export function ParentPlayerHero({
   latestScore: number | null;
   periodLabel: string | null;
 }) {
+  const [failedPhotoUrl, setFailedPhotoUrl] = useState<string | null>(null);
+  const photoUrl = player.photoUrl ?? "";
+  const showPhoto = Boolean(photoUrl && failedPhotoUrl !== photoUrl);
+
   return (
     <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
       <CardContent className="grid gap-4 p-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(170px,0.28fr)] md:items-center">
         <div className="flex justify-start">
           <div className="flex size-18 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-muted/30 md:size-20">
-            {player.photoUrl ? (
+            {showPhoto ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={player.photoUrl} alt={player.name} className="h-full w-full object-cover" />
+              <img
+                src={photoUrl}
+                alt={player.name}
+                className="h-full w-full object-cover"
+                onError={() => setFailedPhotoUrl(photoUrl)}
+              />
             ) : (
               <UserRound className="size-9 text-muted-foreground/35" />
             )}

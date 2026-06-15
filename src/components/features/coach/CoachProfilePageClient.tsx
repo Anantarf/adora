@@ -217,20 +217,15 @@ export function CoachProfilePageClient() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Profil Coach
-          </p>
-          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Profil dan Identitas Coach
-          </h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Lihat data diri pelatih yang tampil ke sistem, lalu perbarui biodata, foto, lisensi, dan tanda tangan bila diperlukan.
-          </p>
-        </div>
-        <div className="rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground md:text-sm">
-          Username: <span className="font-semibold text-foreground">{coachUser?.username ?? "-"}</span>
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
+        <p className="text-sm text-muted-foreground">
+          Lihat data diri pelatih yang tampil ke sistem, lalu perbarui biodata, foto, lisensi, dan tanda tangan bila diperlukan.
+        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium flex items-center gap-2">
+            <UserRound className="size-3.5" />
+            {coachUser?.username ?? "-"}
+          </span>
         </div>
       </div>
 

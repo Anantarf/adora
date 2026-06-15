@@ -75,21 +75,15 @@ export function CoachPlayersPageClient() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Pemain Saya
-          </p>
-          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Daftar Pemain Berdasarkan Penugasan
-          </h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab Anda. Perubahan data pemain tetap dikelola admin agar alur data tetap jelas.
-          </p>
-        </div>
-        <div className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/70 px-3 py-1.5 text-xs font-medium text-muted-foreground md:text-sm">
-          <Users className="size-4 text-primary" />
-          {data.players.length} pemain aktif
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
+        <p className="text-sm text-muted-foreground">
+          Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab Anda. Perubahan data pemain tetap dikelola admin.
+        </p>
+        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium flex items-center gap-2">
+            <Users className="size-3.5" />
+            {data.players.length} pemain aktif
+          </span>
         </div>
       </div>
 

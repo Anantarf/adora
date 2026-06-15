@@ -508,7 +508,7 @@ export default function ParentDashboard() {
 
         </div>
       ) : activePanel === "dokumen" ? (
-        <div id="dokumen" className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <div id="dokumen" className="grid grid-cols-1 items-stretch gap-5 xl:grid-cols-3">
           <ParentReportArchivesCard archives={releasedArchives} player={activeChild} />
           <ParentCoachCard player={activeChild} />
           <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />

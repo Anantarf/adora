@@ -412,18 +412,10 @@ export default function CoachStatisticsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end md:pb-6">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Penilaian Pemain
-          </p>
-          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Penilaian & Rapor
-          </h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Pilih periode dan kelompok, lalu isi penilaian pemain. Pelatih menyimpan draf; admin yang menerbitkan rapor.
-          </p>
-        </div>
+      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
+        <p className="text-sm text-muted-foreground">
+          Pilih periode dan kelompok, lalu isi penilaian pemain. Pelatih menyimpan draf; admin yang menerbitkan rapor.
+        </p>
       </div>
 
       <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 text-sm text-muted-foreground">

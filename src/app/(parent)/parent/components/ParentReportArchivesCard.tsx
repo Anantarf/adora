@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, Loader2 } from "lucide-react";
+import { ChevronRight, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,14 +49,21 @@ export function ParentReportArchivesCard({
   };
 
   return (
-    <Card className="border-border/50 bg-card shadow-sm">
+    <Card className="h-full border-border/50 bg-card shadow-sm">
       <CardHeader className="border-b border-border/50 bg-muted/10 pb-3">
-        <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
-          Arsip Rapor
-        </CardTitle>
-        <CardDescription className="text-xs">
-          Kumpulan rapor resmi anak Anda untuk setiap periode evaluasi yang sudah tersedia.
-        </CardDescription>
+        <div className="flex items-start gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
+            <FileText className="size-4 text-primary" />
+          </div>
+          <div>
+            <CardTitle className="text-lg font-heading uppercase tracking-wide text-primary">
+              Arsip Rapor
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Rapor resmi setiap periode evaluasi.
+            </CardDescription>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="space-y-3 p-4">
         {!archives?.length ? (
@@ -70,7 +77,7 @@ export function ParentReportArchivesCard({
           archives.map((archive) => (
             <div
               key={archive.id}
-              className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-3.5"
+              className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-3.5 transition-colors hover:border-primary/30 hover:bg-primary/5"
             >
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-foreground">{archive.period.name}</p>
@@ -91,6 +98,7 @@ export function ParentReportArchivesCard({
                   <FileText className="mr-2 size-4 text-primary" />
                 )}
                 Lihat Rapor
+                <ChevronRight className="ml-1 size-3.5 text-muted-foreground" />
               </button>
             </div>
           ))
