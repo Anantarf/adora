@@ -55,10 +55,11 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
 
   const playerAsset = await input.lookup.findPlayerAsset(input.fileUrl);
   if (playerAsset) {
+    const owned = await input.lookup.isPlayerOwnedByParent(playerAsset.id, input.userId);
     return {
-      allowed: false,
-      statusCode: 403,
-      message: "File pemain hanya bisa dibuka oleh admin.",
+      allowed: owned,
+      statusCode: owned ? 200 : 403,
+      message: owned ? "allowed" : "File pemain ini bukan milik akun parent ini.",
     };
   }
 

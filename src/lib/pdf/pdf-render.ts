@@ -416,6 +416,8 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
         maxHeightPx: isStamp ? 420 : 180,
         quality: 0.74,
         forceRasterize: true,
+        signatureMask: !isStamp,
+        outputMimeType: isStamp ? undefined : "image/png",
       });
       if (isStamp) {
         doc.addImage(b64, format, PAGE_W / 2 - STAMP_SIZE / 2, yPos + 1, STAMP_SIZE, STAMP_SIZE, undefined, "FAST");
