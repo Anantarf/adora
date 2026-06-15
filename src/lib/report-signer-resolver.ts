@@ -88,6 +88,10 @@ export async function getReportSignerResolverContext(tx: TransactionClientLike) 
         where: {
           id: { in: mappedCoachProfileIds },
           isDeleted: false,
+          user: {
+            isDeleted: false,
+            role: "COACH",
+          },
         },
         select: {
           id: true,

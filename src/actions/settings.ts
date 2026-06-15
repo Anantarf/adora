@@ -33,6 +33,10 @@ export async function getReportSettingsAction() {
       where: {
         id: globalCoachProfileId,
         isDeleted: false,
+        user: {
+          isDeleted: false,
+          role: "COACH",
+        },
       },
       select: {
         id: true,
@@ -87,6 +91,10 @@ export async function updateClubSettingAction(key: string, value: string) {
       where: {
         id: normalizedValue,
         isDeleted: false,
+        user: {
+          isDeleted: false,
+          role: "COACH",
+        },
       },
       select: { id: true },
     });

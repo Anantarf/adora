@@ -29,7 +29,7 @@ export default function SettingsPage() {
   const [localValues, setLocalValues] = useState<Record<string, string>>({});
   const [assetVersions, setAssetVersions] = useState<Record<string, number>>({});
   const [uploading, setUploading] = useState<Record<string, boolean>>({});
-  const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
+  const [failedImageUrls, setFailedImageUrls] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState<Record<string, boolean>>({});
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const mappedCoachIds = new Set((signerMappings ?? []).map((mapping) => mapping.coachProfileId).filter(Boolean));
@@ -175,7 +175,11 @@ export default function SettingsPage() {
 
       setLocalValues((previous) => ({ ...previous, [key]: data.url }));
       setAssetVersions((previous) => ({ ...previous, [key]: Date.now() }));
-      setFailedImages((previous) => ({ ...previous, [key]: false }));
+      setFailedImageUrls((previous) => {
+        const next = { ...previous };
+        delete next[key];
+        return next;
+      });
       await updateSetting.mutateAsync({ key, value: data.url });
       toast.success(`${label} berhasil diunggah.`);
     } catch (error) {
@@ -310,7 +314,7 @@ export default function SettingsPage() {
                         </div>
                       ) : (
                         <div className={`relative flex size-12 items-center justify-center overflow-hidden rounded-lg border border-border/50 ${previewMeta.frameClass}`}>
-                          {failedImages[asset.key] ? (
+                          {failedImageUrls[asset.key] === assetUrl ? (
                             <div className={`flex size-full items-center justify-center ${previewMeta.fallbackClass}`}>
                               <span className="text-[10px] font-semibold">PNG</span>
                             </div>
@@ -323,7 +327,7 @@ export default function SettingsPage() {
                               unoptimized
                               className="max-h-full max-w-full object-contain"
                               onError={() =>
-                                setFailedImages((previous) => ({ ...previous, [asset.key]: true }))
+                                setFailedImageUrls((previous) => ({ ...previous, [asset.key]: assetUrl }))
                               }
                             />
                           )}
@@ -466,7 +470,7 @@ export default function SettingsPage() {
                   {assetUrl ? (
                     <div className="flex min-w-0 items-center gap-3 rounded-lg border border-border/50 bg-background/40 px-3 py-2 xl:min-w-[18rem]">
                       <div className={`relative flex size-12 items-center justify-center overflow-hidden rounded-lg border border-border/50 ${previewMeta.frameClass}`}>
-                        {failedImages[asset.key] ? (
+                        {failedImageUrls[asset.key] === assetUrl ? (
                           <div className={`flex size-full items-center justify-center ${previewMeta.fallbackClass}`}>
                             <span className="text-[10px] font-semibold">PNG</span>
                           </div>
@@ -479,7 +483,7 @@ export default function SettingsPage() {
                             unoptimized
                             className="max-h-full max-w-full object-contain"
                             onError={() =>
-                              setFailedImages((previous) => ({ ...previous, [asset.key]: true }))
+                              setFailedImageUrls((previous) => ({ ...previous, [asset.key]: assetUrl }))
                             }
                           />
                         )}

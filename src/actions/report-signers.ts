@@ -147,6 +147,10 @@ export async function updateReportSignerHomebaseMappingsAction(
       where: {
         id: { in: uniqueCoachProfileIds },
         isDeleted: false,
+        user: {
+          isDeleted: false,
+          role: "COACH",
+        },
       },
       select: { id: true },
     }),

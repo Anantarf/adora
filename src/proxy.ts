@@ -98,20 +98,25 @@ export default async function proxy(request: NextRequest) {
       return handleUnauthorized("/login");
     }
 
-    if (pathname.startsWith("/dashboard") && token.role !== "ADMIN") {
+    if (
+      (pathname.startsWith("/dashboard") || pathname.startsWith("/api/admin")) &&
+      token.role !== "ADMIN"
+    ) {
       return handleUnauthorized(token.role === "COACH" ? "/coach" : "/parent");
     }
 
-    if (pathname.startsWith("/coach") && token.role !== "COACH") {
+    if (
+      (pathname.startsWith("/coach") || pathname.startsWith("/api/coach")) &&
+      token.role !== "COACH"
+    ) {
       return handleUnauthorized(token.role === "ADMIN" ? "/dashboard" : "/parent");
     }
 
     if (
-      pathname.startsWith("/parent") &&
-      token.role !== "PARENT" &&
-      token.role !== "ADMIN"
+      (pathname.startsWith("/parent") || pathname.startsWith("/api/parent")) &&
+      token.role !== "PARENT"
     ) {
-      return handleUnauthorized("/coach");
+      return handleUnauthorized(token.role === "ADMIN" ? "/dashboard" : "/coach");
     }
 
     securedResponse.headers.set(
