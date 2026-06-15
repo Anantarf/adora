@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Activity, AlertCircle, FileText, Loader2, RefreshCw, TrendingUp, User } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { Activity, AlertCircle, Loader2, RefreshCw, User } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
 import { ParentCertificatesCard } from "./components/ParentCertificatesCard";
@@ -118,7 +118,6 @@ function ParentDataIssueBanner({
 }
 
 export default function ParentDashboard() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const { data: children, isError: familyError, isLoading: familyLoading, refetch: refetchFamily } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
@@ -285,27 +284,15 @@ export default function ParentDashboard() {
     void refetchArchives();
     void refetchCertificates();
   };
-  const panelOptions: Array<{ value: ParentPanel; label: string; icon: typeof TrendingUp }> = [
-    { value: "ringkasan", label: "Ringkasan", icon: TrendingUp },
-    { value: "dokumen", label: "Dokumen", icon: FileText },
-    { value: "riwayat", label: "Riwayat", icon: Activity },
-  ];
-  const selectPanel = (panel: ParentPanel) => {
-    router.replace(`/parent?panel=${panel}`, { scroll: false });
-  };
-
   return (
-    <div className="flex w-full flex-col gap-5 md:gap-6">
-      <div className="flex flex-col items-start justify-between gap-3 border-b border-border/70 pb-4 md:flex-row md:items-end md:pb-5">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Portal Orang Tua
-          </p>
-          <h1 className="font-heading text-2xl uppercase tracking-[0.16em] text-foreground md:text-[2.35rem]">
+    <div className="flex w-full flex-col gap-4 md:gap-5">
+      <div className="flex flex-col items-start justify-between gap-3 border-b border-border/60 pb-4 md:flex-row md:items-center">
+        <div className="min-w-0 space-y-1">
+          <h2 className="font-heading text-xl uppercase tracking-[0.08em] text-foreground md:text-2xl">
             Pantauan Pemain
-          </h1>
+          </h2>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Pantau perkembangan, kehadiran, dan hasil evaluasi terbaru anak Anda di satu tempat.
+            Perkembangan, dokumen, dan riwayat performa anak dalam satu portal.
           </p>
         </div>
 
@@ -353,24 +340,6 @@ export default function ParentDashboard() {
         latestScore={latestOverallScore}
         periodLabel={latestStat ? currentPeriodLabel : null}
       />
-
-      <div className="flex w-full gap-2 overflow-x-auto rounded-xl border border-border/60 bg-card/70 p-1">
-        {panelOptions.map((item) => (
-          <button
-            key={item.value}
-            type="button"
-            onClick={() => selectPanel(item.value)}
-            className={`inline-flex h-10 min-w-max flex-1 items-center justify-center gap-2 rounded-lg px-3 text-xs font-semibold transition-colors ${
-              activePanel === item.value
-                ? "bg-primary text-primary-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-            }`}
-          >
-            <item.icon className="size-4" />
-            {item.label}
-          </button>
-        ))}
-      </div>
 
       {statsLoading && activePanel !== "dokumen" ? (
         <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">

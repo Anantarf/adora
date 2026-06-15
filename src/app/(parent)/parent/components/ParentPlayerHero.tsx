@@ -36,24 +36,24 @@ export function ParentPlayerHero({
 }) {
   return (
     <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
-      <CardContent className="grid gap-4 p-4 md:grid-cols-[88px_minmax(0,1fr)_minmax(180px,0.32fr)] md:items-center md:p-5">
+      <CardContent className="grid gap-4 p-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(170px,0.28fr)] md:items-center">
         <div className="flex justify-start">
-          <div className="flex size-22 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/30 md:size-24">
+          <div className="flex size-18 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-muted/30 md:size-20">
             {player.photoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={player.photoUrl} alt={player.name} className="h-full w-full object-cover" />
             ) : (
-              <UserRound className="size-12 text-muted-foreground/35" />
+              <UserRound className="size-9 text-muted-foreground/35" />
             )}
           </div>
         </div>
 
-        <div className="min-w-0 space-y-3">
+        <div className="min-w-0 space-y-2">
           <div className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
               {player.group?.name || "Tanpa Kelompok"}
             </p>
-            <h2 className="truncate text-2xl font-heading uppercase tracking-wide text-foreground md:text-[1.9rem]">
+            <h2 className="truncate text-xl font-heading uppercase tracking-wide text-foreground md:text-2xl">
               {player.name}
             </h2>
           </div>
@@ -73,9 +73,9 @@ export function ParentPlayerHero({
           </div>
         </div>
 
-        <div className="rounded-2xl border border-primary/15 bg-primary/5 p-4 md:justify-self-end">
+        <div className="rounded-xl border border-primary/15 bg-primary/5 p-3 md:justify-self-end">
           {latestScore != null ? (
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
@@ -88,7 +88,7 @@ export function ParentPlayerHero({
                 <GradeBadge score={latestScore} />
               </div>
               <div className="flex items-end gap-1">
-                <span className="text-4xl font-black tabular-nums text-primary">{latestScore}</span>
+                <span className="text-3xl font-black tabular-nums text-primary">{latestScore}</span>
                 <span className="pb-1 text-sm font-bold text-muted-foreground">/100</span>
               </div>
             </div>
