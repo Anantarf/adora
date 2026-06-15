@@ -18,8 +18,9 @@ import { BarChart3, FileText, LogOut, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
+import { useParentPanel } from "@/components/features/parent-panel-context";
 import { UserProfileMenu } from "@/components/features/UserProfileMenu";
 import { cn } from "@/lib/utils";
 
@@ -31,10 +32,9 @@ export const parentNavItems = [
 
 export function ParentSidebar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const { activePanel, setPanel } = useParentPanel();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
-  const activePanel = searchParams.get("panel") ?? "ringkasan";
 
   const isActive = (panel: string) => pathname === "/parent" && activePanel === panel;
 
@@ -70,7 +70,7 @@ export function ParentSidebar() {
                     tooltip={item.title}
                     isActive={isActive(item.panel)}
                     className="h-10 gap-3 rounded-xl px-3 transition-all duration-base hover:bg-primary/10 hover:text-primary data-active:bg-primary data-active:text-primary-foreground data-active:shadow-md"
-                    render={<Link href={item.url} />}
+                    onClick={() => setPanel(item.panel as import("@/components/features/parent-panel-context").ParentPanel)}
                   >
                     <item.icon className="size-4.5 shrink-0" />
                     <span className={cn("flex-1 overflow-hidden whitespace-nowrap text-sm font-medium transition-all duration-300", isCollapsed ? "w-0 pointer-events-none opacity-0" : "w-auto opacity-100")}>

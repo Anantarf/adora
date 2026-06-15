@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, Suspense } from "react";
 import {
   Loader2,
   LayoutList as SelectIcon,
@@ -8,6 +8,7 @@ import {
   FileText,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useSearchParams } from "next/navigation";
 
 import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
@@ -322,9 +323,7 @@ const PlayerStatRow = React.memo(
 
 PlayerStatRow.displayName = "PlayerStatRow";
 
-import { useSearchParams } from "next/navigation";
-
-export default function CoachStatisticsPage() {
+function CoachStatisticsPageInner() {
   const searchParams = useSearchParams();
   const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
   const [activeGroup, setActiveGroup] = useState<string>(searchParams.get("groupId") || "all");
@@ -856,5 +855,13 @@ export default function CoachStatisticsPage() {
         </div>
       ) : null}
     </div>
+  );
+}
+
+export default function CoachStatisticsPage() {
+  return (
+    <Suspense>
+      <CoachStatisticsPageInner />
+    </Suspense>
   );
 }

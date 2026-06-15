@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import { CalendarDays, Search } from "lucide-react";
@@ -16,7 +16,7 @@ import type { getEventsWithAttendanceAction } from "@/actions/schedule";
 
 type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[number];
 
-export function AttendanceCardView() {
+function AttendanceCardViewInner() {
   const searchParams = useSearchParams();
   const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
@@ -226,5 +226,13 @@ export function AttendanceCardView() {
         />
       ) : null}
     </div>
+  );
+}
+
+export function AttendanceCardView() {
+  return (
+    <Suspense>
+      <AttendanceCardViewInner />
+    </Suspense>
   );
 }

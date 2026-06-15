@@ -1,8 +1,9 @@
 "use client";
 
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import { parentNavItems } from "@/components/features/ParentSidebar";
+import { useParentPanel } from "@/components/features/parent-panel-context";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
 function getPageTitle(pathname: string, panel: string) {
@@ -12,8 +13,8 @@ function getPageTitle(pathname: string, panel: string) {
 
 export function ParentShellHeader() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const title = getPageTitle(pathname, searchParams.get("panel") ?? "ringkasan");
+  const { activePanel } = useParentPanel();
+  const title = getPageTitle(pathname, activePanel);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center border-b border-border/60 bg-background/90 px-4 backdrop-blur md:px-6">

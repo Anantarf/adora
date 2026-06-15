@@ -3,7 +3,8 @@
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { Activity, AlertCircle, Loader2, RefreshCw, User } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+
+import { useParentPanel } from "@/components/features/parent-panel-context";
 
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
 import { ParentCertificatesCard } from "./components/ParentCertificatesCard";
@@ -23,14 +24,6 @@ import { getEvaluationSummary, isMetricsJsonV2 } from "@/lib/evaluation-rules";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
 type ParentPanel = "ringkasan" | "dokumen" | "riwayat";
-
-function isParentPanel(value: string | null): value is ParentPanel {
-  return value === "ringkasan" || value === "dokumen" || value === "riwayat";
-}
-
-function normalizeParentPanel(value: string | null): ParentPanel {
-  return isParentPanel(value) ? value : "ringkasan";
-}
 
 const ParentProgressionChart = dynamic(
   () =>
@@ -118,10 +111,9 @@ function ParentDataIssueBanner({
 }
 
 export default function ParentDashboard() {
-  const searchParams = useSearchParams();
+  const { activePanel } = useParentPanel();
   const { data: children, isError: familyError, isLoading: familyLoading, refetch: refetchFamily } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
-  const activePanel = normalizeParentPanel(searchParams.get("panel"));
 
   const effectiveChildId = useMemo(() => {
     const validIds = children?.map((child) => child.id) ?? [];
