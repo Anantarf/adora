@@ -2,7 +2,7 @@
 
 import { AlertTriangle, UserX } from "lucide-react";
 
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { DashboardMetrics } from "@/actions/dashboard";
 
 interface AtRiskPlayersProps {
@@ -13,8 +13,25 @@ interface AtRiskPlayersProps {
 export function AtRiskPlayers({ metrics, isLoading }: AtRiskPlayersProps) {
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border/50 bg-card shadow-sm p-6 flex items-center justify-center min-h-[140px]">
-        <BrandLoader minHeight="min-h-[80px]" />
+      <div className="rounded-xl border border-border/50 bg-card shadow-sm p-4 sm:p-5">
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <Skeleton className="h-3.5 w-44" />
+            <Skeleton className="h-2.5 w-64" />
+          </div>
+          <Skeleton className="h-6 w-8 rounded-md shrink-0" />
+        </div>
+        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex items-center justify-between rounded-lg border border-border/50 bg-background/60 px-3 py-2.5">
+              <div className="space-y-1.5">
+                <Skeleton className="h-3.5 w-28" />
+                <Skeleton className="h-2.5 w-20" />
+              </div>
+              <Skeleton className="h-6 w-10 rounded-full" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
