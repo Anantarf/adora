@@ -11,6 +11,7 @@
     "start": "next start",
     "lint": "eslint",
     "release:check": "tsx scripts/release-check.ts",
+    "audit:visual": "tsx scripts/visual-audit.ts",
     "smoke:check": "tsx scripts/smoke-check.ts",
     "ops:alert-check": "tsx scripts/alert-check.ts",
     "ops:observability-check": "tsx scripts/check-observability-alerts.ts",

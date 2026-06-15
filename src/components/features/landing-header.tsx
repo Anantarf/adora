@@ -54,7 +54,7 @@ export function LandingHeader() {
 
           <nav aria-label="Navigasi utama" className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
             {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} className="font-heading font-black italic uppercase tracking-widest text-xs text-white/70 hover:text-brand-yellow transition-colors">
+              <a key={href} href={href} className="inline-flex min-h-10 items-center font-heading font-black italic uppercase tracking-widest text-xs text-white/70 hover:text-brand-yellow transition-colors">
                 {label}
               </a>
             ))}
@@ -63,7 +63,7 @@ export function LandingHeader() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="skew-box bg-white/15 border-2 border-white/30 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
+              className="skew-box inline-flex min-h-11 items-center bg-white/15 border-2 border-white/30 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
             >
               <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">PORTAL LOGIN</span>
             </Link>

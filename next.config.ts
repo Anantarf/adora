@@ -2,7 +2,78 @@ import type { NextConfig } from "next";
 
 const disableOptimizePackageImports = process.env.NEXT_DISABLE_OPTIMIZE_PACKAGE_IMPORTS === "1";
 
+const staticCsp = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://*.supabase.co",
+  "connect-src 'self' https://*.supabase.co",
+  "font-src 'self'",
+  "frame-src 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+const commonSecurityHeaders = [
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+];
+
+const staticCspHeader = { key: "Content-Security-Policy", value: staticCsp };
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: commonSecurityHeaders,
+      },
+      {
+        source: "/_next/:path*",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/images/:path*",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/favicon.ico",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/logo-adora.png",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/logo-adora-full.png",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/logo-new.svg",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/template-rapor-sd.pdf",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/robots.txt",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/.well-known/security.txt",
+        headers: [staticCspHeader],
+      },
+      {
+        source: "/api/auth/:path*",
+        headers: [staticCspHeader],
+      },
+    ];
+  },
   serverExternalPackages: ["@prisma/client", "prisma", "bcryptjs", "bcrypt", "sharp"],
   experimental: disableOptimizePackageImports
     ? {}

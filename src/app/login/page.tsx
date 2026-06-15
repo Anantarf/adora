@@ -36,7 +36,7 @@ export default async function LoginPage() {
       <Starfield />
       <Link
         href="/"
-        className="absolute top-4 left-4 sm:top-5 sm:left-5 z-20 skew-box bg-white/10 border-2 border-white/20 text-white px-4 py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
+        className="absolute top-4 left-4 sm:top-5 sm:left-5 z-20 skew-box inline-flex min-h-11 items-center bg-white/10 border-2 border-white/20 text-white px-4 py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
       >
         <span className="unskew-content flex items-center gap-2 font-heading font-black italic text-[10px] md:text-xs tracking-widest uppercase">
           <ArrowLeft className="size-4" />

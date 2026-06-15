@@ -219,41 +219,6 @@ const REPORT_STYLES = `
     color: #999;
   }
 
-  .print-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    background: #FF6A00;
-    color: white;
-    border: none;
-    padding: 14px 28px;
-    border-radius: 12px;
-    font-size: 13px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    cursor: pointer;
-    box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
-    transition: all 0.2s;
-  }
-
-  .print-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(124, 58, 237, 0.5);
-  }
-`;
-
-const PRINT_BUTTON_ID = "print-report-button";
-
-const REPORT_SCRIPT = `
-  document.addEventListener("DOMContentLoaded", function () {
-    const printButton = document.getElementById("${PRINT_BUTTON_ID}");
-    if (!printButton) return;
-
-    printButton.addEventListener("click", function () {
-      window.print();
-    });
-  });
 `;
 
 function escapeHtml(str: string): string {
@@ -327,12 +292,8 @@ export function renderReportHtml(viewModel: ReportViewModel): string {
   <title>Rapor ${escapeHtml(viewModel.playerName)} - ${REPORT_TITLE}</title>
   <style>${REPORT_STYLES}
   </style>
-  <script>${REPORT_SCRIPT}
-  </script>
 </head>
 <body>
-  <button id="${PRINT_BUTTON_ID}" class="print-btn no-print" type="button">Simpan sebagai PDF</button>
-
   <div class="header">
     <div class="header-brand">ADORA <span>Basketball</span></div>
     <div class="header-meta">

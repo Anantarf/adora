@@ -2,10 +2,19 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { getToken } from "next-auth/jwt";
 
-function buildCsp() {
-  const scriptSrc = ["'self'", "'unsafe-inline'"];
+const SECURITY_HEADER_VALUES = {
+  "X-Frame-Options": "DENY",
+  "X-Content-Type-Options": "nosniff",
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  "X-XSS-Protection": "1; mode=block",
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+};
+
+function buildCsp(nonce: string) {
+  const scriptSrc = ["'self'", `'nonce-${nonce}'`];
 
   if (process.env.NODE_ENV !== "production") {
+    scriptSrc.push("'unsafe-inline'");
     scriptSrc.push("'unsafe-eval'");
   }
 
@@ -20,33 +29,62 @@ function buildCsp() {
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
+    "frame-ancestors 'none'",
   ].join("; ");
 }
 
-export default async function proxy(request: NextRequest) {
-  const pathname = request.nextUrl.pathname;
-  const csp = buildCsp();
-
-  if (pathname.startsWith("/api/auth")) {
-    return NextResponse.next();
+function applySecurityHeaders(response: NextResponse, csp: string) {
+  for (const [key, value] of Object.entries(SECURITY_HEADER_VALUES)) {
+    response.headers.set(key, value);
   }
 
-  const isApiRoute = pathname.startsWith("/api/");
-  const securedResponse = NextResponse.next();
-
-  securedResponse.headers.set("X-Frame-Options", "DENY");
-  securedResponse.headers.set("X-Content-Type-Options", "nosniff");
-  securedResponse.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
-  securedResponse.headers.set("X-XSS-Protection", "1; mode=block");
-  securedResponse.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
-  securedResponse.headers.set("Content-Security-Policy", csp);
+  response.headers.set("Content-Security-Policy", csp);
 
   if (process.env.NODE_ENV === "production") {
-    securedResponse.headers.set(
+    response.headers.set(
       "Strict-Transport-Security",
       "max-age=31536000; includeSubDomains; preload",
     );
   }
+}
+
+function securedJsonResponse(body: unknown, status: number, csp: string) {
+  const response = NextResponse.json(body, { status });
+  applySecurityHeaders(response, csp);
+  return response;
+}
+
+function securedRedirectResponse(url: URL, csp: string) {
+  const response = NextResponse.redirect(url);
+  applySecurityHeaders(response, csp);
+  return response;
+}
+
+export default async function proxy(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+  const nonce = btoa(crypto.randomUUID());
+  const csp = buildCsp(nonce);
+
+  if (pathname.startsWith("/api/auth")) {
+    const response = NextResponse.next({
+      request: {
+        headers: new Headers(request.headers),
+      },
+    });
+    applySecurityHeaders(response, csp);
+    return response;
+  }
+
+  const isApiRoute = pathname.startsWith("/api/");
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp);
+  const securedResponse = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  });
+  applySecurityHeaders(securedResponse, csp);
 
   const origin = request.headers.get("origin");
   const host = request.headers.get("host");
@@ -65,10 +103,7 @@ export default async function proxy(request: NextRequest) {
   if (isCrossOrigin) {
     const isReadOnly = request.method === "GET" || request.method === "HEAD";
     if (!isReadOnly) {
-      return new NextResponse(
-        JSON.stringify({ error: "Akses lintas asal (CORS) tidak diizinkan." }),
-        { status: 403, headers: { "Content-Type": "application/json" } },
-      );
+      return securedJsonResponse({ error: "Akses lintas asal (CORS) tidak diizinkan." }, 403, csp);
     }
   }
 
@@ -88,11 +123,8 @@ export default async function proxy(request: NextRequest) {
 
     const handleUnauthorized = (redirectUrl: string) =>
       isApiRoute
-        ? new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
-            status: 401,
-            headers: { "Content-Type": "application/json" },
-          })
-        : NextResponse.redirect(new URL(redirectUrl, request.url));
+        ? securedJsonResponse({ error: "Unauthorized" }, 401, csp)
+        : securedRedirectResponse(new URL(redirectUrl, request.url), csp);
 
     if (!token) {
       return handleUnauthorized("/login");

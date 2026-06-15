@@ -56,13 +56,13 @@ export function LandingFooter() {
             <ul className="space-y-4">
               {NAV_LINKS.map(({ label, href }) => (
                 <li key={href}>
-                  <a href={href} className="text-sm text-white/70 hover:text-brand-orange transition-colors font-bold uppercase tracking-wider">
+                  <a href={href} className="inline-flex min-h-10 items-center text-sm text-white/70 hover:text-brand-orange transition-colors font-bold uppercase tracking-wider">
                     {label}
                   </a>
                 </li>
               ))}
               <li>
-                <Link href="/login" className="text-sm text-brand-orange hover:text-white transition-colors font-bold uppercase tracking-wider flex items-center gap-2">
+                <Link href="/login" className="inline-flex min-h-10 items-center gap-2 text-sm text-brand-orange hover:text-white transition-colors font-bold uppercase tracking-wider">
                   Login Portal →
                 </Link>
               </li>

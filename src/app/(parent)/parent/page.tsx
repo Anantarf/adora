@@ -2,7 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Activity, Loader2, User } from "lucide-react";
+import { Activity, AlertCircle, FileText, Loader2, RefreshCw, TrendingUp, User } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
 import { ParentCertificatesCard } from "./components/ParentCertificatesCard";
@@ -20,6 +21,16 @@ import { usePlayerStats } from "@/hooks/use-player-stats";
 import { averageScore, flattenMetrics } from "@/lib/metrics";
 import { getEvaluationSummary, isMetricsJsonV2 } from "@/lib/evaluation-rules";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
+
+type ParentPanel = "ringkasan" | "dokumen" | "riwayat";
+
+function isParentPanel(value: string | null): value is ParentPanel {
+  return value === "ringkasan" || value === "dokumen" || value === "riwayat";
+}
+
+function normalizeParentPanel(value: string | null): ParentPanel {
+  return isParentPanel(value) ? value : "ringkasan";
+}
 
 const ParentProgressionChart = dynamic(
   () =>
@@ -68,9 +79,50 @@ function formatShortPeriodLabel(period?: {
   return `${startMonth}-${endMonth}`;
 }
 
+function parentErrorMessage(label: string) {
+  return `${label} belum bisa dimuat. Coba muat ulang atau hubungi admin ADORA jika masih terjadi.`;
+}
+
+function ParentDataIssueBanner({
+  issues,
+  onRetry,
+}: {
+  issues: string[];
+  onRetry: () => void;
+}) {
+  if (issues.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex flex-col gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex min-w-0 gap-3">
+        <AlertCircle className="mt-0.5 size-5 shrink-0 text-amber-400" />
+        <div className="min-w-0">
+          <p className="font-semibold">Sebagian data belum tampil.</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            {issues.join(" ")}
+          </p>
+        </div>
+      </div>
+      <button
+        type="button"
+        onClick={onRetry}
+        className="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg border border-amber-500/30 px-3 text-xs font-semibold text-foreground transition-colors hover:bg-amber-500/15"
+      >
+        <RefreshCw className="size-3.5" />
+        Muat Ulang
+      </button>
+    </div>
+  );
+}
+
 export default function ParentDashboard() {
-  const { data: children, isLoading: familyLoading } = useFamily();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { data: children, isError: familyError, isLoading: familyLoading, refetch: refetchFamily } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+  const activePanel = normalizeParentPanel(searchParams.get("panel"));
 
   const effectiveChildId = useMemo(() => {
     const validIds = children?.map((child) => child.id) ?? [];
@@ -80,11 +132,10 @@ export default function ParentDashboard() {
     return validIds[0] ?? null;
   }, [children, selectedChildId]);
 
-  const { data: stats, isLoading: statsLoading } = usePlayerStats(effectiveChildId);
-  const { data: attendances, isLoading: attendanceLoading } =
-    usePlayerAttendance(effectiveChildId);
-  const { data: certificates } = usePlayerCertificates(effectiveChildId);
-  const { data: releasedArchives } = useReleasedReportArchives(effectiveChildId);
+  const { data: stats, isError: statsError, isLoading: statsLoading, refetch: refetchStats } = usePlayerStats(effectiveChildId);
+  const { data: attendances, isError: attendanceError, isLoading: attendanceLoading, refetch: refetchAttendance } = usePlayerAttendance(effectiveChildId);
+  const { data: certificates, isError: certificatesError, refetch: refetchCertificates } = usePlayerCertificates(effectiveChildId);
+  const { data: releasedArchives, isError: archivesError, refetch: refetchArchives } = useReleasedReportArchives(effectiveChildId);
 
   const progressionData = useMemo(() => {
     if (!stats?.length) {
@@ -220,6 +271,28 @@ export default function ParentDashboard() {
           year: "numeric",
         })
       : "Periode Evaluasi");
+  const queryIssues = [
+    familyError ? parentErrorMessage("Data keluarga") : null,
+    statsError ? parentErrorMessage("Evaluasi") : null,
+    attendanceError ? parentErrorMessage("Presensi") : null,
+    archivesError ? parentErrorMessage("Arsip rapor") : null,
+    certificatesError ? parentErrorMessage("Sertifikat") : null,
+  ].filter(Boolean) as string[];
+  const retryParentData = () => {
+    void refetchFamily();
+    void refetchStats();
+    void refetchAttendance();
+    void refetchArchives();
+    void refetchCertificates();
+  };
+  const panelOptions: Array<{ value: ParentPanel; label: string; icon: typeof TrendingUp }> = [
+    { value: "ringkasan", label: "Ringkasan", icon: TrendingUp },
+    { value: "dokumen", label: "Dokumen", icon: FileText },
+    { value: "riwayat", label: "Riwayat", icon: Activity },
+  ];
+  const selectPanel = (panel: ParentPanel) => {
+    router.replace(`/parent?panel=${panel}`, { scroll: false });
+  };
 
   return (
     <div className="flex w-full flex-col gap-5 md:gap-6">
@@ -273,13 +346,33 @@ export default function ParentDashboard() {
         )}
       </div>
 
+      <ParentDataIssueBanner issues={queryIssues} onRetry={retryParentData} />
+
       <ParentPlayerHero
         player={activeChild}
         latestScore={latestOverallScore}
         periodLabel={latestStat ? currentPeriodLabel : null}
       />
 
-      {statsLoading ? (
+      <div className="flex w-full gap-2 overflow-x-auto rounded-xl border border-border/60 bg-card/70 p-1">
+        {panelOptions.map((item) => (
+          <button
+            key={item.value}
+            type="button"
+            onClick={() => selectPanel(item.value)}
+            className={`inline-flex h-10 min-w-max flex-1 items-center justify-center gap-2 rounded-lg px-3 text-xs font-semibold transition-colors ${
+              activePanel === item.value
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
+            }`}
+          >
+            <item.icon className="size-4" />
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {statsLoading && activePanel !== "dokumen" ? (
         <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
           <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-muted/10 pb-4">
@@ -330,7 +423,7 @@ export default function ParentDashboard() {
             </CardContent>
           </Card>
         </div>
-      ) : !stats?.length ? (
+      ) : !stats?.length && activePanel !== "dokumen" ? (
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
           <div className="flex size-16 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
             <Activity className="size-8" />
@@ -346,7 +439,7 @@ export default function ParentDashboard() {
             </p>
           </div>
         </div>
-      ) : (
+      ) : activePanel === "ringkasan" ? (
         <div className="flex flex-col gap-6">
           <div className="grid w-full grid-cols-1 gap-6">
             {latestMetrics ? (
@@ -366,7 +459,6 @@ export default function ParentDashboard() {
                 </CardHeader>
                 <CardContent className="space-y-4 p-3 md:p-4">
                   {isMetricsJsonV2(latestMetrics) ? (
-                    // V2: tampilkan ringkasan per kategori
                     <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                       {getEvaluationSummary(latestMetrics).categorySummaries.map((category) => (
                         <div
@@ -394,7 +486,7 @@ export default function ParentDashboard() {
                               {getEvaluationSummary(latestMetrics).attendance!.label}
                             </p>
                             <p className="mt-0.5 text-[11px] text-muted-foreground">
-                              Bobot {formatWeight(getEvaluationSummary(latestMetrics).attendance!.weight)}% • {getEvaluationSummary(latestMetrics).attendance!.counts.HADIR} / {getEvaluationSummary(latestMetrics).attendance!.totalSessions} kegiatan dihadiri
+                              Bobot {formatWeight(getEvaluationSummary(latestMetrics).attendance!.weight)}% - {getEvaluationSummary(latestMetrics).attendance!.counts.HADIR} / {getEvaluationSummary(latestMetrics).attendance!.totalSessions} kegiatan dihadiri
                             </p>
                           </div>
                           <div className="text-right">
@@ -407,7 +499,6 @@ export default function ParentDashboard() {
                       ) : null}
                     </div>
                   ) : (
-                    // V1 legacy: tampilkan flat grid semua aspek
                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
                       {flattenMetrics(latestMetrics).map((item) => (
                         <div
@@ -446,16 +537,23 @@ export default function ParentDashboard() {
             periodLabel={latestStat ? currentPeriodLabel : null}
           />
 
-          <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-            <ParentReportArchivesCard
-              archives={releasedArchives}
-              player={activeChild}
-            />
-            <ParentCoachCard player={activeChild} />
-            <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
-          </div>
-
+        </div>
+      ) : activePanel === "dokumen" ? (
+        <div id="dokumen" className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+          <ParentReportArchivesCard archives={releasedArchives} player={activeChild} />
+          <ParentCoachCard player={activeChild} />
+          <ParentCertificatesCard certificates={certificates} playerName={activeChild.name} />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
           <ParentProgressionChart data={progressionData} />
+          <ParentAttendanceSummary
+            attendanceSummary={attendanceSummary}
+            attendances={periodAttendance}
+            attendanceLoading={attendanceLoading}
+            activeChildName={activeChild.name}
+            periodLabel={latestStat ? currentPeriodLabel : null}
+          />
         </div>
       )}
     </div>

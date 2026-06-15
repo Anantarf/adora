@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/admin/", "/parent/", "/api/"],
+      disallow: ["/dashboard/", "/coach/", "/parent/", "/api/"],
     },
     sitemap: "https://adorabbc.com/sitemap.xml",
   };
