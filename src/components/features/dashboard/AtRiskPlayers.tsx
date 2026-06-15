@@ -2,7 +2,7 @@
 
 import { AlertTriangle, UserX } from "lucide-react";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import type { DashboardMetrics } from "@/actions/dashboard";
 
 interface AtRiskPlayersProps {
@@ -13,14 +13,8 @@ interface AtRiskPlayersProps {
 export function AtRiskPlayers({ metrics, isLoading }: AtRiskPlayersProps) {
   if (isLoading) {
     return (
-      <div className="rounded-xl border border-border/50 bg-card shadow-sm">
-        <div className="border-b border-border/50 px-5 py-4">
-          <Skeleton className="h-5 w-48" />
-        </div>
-        <div className="space-y-2 px-5 py-4">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
+      <div className="rounded-xl border border-border/50 bg-card shadow-sm p-6 flex items-center justify-center min-h-[140px]">
+        <BrandLoader minHeight="min-h-[80px]" />
       </div>
     );
   }

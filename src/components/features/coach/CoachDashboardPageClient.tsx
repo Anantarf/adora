@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { AlertCircle, CalendarDays, ClipboardCheck, FileCheck2, RefreshCcw, Users, UsersRound } from "lucide-react";
 
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,19 +20,7 @@ export function CoachDashboardPageClient() {
   const { data, isLoading, isError, error, refetch } = useCoachWorkspace();
 
   if (isLoading) {
-    return (
-      <div className="grid gap-6">
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {[1, 2, 3, 4].map((item) => (
-            <div key={item} className="h-28 animate-pulse rounded-2xl border border-border/50 bg-card/70" />
-          ))}
-        </div>
-        <div className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <div className="h-80 animate-pulse rounded-2xl border border-border/50 bg-card/70" />
-          <div className="h-80 animate-pulse rounded-2xl border border-border/50 bg-card/70" />
-        </div>
-      </div>
-    );
+    return <BrandLoader minHeight="min-h-[60vh]" />;
   }
 
   if (isError || !data) {

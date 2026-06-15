@@ -15,6 +15,7 @@ import { ParentReportArchivesCard } from "./components/ParentReportArchivesCard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { useReleasedReportArchives } from "@/hooks/use-report-archives";
@@ -33,9 +34,8 @@ const ParentProgressionChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Card className="flex min-h-80 flex-col gap-4 border-border/50 bg-card p-6 lg:col-span-2">
-        <Skeleton className="h-5 w-48 bg-muted/50" />
-        <Skeleton className="h-44 w-full rounded bg-muted/30" />
+      <Card className="flex min-h-80 flex-col items-center justify-center border-border/50 bg-card p-6 lg:col-span-2">
+        <BrandLoader minHeight="min-h-[200px]" />
       </Card>
     ),
   },
@@ -204,18 +204,8 @@ export default function ParentDashboard() {
 
   if (familyLoading) {
     return (
-      <div className="flex w-full flex-col gap-6 animate-pulse p-4 md:gap-8">
-        <div className="flex flex-col items-start justify-between gap-4 border-b border-border pb-6 md:flex-row md:items-center md:pb-8">
-          <div className="space-y-2">
-            <Skeleton className="h-8 w-64 bg-muted/60" />
-            <Skeleton className="h-4 w-96 bg-muted/40" />
-          </div>
-          <Skeleton className="h-11 w-48 rounded-lg bg-muted/50" />
-        </div>
-        <div className="flex items-center justify-center gap-3 py-20 font-semibold text-primary/70">
-          <Loader2 className="size-6 animate-spin text-primary" />
-          <span>Memuat data keluarga...</span>
-        </div>
+      <div className="flex min-h-[60vh] w-full items-center justify-center">
+        <BrandLoader minHeight="min-h-[300px]" />
       </div>
     );
   }
@@ -334,55 +324,8 @@ export default function ParentDashboard() {
       />
 
       {statsLoading && activePanel !== "dokumen" ? (
-        <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
-          <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-border/50 bg-muted/10 pb-4">
-              <div className="space-y-2">
-                <Skeleton className="h-5 w-32 bg-muted/60" />
-                <Skeleton className="h-3.5 w-24 bg-muted/40" />
-              </div>
-              <Skeleton className="h-12 w-12 rounded bg-muted/50" />
-            </CardHeader>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((index) => (
-                  <div
-                    key={index}
-                    className="flex min-h-20 flex-col justify-center gap-2 rounded-lg border border-border/40 bg-muted/30 p-3 text-center"
-                  >
-                    <Skeleton className="mx-auto h-3 w-16 bg-muted/40" />
-                    <Skeleton className="mx-auto h-6 w-10 bg-muted/50" />
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="flex min-h-80 flex-col gap-4 border-border/50 bg-card p-6">
-            <Skeleton className="h-5 w-48 bg-muted/50" />
-            <Skeleton className="h-44 w-full rounded bg-muted/30" />
-          </Card>
-
-          <Card className="flex min-h-80 flex-col gap-4 border-border/50 bg-card p-6">
-            <Skeleton className="h-5 w-40 bg-muted/50" />
-            <div className="flex flex-col gap-3">
-              <Skeleton className="h-10 w-full rounded-lg bg-muted/40" />
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 2, 3, 4].map((index) => (
-                  <Skeleton key={index} className="h-16 rounded-lg bg-muted/30" />
-                ))}
-              </div>
-            </div>
-          </Card>
-
-          <Card className="overflow-hidden border-border/50 bg-card shadow-sm lg:col-span-2">
-            <CardHeader className="border-b border-border/50 bg-muted/10 pb-4">
-              <Skeleton className="h-5 w-40 bg-muted/50" />
-            </CardHeader>
-            <CardContent className="p-6">
-              <Skeleton className="h-20 w-full rounded-xl bg-muted/30" />
-            </CardContent>
-          </Card>
+        <div className="w-full flex items-center justify-center py-20 border border-border/50 bg-card rounded-2xl">
+          <BrandLoader minHeight="min-h-[250px]" />
         </div>
       ) : !stats?.length && activePanel !== "dokumen" ? (
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">

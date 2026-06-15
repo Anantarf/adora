@@ -11,7 +11,7 @@ import { AccountDetailDialog } from "@/components/features/users/AccountDetailDi
 import { CoachProfileDialog } from "@/components/features/users/CoachProfileDialog";
 import { EditUserDialog } from "@/components/features/users/EditUserDialog";
 import { Pagination } from "@/components/ui/pagination";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,23 +84,8 @@ export default function UsersManagementPage() {
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="space-y-2 animate-pulse">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="flex items-center justify-between px-4 py-2.5 rounded-xl border border-border/50 bg-card gap-3">
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <Skeleton className="size-8 rounded-full shrink-0 bg-muted/50" />
-                  <div className="flex items-center gap-2 min-w-0 flex-wrap flex-1">
-                    <Skeleton className="h-4 w-32 bg-muted/50" />
-                    <Skeleton className="h-4 w-16 bg-muted/40" />
-                    <Skeleton className="h-5 w-20 rounded bg-muted/40" />
-                  </div>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <Skeleton className="h-7 w-20 rounded-lg bg-muted/40" />
-                  <Skeleton className="h-7 w-7 rounded-lg bg-muted/40" />
-                </div>
-              </div>
-            ))}
+          <div className="w-full py-16 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[300px]">
+            <BrandLoader minHeight="min-h-[200px]" />
           </div>
         ) : isError ? (
           <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-destructive/40 bg-destructive/5 text-center">

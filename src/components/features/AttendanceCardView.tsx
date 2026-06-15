@@ -11,7 +11,7 @@ import { getEventConfig } from "@/lib/config/events";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import type { getEventsWithAttendanceAction } from "@/actions/schedule";
 
 type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[number];
@@ -23,7 +23,7 @@ function AttendanceCardViewInner() {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 20;
 
-  const { data: events, isLoading } = useEventsWithAttendance();
+  const { data: events = [], isLoading } = useEventsWithAttendance();
 
   useEffect(() => {
     setCurrentPage(1);
@@ -77,26 +77,7 @@ function AttendanceCardViewInner() {
   );
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col gap-6">
-        <Skeleton className="h-11 w-full rounded-xl" />
-        <Skeleton className="h-5 w-28 rounded" />
-        <div className="space-y-2">
-          {Array.from({ length: 5 }).map((_, index) => (
-            <div
-              key={index}
-              className="flex min-h-14 items-center gap-3 rounded-xl border border-border/50 bg-card px-4 py-3"
-            >
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-3.5 w-48" />
-                <Skeleton className="h-3 w-32" />
-              </div>
-              <Skeleton className="h-6 w-24 rounded-md" />
-            </div>
-          ))}
-        </div>
-      </div>
-    );
+    return <BrandLoader minHeight="min-h-[350px]" />;
   }
 
   return (

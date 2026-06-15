@@ -11,6 +11,7 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 function formatBirthDate(value: Date | string) {
   return new Date(value).toLocaleDateString("id-ID", {
@@ -44,13 +45,7 @@ export function CoachPlayersPageClient() {
   }, [data, selectedGroupId, debouncedSearch]);
 
   if (isLoading) {
-    return (
-      <div className="grid gap-6">
-        <div className="h-24 animate-pulse rounded-2xl border border-border/50 bg-card/70" />
-        <div className="h-16 animate-pulse rounded-2xl border border-border/50 bg-card/70" />
-        <div className="h-96 animate-pulse rounded-2xl border border-border/50 bg-card/70" />
-      </div>
-    );
+    return <BrandLoader minHeight="min-h-[60vh]" />;
   }
 
   if (isError || !data) {

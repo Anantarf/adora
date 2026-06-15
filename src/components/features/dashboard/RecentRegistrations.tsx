@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Clock, UserPlus } from "lucide-react";
-
 import { formatFullDate } from "@/lib/date-utils";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 type RegistrationProps = {
   registrations: {
@@ -17,15 +17,8 @@ type RegistrationProps = {
 export function RecentRegistrations({ registrations, isLoading }: RegistrationProps) {
   if (isLoading) {
     return (
-      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
-        <div className="border-b border-border/50 px-5 py-4">
-          <div className="h-5 w-40 animate-pulse rounded bg-muted/50" />
-        </div>
-        <div className="space-y-3 px-5 py-4">
-          {[1, 2, 3].map((item) => (
-            <div key={item} className="h-16 animate-pulse rounded-lg bg-muted/30" />
-          ))}
-        </div>
+      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm min-h-[350px] justify-center">
+        <BrandLoader minHeight="min-h-[200px]" />
       </div>
     );
   }

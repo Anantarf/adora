@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { getPublicHomebases } from "@/actions/homebase";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { type homebase as Homebase } from "@prisma/client";
 import { MapPin, Phone } from "lucide-react";
 
@@ -62,20 +63,8 @@ export function HomebaseSelector({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[1, 2].map((i) => (
-          <div
-            key={i}
-            className="p-5 md:p-6 border-2 border-white/5 bg-black/20 rounded-2xl animate-pulse flex flex-col gap-4 min-h-[160px]"
-          >
-            <div className="h-7 w-2/3 bg-white/10 rounded-lg" />
-            <div className="space-y-2">
-              <div className="h-4 w-1/3 bg-white/5 rounded-md" />
-              <div className="h-4 w-full bg-white/5 rounded-sm" />
-              <div className="h-4 w-5/6 bg-white/5 rounded-sm" />
-            </div>
-          </div>
-        ))}
+      <div className="w-full py-8 border-2 border-dashed border-white/10 rounded-2xl bg-black/20">
+        <BrandLoader minHeight="min-h-[120px]" />
       </div>
     );
   }

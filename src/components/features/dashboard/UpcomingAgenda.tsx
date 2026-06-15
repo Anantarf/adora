@@ -10,7 +10,7 @@ import { getPublicEventsAction } from "@/actions/schedule";
 import { QUERY_KEYS } from "@/lib/constants";
 import { getEventConfig } from "@/lib/config/events";
 import { getCountdownLabel } from "@/lib/date-utils";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 
 export function UpcomingAgenda() {
   const { data: events, isLoading } = useQuery({
@@ -40,10 +40,8 @@ export function UpcomingAgenda() {
 
       <div className="flex min-h-72 flex-1 flex-col px-5 py-4">
         {isLoading ? (
-          <div className="space-y-3">
-            {Array.from({ length: 4 }).map((_, index) => (
-              <Skeleton key={index} className="h-14 w-full rounded-lg" />
-            ))}
+          <div className="flex flex-1 items-center justify-center py-8">
+            <BrandLoader minHeight="min-h-[160px]" />
           </div>
         ) : upcoming.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border/50 bg-background/30 px-4 py-10 text-center">

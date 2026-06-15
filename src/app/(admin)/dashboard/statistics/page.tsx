@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGroups } from "@/hooks/use-groups";
 import { usePeriods, useSetActivePeriod, useDeletePeriod } from "@/hooks/use-evaluation-periods";
@@ -629,46 +630,15 @@ export default function StatisticsPage() {
         </div>
       ) : null}
 
-      {selectedPeriodId ? (
-        <div className="space-y-4 lg:hidden">
-          {playersLoading || statsLoading ? (
-            <div className="space-y-4 animate-pulse">
-              {[1, 2].map((groupIndex) => (
-                <div
-                  key={groupIndex}
-                  className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm"
-                >
-                  <div className="border-b border-border/50 bg-muted/20 px-4 py-2.5">
-                    <Skeleton className="h-4 w-32 bg-muted/60" />
-                  </div>
-                  <div className="space-y-4 divide-y divide-border/40 p-4">
-                    {[1, 2].map((playerIndex) => (
-                      <div key={playerIndex} className="space-y-3 pt-3 first:pt-0">
-                        <div className="flex items-center justify-between">
-                          <Skeleton className="h-4 w-40 bg-muted/50" />
-                          <Skeleton className="h-3 w-12 bg-muted/40" />
-                        </div>
-                        <div className="flex gap-2 overflow-x-auto pb-2">
-                          {[1, 2, 3, 4].map((metricIndex) => (
-                            <Skeleton
-                              key={metricIndex}
-                              className="h-10 min-w-20 shrink-0 rounded-md bg-muted/40"
-                            />
-                          ))}
-                        </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <Skeleton className="h-10 rounded-md bg-muted/40" />
-                          <Skeleton className="h-10 rounded-md bg-muted/40" />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : null}
+      {selectedPeriodId && (playersLoading || statsLoading) ? (
+        <div className="w-full py-20 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[300px]">
+          <BrandLoader minHeight="min-h-[200px]" />
+        </div>
+      ) : null}
 
-          {!playersLoading && !statsLoading && playersByGroup.length === 0 ? (
+      {selectedPeriodId && !(playersLoading || statsLoading) ? (
+        <div className="space-y-4 lg:hidden">
+          {playersByGroup.length === 0 ? (
             <div className="rounded-xl border border-border/50 bg-card p-6 text-center">
               {(players?.length ?? 0) === 0 ? (
                 <>
@@ -859,7 +829,7 @@ export default function StatisticsPage() {
         </div>
       ) : null}
 
-      {selectedPeriodId ? (
+      {selectedPeriodId && !(playersLoading || statsLoading) ? (
         <div className="hidden overflow-x-auto rounded-2xl border border-border/50 bg-card shadow-sm lg:block">
           <Table className="min-w-[920px]">
               <TableHeader className="bg-muted/[0.16]">
@@ -885,41 +855,7 @@ export default function StatisticsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {playersLoading || statsLoading ? (
-                <>
-                  {[1, 2, 3, 4, 5].map((rowIndex) => (
-                    <TableRow key={rowIndex} className="animate-pulse">
-                      <TableCell className="sticky left-0 z-20 w-12 bg-card text-center">
-                        <Skeleton className="mx-auto h-4 w-4 bg-muted/50" />
-                      </TableCell>
-                      <TableCell className="sticky left-12 z-20 min-w-44 max-w-56 bg-card">
-                        <Skeleton className="h-4 w-32 bg-muted/50" />
-                      </TableCell>
-                      <TableCell className="min-w-[360px]">
-                        <div className="grid grid-cols-3 gap-2">
-                          {[1, 2, 3].map((chipIndex) => (
-                            <Skeleton key={chipIndex} className="h-10 rounded-full bg-muted/40" />
-                          ))}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Skeleton className="mx-auto h-5 w-10 rounded bg-muted/40" />
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Skeleton className="mx-auto h-5 w-16 rounded bg-muted/40" />
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Skeleton className="h-7 w-7 rounded bg-muted/40" />
-                          <Skeleton className="h-7 w-7 rounded bg-muted/40" />
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </>
-              ) : null}
-
-              {!playersLoading && !statsLoading && playersByGroup.length === 0 ? (
+              {playersByGroup.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={6} className="h-24 text-center">
                     {(players?.length ?? 0) === 0 ? (
@@ -945,8 +881,7 @@ export default function StatisticsPage() {
                 </TableRow>
               ) : null}
 
-              {!playersLoading && !statsLoading
-                ? playersByGroup.map(({ group, players: groupPlayers }) => (
+              {playersByGroup.map(({ group, players: groupPlayers }) => (
                     <React.Fragment key={group.id}>
                       <TableRow className="bg-muted/[0.12] hover:bg-muted/[0.12]">
                         <TableCell
@@ -980,7 +915,7 @@ export default function StatisticsPage() {
                       })}
                     </React.Fragment>
                   ))
-                : null}
+                }
             </TableBody>
           </Table>
         </div>

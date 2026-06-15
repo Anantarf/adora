@@ -9,7 +9,7 @@ import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function CertificatesPage() {
@@ -131,25 +131,8 @@ export default function CertificatesPage() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-3">
-          {[1, 2, 3, 4].map((item) => (
-            <div
-              key={item}
-              className="flex items-center justify-between gap-3 rounded-xl border border-border/50 bg-card px-4 py-3"
-            >
-              <div className="flex min-w-0 flex-1 items-center gap-3">
-                <Skeleton className="size-8 rounded-lg bg-muted/50" />
-                <div className="min-w-0 flex-1 space-y-2">
-                  <Skeleton className="h-4 w-48 bg-muted/50" />
-                  <Skeleton className="h-3 w-28 bg-muted/40" />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-8 w-16 rounded-md bg-muted/40" />
-                <Skeleton className="h-8 w-16 rounded-md bg-muted/40" />
-              </div>
-            </div>
-          ))}
+        <div className="w-full py-16 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[300px]">
+          <BrandLoader minHeight="min-h-[200px]" />
         </div>
       ) : null}
 

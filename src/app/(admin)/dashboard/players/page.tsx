@@ -27,6 +27,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
+import { BrandLoader } from "@/components/ui/brand-loader";
 import { useGroups, type Group } from "@/hooks/use-groups";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePlayersPage } from "@/hooks/use-players";
@@ -259,12 +260,9 @@ export default function PlayersPage() {
 
             <div className="flex max-h-[460px] flex-col gap-2 overflow-y-auto pr-1 custom-scrollbar">
               {isGroupsLoading ? (
-                Array.from({ length: 4 }).map((_, index) => (
-                  <div
-                    key={index}
-                    className="h-16 w-full animate-pulse rounded-lg border border-transparent bg-muted/30"
-                  />
-                ))
+                <div className="py-8 border-2 border-dashed border-white/5 bg-black/10 rounded-xl">
+                  <BrandLoader minHeight="min-h-[140px]" />
+                </div>
               ) : groupsInCategory.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border/50 py-10 text-center text-xs text-muted-foreground/60">
                   {groupSearchQuery ? "Kelompok tidak ditemukan" : "Tidak ada kelompok latihan"}
@@ -490,13 +488,8 @@ export default function PlayersPage() {
                 </div>
 
                 {isPlayersLoading ? (
-                  <div className="flex flex-col gap-3 py-6">
-                    {Array.from({ length: 4 }).map((_, index) => (
-                      <Skeleton
-                        key={index}
-                        className="h-12 w-full animate-pulse rounded-lg bg-muted/20"
-                      />
-                    ))}
+                  <div className="w-full py-16 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[250px]">
+                    <BrandLoader minHeight="min-h-[160px]" />
                   </div>
                 ) : filteredPlayerCount === 0 ? (
                   <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/50 bg-background/20 p-12 text-center">
