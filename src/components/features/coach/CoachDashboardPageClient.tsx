@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { AlertCircle, CalendarDays, ClipboardCheck, FileCheck2, RefreshCcw, Users, UsersRound } from "lucide-react";
 
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function formatDate(value: Date | string) {
   return new Date(value).toLocaleDateString("id-ID", {
@@ -20,26 +21,32 @@ export function CoachDashboardPageClient() {
   const { data, isLoading, isError, error, refetch } = useCoachWorkspace();
 
   if (isLoading) {
-    return <BrandLoader minHeight="min-h-[60vh]" />;
+    return (
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-10 md:gap-6">
+        <Skeleton className="h-56 w-full rounded-3xl bg-muted/20" />
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-36 w-full rounded-xl bg-muted/15" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (isError || !data) {
     return (
-      <div className="flex min-h-80 flex-col items-center justify-center gap-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-          <AlertCircle className="size-6" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">Portal coach gagal dimuat</h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Terjadi kendala saat memuat data pelatih."}
-          </p>
-        </div>
-        <Button type="button" onClick={() => refetch()}>
-          <RefreshCcw className="mr-2 size-4" />
-          Muat Ulang
-        </Button>
-      </div>
+      <AdminStatePanel
+        icon={AlertCircle}
+        title="Portal coach gagal dimuat"
+        description={error instanceof Error ? error.message : "Terjadi kendala saat memuat data pelatih."}
+        tone="danger"
+        action={
+          <Button type="button" onClick={() => refetch()}>
+            <RefreshCcw className="mr-2 size-4" />
+            Muat Ulang
+          </Button>
+        }
+      />
     );
   }
 
@@ -112,18 +119,18 @@ export function CoachDashboardPageClient() {
           </div>
 
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="rounded-2xl border border-primary/25 bg-primary/10 p-4 text-primary sm:col-span-2">
+            <div className="rounded-xl border border-primary/25 bg-primary/10 p-4 text-primary sm:col-span-2">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">Portal Coach</p>
               <p className="mt-2 text-sm font-bold text-foreground">Akses pelatih aktif</p>
               <p className="mt-1 text-xs text-muted-foreground">
                 Anda masuk sebagai Coach <span className="font-semibold text-foreground">{data.coach.name}</span>
               </p>
             </div>
-            <div className="rounded-2xl border border-border/50 bg-background/45 p-4">
+            <div className="rounded-xl border border-border/50 bg-background/45 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Kelompok</p>
               <p className="mt-2 font-heading text-2xl leading-none text-foreground">{data.summary.totalGroups}</p>
             </div>
-            <div className="rounded-2xl border border-border/50 bg-background/45 p-4">
+            <div className="rounded-xl border border-border/50 bg-background/45 p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Pemain</p>
               <p className="mt-2 font-heading text-2xl leading-none text-primary">{data.summary.totalPlayers}</p>
             </div>
@@ -155,7 +162,7 @@ export function CoachDashboardPageClient() {
                     {card.value}
                   </CardTitle>
                 </div>
-                <div className="flex size-11 items-center justify-center rounded-2xl border border-primary/15 bg-primary/5 text-primary">
+                <div className="flex size-11 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
                   <card.icon className="size-5" />
                 </div>
               </div>
@@ -177,7 +184,7 @@ export function CoachDashboardPageClient() {
             <Link
               key={action.title}
               href={action.href}
-              className="group rounded-2xl border border-border/50 bg-background/40 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
+              className="group rounded-xl border border-border/50 bg-background/40 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
             >
               <div className="mb-3 flex size-10 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 text-primary">
                 <action.icon className="size-4" />
@@ -200,7 +207,7 @@ export function CoachDashboardPageClient() {
               data.groups.map((group) => (
                 <div
                   key={group.id}
-                  className="flex flex-col gap-3 rounded-2xl border border-border/50 bg-background/40 p-4 md:flex-row md:items-center md:justify-between"
+                  className="flex flex-col gap-3 rounded-xl border border-border/50 bg-background/40 p-4 md:flex-row md:items-center md:justify-between"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">{group.name}</p>
@@ -214,7 +221,12 @@ export function CoachDashboardPageClient() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Belum ada kelompok yang ditugaskan admin ke coach ini.</p>
+              <AdminStatePanel
+                icon={UsersRound}
+                title="Belum ada kelompok"
+                description="Kelompok akan tampil setelah admin menugaskan coach ke kelompok latihan."
+                className="min-h-40 border-0 bg-transparent"
+              />
             )}
           </CardContent>
         </Card>
@@ -227,7 +239,7 @@ export function CoachDashboardPageClient() {
           <CardContent className="space-y-3">
             {data.upcomingEvents.length > 0 ? (
               data.upcomingEvents.map((event) => (
-                <div key={event.id} className="rounded-2xl border border-border/50 bg-background/40 p-4">
+                <div key={event.id} className="rounded-xl border border-border/50 bg-background/40 p-4">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-foreground">{event.title}</p>
@@ -245,7 +257,12 @@ export function CoachDashboardPageClient() {
                 </div>
               ))
             ) : (
-              <p className="text-sm text-muted-foreground">Belum ada agenda mendatang untuk penugasan coach ini.</p>
+              <AdminStatePanel
+                icon={CalendarDays}
+                title="Belum ada agenda mendatang"
+                description="Agenda akan muncul setelah jadwal dibuat untuk kelompok yang ditugaskan."
+                className="min-h-40 border-0 bg-transparent"
+              />
             )}
           </CardContent>
         </Card>

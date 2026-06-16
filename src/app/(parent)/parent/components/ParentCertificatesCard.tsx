@@ -2,6 +2,7 @@
 
 import { Award, ChevronRight } from "lucide-react";
 
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatFullDate } from "@/lib/date-utils";
 
@@ -38,14 +39,12 @@ export function ParentCertificatesCard({
       </CardHeader>
       <CardContent className="space-y-3 p-4">
         {!certificates?.length ? (
-          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-6 text-center">
-            <p className="text-sm font-medium text-muted-foreground">
-              Belum ada sertifikat yang tersedia.
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground/80">
-              Sertifikat untuk {playerName} akan tampil di sini setelah ditambahkan oleh tim ADORA.
-            </p>
-          </div>
+          <AdminStatePanel
+            icon={Award}
+            title="Sertifikat belum tersedia"
+            description={`Sertifikat untuk ${playerName} akan tampil di sini setelah ditambahkan oleh tim ADORA.`}
+            className="min-h-44 border-dashed bg-background/30"
+          />
         ) : (
           certificates.map((certificate) => (
             <a

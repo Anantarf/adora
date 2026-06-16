@@ -28,6 +28,9 @@ import {
   CoachProfileFields,
   uploadCoachProfileAsset,
 } from "@/components/features/coach/coach-profile-form-shared";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function formatDateLabel(value: string) {
   if (!value) {
@@ -186,55 +189,59 @@ export function CoachProfilePageClient() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-80 items-center justify-center gap-2 rounded-2xl border border-border/50 bg-card">
-        <Loader2 className="size-4 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">Memuat profil coach...</span>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
+        <div className="grid gap-4 rounded-xl border border-border/50 bg-card p-4 lg:grid-cols-[18rem_minmax(0,1fr)]">
+          <Skeleton className="h-64 w-full rounded-xl bg-muted/20" />
+          <div className="space-y-3">
+            <Skeleton className="h-12 w-full rounded-xl bg-muted/25" />
+            {Array.from({ length: 6 }).map((_, index) => (
+              <Skeleton key={index} className="h-20 w-full rounded-xl bg-muted/15" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
   if (isError) {
     return (
-      <div className="flex min-h-80 flex-col items-center justify-center gap-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-          <AlertCircle className="size-6" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">Profil coach gagal dimuat</h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            {error instanceof Error
-              ? error.message
-              : "Terjadi kendala saat mengambil data profil coach. Coba muat ulang halaman."}
-          </p>
-        </div>
-        <Button type="button" onClick={() => refetch()}>
-          <RefreshCcw className="mr-2 size-4" />
-          Muat Ulang
-        </Button>
-      </div>
+      <AdminStatePanel
+        icon={AlertCircle}
+        title="Profil coach gagal dimuat"
+        description={error instanceof Error ? error.message : "Terjadi kendala saat mengambil data profil coach. Coba muat ulang halaman."}
+        tone="danger"
+        action={
+          <Button type="button" onClick={() => refetch()}>
+            <RefreshCcw className="mr-2 size-4" />
+            Muat Ulang
+          </Button>
+        }
+      />
     );
   }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          Lihat data diri pelatih yang tampil ke sistem, lalu perbarui biodata, foto, lisensi, dan tanda tangan bila diperlukan.
-        </p>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <AdminPageHeader
+        eyebrow="Profil Coach"
+        title="Data Diri Pelatih"
+        description="Lihat data diri pelatih yang tampil ke sistem, lalu perbarui biodata, foto, lisensi, dan tanda tangan bila diperlukan."
+        actions={
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium flex items-center gap-2">
             <UserRound className="size-3.5" />
             {coachUser?.username ?? "-"}
           </span>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(20rem,0.38fr)]">
-        <div className="overflow-hidden rounded-2xl border border-border/50 bg-card shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
           <div className="grid gap-0 lg:grid-cols-[18rem_minmax(0,1fr)]">
             <div className="border-b border-border/50 bg-muted/[0.16] p-5 lg:border-b-0 lg:border-r">
               <div className="mx-auto flex max-w-60 flex-col items-center text-center">
-                <div className="flex size-36 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-background/60">
+                <div className="flex size-36 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-background/60">
                   {showSavedPhoto ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
@@ -340,7 +347,7 @@ export function CoachProfilePageClient() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
-          <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
+          <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Status Profil
             </p>
@@ -349,7 +356,7 @@ export function CoachProfilePageClient() {
               {profileCompletionCount} dari 7 data inti sudah terisi.
             </p>
           </div>
-          <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
+          <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Penugasan Aktif
             </p>
@@ -361,7 +368,7 @@ export function CoachProfilePageClient() {
               Penugasan tetap dikelola admin.
             </p>
           </div>
-          <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm sm:col-span-2 xl:col-span-1">
+          <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm sm:col-span-2 xl:col-span-1">
             <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
               <ShieldCheck className="size-4 text-primary" />
               Akses Profil
@@ -374,7 +381,7 @@ export function CoachProfilePageClient() {
       </section>
 
       {isEditing ? (
-        <section className="rounded-2xl border border-border/50 bg-card p-6 shadow-sm">
+        <section className="rounded-xl border border-border/50 bg-card p-6 shadow-sm">
           <div className="mt-5 space-y-5">
             <div className="flex items-center gap-2 border-b border-border/50 pb-4 text-foreground">
               <UserRoundCog className="size-5 text-primary" />
@@ -408,7 +415,7 @@ export function CoachProfilePageClient() {
               }
             />
 
-            <div className="rounded-2xl border border-border/50 bg-background/40 p-4">
+            <div className="rounded-xl border border-border/50 bg-background/40 p-4">
               <div>
                 <h3 className="text-sm font-semibold text-foreground">Kelompok Saat Ini</h3>
                 <p className="mt-1 text-xs text-muted-foreground">

@@ -6,12 +6,14 @@ import { useDebounce } from "use-debounce";
 import { AlertCircle, ClipboardCheck, FilePenLine, HeartPulse, RefreshCcw, School, Search, Users } from "lucide-react";
 
 import { useCoachWorkspace } from "@/hooks/use-coach-workspace";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function formatBirthDate(value: Date | string) {
   return new Date(value).toLocaleDateString("id-ID", {
@@ -45,44 +47,51 @@ export function CoachPlayersPageClient() {
   }, [data, selectedGroupId, debouncedSearch]);
 
   if (isLoading) {
-    return <BrandLoader minHeight="min-h-[60vh]" />;
+    return (
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
+        <div className="flex min-h-[300px] w-full flex-col gap-2 rounded-xl border border-border/50 bg-card p-3">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Skeleton key={index} className="h-[76px] w-full rounded-xl bg-muted/20" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   if (isError || !data) {
     return (
-      <div className="flex min-h-80 flex-col items-center justify-center gap-4 rounded-2xl border border-destructive/30 bg-destructive/5 p-6 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full bg-destructive/10 text-destructive">
-          <AlertCircle className="size-6" />
-        </div>
-        <div className="space-y-1">
-          <h2 className="text-lg font-semibold text-foreground">Data pemain gagal dimuat</h2>
-          <p className="max-w-md text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : "Terjadi kendala saat memuat daftar pemain."}
-          </p>
-        </div>
-        <Button type="button" onClick={() => refetch()}>
-          <RefreshCcw className="mr-2 size-4" />
-          Muat Ulang
-        </Button>
-      </div>
+      <AdminStatePanel
+        icon={AlertCircle}
+        title="Data pemain gagal dimuat"
+        description={error instanceof Error ? error.message : "Terjadi kendala saat memuat daftar pemain."}
+        tone="danger"
+        action={
+          <Button type="button" onClick={() => refetch()}>
+            <RefreshCcw className="mr-2 size-4" />
+            Muat Ulang
+          </Button>
+        }
+      />
     );
   }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab Anda. Perubahan data pemain tetap dikelola admin.
-        </p>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+      <AdminPageHeader
+        eyebrow="Portal Coach"
+        title="Pemain Saya"
+        description="Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab Anda. Perubahan data pemain tetap dikelola admin."
+        actions={
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium flex items-center gap-2">
             <Users className="size-3.5" />
             {data.players.length} pemain aktif
           </span>
-        </div>
-      </div>
+          </div>
+        }
+      />
 
-      <div className="rounded-2xl border border-border/50 bg-card p-4 shadow-sm">
+      <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="relative w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -120,7 +129,7 @@ export function CoachPlayersPageClient() {
               {filteredPlayers.map((player) => (
                 <div
                   key={player.id}
-                  className="group grid gap-3 rounded-2xl border border-border/50 bg-card p-4 sm:bg-background/40 lg:grid-cols-[minmax(0,1.1fr)_minmax(10rem,0.7fr)_auto] lg:items-center transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md hover:border-primary/30"
+                  className="group grid gap-3 rounded-xl border border-border/50 bg-card p-4 transition-colors hover:border-primary/30 hover:bg-muted/20 sm:bg-background/40 lg:grid-cols-[minmax(0,1.1fr)_minmax(10rem,0.7fr)_auto] lg:items-center"
                 >
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground transition-colors group-hover:text-primary">{player.name}</p>
@@ -146,14 +155,14 @@ export function CoachPlayersPageClient() {
                   <div className="flex flex-wrap gap-2 lg:justify-end">
                     <Link
                       href={`/coach/attendances?q=${encodeURIComponent(player.group.name)}`}
-                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-xl group/btn transition-all hover:bg-primary/5 hover:border-primary/30")}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }), "h-9 rounded-lg text-xs font-medium group/btn transition-all hover:bg-primary/5 hover:border-primary/30")}
                     >
                         <ClipboardCheck className="mr-2 size-3.5 transition-transform group-hover/btn:scale-110" />
                         Presensi
                     </Link>
                     <Link
                       href={`/coach/statistics?groupId=${player.group.id}`}
-                      className={cn(buttonVariants({ size: "sm" }), "h-9 rounded-xl group/btn transition-all hover:shadow-[0_0_12px_rgba(var(--primary),0.3)] hover:brightness-105")}
+                      className={cn(buttonVariants({ size: "sm" }), "h-9 rounded-lg text-xs font-medium group/btn transition-all hover:brightness-105")}
                     >
                         <FilePenLine className="mr-2 size-3.5 transition-transform group-hover/btn:rotate-6" />
                         Nilai
@@ -163,30 +172,28 @@ export function CoachPlayersPageClient() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-2 py-12 px-4 text-center border border-dashed border-border/60 rounded-2xl bg-card">
-              <Users className="size-8 text-muted-foreground/30 mb-2" />
-              <p className="text-sm font-semibold text-foreground">
-                Tidak ada pemain ditemukan
-              </p>
-              <p className="text-xs text-muted-foreground max-w-[250px]">
-                {searchQuery || selectedGroupId !== "all" 
-                  ? "Coba ubah filter pencarian atau kelompok untuk melihat hasil."
-                  : "Belum ada pemain aktif yang terhubung ke penugasan coach ini."}
-              </p>
-              {(searchQuery || selectedGroupId !== "all") && (
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  className="mt-4 h-8 text-xs rounded-xl"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setSelectedGroupId("all");
-                  }}
-                >
-                  Reset Filter
-                </Button>
-              )}
-            </div>
+            <AdminStatePanel
+              icon={Users}
+              title="Tidak ada pemain ditemukan"
+              description={searchQuery || selectedGroupId !== "all"
+                ? "Coba ubah filter pencarian atau kelompok untuk melihat hasil."
+                : "Belum ada pemain aktif yang terhubung ke penugasan coach ini."}
+              action={
+                searchQuery || selectedGroupId !== "all" ? (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 rounded-lg text-xs font-medium"
+                    onClick={() => {
+                      setSearchQuery("");
+                      setSelectedGroupId("all");
+                    }}
+                  >
+                    Reset Filter
+                  </Button>
+                ) : null
+              }
+            />
           )}
         </CardContent>
       </Card>

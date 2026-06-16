@@ -41,7 +41,7 @@ export function ParentPlayerHero({
 
   return (
     <Card className="overflow-hidden border-border/50 bg-card shadow-sm">
-      <CardContent className="grid gap-4 p-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(170px,0.28fr)] md:items-center">
+      <CardContent className="grid gap-4 p-4 md:grid-cols-[72px_minmax(0,1fr)_minmax(190px,0.28fr)] md:items-center">
         <div className="flex justify-start">
           <div className="flex size-18 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-muted/30 md:size-20">
             {showPhoto ? (
@@ -63,20 +63,20 @@ export function ParentPlayerHero({
             <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-primary">
               {player.group?.name || "Tanpa Kelompok"}
             </p>
-            <h2 className="truncate text-xl font-heading uppercase tracking-wide text-foreground md:text-2xl">
+            <h2 className="truncate text-xl font-heading uppercase tracking-wide text-foreground">
               {player.name}
             </h2>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <div className="inline-flex max-w-full items-center gap-2 rounded-full border border-border/50 bg-background/40 px-3 py-1.5">
+            <div className="inline-flex max-w-full items-center gap-2 rounded-lg border border-border/50 bg-background/40 px-3 py-1.5">
               <MapPin className="size-3.5 shrink-0 text-primary" />
               <span className="truncate text-xs font-medium text-muted-foreground">
                 {formatBirthLabel(player)}
               </span>
             </div>
             {player.gender ? (
-              <span className="inline-flex items-center rounded-full border border-border/50 bg-background/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
+              <span className="inline-flex items-center rounded-lg border border-border/50 bg-background/40 px-3 py-1.5 text-xs font-medium text-muted-foreground">
                 {player.gender}
               </span>
             ) : null}
@@ -98,7 +98,7 @@ export function ParentPlayerHero({
                 <GradeBadge score={latestScore} />
               </div>
               <div className="flex items-end gap-1">
-                <span className="text-3xl font-black tabular-nums text-primary">{latestScore}</span>
+                <span className="text-2xl font-black tabular-nums text-primary">{latestScore}</span>
                 <span className="pb-1 text-sm font-bold text-muted-foreground">/100</span>
               </div>
             </div>

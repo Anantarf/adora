@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronRight, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatFullDate } from "@/lib/date-utils";
 import type { FamilyPlayer } from "@/hooks/use-family";
@@ -67,12 +68,12 @@ export function ParentReportArchivesCard({
       </CardHeader>
       <CardContent className="space-y-3 p-4">
         {!archives?.length ? (
-          <div className="rounded-xl border border-dashed border-border/50 bg-background/30 px-4 py-6 text-center">
-            <p className="text-sm font-medium text-muted-foreground">Belum ada rapor yang tersedia.</p>
-            <p className="mt-1 text-xs text-muted-foreground/80">
-              Rapor {player.name} akan tampil di sini setelah dokumen evaluasi diterbitkan.
-            </p>
-          </div>
+          <AdminStatePanel
+            icon={FileText}
+            title="Rapor belum tersedia"
+            description={`Rapor ${player.name} akan tampil di sini setelah dokumen evaluasi diterbitkan.`}
+            className="min-h-44 border-dashed bg-background/30"
+          />
         ) : (
           archives.map((archive) => (
             <div
@@ -90,7 +91,7 @@ export function ParentReportArchivesCard({
                 type="button"
                 onClick={() => handleOpenRealReport(archive)}
                 disabled={loadingArchiveId === archive.id}
-                className="inline-flex h-9 items-center justify-center rounded-xl border border-border/50 bg-card px-4 text-xs font-semibold text-foreground transition-colors hover:bg-muted/20"
+                className="inline-flex h-9 items-center justify-center rounded-lg border border-border/50 bg-card px-4 text-xs font-semibold text-foreground transition-colors hover:bg-muted/20 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {loadingArchiveId === archive.id ? (
                   <Loader2 className="mr-2 size-4 animate-spin text-primary" />

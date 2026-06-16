@@ -59,7 +59,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
         </CardHeader>
         <CardContent className="space-y-3 p-4">
           <div className="flex items-center gap-3">
-            <div className="flex size-16 items-center justify-center overflow-hidden rounded-2xl border border-border/60 bg-muted/30">
+            <div className="flex size-16 items-center justify-center overflow-hidden rounded-xl border border-border/60 bg-muted/30">
               {coach?.photoUrl && !photoFailed ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -85,7 +85,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
           <Button
             type="button"
             variant="outline"
-            className="h-9 w-full rounded-xl border-border/50 bg-background/30 text-xs font-semibold"
+            className="h-9 w-full rounded-lg border-border/50 bg-background/30 text-xs font-semibold"
             disabled={!coach?.licenseUrl}
             onClick={() => setOpen(true)}
           >
@@ -106,7 +106,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
             </DialogDescription>
           </DialogHeader>
           {coach?.licenseUrl ? (
-            <div className="overflow-hidden rounded-2xl border border-border/50 bg-background/40 p-3">
+            <div className="overflow-hidden rounded-xl border border-border/50 bg-background/40 p-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={coach.licenseUrl}

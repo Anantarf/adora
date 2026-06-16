@@ -1,6 +1,8 @@
 import { useMemo } from "react";
-import { Loader2, ClipboardCheck } from "lucide-react";
+import { ClipboardCheck } from "lucide-react";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ATTENDANCE_STATUS_STYLE as STATUS_STYLE } from "@/lib/constants/badge-configs";
 import type { AttendanceStatus, Attendance } from "@/types/dashboard";
 import { format } from "date-fns";
@@ -47,15 +49,28 @@ export function ParentAttendanceSummary({
       </CardHeader>
       <CardContent className="p-3 sm:p-4">
         {attendanceLoading ? (
-          <div className="flex items-center justify-center gap-2 py-8 text-primary font-bold text-xs uppercase tracking-widest">
-            <Loader2 className="size-4 animate-spin" /> Memuat data kehadiran...
+          <div className="grid gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)]">
+            <div className="space-y-2">
+              <Skeleton className="h-14 w-full rounded-xl bg-muted/20" />
+              <div className="grid grid-cols-2 gap-2">
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton key={index} className="h-9 w-full rounded-lg bg-muted/15" />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-xl bg-muted/15" />
+              ))}
+            </div>
           </div>
         ) : !attendances?.length ? (
-          <div className="flex flex-col items-center justify-center py-10 gap-2 text-center">
-            <ClipboardCheck className="size-8 text-muted-foreground/30 mb-1" />
-            <p className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Data Kehadiran Belum Tersedia</p>
-            <p className="text-xs text-muted-foreground/75">Riwayat kehadiran akan tampil di sini setelah kehadiran dicatat untuk agenda latihan atau pertandingan.</p>
-          </div>
+          <AdminStatePanel
+            icon={ClipboardCheck}
+            title="Data kehadiran belum tersedia"
+            description="Riwayat kehadiran akan tampil di sini setelah kehadiran dicatat untuk agenda latihan atau pertandingan."
+            className="min-h-56 border-0 bg-transparent"
+          />
         ) : (
           <div className="grid gap-3 xl:grid-cols-[minmax(0,0.95fr)_minmax(320px,1.05fr)] xl:items-start">
             <div className="flex flex-wrap items-center gap-2">

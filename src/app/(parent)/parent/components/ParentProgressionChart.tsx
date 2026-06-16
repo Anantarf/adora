@@ -22,17 +22,17 @@ export function ParentProgressionChart({
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 p-5 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] md:p-6">
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-5 text-center">
+          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5 text-center">
             <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
               Evaluasi Pertama
             </p>
-            <p className="mt-3 text-4xl font-black tabular-nums text-primary">
+            <p className="mt-3 text-3xl font-black tabular-nums text-primary">
               {firstEvaluation.Overall}
               <span className="ml-1 text-base font-bold text-muted-foreground">/100</span>
             </p>
             <p className="mt-2 text-xs font-medium text-muted-foreground">{firstEvaluation.name}</p>
           </div>
-          <div className="flex flex-col justify-center rounded-2xl border border-dashed border-border/60 bg-background/30 p-5">
+          <div className="flex flex-col justify-center rounded-xl border border-dashed border-border/60 bg-background/30 p-5">
             <p className="text-sm font-semibold text-foreground">Belum cukup data untuk membandingkan perkembangan.</p>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               Nilai ini adalah titik awal evaluasi. Setelah periode berikutnya diterbitkan, grafik akan

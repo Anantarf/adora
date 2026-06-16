@@ -4,6 +4,8 @@ import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
 import { Activity, AlertCircle, RefreshCw, User } from "lucide-react";
 
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { useParentPanel } from "@/components/features/parent-panel-context";
 
 import { ParentAttendanceSummary } from "./components/ParentAttendanceSummary";
@@ -15,7 +17,6 @@ import { ParentReportArchivesCard } from "./components/ParentReportArchivesCard"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BrandLoader } from "@/components/ui/brand-loader";
 import { usePlayerCertificates } from "@/hooks/use-certificates";
 import { useFamily, usePlayerAttendance, type FamilyPlayer } from "@/hooks/use-family";
 import { useReleasedReportArchives } from "@/hooks/use-report-archives";
@@ -203,28 +204,26 @@ export default function ParentDashboard() {
 
   if (familyLoading) {
     return (
-      <div className="flex min-h-[60vh] w-full items-center justify-center">
-        <BrandLoader minHeight="min-h-[300px]" />
+      <div className="flex w-full flex-col gap-4 md:gap-5">
+        <Skeleton className="h-24 w-full rounded-xl bg-muted/20" />
+        <Skeleton className="h-32 w-full rounded-xl bg-muted/15" />
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-28 w-full rounded-xl bg-muted/20" />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (!children || children.length === 0) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-500">
-        <div className="mb-8 flex size-20 items-center justify-center rounded-full border border-primary/20 bg-primary/5 text-primary/60 shadow-sm">
-          <User className="size-10" />
-        </div>
-        <h2 className="mb-4 text-xl font-heading uppercase text-foreground">
-          Profil Anak Belum Terhubung
-        </h2>
-        <p className="max-w-md text-sm font-medium leading-relaxed text-muted-foreground">
-          Akun ini belum terhubung ke profil anak.
-        </p>
-        <p className="max-w-md text-sm font-medium leading-relaxed text-muted-foreground">
-          Hubungi tim ADORA agar akun ini dapat dihubungkan ke profil putra atau putri Anda.
-        </p>
-      </div>
+      <AdminStatePanel
+        icon={User}
+        title="Profil anak belum terhubung"
+        description="Akun ini belum terhubung ke profil anak. Hubungi tim ADORA agar akun ini dapat dihubungkan ke profil putra atau putri Anda."
+        className="min-h-[60vh]"
+      />
     );
   }
 
@@ -267,23 +266,18 @@ export default function ParentDashboard() {
   };
   return (
     <div className="flex w-full flex-col gap-4 md:gap-5">
-      <div className="flex flex-col items-start justify-between gap-3 border-b border-border/60 pb-4 md:flex-row md:items-center">
-        <div className="min-w-0 space-y-1">
-          <h2 className="font-heading text-xl uppercase tracking-[0.08em] text-foreground md:text-2xl">
-            Pantauan Pemain
-          </h2>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            Perkembangan, dokumen, dan riwayat performa anak dalam satu portal.
-          </p>
-        </div>
-
-        {children.length > 1 ? (
+      <AdminPageHeader
+        eyebrow="Portal Orang Tua"
+        title="Pantauan Pemain"
+        description="Perkembangan, dokumen, dan riwayat performa anak dalam satu portal."
+        actions={
+          children.length > 1 ? (
           <div className="flex w-full flex-col gap-2 md:w-auto md:items-end">
             <span className="ml-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Pilih Anak
             </span>
             <Select value={effectiveChildId ?? ""} onValueChange={setSelectedChildId}>
-              <SelectTrigger className="h-10 w-full rounded-full border-border/70 bg-card px-4 font-semibold text-foreground md:w-72">
+              <SelectTrigger className="h-10 w-full rounded-lg border-border/70 bg-card px-4 font-semibold text-foreground md:w-72">
                 <SelectValue placeholder="Pilih profil">
                   {effectiveChildId
                     ? children.find((child) => child.id === effectiveChildId)?.name
@@ -304,15 +298,16 @@ export default function ParentDashboard() {
             <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
               Profil Aktif
             </span>
-            <div className="inline-flex min-h-10 items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-2">
+            <div className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-3.5 py-2">
               <span className="font-semibold text-foreground">{activeChild.name}</span>
-              <span className="rounded-full bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
+              <span className="rounded-lg bg-primary/15 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-primary">
                 {activeChild.group?.name || "Tanpa Kelompok"}
               </span>
             </div>
           </div>
-        )}
-      </div>
+        )
+        }
+      />
 
       <ParentDataIssueBanner issues={queryIssues} onRetry={retryParentData} />
 
@@ -323,27 +318,18 @@ export default function ParentDashboard() {
       />
 
       {statsLoading && activePanel !== "dokumen" ? (
-        <div className="grid gap-3 rounded-2xl border border-border/50 bg-card p-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 rounded-xl border border-border/50 bg-card p-4 sm:grid-cols-2 xl:grid-cols-3">
           {Array.from({ length: 6 }).map((_, index) => (
             <Skeleton key={index} className="h-24 w-full rounded-xl bg-muted/20" />
           ))}
         </div>
       ) : !stats?.length && activePanel !== "dokumen" ? (
-        <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
-          <div className="flex size-16 items-center justify-center rounded-full bg-muted text-muted-foreground/50">
-            <Activity className="size-8" />
-          </div>
-          <div className="space-y-1">
-            <h3 className="text-xl font-heading uppercase text-foreground">
-              Evaluasi Belum Tersedia
-            </h3>
-            <p className="mx-auto max-w-sm text-sm text-muted-foreground">
-              Hasil evaluasi terbaru untuk{" "}
-              <span className="font-semibold text-foreground">{activeChild.name}</span> akan
-              tampil di sini setelah penilaian berikutnya tersedia.
-            </p>
-          </div>
-        </div>
+        <AdminStatePanel
+          icon={Activity}
+          title="Evaluasi belum tersedia"
+          description={`Hasil evaluasi terbaru untuk ${activeChild.name} akan tampil di sini setelah penilaian berikutnya tersedia.`}
+          className="bg-card/50"
+        />
       ) : activePanel === "ringkasan" ? (
         <div className="flex flex-col gap-6">
           <div className="grid w-full grid-cols-1 gap-6">
