@@ -1,11 +1,12 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export type ParentPanel = "ringkasan" | "dokumen" | "riwayat";
 
 const VALID_PANELS: ParentPanel[] = ["ringkasan", "dokumen", "riwayat"];
+const DEFAULT_PANEL: ParentPanel = "ringkasan";
 
 function isValidPanel(value: string | null): value is ParentPanel {
   return VALID_PANELS.includes(value as ParentPanel);
@@ -27,31 +28,22 @@ export function useParentPanel(): ParentPanelContextValue {
 }
 
 /**
- * ParentPanelProvider — reads initial panel from URL search params,
- * provides activePanel state to children, and syncs URL on change.
+ * ParentPanelProvider - URL adalah satu-satunya sumber kebenaran untuk panel aktif.
+ * `activePanel` diturunkan dari search params, `setPanel` hanya mendorong URL baru.
  *
- * Must be wrapped in <Suspense> at the layout level because it uses
- * useSearchParams internally.
+ * Provider ini memakai useSearchParams, jadi harus dibungkus <Suspense> di level layout.
  */
 export function ParentPanelProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const rawPanel = searchParams.get("panel");
-  const initialPanel: ParentPanel = isValidPanel(rawPanel) ? rawPanel : "ringkasan";
-
-  const [activePanel, setActivePanelState] = useState<ParentPanel>(initialPanel);
-
-  // Sync state when the URL changes externally (e.g. browser back/forward)
-  useEffect(() => {
-    const raw = searchParams.get("panel");
-    const resolved: ParentPanel = isValidPanel(raw) ? raw : "ringkasan";
-    setActivePanelState(resolved);
-  }, [searchParams]);
+  const activePanel = useMemo<ParentPanel>(
+    () => (isValidPanel(searchParams.get("panel")) ? (searchParams.get("panel") as ParentPanel) : DEFAULT_PANEL),
+    [searchParams],
+  );
 
   const setPanel = useCallback(
     (panel: ParentPanel) => {
-      setActivePanelState(panel);
       router.push(`/parent?panel=${panel}`, { scroll: false });
     },
     [router],

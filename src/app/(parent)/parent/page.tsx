@@ -33,7 +33,7 @@ const ParentProgressionChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Card className="min-h-80 border-border/50 bg-card p-6 lg:col-span-2">
+      <Card className="min-h-80 border-border/50 bg-card p-6">
         <Skeleton className="h-7 w-44 rounded-lg bg-muted/25" />
         <Skeleton className="mt-5 h-56 w-full rounded-xl bg-muted/15" />
       </Card>
@@ -115,13 +115,14 @@ export default function ParentDashboard() {
   const { data: children, isError: familyError, isLoading: familyLoading, refetch: refetchFamily } = useFamily();
   const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
 
-  const effectiveChildId = useMemo(() => {
+  // Pilih anak aktif: preferensi user kalau masih valid, fallback ke anak pertama yang tersedia.
+  const effectiveChildId = (() => {
     const validIds = children?.map((child) => child.id) ?? [];
     if (selectedChildId && validIds.includes(selectedChildId)) {
       return selectedChildId;
     }
     return validIds[0] ?? null;
-  }, [children, selectedChildId]);
+  })();
 
   const { data: stats, isError: statsError, isLoading: statsLoading, refetch: refetchStats } = usePlayerStats(effectiveChildId);
   const { data: attendances, isError: attendanceError, isLoading: attendanceLoading, refetch: refetchAttendance } = usePlayerAttendance(effectiveChildId);
@@ -268,7 +269,7 @@ export default function ParentDashboard() {
     <div className="flex w-full flex-col gap-4 md:gap-5">
       <AdminPageHeader
         eyebrow="Portal Orang Tua"
-        title="Pantauan Pemain"
+        title={activePanel === "dokumen" ? "Rapor & Sertifikat" : activePanel === "riwayat" ? "Riwayat Performa" : "Ringkasan Pemain"}
         description="Perkembangan, dokumen, dan riwayat performa anak dalam satu portal."
         actions={
           children.length > 1 ? (
@@ -450,3 +451,6 @@ export default function ParentDashboard() {
     </div>
   );
 }
+
+
+
