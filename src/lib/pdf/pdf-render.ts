@@ -38,6 +38,21 @@ function splitLinesByAvailableHeight(lineCount: number, lineHeight: number, avai
   return chunks;
 }
 
+function truncatePdfText(doc: jsPDF, text: string, maxWidth: number) {
+  if (doc.getTextWidth(text) <= maxWidth) {
+    return text;
+  }
+
+  const ellipsis = "...";
+  let output = text.trim();
+
+  while (output.length > 0 && doc.getTextWidth(`${output}${ellipsis}`) > maxWidth) {
+    output = output.slice(0, -1).trimEnd();
+  }
+
+  return output ? `${output}${ellipsis}` : ellipsis;
+}
+
 // ─── Title ────────────────────────────────────────────────────────────────────
 
 export function renderMainTitle(doc: jsPDF, y: number, periodName: string): number {
@@ -79,6 +94,8 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
   const panelHeight = Math.max(26, 10 + rowCountPerColumn * 6);
   const labelWidth = 30;
   const colGap = 10;
+  const columnWidth = (CONTENT_W - 16 - colGap) / 2;
+  const valueMaxWidth = columnWidth - labelWidth - 4;
   const colX = [MARGIN + 8, MARGIN + CONTENT_W / 2 + colGap / 2];
 
   drawSectionTitle(doc, "IDENTITAS PEMAIN", y);
@@ -96,7 +113,7 @@ export function renderPlayerInfo(doc: jsPDF, y: number, info: PlayerInfoParam): 
     doc.setFont("helvetica", "bold");
     doc.text(row.label, baseX, rowY);
     doc.setFont("helvetica", "normal");
-    doc.text(`: ${row.value}`, baseX + labelWidth, rowY);
+    doc.text(`: ${truncatePdfText(doc, row.value, valueMaxWidth)}`, baseX + labelWidth, rowY);
     doc.setTextColor(0, 0, 0);
   });
 
@@ -186,6 +203,7 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
         cellPadding: 3,
         lineColor: [0, 0, 0],
         lineWidth: 0.1,
+        overflow: "linebreak",
       },
       bodyStyles: {
         fillColor: false,
@@ -241,6 +259,7 @@ export function renderAssessmentTable(doc: jsPDF, y: number, metrics: MetricsJso
       cellPadding: 3,
       lineColor: [0, 0, 0],
       lineWidth: 0.1,
+      overflow: "linebreak",
     },
     bodyStyles: {
       fillColor: false,
@@ -416,7 +435,6 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
         maxHeightPx: isStamp ? 420 : 180,
         quality: 0.74,
         forceRasterize: true,
-        signatureMask: !isStamp,
         outputMimeType: isStamp ? undefined : "image/png",
       });
       if (isStamp) {
@@ -467,8 +485,8 @@ export async function renderSignatureArea(doc: jsPDF, y: number, info: Signature
 
   doc.setFont("helvetica", "bold");
   doc.setFontSize(9); // consistent body
-  doc.text(signers?.coachName ?? "Head Coach", leftX + columnWidth / 2, lineY + 4.5, { align: "center" });
-  doc.text(signers?.ceoName ?? "CEO", rightX + columnWidth / 2, lineY + 4.5, { align: "center" });
+  doc.text(truncatePdfText(doc, signers?.coachName ?? "Head Coach", columnWidth - 4), leftX + columnWidth / 2, lineY + 4.5, { align: "center" });
+  doc.text(truncatePdfText(doc, signers?.ceoName ?? "CEO", columnWidth - 4), rightX + columnWidth / 2, lineY + 4.5, { align: "center" });
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(8); // consistent sub-label

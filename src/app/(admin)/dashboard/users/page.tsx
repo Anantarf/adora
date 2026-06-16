@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Users } from "lucide-react";
 import { useUsersPage, useDeleteUser, useResetPassword } from "@/hooks/use-users";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { UserAccountActionDialogs, type UserDialogState } from "@/components/features/users/UserAccountActionDialogs";
 import { UserAccountCard } from "@/components/features/users/UserAccountCard";
 import { UsersManagementHeader } from "@/components/features/users/UsersManagementHeader";
@@ -11,7 +12,7 @@ import { AccountDetailDialog } from "@/components/features/users/AccountDetailDi
 import { CoachProfileDialog } from "@/components/features/users/CoachProfileDialog";
 import { EditUserDialog } from "@/components/features/users/EditUserDialog";
 import { Pagination } from "@/components/ui/pagination";
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -84,23 +85,28 @@ export default function UsersManagementPage() {
 
       <div className="flex flex-col gap-2">
         {isLoading ? (
-          <div className="w-full py-16 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[300px]">
-            <BrandLoader minHeight="min-h-[200px]" />
+          <div className="flex min-h-[300px] w-full flex-col gap-2 rounded-xl border border-border/50 bg-card p-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-[58px] w-full rounded-xl bg-muted/20" />
+            ))}
           </div>
         ) : isError ? (
-          <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-destructive/40 bg-destructive/5 text-center">
-            <Users className="size-10 text-destructive/50" />
-            <p className="text-sm font-semibold text-destructive">Gagal memuat data akun.</p>
-            <button type="button" onClick={() => refetch()} className="rounded-lg border border-destructive/40 px-4 py-2 text-[11px] font-medium text-destructive hover:bg-destructive/10">
-              Muat Ulang
-            </button>
-          </div>
+          <AdminStatePanel
+            icon={Users}
+            title="Gagal memuat data akun."
+            tone="danger"
+            action={
+              <button type="button" onClick={() => refetch()} className="rounded-lg border border-destructive/40 px-4 py-2 text-[11px] font-medium text-destructive hover:bg-destructive/10">
+                Muat Ulang
+              </button>
+            }
+          />
         ) : totalAccounts === 0 ? (
-          <div className="col-span-full h-64 flex flex-col gap-3 items-center justify-center rounded-xl border border-dashed border-border/50">
-            <Users className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-medium text-muted-foreground">{isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : isCoach ? "coach" : "admin"}`}</p>
-            <p className="text-xs text-muted-foreground/75 text-center">{isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : isCoach ? "coach" : "admin"} baru menggunakan tombol di bagian atas.`}</p>
-          </div>
+          <AdminStatePanel
+            icon={Users}
+            title={isSearchActive ? "Akun tidak ditemukan" : `Belum ada akun ${isParent ? "orang tua" : isCoach ? "coach" : "admin"}`}
+            description={isSearchActive ? "Ubah kata kunci pencarian atau kosongkan filter." : `Tambahkan akun ${isParent ? "orang tua" : isCoach ? "coach" : "admin"} baru menggunakan tombol di bagian atas.`}
+          />
         ) : (
           paginatedUsers.map((user) => (
             <UserAccountCard key={user.id} user={user} onViewDetail={setSelectedUserId} />

@@ -3,6 +3,7 @@
 import { Search, UserCheck2 } from "lucide-react";
 
 import { AddUserDialog } from "@/components/features/AddUserDialog";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
 import { Input } from "@/components/ui/input";
 
 type UsersManagementHeaderProps = {
@@ -29,10 +30,12 @@ export function UsersManagementHeader({
 
   return (
     <>
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 md:flex-row md:items-center md:pb-8">
-        <p className="text-sm text-muted-foreground">{roleCopy}</p>
-        <AddUserDialog role={role} />
-      </div>
+      <AdminPageHeader
+        eyebrow="Akses Sistem"
+        title="Manajemen Akun"
+        description={roleCopy}
+        actions={<AddUserDialog role={role} />}
+      />
 
       <div className="flex w-fit gap-1 rounded-lg border border-border/50 bg-background/40 p-1">
         <button

@@ -66,7 +66,7 @@ export function UserAccountCard({ user, onViewDetail }: UserAccountCardProps) {
           onClick={() => onViewDetail(user.id)}
           variant="ghost"
           size="sm"
-          className="h-8 gap-1.5 rounded-lg px-2.5 text-[11px] font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
+          className="h-9 gap-1.5 rounded-lg px-3 text-xs font-medium text-muted-foreground transition-all hover:bg-muted hover:text-foreground"
         >
           <Eye className="size-3.5" />
           <span>Lihat Detail</span>

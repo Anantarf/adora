@@ -9,9 +9,10 @@ import { useSearchParams } from "next/navigation";
 import { AttendanceDetailModal } from "./AttendanceDetailModal";
 import { getEventConfig } from "@/lib/config/events";
 import { useEventsWithAttendance } from "@/hooks/use-events-with-attendance";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { getEventsWithAttendanceAction } from "@/actions/schedule";
 
 type EventItem = Awaited<ReturnType<typeof getEventsWithAttendanceAction>>[number];
@@ -77,7 +78,14 @@ function AttendanceCardViewInner() {
   );
 
   if (isLoading) {
-    return <BrandLoader minHeight="min-h-[350px]" />;
+    return (
+      <div className="space-y-4 rounded-xl border border-border/50 bg-card p-4">
+        <Skeleton className="h-11 w-full rounded-xl bg-muted/25" />
+        {Array.from({ length: 5 }).map((_, index) => (
+          <Skeleton key={index} className="h-[86px] w-full rounded-xl bg-muted/20" />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -95,17 +103,11 @@ function AttendanceCardViewInner() {
       </div>
 
       {months.length === 0 ? (
-        <div className="flex h-64 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border/50 text-center">
-          <CalendarDays className="mb-1 size-10 text-muted-foreground/30" />
-          <p className="text-sm font-medium text-muted-foreground">
-            {searchQuery ? "Hasil tidak ditemukan" : "Belum ada agenda yang tercatat"}
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground/75">
-            {searchQuery
-              ? "Coba gunakan kata kunci pencarian yang berbeda."
-              : "Belum ada agenda yang tercatat untuk kelompok yang bisa Anda akses."}
-          </p>
-        </div>
+        <AdminStatePanel
+          icon={CalendarDays}
+          title={searchQuery ? "Hasil tidak ditemukan" : "Belum ada agenda yang tercatat"}
+          description={searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Belum ada agenda yang tercatat untuk kelompok yang bisa Anda akses."}
+        />
       ) : (
         <div className="space-y-5">
           {months.map((monthKey) => (

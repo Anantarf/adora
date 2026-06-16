@@ -24,7 +24,6 @@ type PdfImageLoadOptions = {
   quality?: number;
   forceRasterize?: boolean;
   outputMimeType?: string;
-  signatureMask?: boolean;
 };
 
 function loadImageElement(src: string): Promise<HTMLImageElement> {
@@ -63,35 +62,6 @@ async function normalizeImageForPdf(blob: Blob, options: PdfImageLoadOptions) {
     context.imageSmoothingEnabled = true;
     context.imageSmoothingQuality = "high";
     context.drawImage(image, 0, 0, targetWidth, targetHeight);
-
-    if (options.signatureMask) {
-      const imageData = context.getImageData(0, 0, targetWidth, targetHeight);
-      const pixels = imageData.data;
-      const cornerIndexes = [
-        0,
-        (targetWidth - 1) * 4,
-        (targetWidth * (targetHeight - 1)) * 4,
-        (targetWidth * targetHeight - 1) * 4,
-      ];
-      const cornerLuma =
-        cornerIndexes.reduce((sum, index) => {
-          return sum + (pixels[index] * 0.299 + pixels[index + 1] * 0.587 + pixels[index + 2] * 0.114);
-        }, 0) / cornerIndexes.length;
-      const hasDarkBackground = cornerLuma < 32;
-
-      if (hasDarkBackground) {
-        for (let index = 0; index < pixels.length; index += 4) {
-          const luma = pixels[index] * 0.299 + pixels[index + 1] * 0.587 + pixels[index + 2] * 0.114;
-          const alpha = Math.max(0, Math.min(255, (luma - cornerLuma - 10) * 3.2));
-          pixels[index] = 0;
-          pixels[index + 1] = 0;
-          pixels[index + 2] = 0;
-          pixels[index + 3] = alpha;
-        }
-
-        context.putImageData(imageData, 0, 0);
-      }
-    }
 
     const mimeType = options.outputMimeType || blob.type || "image/png";
     const quality = options.quality ?? 0.82;

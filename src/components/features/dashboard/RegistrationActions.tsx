@@ -55,10 +55,10 @@ export function RegistrationActions({ regId, status }: Props) {
 
   return (
     <>
-      <div className="flex items-center gap-2 ml-2">
+      <div className="ml-2 flex items-center gap-2">
         <Select disabled={isPending} value={status} onValueChange={handleStatusChange}>
           <SelectTrigger
-            className={`h-8 w-[155px] text-[10px] font-medium transition-colors ${REGISTRATION_STATUS_META[status].badgeClassName}`}
+            className={`h-9 w-[168px] rounded-lg text-xs font-medium transition-colors ${REGISTRATION_STATUS_META[status].badgeClassName}`}
           >
             <SelectValue>
               {(() => {
@@ -81,11 +81,11 @@ export function RegistrationActions({ regId, status }: Props) {
               })()}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-border/50 min-w-[155px]">
+          <SelectContent className="min-w-[168px] rounded-xl border-border/50">
             {(Object.entries(REGISTRATION_STATUS_META) as [RegistrationStatus, typeof REGISTRATION_STATUS_META[RegistrationStatus]][]).map(([key, meta]) => {
               const Icon = meta.icon;
               return (
-                <SelectItem key={key} value={key} className={`cursor-pointer text-[10px] font-medium ${meta.selectClassName}`}>
+                <SelectItem key={key} value={key} className={`cursor-pointer text-xs font-medium ${meta.selectClassName}`}>
                   <div className="flex items-center gap-1.5">
                     <Icon className="size-3.5" />
                     <span>{meta.label}</span>
@@ -93,7 +93,7 @@ export function RegistrationActions({ regId, status }: Props) {
                 </SelectItem>
               );
             })}
-            <SelectItem value="DELETED" className="cursor-pointer text-[10px] font-medium text-destructive focus:bg-destructive/10 focus:text-destructive">
+            <SelectItem value="DELETED" className="cursor-pointer text-xs font-medium text-destructive focus:bg-destructive/10 focus:text-destructive">
               <div className="flex items-center gap-1.5">
                 <Trash2 className="size-3.5" />
                 <span>Hapus Pendaftar</span>

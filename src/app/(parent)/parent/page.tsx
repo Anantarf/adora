@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import { Activity, AlertCircle, Loader2, RefreshCw, User } from "lucide-react";
+import { Activity, AlertCircle, RefreshCw, User } from "lucide-react";
 
 import { useParentPanel } from "@/components/features/parent-panel-context";
 
@@ -24,8 +24,6 @@ import { averageScore, flattenMetrics } from "@/lib/metrics";
 import { getEvaluationSummary, isMetricsJsonV2 } from "@/lib/evaluation-rules";
 import type { AttendanceStatus, MetricsJson } from "@/types/dashboard";
 
-type ParentPanel = "ringkasan" | "dokumen" | "riwayat";
-
 const ParentProgressionChart = dynamic(
   () =>
     import("./components/ParentProgressionChart").then(
@@ -34,8 +32,9 @@ const ParentProgressionChart = dynamic(
   {
     ssr: false,
     loading: () => (
-      <Card className="flex min-h-80 flex-col items-center justify-center border-border/50 bg-card p-6 lg:col-span-2">
-        <BrandLoader minHeight="min-h-[200px]" />
+      <Card className="min-h-80 border-border/50 bg-card p-6 lg:col-span-2">
+        <Skeleton className="h-7 w-44 rounded-lg bg-muted/25" />
+        <Skeleton className="mt-5 h-56 w-full rounded-xl bg-muted/15" />
       </Card>
     ),
   },
@@ -324,8 +323,10 @@ export default function ParentDashboard() {
       />
 
       {statsLoading && activePanel !== "dokumen" ? (
-        <div className="w-full flex items-center justify-center py-20 border border-border/50 bg-card rounded-2xl">
-          <BrandLoader minHeight="min-h-[250px]" />
+        <div className="grid gap-3 rounded-2xl border border-border/50 bg-card p-4 sm:grid-cols-2 xl:grid-cols-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <Skeleton key={index} className="h-24 w-full rounded-xl bg-muted/20" />
+          ))}
         </div>
       ) : !stats?.length && activePanel !== "dokumen" ? (
         <div className="flex flex-col items-center gap-4 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">

@@ -6,8 +6,6 @@ import { format } from "date-fns";
 import { id as idLocale } from "date-fns/locale";
 import {
   CalendarDays,
-  Clock,
-  Loader2,
   MapPin,
   Pencil,
   Trash2,
@@ -17,7 +15,10 @@ import { EventDeleteConfirm } from "@/components/features/EventDeleteConfirm";
 import { EventEditDialog } from "@/components/features/EventEditDialog";
 import { EventFormCard } from "@/components/features/EventFormCard";
 import { EventPreviewDialog } from "@/components/features/EventPreviewDialog";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getEventConfig, EVENT_TYPES } from "@/lib/config/events";
 import { getCountdownLabel, getJakartaToday, toJakartaDate } from "@/lib/date-utils";
 import { useSchedule } from "@/hooks/use-schedule";
@@ -28,8 +29,9 @@ const CalendarView = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex items-center justify-center p-20">
-        <Loader2 className="size-8 animate-spin text-primary" />
+      <div className="space-y-3 p-4">
+        <Skeleton className="h-10 w-full rounded-xl bg-muted/20" />
+        <Skeleton className="h-[420px] w-full rounded-xl bg-muted/15" />
       </div>
     ),
   },
@@ -84,18 +86,12 @@ export default function SchedulePage() {
 
   return (
     <>
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-6">
-        <div className="space-y-2 border-b border-border/50 pb-6">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Agenda Klub
-          </p>
-          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Kalender Agenda
-          </h1>
-          <p className="max-w-3xl text-sm text-muted-foreground">
-            Kelola jadwal latihan, tanding, dan agenda resmi klub dari satu halaman kerja.
-          </p>
-        </div>
+      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
+        <AdminPageHeader
+          eyebrow="Agenda Klub"
+          title="Kalender Agenda"
+          description="Kelola jadwal latihan, tanding, dan agenda resmi klub dari satu halaman kerja."
+        />
 
         <section className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
           <div className="border-b border-border/50 px-5 py-4">
@@ -124,23 +120,25 @@ export default function SchedulePage() {
 
               <div className="flex flex-col gap-2.5">
                 {isLoading ? (
-                  <div className="flex items-center justify-center gap-2 rounded-xl border border-border/50 bg-background/40 px-4 py-10 text-sm text-muted-foreground">
-                    <Loader2 className="size-4 animate-spin text-primary" />
-                    Memuat agenda...
+                  <div className="space-y-2.5 rounded-xl border border-border/50 bg-background/40 p-3">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <Skeleton key={index} className="h-[70px] w-full rounded-xl bg-muted/20" />
+                    ))}
                   </div>
                 ) : isError ? (
-                  <div className="rounded-xl border border-dashed border-destructive/30 bg-background/40 px-4 py-10 text-center">
-                    <p className="text-sm font-semibold text-destructive">Gagal memuat agenda</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Periksa koneksi lalu muat ulang halaman.</p>
-                  </div>
+                  <AdminStatePanel
+                    title="Gagal memuat agenda"
+                    description="Periksa koneksi lalu muat ulang halaman."
+                    tone="danger"
+                    className="min-h-40"
+                  />
                 ) : upcomingEvents.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-border/50 bg-background/40 px-4 py-10 text-center">
-                    <CalendarDays className="mx-auto size-8 text-muted-foreground/30" />
-                    <p className="mt-3 text-sm font-medium text-muted-foreground">Belum ada agenda mendatang</p>
-                    <p className="mt-1 text-xs text-muted-foreground/75">
-                      Tambahkan agenda baru dari form di bawah kalender.
-                    </p>
-                  </div>
+                  <AdminStatePanel
+                    icon={CalendarDays}
+                    title="Belum ada agenda mendatang"
+                    description="Tambahkan agenda baru dari form di bawah kalender."
+                    className="min-h-40"
+                  />
                 ) : (
                   upcomingEvents.map((event) => {
                     const config = getEventConfig(event.type);
@@ -205,9 +203,9 @@ export default function SchedulePage() {
                                   eventObject.stopPropagation();
                                   setUiState({ type: "edit", event });
                                 }}
-                                className="h-7 px-2 text-[11px] font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                                className="h-9 rounded-lg px-3 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
                               >
-                                <Pencil className="mr-1 size-3" />
+                                <Pencil className="mr-1.5 size-3.5" />
                                 Edit
                               </Button>
                               <Button
@@ -217,9 +215,9 @@ export default function SchedulePage() {
                                   eventObject.stopPropagation();
                                   setUiState({ type: "delete", targetId: event.id });
                                 }}
-                                className="h-7 px-2 text-[11px] font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+                                className="h-9 rounded-lg px-3 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
                               >
-                                <Trash2 className="mr-1 size-3" />
+                                <Trash2 className="mr-1.5 size-3.5" />
                                 Hapus
                               </Button>
                             </div>

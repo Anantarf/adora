@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminPageHeader } from "@/components/features/admin-page-header";
 import { useClubSettings, useUpdateClubSetting } from "@/hooks/use-settings";
 import { useReportSignerCoachOptions, useReportSignerHomebaseMappings } from "@/hooks/use-report-signers";
 import { Button } from "@/components/ui/button";
@@ -192,27 +193,21 @@ export default function SettingsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-12">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-5 md:flex-row md:items-end">
-        <div className="space-y-2">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-          Pengaturan
-        </p>
-        <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-          Aset dan Tanda Tangan Rapor
-        </h1>
-        <p className="max-w-3xl text-sm text-muted-foreground">
-          Lengkapi template, nama, dan tanda tangan yang dipakai saat rapor diterbitkan.
-        </p>
-        </div>
-        <Button onClick={handlePreviewPdf} disabled={isPreviewLoading} size="xl">
-          {isPreviewLoading ? (
-            <Loader2 className="size-3.5 animate-spin" />
-          ) : (
-            <FileText className="size-3.5" />
-          )}
-          Pratinjau Rapor
-        </Button>
-      </div>
+      <AdminPageHeader
+        eyebrow="Pengaturan"
+        title="Aset dan Tanda Tangan Rapor"
+        description="Lengkapi template, nama, dan tanda tangan yang dipakai saat rapor diterbitkan."
+        actions={
+          <Button onClick={handlePreviewPdf} disabled={isPreviewLoading} size="xl">
+            {isPreviewLoading ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <FileText className="size-3.5" />
+            )}
+            Pratinjau Rapor
+          </Button>
+        }
+      />
 
       <div className="grid gap-2 md:grid-cols-4">
         {readinessItems.map((item) => (

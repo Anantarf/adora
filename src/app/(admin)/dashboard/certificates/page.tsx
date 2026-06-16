@@ -5,11 +5,13 @@ import { ExternalLink, FileBadge, Search, Trash2, User } from "lucide-react";
 import { toast } from "sonner";
 
 import { AddCertificateDialog } from "@/components/features/AddCertificateDialog";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { BrandLoader } from "@/components/ui/brand-loader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function CertificatesPage() {
@@ -64,9 +66,9 @@ export default function CertificatesPage() {
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 px-2 text-[11px] font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="h-9 rounded-lg px-3 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
           >
-            <Trash2 className="mr-1 size-3.5" />
+            <Trash2 className="mr-1.5 size-3.5" />
             Hapus
           </Button>
         }
@@ -96,24 +98,29 @@ export default function CertificatesPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 md:flex-row md:items-center md:pb-8">
-        <p className="text-sm text-muted-foreground">
-          Kelola daftar sertifikat digital yang terhubung ke pemain.
-        </p>
-        <AddCertificateDialog />
-      </div>
+      <AdminPageHeader
+        eyebrow="Dokumen Pemain"
+        title="Sertifikat"
+        description="Kelola daftar sertifikat digital yang terhubung ke pemain."
+        actions={<AddCertificateDialog />}
+      />
 
       {isError ? (
-        <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
-          <span>Gagal memuat daftar sertifikat. Coba muat ulang.</span>
-          <button
-            type="button"
-            onClick={() => refetch()}
-            className="rounded-lg border border-destructive/40 px-3 py-1 text-[11px] font-medium text-destructive hover:bg-destructive/10"
-          >
-            Muat Ulang
-          </button>
-        </div>
+        <AdminStatePanel
+          icon={FileBadge}
+          title="Gagal memuat daftar sertifikat."
+          description="Coba muat ulang halaman atau ulangi beberapa saat lagi."
+          tone="danger"
+          action={
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="rounded-lg border border-destructive/40 px-4 py-2 text-[11px] font-medium text-destructive hover:bg-destructive/10"
+            >
+              Muat Ulang
+            </button>
+          }
+        />
       ) : null}
 
       <div className="relative">
@@ -131,23 +138,29 @@ export default function CertificatesPage() {
       </div>
 
       {isLoading ? (
-        <div className="w-full py-16 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[300px]">
-          <BrandLoader minHeight="min-h-[200px]" />
-        </div>
+        <>
+          <div className="space-y-3 md:hidden">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-28 w-full rounded-xl bg-muted/20" />
+            ))}
+          </div>
+          <div className="hidden min-h-[300px] rounded-xl border border-border/50 bg-card p-4 md:block">
+            <Skeleton className="h-11 w-full rounded-xl bg-muted/25" />
+            <div className="mt-3 space-y-2">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <Skeleton key={index} className="h-12 w-full rounded-lg bg-muted/15" />
+              ))}
+            </div>
+          </div>
+        </>
       ) : null}
 
       {!isLoading && !isError && filteredCertificates.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/50 py-16 text-center">
-          <FileBadge className="size-10 text-muted-foreground/30" />
-          <p className="text-sm font-medium text-muted-foreground">
-            {searchQuery ? "Sertifikat tidak ditemukan" : "Belum ada sertifikat"}
-          </p>
-          <p className="text-xs text-muted-foreground/75">
-            {searchQuery
-              ? "Coba gunakan kata kunci pencarian yang berbeda."
-              : "Tambahkan sertifikat baru dari tombol di atas."}
-          </p>
-        </div>
+        <AdminStatePanel
+          icon={FileBadge}
+          title={searchQuery ? "Sertifikat tidak ditemukan" : "Belum ada sertifikat"}
+          description={searchQuery ? "Coba gunakan kata kunci pencarian yang berbeda." : "Tambahkan sertifikat baru dari tombol di atas."}
+        />
       ) : null}
 
       {!isLoading && !isError && filteredCertificates.length > 0 ? (
@@ -190,7 +203,7 @@ export default function CertificatesPage() {
                     href={certificate.fileUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-8 flex-1 items-center justify-center gap-1.5 rounded-md border border-border/50 text-[11px] font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary"
+                    className="inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-border/50 px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary"
                   >
                     <ExternalLink className="size-3.5" />
                     Lihat File
@@ -206,19 +219,19 @@ export default function CertificatesPage() {
             <Table className="min-w-[48rem]">
               <TableHeader className="bg-muted/20">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">
-                  <TableHead className="w-10 text-center text-[10px] font-medium text-muted-foreground">
+                  <TableHead className="w-10 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                     No
                   </TableHead>
-                  <TableHead className="text-[10px] font-medium text-muted-foreground">
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                     Judul Sertifikat
                   </TableHead>
-                  <TableHead className="w-52 text-[10px] font-medium text-muted-foreground">
+                  <TableHead className="w-52 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                     Pemain
                   </TableHead>
-                  <TableHead className="w-36 text-[10px] font-medium text-muted-foreground">
+                  <TableHead className="w-36 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                     Tanggal Unggah
                   </TableHead>
-                  <TableHead className="w-32 text-right text-[10px] font-medium text-muted-foreground">
+                  <TableHead className="w-32 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                     Aksi
                   </TableHead>
                 </TableRow>
@@ -257,7 +270,7 @@ export default function CertificatesPage() {
                           href={certificate.fileUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex h-8 items-center gap-1 rounded-md border border-border/50 px-2 text-[11px] font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary"
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-border/50 px-3 text-xs font-medium text-foreground transition-colors hover:border-primary/30 hover:text-primary"
                         >
                           <ExternalLink className="size-3.5" />
                           Lihat

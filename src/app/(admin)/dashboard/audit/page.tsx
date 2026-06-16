@@ -7,7 +7,10 @@ import { ChevronRight, Clock, FileText, Loader2, RefreshCw, ShieldAlert, User } 
 import { useAuditLogs, type AuditLogRecord } from "@/hooks/use-audit-log";
 import { useGroups } from "@/hooks/use-groups";
 import { useHomebases } from "@/hooks/use-homebases";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AUDIT_ACTION_CONFIG as ACTION_CONFIG,
   getAuditActionConfig as getActionConfig,
@@ -213,24 +216,25 @@ export default function AuditPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 md:flex-row md:items-center md:pb-8">
-        <p className="text-sm text-muted-foreground">
-          Tinjau perubahan data penting dan siapa yang menjalankannya.
-        </p>
-
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => {
-            void refetch();
-          }}
-          disabled={isRefetching}
-          className="h-10 border-border/50 px-4 text-xs font-medium hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
-        >
-          <RefreshCw className={`mr-2 size-3.5 ${isRefetching ? "animate-spin" : ""}`} />
-          Refresh
-        </Button>
-      </div>
+      <AdminPageHeader
+        eyebrow="Jejak Aktivitas"
+        title="Audit Log"
+        description="Tinjau perubahan data penting dan siapa yang menjalankannya."
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              void refetch();
+            }}
+            disabled={isRefetching}
+            className="h-10 border-border/50 px-4 text-xs font-medium hover:border-primary/30 hover:bg-primary/10 hover:text-primary"
+          >
+            <RefreshCw className={`mr-2 size-3.5 ${isRefetching ? "animate-spin" : ""}`} />
+            Refresh
+          </Button>
+        }
+      />
 
       <div className="flex flex-wrap items-center gap-2">
         {(Object.entries(ACTION_CONFIG) as [
@@ -262,15 +266,13 @@ export default function AuditPage() {
 
       <div className="flex flex-col gap-2.5">
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center gap-4 py-24">
-            <Loader2 className="size-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Memuat riwayat aktivitas...</p>
+          <div className="space-y-2.5 rounded-xl border border-border/50 bg-card p-3">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-[74px] w-full rounded-xl bg-muted/20" />
+            ))}
           </div>
         ) : logs.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/50 bg-background/30 py-20 text-center">
-            <ShieldAlert className="size-10 text-muted-foreground/25" />
-            <p className="text-sm font-medium text-muted-foreground">Belum ada aktivitas</p>
-          </div>
+          <AdminStatePanel icon={ShieldAlert} title="Belum ada aktivitas" />
         ) : (
           <>
             {logs.map((log) => (

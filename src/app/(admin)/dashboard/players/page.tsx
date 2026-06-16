@@ -19,6 +19,8 @@ import {
 
 import { AddGroupDialog } from "@/components/features/AddGroupDialog";
 import { AddPlayerDialog } from "@/components/features/AddPlayerDialog";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { DeleteGroupConfirm } from "@/components/features/DeleteGroupConfirm";
 import { DeletePlayerConfirm } from "@/components/features/DeletePlayerConfirm";
 import { EditGroupDialog } from "@/components/features/EditGroupDialog";
@@ -27,7 +29,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BrandLoader } from "@/components/ui/brand-loader";
 import { useGroups, type Group } from "@/hooks/use-groups";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { usePlayersPage } from "@/hooks/use-players";
@@ -167,19 +168,21 @@ export default function PlayersPage() {
         />
       )}
 
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <p className="text-sm text-muted-foreground">
-          Pilih kelompok di kiri, lalu kelola pemain dan pencariannya di panel kanan.
-        </p>
-        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
-            {activeCategoryLabel}
-          </span>
-          <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
-            {groupsInCategory.length} kelompok aktif
-          </span>
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="Manajemen Pemain"
+        title="Pemain & Kelompok"
+        description="Pilih kelompok di kiri, lalu kelola pemain dan pencariannya di panel kanan."
+        actions={
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
+              {activeCategoryLabel}
+            </span>
+            <span className="rounded-md border border-border/50 bg-background/60 px-3 py-1.5 font-medium">
+              {groupsInCategory.length} kelompok aktif
+            </span>
+          </div>
+        }
+      />
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
         <div
@@ -199,7 +202,7 @@ export default function PlayersPage() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setUiState({ type: "add-group" })}
-                className="h-8 px-2.5 text-[11px] font-medium text-primary hover:bg-primary/10"
+                className="h-9 rounded-lg px-3 text-xs font-medium text-primary hover:bg-primary/10"
               >
                 + Kelompok
               </Button>
@@ -252,8 +255,10 @@ export default function PlayersPage() {
 
             <div className="flex max-h-[460px] flex-col gap-2 overflow-y-auto pr-1 custom-scrollbar">
               {isGroupsLoading ? (
-                <div className="py-8 border-2 border-dashed border-white/5 bg-black/10 rounded-xl">
-                  <BrandLoader minHeight="min-h-[140px]" />
+                <div className="space-y-2 rounded-xl border border-border/40 bg-background/20 p-3">
+                  {Array.from({ length: 5 }).map((_, index) => (
+                    <Skeleton key={index} className="h-[68px] w-full rounded-xl bg-muted/20" />
+                  ))}
                 </div>
               ) : groupsInCategory.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border/50 py-10 text-center text-xs text-muted-foreground/60">
@@ -313,12 +318,12 @@ export default function PlayersPage() {
         >
           <AnimatePresence mode="wait">
             {!effectiveGroupId ? (
-              <div className="flex min-h-[460px] flex-col items-center justify-center gap-3 rounded-xl border border-border/50 bg-card p-8 text-center">
-                <Users className="size-8 animate-bounce text-muted-foreground/30" />
-                <p className="text-xs font-semibold text-muted-foreground">
-                  Silakan pilih kelompok terlebih dahulu di panel kiri.
-                </p>
-              </div>
+              <AdminStatePanel
+                icon={Users}
+                title="Pilih kelompok terlebih dahulu"
+                description="Silakan pilih kelompok di panel kiri untuk melihat dan mengelola daftar pemain."
+                className="min-h-[460px] bg-card"
+              />
             ) : isPlayersLoading && !selectedGroup ? (
               <div className="flex min-h-[500px] flex-col gap-4 rounded-xl border border-border/50 bg-card p-6">
                 <Skeleton className="h-14 w-full rounded-xl bg-muted/30" />
@@ -480,25 +485,22 @@ export default function PlayersPage() {
                 </div>
 
                 {isPlayersLoading ? (
-                  <div className="w-full py-16 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[250px]">
-                    <BrandLoader minHeight="min-h-[160px]" />
+                  <div className="grid min-h-[250px] w-full gap-3 rounded-xl border border-border/50 bg-card p-4 md:grid-cols-2">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                      <Skeleton key={index} className="h-20 w-full rounded-xl bg-muted/20" />
+                    ))}
                   </div>
                 ) : filteredPlayerCount === 0 ? (
-                  <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border/50 bg-background/20 p-12 text-center">
-                    <Users className="size-8 shrink-0 text-muted-foreground/20" />
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      {playerSearchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}
-                    </p>
-                    <p className="mt-0.5 max-w-sm text-[11px] leading-relaxed text-muted-foreground">
-                      {playerSearchQuery
-                        ? "Coba kata kunci lain atau periksa ejaan nama pemain."
-                        : "Lengkapi data pemain baru dengan mengklik tombol Tambah Pemain di atas."}
-                    </p>
-                  </div>
+                  <AdminStatePanel
+                    icon={Users}
+                    title={playerSearchQuery ? "Pemain tidak ditemukan" : "Kelompok masih kosong"}
+                    description={playerSearchQuery ? "Coba kata kunci lain atau periksa ejaan nama pemain." : "Lengkapi data pemain baru dengan mengklik tombol Tambah Pemain di atas."}
+                    className="min-h-[300px]"
+                  />
                 ) : viewMode === "database" ? (
                   <div className="-mx-1 overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
                     <table className="min-w-[64rem] w-full text-left text-xs">
-                      <thead className="border-b border-border/50 bg-muted/40 text-[10px] font-medium text-muted-foreground">
+                      <thead className="border-b border-border/50 bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                         <tr>
                           <th scope="col" className="w-10 px-4 py-3 text-center">
                             No

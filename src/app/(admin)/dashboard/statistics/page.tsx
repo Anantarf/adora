@@ -11,6 +11,8 @@ import { toast } from "sonner";
 
 import { AddPeriodDialog } from "@/components/features/AddPeriodDialog";
 import { AddStatDialog } from "@/components/features/AddStatDialog";
+import { AdminPageHeader } from "@/components/features/admin-page-header";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { EvaluationConfigDialog } from "@/components/features/EvaluationConfigDialog";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -19,7 +21,6 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { BrandLoader } from "@/components/ui/brand-loader";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useGroups } from "@/hooks/use-groups";
 import { usePeriods, useSetActivePeriod, useDeletePeriod } from "@/hooks/use-evaluation-periods";
@@ -296,7 +297,7 @@ const PlayerStatRow = React.memo(
                 title="Lihat Rapor PDF"
                 onClick={handleViewReport}
                 disabled={isPdfLoading}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border/50 bg-background/40 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:opacity-50"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border/50 bg-background/40 text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/10 hover:text-primary disabled:opacity-50"
               >
                 {isPdfLoading ? (
                   <Loader2 className="size-4 animate-spin text-primary" />
@@ -432,23 +433,17 @@ export default function StatisticsPage() {
 
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
-      <div className="flex flex-col items-start justify-between gap-4 border-b border-border/50 pb-6 sm:flex-row sm:items-center">
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/80">
-            Penilaian Pemain
-          </p>
-          <h1 className="font-heading text-2xl tracking-[0.08em] text-foreground md:text-[2rem]">
-            Penilaian & Rapor
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <AdminPageHeader
+        eyebrow="Penilaian Pemain"
+        title="Penilaian & Rapor"
+        description="Pilih periode dan kelompok, lalu lanjut isi atau perbarui nilai pemain."
+        actions={
+          <>
           <EvaluationConfigDialog />
           <AddPeriodDialog />
-        </div>
-      </div>
+          </>
+        }
+      />
 
       <div className="rounded-xl border border-border/50 bg-card p-4 shadow-sm">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -512,7 +507,7 @@ export default function StatisticsPage() {
                             <Button
                               type="button"
                               variant="ghost"
-                              className="h-8 justify-start px-2 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                              className="h-9 justify-start rounded-lg px-3 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
                               onClick={(event) => {
                                 event.preventDefault();
                                 event.stopPropagation();
@@ -524,7 +519,7 @@ export default function StatisticsPage() {
                           ) : null}
                           <AlertDialog>
                             <AlertDialogTrigger
-                              className="flex h-8 items-center rounded-md px-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+                              className="flex h-9 items-center rounded-lg px-3 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
                               onClick={(event) => event.stopPropagation()}
                             >
                               Hapus periode
@@ -619,47 +614,50 @@ export default function StatisticsPage() {
       </div>
 
       {!selectedPeriodId ? (
-        <div className="rounded-xl border border-dashed border-border/60 bg-card p-12 text-center">
-          <CalendarRange className="mx-auto mb-3 size-10 text-muted-foreground/30" />
-          <p className="text-sm font-medium text-muted-foreground">
-            Belum ada periode evaluasi
-          </p>
-          <p className="mt-1 text-xs text-muted-foreground/75">
-            Buat periode baru untuk mulai input nilai.
-          </p>
+        <AdminStatePanel
+          icon={CalendarRange}
+          title="Belum ada periode evaluasi"
+          description="Buat periode baru untuk mulai input nilai."
+          className="bg-card"
+        />
+      ) : null}
+
+      {selectedPeriodId && (playersLoading || statsLoading) ? (
+        <div className="hidden min-h-[300px] w-full rounded-xl border border-border/50 bg-card p-4 lg:block">
+          <div className="space-y-3">
+            <Skeleton className="h-11 w-full rounded-xl bg-muted/25" />
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Skeleton key={index} className="h-14 w-full rounded-lg bg-muted/15" />
+            ))}
+          </div>
         </div>
       ) : null}
 
       {selectedPeriodId && (playersLoading || statsLoading) ? (
-        <div className="w-full py-20 border border-border/50 bg-card rounded-2xl flex items-center justify-center min-h-[300px]">
-          <BrandLoader minHeight="min-h-[200px]" />
+        <div className="space-y-3 lg:hidden">
+          {Array.from({ length: 4 }).map((_, index) => (
+            <Skeleton key={index} className="h-40 w-full rounded-xl bg-muted/20" />
+          ))}
         </div>
       ) : null}
 
       {selectedPeriodId && !(playersLoading || statsLoading) ? (
         <div className="space-y-4 lg:hidden">
           {playersByGroup.length === 0 ? (
-            <div className="rounded-xl border border-border/50 bg-card p-6 text-center">
-              {(players?.length ?? 0) === 0 ? (
-                <>
-                  <p className="text-sm font-semibold text-foreground">
-                    Belum ada pemain terdaftar
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Tambah pemain terlebih dahulu melalui halaman Pemain.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-semibold text-foreground">
-                    Semua pemain belum memiliki kelompok
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Tetapkan kelompok pada pemain melalui halaman Pemain.
-                  </p>
-                </>
-              )}
-            </div>
+            <AdminStatePanel
+              icon={CalendarRange}
+              className="min-h-56 bg-card"
+              title={
+                (players?.length ?? 0) === 0
+                  ? "Belum ada pemain terdaftar"
+                  : "Semua pemain belum memiliki kelompok"
+              }
+              description={
+                (players?.length ?? 0) === 0
+                  ? "Tambah pemain terlebih dahulu melalui halaman Pemain."
+                  : "Tetapkan kelompok pada pemain melalui halaman Pemain."
+              }
+            />
           ) : null}
 
           {!playersLoading && !statsLoading
@@ -830,26 +828,26 @@ export default function StatisticsPage() {
       ) : null}
 
       {selectedPeriodId && !(playersLoading || statsLoading) ? (
-        <div className="hidden overflow-x-auto rounded-2xl border border-border/50 bg-card shadow-sm lg:block">
+        <div className="hidden overflow-x-auto rounded-xl border border-border/50 bg-card shadow-sm lg:block">
           <Table className="min-w-[920px]">
               <TableHeader className="bg-muted/[0.16]">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">
-                <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-[10px] font-medium text-muted-foreground">
+                <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                   No
                 </TableHead>
-                <TableHead className="sticky left-12 z-20 min-w-40 max-w-52 bg-muted/20 text-[10px] font-medium text-muted-foreground">
+                <TableHead className="sticky left-12 z-20 min-w-40 max-w-52 bg-muted/20 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                   Nama Pemain
                 </TableHead>
-                <TableHead className="min-w-[320px] px-3 text-left text-[10px] font-medium text-muted-foreground">
+                <TableHead className="min-w-[320px] px-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                   Ringkasan Kategori
                 </TableHead>
-                <TableHead className="w-20 text-center text-[10px] font-medium text-muted-foreground">
+                <TableHead className="w-20 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                   Nilai
                 </TableHead>
-                <TableHead className="w-20 text-center text-[10px] font-medium text-muted-foreground">
+                <TableHead className="w-20 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                   Status
                 </TableHead>
-                <TableHead className="w-24 text-right text-[10px] font-medium text-muted-foreground">
+                <TableHead className="w-24 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
                   Aksi
                 </TableHead>
               </TableRow>

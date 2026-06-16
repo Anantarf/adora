@@ -180,9 +180,9 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                           href={waContactUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-green-700"
+                          className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-green-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-green-700"
                         >
-                          <MessageCircle className="size-3" />
+                          <MessageCircle className="size-3.5" />
                           Hubungi
                         </a>
                         <RegistrationActions regId={registration.id} status={registration.status} />
@@ -284,9 +284,9 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                               href={waContactUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 rounded-md bg-green-600 px-2.5 py-1.5 text-[11px] font-semibold text-white transition-colors hover:bg-green-700"
+                              className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-green-600 px-3 text-xs font-semibold text-white transition-colors hover:bg-green-700"
                             >
-                              <MessageCircle className="size-3" />
+                              <MessageCircle className="size-3.5" />
                               Hubungi
                             </a>
                             <RegistrationActions regId={registration.id} status={registration.status} />
