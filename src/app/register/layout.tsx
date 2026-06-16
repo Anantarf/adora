@@ -1,3 +1,5 @@
+import "@/app/_interactive-animations.css";
+
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

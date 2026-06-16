@@ -7,7 +7,7 @@ import { CookieNotice } from "@/components/privacy/cookie-notice";
 // Body Font Base
 const poppins = Poppins({
   variable: "--font-sans",
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   subsets: ["latin"],
   display: "swap",
   fallback: ["system-ui", "sans-serif"],
