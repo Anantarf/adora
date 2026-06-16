@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
 import { WebVitals } from "@/components/analytics/web-vitals";
-import { CookieNotice } from "@/components/privacy/cookie-notice";
 
 // Body Font Base
 const poppins = Poppins({
@@ -65,7 +64,6 @@ export default function RootLayout({
       <body className={`antialiased min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground`}>
         <WebVitals />
         {children}
-        <CookieNotice />
       </body>
     </html>
   );
