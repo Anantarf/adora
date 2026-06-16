@@ -6,7 +6,6 @@ const SECURITY_HEADER_VALUES = {
   "X-Frame-Options": "DENY",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "strict-origin-when-cross-origin",
-  "X-XSS-Protection": "1; mode=block",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
 };
 

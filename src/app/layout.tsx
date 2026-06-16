@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import { Poppins, Montserrat } from "next/font/google";
 import "./globals.css";
-import { Providers } from "@/components/providers/query-provider";
 import { WebVitals } from "@/components/analytics/web-vitals";
-import { Toaster } from "sonner";
+import { CookieNotice } from "@/components/privacy/cookie-notice";
 
 // Body Font Base
 const poppins = Poppins({
@@ -65,10 +64,8 @@ export default function RootLayout({
     <html lang="id" className={`${poppins.variable} ${montserrat.variable} dark scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`antialiased min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground`}>
         <WebVitals />
-        <Providers>
-          {children}
-          <Toaster richColors position="top-right" />
-        </Providers>
+        {children}
+        <CookieNotice />
       </body>
     </html>
   );

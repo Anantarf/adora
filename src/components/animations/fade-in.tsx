@@ -1,87 +1,34 @@
-"use client";
+import type { ReactNode } from "react";
 
-import { m, LazyMotion, useReducedMotion } from "framer-motion";
-import { createContext, ReactNode, useContext } from "react";
-
-const loadFeatures = () => import("framer-motion").then((res) => res.domAnimation);
-
-const ReducedMotionCtx = createContext(false);
-
-interface FadeInProps {
+type FadeInProps = {
   children: ReactNode;
   delay?: number;
   direction?: "up" | "down" | "left" | "right" | "none";
   className?: string;
   duration?: number;
-}
-
-const DIRECTIONS = {
-  up: { y: 40, x: 0 },
-  down: { y: -40, x: 0 },
-  left: { x: 40, y: 0 },
-  right: { x: -40, y: 0 },
-  none: { x: 0, y: 0 },
 };
 
-const EASE = [0.21, 0.47, 0.32, 0.98] as const;
-
-export function FadeIn({ children, delay = 0, direction = "up", className = "", duration = 0.8 }: FadeInProps) {
-  const shouldReduceMotion = useReducedMotion();
-
-  if (shouldReduceMotion) return <div className={className}>{children}</div>;
-
-  return (
-    <LazyMotion features={loadFeatures}>
-      <m.div initial={{ opacity: 0, ...DIRECTIONS[direction] }} whileInView={{ opacity: 1, x: 0, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration, delay, ease: EASE }} className={className}>
-        {children}
-      </m.div>
-    </LazyMotion>
-  );
+export function FadeIn({ children, className = "" }: FadeInProps) {
+  return <div className={className}>{children}</div>;
 }
 
-export function StaggerContainer({ children, className = "", delay = 0.1 }: { children: ReactNode; className?: string; delay?: number }) {
-  const shouldReduceMotion = useReducedMotion();
-
-  return (
-    <ReducedMotionCtx.Provider value={!!shouldReduceMotion}>
-      {shouldReduceMotion ? (
-        <div className={className}>{children}</div>
-      ) : (
-        <LazyMotion features={loadFeatures}>
-          <m.div
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            variants={{
-              hidden: {},
-              visible: { transition: { staggerChildren: delay } },
-            }}
-            className={className}
-          >
-            {children}
-          </m.div>
-        </LazyMotion>
-      )}
-    </ReducedMotionCtx.Provider>
-  );
+export function StaggerContainer({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+  delay?: number;
+}) {
+  return <div className={className}>{children}</div>;
 }
 
-export function StaggerItem({ children, className = "" }: { children: ReactNode; className?: string }) {
-  const reducedMotion = useContext(ReducedMotionCtx);
-
-  if (reducedMotion) return <div className={className}>{children}</div>;
-
-  return (
-    <LazyMotion features={loadFeatures}>
-      <m.div
-        variants={{
-          hidden: { opacity: 0, y: 30 },
-          visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } },
-        }}
-        className={className}
-      >
-        {children}
-      </m.div>
-    </LazyMotion>
-  );
+export function StaggerItem({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return <div className={className}>{children}</div>;
 }

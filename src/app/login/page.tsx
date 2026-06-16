@@ -6,6 +6,7 @@ import { ArrowLeft } from "lucide-react";
 import { LoginForm } from "@/components/features/auth/login-form";
 import { Starfield } from "@/components/ui/starfield";
 import { Metadata } from "next";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Login Portal - ADORA Basketball Club",
@@ -44,6 +45,7 @@ export default async function LoginPage() {
         </span>
       </Link>
       <LoginForm />
+      <Toaster richColors position="top-right" />
     </main>
   );
 }

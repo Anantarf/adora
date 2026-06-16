@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { SessionProvider } from "next-auth/react";
+import { Toaster } from "sonner";
 
 const ReactQueryDevtools = dynamic(
   () => import("@tanstack/react-query-devtools").then((mod) => mod.ReactQueryDevtools),
@@ -29,6 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <SessionProvider>
       <QueryClientProvider client={queryClient}>
         {children}
+        <Toaster richColors position="top-right" />
         {isDev ? <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" /> : null}
       </QueryClientProvider>
     </SessionProvider>
