@@ -14,6 +14,7 @@ import { EditUserDialog } from "@/components/features/users/EditUserDialog";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Header memakai UsersManagementHeader (sub-header kustom dengan role switcher + search) bukan AdminPageHeader generik, karena halaman ini punya kontrol filter yang lebih kaya.
 export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeRole, setActiveRole] = useState<"PARENT" | "ADMIN" | "COACH">("PARENT");

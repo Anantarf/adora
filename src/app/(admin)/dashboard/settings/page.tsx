@@ -191,7 +191,9 @@ export default function SettingsPage() {
     }
   };
 
+  // Pengecualian: form sempit butuh max-w-5xl; halaman role lain memakai max-w-7xl.
   return (
+
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-5 pb-12">
       <AdminPageHeader
         eyebrow="Pengaturan"

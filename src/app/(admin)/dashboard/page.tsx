@@ -34,6 +34,8 @@ function getSummaryText(
   return `${recentRegistrationCount} pendaftar menunggu proses dan ${atRiskPlayerCount} pemain perlu follow-up absensi.`;
 }
 
+
+// Heading dirender inline (tanpa AdminPageHeader): kartu ringkasan berperan sebagai hero, jadi judul + chip + CTA digabung dalam section pertama.
 export default function AdminDashboardPage() {
   const { data: metrics, isLoading, isError, refetch } = useDashboardMetrics();
 
@@ -48,6 +50,7 @@ export default function AdminDashboardPage() {
     : "border-primary/25 bg-primary/10 text-primary";
 
   return (
+
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-5 pb-10 md:gap-6">
       <section className="overflow-hidden rounded-3xl border border-border/60 bg-card shadow-sm">
         <div className="grid gap-6 p-5 md:p-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,480px)] lg:items-start">
