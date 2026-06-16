@@ -14,7 +14,7 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, LogOut, UserRoundCog, Users, CalendarCheck2, Star } from "lucide-react";
+import { LayoutDashboard, LogOut, UserRoundCog, Users, CalendarCheck2, LineChart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -27,7 +27,7 @@ export const coachNavItems = [
   { title: "Dashboard Coach", url: "/dashboard", icon: LayoutDashboard },
   { title: "Data Pemain", url: "/players", icon: Users },
   { title: "Data Presensi", url: "/attendances", icon: CalendarCheck2 },
-  { title: "Penilaian & Rapor", url: "/statistics", icon: Star },
+  { title: "Penilaian & Rapor", url: "/statistics", icon: LineChart },
   { title: "Profil Coach", url: "/profile", icon: UserRoundCog },
 ];
 
