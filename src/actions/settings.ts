@@ -6,7 +6,7 @@ import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
 import { CLUB_SETTING_KEYS, formatZodErrors, normalizeClubSettingValue, updateClubSettingSchema, type ClubSettingKey } from "@/lib/validation/club-setting";
 
-const REPORT_SETTING_KEYS = CLUB_SETTING_KEYS;
+
 
 export async function getClubSettingsAction() {
   await requireAdmin();
@@ -20,7 +20,7 @@ export async function getReportSettingsAction() {
   const settings = await prisma.clubSetting.findMany({
     where: {
       key: {
-        in: [...REPORT_SETTING_KEYS],
+        in: [...CLUB_SETTING_KEYS],
       },
     },
   });
@@ -117,3 +117,4 @@ export async function updateClubSettingAction(key: string, value: string) {
   revalidatePath("/dashboard/settings");
   return setting;
 }
+

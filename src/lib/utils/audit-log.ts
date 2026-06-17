@@ -61,7 +61,8 @@ const FIELD_TOKEN_LABELS: Record<string, string> = {
 
 export const ROLE_LABELS: Record<string, string> = {
   PARENT: "Orang Tua",
-  ADMIN: "Administrator Utama",
+  ADMIN: "Admin",
+  COACH: "Coach",
 };
 
 export type AuditValueLookups = Partial<{

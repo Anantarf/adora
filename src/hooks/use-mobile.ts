@@ -14,11 +14,9 @@ export function useIsMobile() {
     const handleChange = () => onStoreChange();
 
     mediaQueryList.addEventListener("change", handleChange);
-    window.addEventListener("resize", handleChange);
 
     return () => {
       mediaQueryList.removeEventListener("change", handleChange);
-      window.removeEventListener("resize", handleChange);
     };
   }, []);
 

@@ -110,19 +110,6 @@ export function formatFullDate(date: Date | string): string {
   });
 }
 
-export function getAge(dateOfBirth: Date | string): number {
-  const today = getJakartaToday();
-  const birthDate = toJakartaDate(dateOfBirth);
-
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const m = today.getMonth() - birthDate.getMonth();
-
-  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-    age--;
-  }
-  return age;
-}
-
 /**
  * Combine a Date object and a time string (HH:mm) into a ISO string.
  * Resulting string is in Jakarta offset (+07:00).

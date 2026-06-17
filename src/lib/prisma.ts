@@ -13,16 +13,11 @@ function createPrismaClient() {
   const url = process.env.DATABASE_URL;
 
   if (!url) {
-    if (process.env.NODE_ENV === "production") {
-      throw new Error("DATABASE_URL must be specified in production environment.");
-    }
-
-    // Keep local and CI boot resilient even when env setup is incomplete.
-    console.warn("WARNING: DATABASE_URL is missing. Prisma will fail to connect.");
+    throw new Error("DATABASE_URL is required. Copy .env.example to .env and set DATABASE_URL (Prisma will not silently fall back to localhost).");
   }
 
   const adapter = new PrismaPg({
-    connectionString: url || "postgresql://localhost:5432/postgres",
+    connectionString: url,
   });
 
   return new PrismaClient({

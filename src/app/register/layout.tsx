@@ -1,5 +1,3 @@
-import "@/app/_interactive-animations.css";
-
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -26,3 +24,4 @@ export const metadata: Metadata = {
 export default function RegisterLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
+

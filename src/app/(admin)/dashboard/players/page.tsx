@@ -3,7 +3,7 @@
 import * as React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { useDebounce } from "use-debounce";
-import { motion, AnimatePresence } from "framer-motion";
+
 import {
   Search,
   Edit2,
@@ -316,7 +316,7 @@ export default function PlayersPage() {
         <div
           className={`flex flex-col gap-4 lg:col-span-8 ${isMobileDetailOpen ? "flex" : "hidden lg:flex"}`}
         >
-          <AnimatePresence mode="wait">
+
             {!effectiveGroupId ? (
               <AdminStatePanel
                 icon={Users}
@@ -335,13 +335,12 @@ export default function PlayersPage() {
                 </div>
               </div>
             ) : (
-              <motion.div
-                key={effectiveGroupId}
-                initial={{ opacity: 0, y: 4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.15 }}
-                className="flex min-h-[520px] flex-col gap-5 rounded-xl border border-border/50 bg-card p-4 shadow-xs sm:p-6"
+<div className="flex min-h-[520px] animate-in fade-in slide-in-from-top-1 duration-150 flex-col gap-5 rounded-xl border border-border/50 bg-card p-4 shadow-xs sm:p-6"
+
+
+
+
+
               >
                 {selectedGroup && (
                   <div className="flex flex-col gap-4 border-b border-border/50 pb-4">
@@ -738,11 +737,12 @@ export default function PlayersPage() {
                     />
                   </div>
                 )}
-              </motion.div>
+</div>
             )}
-          </AnimatePresence>
+
         </div>
       </div>
     </div>
   );
 }
+

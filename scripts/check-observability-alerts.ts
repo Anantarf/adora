@@ -1,16 +1,17 @@
 import "dotenv/config";
 import { getObservabilitySnapshot } from "@/lib/observability-snapshot";
 import { dispatchOperationalAlert } from "@/lib/operational-alerts";
+import { resolveAlertThreshold } from "@/lib/constants/alert-thresholds";
 
 async function main() {
   const snapshot = await getObservabilitySnapshot(1); // last 1 hour
+  const env = process.env;
 
-  // thresholds can be tuned via env
-  const badWebVitalsThreshold = Number(process.env.ALERT_BAD_WEBVITALS_THRESHOLD ?? "50");
-  const errorEventsThreshold = Number(process.env.ALERT_ERROR_EVENTS_THRESHOLD ?? "10");
-  const warnEventsThreshold = Number(process.env.ALERT_WARN_EVENTS_THRESHOLD ?? "25");
+  const badWebVitals = resolveAlertThreshold("badWebVitals", env);
+  const errorEvents = resolveAlertThreshold("errorEvents", env);
+  const warnEvents = resolveAlertThreshold("warnEvents", env);
 
-  if (snapshot.totals.badWebVitals >= badWebVitalsThreshold) {
+  if (snapshot.totals.badWebVitals >= badWebVitals) {
     await dispatchOperationalAlert({
       severity: "WARN",
       source: "observability-check",
@@ -20,7 +21,7 @@ async function main() {
     });
   }
 
-  if (snapshot.totals.errorEvents >= errorEventsThreshold) {
+  if (snapshot.totals.errorEvents >= errorEvents) {
     await dispatchOperationalAlert({
       severity: "ERROR",
       source: "observability-check",
@@ -30,7 +31,7 @@ async function main() {
     });
   }
 
-  if (snapshot.totals.warnEvents >= warnEventsThreshold) {
+  if (snapshot.totals.warnEvents >= warnEvents) {
     await dispatchOperationalAlert({
       severity: "WARN",
       source: "observability-check",

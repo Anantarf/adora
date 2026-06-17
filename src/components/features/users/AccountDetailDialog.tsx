@@ -5,12 +5,7 @@ import type { UserItem } from "./UserAccountCard";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-const ROLE_LABELS: Record<string, string> = {
-  PARENT: "Orang Tua",
-  ADMIN: "Admin",
-  COACH: "Coach",
-};
-
+import { ROLE_LABELS } from "@/lib/utils/audit-log";
 type AccountDetailDialogProps = {
   user: UserItem | null;
   open: boolean;

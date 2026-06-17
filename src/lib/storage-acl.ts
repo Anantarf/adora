@@ -4,7 +4,7 @@ export type StorageAclRole = "ADMIN" | "PARENT" | "COACH";
 
 export type StorageAclLookup = {
   findCoachAsset(fileUrl: string): Promise<{ id: string; userId: string; isLicense: boolean } | null>;
-  findCoachLicense(fileUrl: string): Promise<{ id: string } | null>;
+
   findPlayerAsset(fileUrl: string): Promise<{ id: string } | null>;
   findCertificate(fileUrl: string): Promise<{ id: string; playerId: string } | null>;
   findReportArchive(fileUrl: string): Promise<{ id: string; playerId: string } | null>;
@@ -115,3 +115,4 @@ export async function authorizePrivateStorageAccess(input: { role: StorageAclRol
     message: "allowed",
   };
 }
+

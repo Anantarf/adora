@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import type { MetricsJson } from "@/types/dashboard";
 import { getEvaluationSummary, isMetricsJsonV2, type MetricsJsonV2 } from "@/lib/evaluation-rules";
+import { calculateAgeFromDate } from "@/lib/player-profile";
 
 const PRINT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
   day: "numeric",
@@ -53,18 +54,6 @@ function toNumber(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
-function getAge(dateOfBirth: Date): number {
-  const today = new Date();
-  const birthDate = new Date(dateOfBirth);
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age -= 1;
-  }
-
-  return age;
-}
 
 function formatDate(date: Date, options: Intl.DateTimeFormatOptions): string {
   return new Date(date).toLocaleDateString("id-ID", options);
@@ -222,7 +211,7 @@ export function buildReportViewModel(player: PlayerReportRecord): ReportViewMode
 
   return {
     attendanceRateLabel: attendanceRate === "N/A" ? attendanceRate : `${attendanceRate}%`,
-    age: getAge(player.dateOfBirth),
+    age: calculateAgeFromDate(player.dateOfBirth) ?? 0,
     certificates: player.certificate.map((certificate) => ({
       title: certificate.title,
       uploadedAtLabel: formatDate(certificate.uploadedAt, CERTIFICATE_DATE_FORMAT),

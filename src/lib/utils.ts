@@ -80,14 +80,14 @@ export function sanitizePhone(phone: string): string {
   return phone.replace(/\D/g, "");
 }
 /**
- * Returns the current academic year in "YYYY/YYYY" format.
- * Transition month is August (8).
+ * Mengembalikan string `"YYYY/YYYY`".
+ * Tahun ajaran berjalan: bulan 8 (September) adalah batas naik tahun ajaran baru.
  */
 export function getAcademicYear(): string {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
-  // Month starts from 0 (8 = September, so < 8 is before Sept)
-  // School usually starts around July/August in Indo, but for season 8 (Sept) is safe boundary
+  // < 8 artinya sebelum September, masih tahun ajaran yang sedang berjalan.
+
   const startYear = currentDate.getMonth() < 8 ? currentYear - 1 : currentYear;
   return `${startYear}/${startYear + 1}`;
 }

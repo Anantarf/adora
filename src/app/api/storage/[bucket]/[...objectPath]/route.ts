@@ -122,14 +122,6 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
                   }
                 : null,
             ),
-          findCoachLicense: (value) =>
-            prisma.coachProfile.findFirst({
-              where: {
-                OR: [{ licenseUrl: value }, { signatureUrl: value }],
-                isDeleted: false,
-              },
-              select: { id: true },
-            }),
           findPlayerAsset: (value) =>
             prisma.player.findFirst({
               where: {
@@ -206,3 +198,4 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
     return NextResponse.json({ error: "Gagal membuka file." }, { status: 500 });
   }
 }
+
