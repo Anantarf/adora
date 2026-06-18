@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { createAuditLog } from "@/actions/audit";
+import { recordOperationalWarning } from "@/lib/observability";
 import { acquireAdvisoryLock, withSerializableTransaction } from "@/lib/db-concurrency";
 import { toJakartaDate } from "@/lib/date-utils";
 import {
@@ -575,6 +576,7 @@ export async function submitStatisticAction(data: {
 }
 
 export async function getStatsByPeriodAction(periodId: string) {
+  const startMs = Date.now();
   const session = await requireActiveUser();
   const { role, id: userId } = session.user;
   if (role !== "ADMIN" && role !== "COACH") {
@@ -645,7 +647,7 @@ export async function getStatsByPeriodAction(periodId: string) {
 
   const signerContext = await getReportSignerResolverContext(prisma);
 
-  return statistics.map((statistic) => {
+  const result = statistics.map((statistic) => {
     const resolvedSigner = resolveReportSignerSnapshotForGroup(
       statistic.player.group,
       signerContext,
@@ -660,6 +662,17 @@ export async function getStatsByPeriodAction(periodId: string) {
       metricsJson: parseMetrics(statistic.metricsJson),
     };
   });
+
+  const durationMs = Date.now() - startMs;
+  if (durationMs > 2000) {
+    recordOperationalWarning({
+      source: "getStatsByPeriodAction",
+      message: `Pengambilan statistik periode ${periodId} memakan waktu lama (${statistics.length} data)`,
+      durationMs,
+    });
+  }
+
+  return result;
 }
 
 export async function getStatHistoryAction(statisticId: string) {
@@ -700,6 +713,7 @@ export async function getStatHistoryAction(statisticId: string) {
 }
 
 export async function getPlayerStatsAction(playerId: string) {
+  const startMs = Date.now();
   const session = await requireActiveUser();
   const { role, id: userId } = session.user;
 
@@ -774,7 +788,7 @@ export async function getPlayerStatsAction(playerId: string) {
 
   const signerContext = await getReportSignerResolverContext(prisma);
 
-  return statistics.map((statistic) => {
+  const result = statistics.map((statistic) => {
     const resolvedSigner = resolveReportSignerSnapshotForGroup(
       statistic.player.group,
       signerContext,
@@ -789,4 +803,15 @@ export async function getPlayerStatsAction(playerId: string) {
       metricsJson: parseMetrics(statistic.metricsJson),
     };
   });
+
+  const durationMs = Date.now() - startMs;
+  if (durationMs > 2000) {
+    recordOperationalWarning({
+      source: "getPlayerStatsAction",
+      message: `Pengambilan statistik pemain ${playerId} memakan waktu lama (${statistics.length} data)`,
+      durationMs,
+    });
+  }
+
+  return result;
 }

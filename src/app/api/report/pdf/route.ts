@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import {
   ALLOWED_REPORT_ROLES,
   buildReportViewModel,
@@ -10,6 +11,7 @@ import {
 import { renderReportHtml } from "./report-render";
 
 export async function GET(req: NextRequest) {
+  const startMs = Date.now();
   try {
     const actor = await getSessionActor();
     if (!actor) {
@@ -35,6 +37,16 @@ export async function GET(req: NextRequest) {
     }
 
     const html = renderReportHtml(buildReportViewModel(player));
+    
+    const durationMs = Date.now() - startMs;
+    if (durationMs > 2000) {
+      recordOperationalWarning({
+        source: "PDF_REPORT_GENERATION",
+        message: `Pembuatan HTML rapor untuk player ${playerId} lambat.`,
+        durationMs,
+      });
+    }
+
     return new NextResponse(html, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
@@ -42,6 +54,11 @@ export async function GET(req: NextRequest) {
     });
   } catch (error) {
     console.error("[PDF_REPORT_ERROR]:", error);
+    recordOperationalError({
+      source: "PDF_REPORT_GENERATION",
+      message: "Gagal generate laporan HTML",
+      error,
+    });
     return NextResponse.json({ error: "Gagal generate laporan." }, { status: 500 });
   }
 }
