@@ -162,11 +162,11 @@ export default function SchedulePage() {
                           <div className="min-w-0 space-y-1">
                             <div className="flex flex-wrap items-center gap-2">
                               <span
-                                className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-medium leading-none"
+                                className="inline-flex rounded-md border px-1.5 py-0.5 text-[10px] font-semibold leading-none"
                                 style={{
-                                  backgroundColor: `${config.color}15`,
+                                  backgroundColor: `${config.color}30`,
                                   color: config.color,
-                                  borderColor: `${config.color}30`,
+                                  borderColor: `${config.color}60`,
                                 }}
                               >
                                 {config.label}
