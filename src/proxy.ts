@@ -48,10 +48,14 @@ function buildCsp(nonce: string) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
+    "report-uri /api/csp-report",
+    "report-to csp-endpoint",
   ].join("; ");
 }
 
 function applySecurityHeaders(response: NextResponse, csp: string) {
+  response.headers.set("Reporting-Endpoints", `csp-endpoint="/api/csp-report"`);
+
   for (const [key, value] of Object.entries(SECURITY_HEADER_VALUES)) {
     response.headers.set(key, value);
   }

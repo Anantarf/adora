@@ -9,6 +9,7 @@ import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 import { getRequestIp } from "@/lib/async-utils";
 import { recordOperationalWarning } from "@/lib/observability";
+import { createAuditLog } from "@/actions/audit";
 
 type RegistrationStatus = "PENDING" | "REVIEWED" | "COMPLETED";
 
@@ -52,15 +53,33 @@ export async function submitRegistration(data: {
   const { playerName: name, phone, email, ageGroup, homebaseId } = parsed.data;
 
   try {
-    const registration = await prisma.registration.create({
-      data: {
-        playerName: name,
-        phone,
-        email: email || null,
-        ageGroup,
-        homebaseId,
-        status: "PENDING",
-      },
+    const registration = await prisma.$transaction(async (tx) => {
+      const created = await tx.registration.create({
+        data: {
+          playerName: name,
+          phone,
+          email: email || null,
+          ageGroup,
+          homebaseId,
+          status: "PENDING",
+        },
+      });
+
+      await createAuditLog(
+        tx,
+        "SUBMIT_REGISTRATION",
+        "registration",
+        created.id,
+        null,
+        {
+          playerName: name,
+          ageGroup,
+          homebaseId,
+          ip,
+        },
+      );
+
+      return created;
     });
 
     revalidateRegistrations();
@@ -99,8 +118,12 @@ export async function getPendingRegistrations() {
 }
 
 async function updateRegistrationStatus(id: string, status: RegistrationStatus) {
-  await requireAdmin();
-  await prisma.registration.update({ where: { id }, data: { status } });
+  const session = await requireAdmin();
+  const userId = session.user.id;
+  await prisma.$transaction(async (tx) => {
+    await tx.registration.update({ where: { id }, data: { status } });
+    await createAuditLog(tx, "UPDATE_REGISTRATION", "registration", id, userId, { status });
+  });
   revalidateRegistrations();
 }
 
@@ -113,7 +136,15 @@ export async function markRegistrationUnpaid(id: string): Promise<void> {
 }
 
 export async function deleteRegistration(id: string): Promise<void> {
-  await requireAdmin();
-  await prisma.registration.delete({ where: { id } });
+  const session = await requireAdmin();
+  const userId = session.user.id;
+  await prisma.$transaction(async (tx) => {
+    const existing = await tx.registration.findUnique({
+      where: { id },
+      select: { playerName: true, ageGroup: true, homebaseId: true },
+    });
+    await tx.registration.delete({ where: { id } });
+    await createAuditLog(tx, "DELETE_REGISTRATION", "registration", id, userId, existing ?? undefined);
+  });
   revalidateRegistrations();
 }
