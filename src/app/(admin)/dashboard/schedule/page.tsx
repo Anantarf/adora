@@ -120,7 +120,7 @@ export default function SchedulePage() {
 
               <div className="flex flex-col gap-2.5">
                 {isLoading ? (
-                  <div className="space-y-2.5 rounded-xl border border-border/50 bg-background/40 p-3">
+                  <div className="space-y-2.5 rounded-xl border border-border/50 bg-muted p-3">
                     {Array.from({ length: 5 }).map((_, index) => (
                       <Skeleton key={index} className="h-[70px] w-full rounded-xl bg-muted/20" />
                     ))}
@@ -155,7 +155,7 @@ export default function SchedulePage() {
                             setUiState({ type: "preview", event });
                           }
                         }}
-                        className="w-full rounded-xl border border-border/50 bg-background/40 px-4 py-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                        className="w-full rounded-xl border border-border/50 bg-muted px-4 py-3 text-left transition-colors hover:border-primary/30 hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                         style={{ borderLeftColor: config.color, borderLeftWidth: "4px" }}
                       >
                         <div className="grid w-full grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
@@ -196,30 +196,30 @@ export default function SchedulePage() {
                             </span>
 
                             <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(eventObject) => {
-                                  eventObject.stopPropagation();
-                                  setUiState({ type: "edit", event });
-                                }}
-                                className="h-9 rounded-lg px-3 text-xs font-medium text-primary hover:bg-primary/10 hover:text-primary"
-                              >
-                                <Pencil className="mr-1.5 size-3.5" />
-                                Edit
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={(eventObject) => {
-                                  eventObject.stopPropagation();
-                                  setUiState({ type: "delete", targetId: event.id });
-                                }}
-                                className="h-9 rounded-lg px-3 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
-                              >
-                                <Trash2 className="mr-1.5 size-3.5" />
-                                Hapus
-                              </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(eventObject) => {
+                                    eventObject.stopPropagation();
+                                    setUiState({ type: "edit", event });
+                                  }}
+                                  className="h-9 rounded-lg px-3 text-xs font-medium text-foreground hover:bg-primary/10 hover:text-primary"
+                                >
+                                  <Pencil className="mr-1.5 size-3.5 text-primary" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(eventObject) => {
+                                    eventObject.stopPropagation();
+                                    setUiState({ type: "delete", targetId: event.id });
+                                  }}
+                                  className="h-9 rounded-lg px-3 text-xs font-medium text-red-600 dark:text-red-400 hover:bg-destructive/10 hover:text-red-500"
+                                >
+                                  <Trash2 className="mr-1.5 size-3.5" />
+                                  Hapus
+                                </Button>
                             </div>
                           </div>
                         </div>

@@ -114,7 +114,7 @@
   --popover: #ffffff;
   --popover-foreground: #1a1a2e;
   --primary: #ff6a00; /* Primary Orange */
-  --primary-foreground: #ffffff;
+  --primary-foreground: #1a1a2e;
   --secondary: #7c3aed; /* Secondary Purple */
   --secondary-foreground: #ffffff;
   --muted: #e4e4e7;
@@ -134,7 +134,7 @@
   --sidebar: #fafafa;
   --sidebar-foreground: #09090b;
   --sidebar-primary: #ff6a00;
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary-foreground: #1a1a2e;
   --sidebar-accent: #f4f4f5;
   --sidebar-accent-foreground: #09090b;
   --sidebar-border: #e4e4e7;
@@ -150,7 +150,7 @@
   --popover: #18181b;
   --popover-foreground: #fafafa;
   --primary: #ff6a00; /* Primary Orange */
-  --primary-foreground: #ffffff;
+  --primary-foreground: #09090b;
   --secondary: #8b5cf6; /* Secondary Purple (for badges only) */
   --secondary-foreground: #ffffff;
   --muted: #27272a; /* Neutral Zinc 800 */
@@ -169,7 +169,7 @@
   --sidebar: #0f0f12; /* Match Background */
   --sidebar-foreground: #fafafa;
   --sidebar-primary: #ff6a00;
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary-foreground: #09090b;
   --sidebar-accent: #27272a;
   --sidebar-accent-foreground: #fafafa;
   --sidebar-border: #27272a;
