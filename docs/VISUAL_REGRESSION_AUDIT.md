@@ -99,3 +99,71 @@ Saat test gagal, diff image otomatis tersimpan di `test-results/<spec-name>/<tes
 
 - Tablet full-page sengaja di-skip. Carousel auto-fade + dynamic year text menyebabkan drift > 5% yang tidak bisa di-stabilize dengan `animations: 'disabled'` saja. Section-level test tetap cover semua viewport.
 - Snapshot baseline sengaja tracked di git (12.76 MB) untuk perbandingan antar-commit. Cleanup: gunakan `git clean -ndX` untuk cek file ignored, atau hapus folder `tests/visual-regression/landing.spec.ts-snapshots/` jika ingin reset.
+
+## Batch 2 (2026-06-19) — Spec tambahan
+
+### Scope rationale
+
+Batch 1 hanya cover landing (`/`) yang publicly visible tanpa auth. ADORA punya 20 page UI; dari 19 lainnya, 3 punya nilai visual regression tinggi, sisanya sudah ter-cover flow/integration test atau noisy (skeleton loader drift).
+
+| Route | Alasan cover | Tipe | Env gate |
+|---|---|---|---|
+| `/login` | Pintu masuk semua role; branding & form layout adalah first impression. | Public | none |
+| `/register` | Funnel konversi; WhatsApp deep-link + form adalah hero. | Public | none |
+| `/parent` | Portal orang tua; data-driven tapi layout murni tanpa dialog. | Auth | `E2E_PARENT_*` |
+| `/coach/profile` | Profil editable in-place; tipis dan tidak ada loading state. | Auth | `E2E_COACH_*` |
+
+Yang TIDAK ditambah (by design):
+
+- `/dashboard/users`, `/dashboard/registrations` dll. — `useUsersPage` / `useRegistrationsPage` render skeleton dulu, baseline jadi capture skeleton bukan data. Integration test sudah cover logic.
+- `/coach/players`, `/coach/statistics` — chart + table dengan data dinamis; visual regression cepat stale.
+- `/coach/dashboard`, `/coach/attendances` — sama, data-driven.
+- API routes (`/api/*`) — no visual.
+
+### Spec yang ditambah
+
+| File | Viewport | Test | Snapshot |
+|---|---|---|---|
+| `tests/visual-regression/login.spec.ts` | 3 | 3 full-page | 3 PNG |
+| `tests/visual-regression/register.spec.ts` | 3 | 3 full-page | 3 PNG |
+| `tests/visual-regression/parent.spec.ts` | 3 | 3 full-page (gated) | 3 PNG |
+| `tests/visual-regression/coach-profile.spec.ts` | 3 | 3 full-page (gated) | 3 PNG |
+
+Total batch 2: 12 test, 12 PNG.
+
+### Shared helper
+
+`tests/helpers/visual.ts` — `VISUAL_VIEWPORTS` + `stubWebVitals()`. Konsolidasi config viewport agar tidak drift antar spec, dan satu tempat untuk stub analytics endpoint (konsisten dengan pattern di `landing.spec.ts`).
+
+### Threshold
+
+- Public spec (login, register): `maxDiffPixelRatio: 0.02` — layout statis, threshold ketat.
+- Auth spec (parent, coach profile): `maxDiffPixelRatio: 0.05` — data dinamis dari seed DB (nama, foto, stats), toleransi lebih longgar.
+
+### Menjalankan
+
+Public spec (no env):
+
+```bash
+npx playwright test tests/visual-regression/login.spec.ts --update-snapshots
+npx playwright test tests/visual-regression/register.spec.ts --update-snapshots
+```
+
+Auth spec (perlu DB live + seed):
+
+```bash
+# Parent
+$env:E2E_PARENT_USERNAME="parent.arya"
+$env:E2E_PARENT_PASSWORD="password"
+npx playwright test tests/visual-regression/parent.spec.ts --update-snapshots
+
+# Coach
+$env:E2E_COACH_USERNAME="coach.danuri"
+$env:E2E_COACH_PASSWORD="password"
+npx playwright test tests/visual-regression/coach-profile.spec.ts --update-snapshots
+```
+
+### Catatan
+
+- Folder `tests/visual-regression/**/*.spec.ts-snapshots/` masuk `.gitignore` (commit `ccf76517`). Baseline di-generate on-demand per environment, bukan di-track di git. Trade-off: diff visual tidak terlihat di PR review, tapi repo tetap ramping dan contributor tidak tanpa sengaja commit 12 MB+ PNG.
+- Test gated `test.skip(!hasEnv, ...)` — contributor tanpa env tetap bisa `npx playwright test` dan spec gated akan diskip otomatis tanpa fail.
