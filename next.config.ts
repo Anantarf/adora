@@ -36,6 +36,7 @@ const commonSecurityHeaders = [
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "X-Frame-Options", value: "DENY" },
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+  { key: "Reporting-Endpoints", value: 'csp-endpoint="/api/csp-report"' },
 ];
 
 const staticCspHeader = { key: "Content-Security-Policy", value: staticCsp };

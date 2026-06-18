@@ -23,7 +23,7 @@ export function CoachShellHeader() {
       <div className="flex min-w-0 items-center gap-3">
         <SidebarTrigger className="h-9 w-9 rounded-md transition-all hover:bg-primary/10 hover:text-primary" />
         <div className="min-w-0">
-          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-primary/75">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.22em] text-foreground/70">
             Coach
           </p>
           <h1 className="truncate font-heading text-base tracking-[0.08em] text-foreground md:text-lg">

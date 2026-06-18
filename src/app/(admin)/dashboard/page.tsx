@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
           <span className="text-xs font-medium text-muted-foreground">{todayLabel}</span>
           <Link
             href="/dashboard/registrations"
-            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-primary-foreground transition-colors hover:bg-primary/90 sm:w-auto"
+            className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-primary px-4 text-sm font-bold text-zinc-950 transition-colors hover:bg-primary/90 sm:w-auto"
           >
             <UserPlus className="size-4" />
             Proses Pendaftar
