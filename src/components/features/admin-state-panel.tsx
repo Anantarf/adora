@@ -28,14 +28,14 @@ export function AdminStatePanel({
       } ${className}`}
     >
       {Icon ? (
-        <Icon className={`size-10 ${isDanger ? "text-destructive/50" : "text-muted-foreground/30"}`} />
+        <Icon className={`size-10 ${isDanger ? "text-destructive/60" : "text-muted-foreground/50"}`} />
       ) : null}
       <div className="space-y-1">
         <p className={`text-sm font-semibold ${isDanger ? "text-destructive" : "text-muted-foreground"}`}>
           {title}
         </p>
         {description ? (
-          <p className="mx-auto max-w-sm text-xs leading-relaxed text-muted-foreground/75">
+          <p className="mx-auto max-w-sm text-xs leading-relaxed text-muted-foreground">
             {description}
           </p>
         ) : null}

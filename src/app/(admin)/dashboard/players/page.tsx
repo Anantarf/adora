@@ -191,9 +191,9 @@ export default function PlayersPage() {
           <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 shadow-xs">
             <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-3">
               <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-foreground">
+                <h2 className="text-sm font-semibold text-foreground">
                   Daftar Kelompok
-                </h3>
+                </h2>
                 <p className="text-[11px] leading-relaxed text-muted-foreground">
                   Pilih kelompok di kiri, lalu kelola pemainnya di panel kanan.
                 </p>
@@ -218,7 +218,7 @@ export default function PlayersPage() {
               />
             </div>
 
-            <div className="flex gap-1.5 rounded-lg bg-muted/40 p-1" role="tablist">
+            <div role="tablist" aria-label="Pilih kategori kelompok" className="flex gap-1.5 rounded-lg bg-muted/40 p-1">
               {(["SEKOLAH", "KELOMPOK_UMUR"] as const).map((category) => {
                 const active = selectedCategory === category;
                 const count = groups?.filter((group) => group.category === category).length ?? 0;
@@ -227,6 +227,8 @@ export default function PlayersPage() {
                   <button
                     key={category}
                     type="button"
+                    role="tab"
+                    aria-selected={active}
                     onClick={() => {
                       setSelectedCategory(category);
                       setSelectedGroupId(null);
@@ -261,7 +263,7 @@ export default function PlayersPage() {
                   ))}
                 </div>
               ) : groupsInCategory.length === 0 ? (
-                <div className="rounded-lg border border-dashed border-border/50 py-10 text-center text-xs text-muted-foreground/60">
+                <div className="rounded-lg border border-dashed border-border/50 py-10 text-center text-xs text-muted-foreground">
                   {groupSearchQuery ? "Kelompok tidak ditemukan" : "Tidak ada kelompok latihan"}
                 </div>
               ) : (
@@ -499,7 +501,7 @@ export default function PlayersPage() {
                 ) : viewMode === "database" ? (
                   <div className="-mx-1 overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
                     <table className="min-w-[64rem] w-full text-left text-xs">
-                      <thead className="border-b border-border/50 bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                      <thead className="border-b border-border/50 bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         <tr>
                           <th scope="col" className="w-10 px-4 py-3 text-center">
                             No
@@ -691,10 +693,10 @@ export default function PlayersPage() {
                             </div>
                           )}
                           <div className="flex min-w-0 flex-col gap-0.5">
-                            <h4 className="truncate text-sm font-semibold text-foreground">
+                            <h3 className="truncate text-sm font-semibold text-foreground">
                               {buildPlayerFullName(player.firstName, player.lastName) ||
                                 player.name}
-                            </h4>
+                            </h3>
                             <span className="truncate text-[10px] font-medium text-muted-foreground">
                               {player.group?.name || "Tanpa Kelompok"}
                             </span>
