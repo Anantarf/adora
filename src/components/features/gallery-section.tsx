@@ -69,7 +69,7 @@ export function GallerySection() {
           </div>
 
           {/* Slot 2 — Foto Tim (kanan atas kiri) */}
-          <PhotoSlot label="Adora Squad" desc="Wajah-wajah penuh talenta yang selalu siap memberikan performa terbaik." image="/images/gallery/team(3-2).jpg" color="orange" className="col-span-12 md:col-span-4 row-span-1 h-55 md:h-full" />
+          <PhotoSlot label="Adora Squad" desc="Wajah-wajah penuh talenta yang selalu siap memberikan performa terbaik." image="/images/gallery/team(3-2).jpg" color="orange" className="col-span-12 md:col-span-4 row-span-1 h-44 md:h-full" />
 
           {/* Slot 3 — Motivasi (kanan atas kanan) */}
           <PhotoSlot
@@ -77,7 +77,7 @@ export function GallerySection() {
             desc="Latihan rutin yang seru dan penuh semangat! Mulai dari asah skill dasar sampai sesi drill bareng pelatih."
             image="/images/gallery/drill.jpg"
             color="yellow"
-            className="col-span-12 md:col-span-3 row-span-1 h-55 md:h-full"
+            className="col-span-12 md:col-span-3 row-span-1 h-44 md:h-full"
           />
 
           {/* Slot 4 — Pengarahan & Evaluasi (kanan bawah kiri) */}
@@ -86,7 +86,7 @@ export function GallerySection() {
             desc="Potret anak-anak saat kumpul dan fokus menyimak masukan serta evaluasi dari pelatih."
             image="/images/gallery/latbrief.jpg"
             color="yellow"
-            className="col-span-12 md:col-span-4 row-span-1 h-55 md:h-full"
+            className="col-span-12 md:col-span-4 row-span-1 h-44 md:h-full"
           />
 
           {/* Slot 5 — Keceriaan (kanan bawah kanan) */}
@@ -95,7 +95,7 @@ export function GallerySection() {
             desc="Senyum dan tawa lepas anak-anak yang jadi bukti serunya kebersamaan di Adora."
             image="/images/gallery/keceriaan.JPG"
             color="orange"
-            className="col-span-12 md:col-span-3 row-span-1 h-55 md:h-full"
+            className="col-span-12 md:col-span-3 row-span-1 h-44 md:h-full"
           />
         </div>
       </div>
