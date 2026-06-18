@@ -124,7 +124,7 @@ function RegisterContent() {
   };
 
   return (
-    <main className="min-h-screen bg-page-dark text-white relative overflow-hidden pt-18">
+    <main id="main" className="min-h-screen bg-page-dark text-white relative overflow-hidden pt-18">
       <LandingHeader />
 
       {/* Background Textures */}

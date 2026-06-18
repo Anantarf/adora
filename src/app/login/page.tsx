@@ -33,7 +33,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center relative overflow-hidden bg-page-dark px-4 pt-20 pb-6 sm:py-6">
+    <main id="main" className="min-h-screen flex items-center justify-center relative overflow-hidden bg-page-dark px-4 pt-20 pb-6 sm:py-6">
       <Starfield />
       <Link
         href="/"

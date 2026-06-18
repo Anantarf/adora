@@ -47,7 +47,7 @@ export default async function AdminLayout({
           <SidebarInset className="relative flex min-h-dvh min-w-0 w-full flex-col bg-background selection:bg-primary/20">
             <AdminShellHeader />
 
-            <main className="mx-auto flex w-full min-w-0 max-w-375 flex-1 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
+            <main id="main" className="mx-auto flex w-full min-w-0 max-w-375 flex-1 px-4 py-4 sm:px-6 md:px-8 md:pt-6 md:pb-10 lg:px-10 lg:pt-6 lg:pb-12">
               <div className="w-full min-w-0 animate-in fade-in duration-200 ease-out fill-mode-both">
                 {children}
               </div>
