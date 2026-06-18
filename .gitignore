@@ -53,3 +53,6 @@ next-env.d.ts
 /scratch/
 /adora-bc.code-workspace
 .aider*
+
+# Playwright visual regression baselines (regenerate with --update-snapshots)
+/tests/visual-regression/**/*.spec.ts-snapshots/
