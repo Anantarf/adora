@@ -13,7 +13,7 @@ export const metadata: Metadata = {
   description: "Masuk ke portal anggota ADORA Basketball Club untuk memantau perkembangan, jadwal latihan, dan raport pemain.",
   robots: {
     index: false,
-    follow: false,
+    follow: true,
   },
 };
 
