@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -69,8 +69,8 @@ export function EventFormCard({
   surface = "card",
   hideCancel = false,
 }: EventFormCardProps) {
-  const [date, setDate] = useState<Date | undefined>(getJakartaToday);
-  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>([]);
+  const [date, setDate] = useState<Date | undefined>(() => (editEvent ? new Date(editEvent.date) : getJakartaToday()));
+  const [selectedGroupIds, setSelectedGroupIds] = useState<string[]>(() => editEvent?.groups?.map((group) => group.id) ?? []);
 
   const { data: homebases = [] } = useHomebases();
   const { data: groups = [] } = useGroups();
@@ -104,31 +104,7 @@ export function EventFormCard({
       ? "Perbarui tanggal, kelompok, dan lokasi agenda tanpa meninggalkan halaman kerja."
       : "Tambahkan agenda baru setelah mengecek sebaran jadwal dan bentrok di kalender.");
 
-  useEffect(() => {
-    if (editEvent) {
-      setDate(new Date(editEvent.date));
-      setSelectedGroupIds(editEvent.groups?.map((group) => group.id) ?? []);
-      reset({
-        eventId: editEvent.id,
-        title: editEvent.title,
-        description: editEvent.description || "",
-        location: editEvent.location || "",
-        type: editEvent.type as EventFormValues["type"],
-        time: new Date(editEvent.date).toLocaleTimeString("en-GB", {
-          timeZone: "Asia/Jakarta",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-        }),
-        homebaseId: editEvent.homebaseId || undefined,
-      });
-      return;
-    }
 
-    setDate(getJakartaToday());
-    setSelectedGroupIds([]);
-    reset(getBlankFormValues());
-  }, [editEvent, reset]);
 
   const toggleGroup = (groupId: string) => {
     setSelectedGroupIds((previous) => (

@@ -13,7 +13,6 @@ import { AddStatDialog } from "@/components/features/AddStatDialog";
 import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { GradeBadge } from "@/components/features/dashboard/GradeBadge";
 import { Badge } from "@/components/ui/badge";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {

@@ -1,18 +1,15 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useMemo, useState } from "react";
 import {
   LayoutList as SelectIcon,
   CalendarRange,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { toast } from "sonner";
-
 import { AdminPageHeader } from "@/components/features/admin-page-header";
 import {
   StatisticsList,
   periodDisplayLabel,
-  type SharedPeriod,
   type SharedPlayer,
   type SharedStat,
 } from "@/components/features/statistics/StatisticsList";
@@ -24,27 +21,21 @@ import { useStatsByPeriod } from "@/hooks/use-statistics";
 
 function CoachStatisticsPageInner() {
   const searchParams = useSearchParams();
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
   const [activeGroup, setActiveGroup] = useState<string>(searchParams.get("groupId") || "all");
+  // Pilihan user untuk periode; null artinya belum pilih (auto-pakai periode aktif dari server).
+  const [pickedPeriodId, setPickedPeriodId] = useState<string | null>(null);
+
+  const { data: periods } = usePeriods();
+
+  // Default periode aktif ketika user belum memilih; setelah user memilih, pickedPeriodId menang.
+  const defaultPeriodId = periods?.find((period) => period.isActive)?.id ?? periods?.[0]?.id;
+  const selectedPeriodId = pickedPeriodId ?? defaultPeriodId ?? "";
+  const selectedPeriod = periods?.find((period) => period.id === selectedPeriodId) ?? null;
+
 
   const { data: coachData, isLoading: coachLoading } = useCoachWorkspace();
-  const { data: periods } = usePeriods();
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId || null);
   const { data: settings } = useReportSettings();
-
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    if (initialized.current || !periods) {
-      return;
-    }
-
-    const firstPeriod = periods.find((period) => period.isActive) ?? periods[0];
-    if (firstPeriod) {
-      setSelectedPeriodId(firstPeriod.id);
-      initialized.current = true;
-    }
-  }, [periods]);
 
   const groups = useMemo(() => coachData?.groups ?? [], [coachData?.groups]);
   const players = useMemo<SharedPlayer[]>(() => {
@@ -96,7 +87,6 @@ function CoachStatisticsPageInner() {
     [visibleStats],
   );
 
-  const selectedPeriod = (periods?.find((period) => period.id === selectedPeriodId) ?? null) as SharedPeriod | null;
   const isLoading = coachLoading || statsLoading;
 
   return (
@@ -120,7 +110,7 @@ function CoachStatisticsPageInner() {
               <Select
                 value={selectedPeriodId}
                 onValueChange={(value) => {
-                  setSelectedPeriodId(value ?? "");
+                  setPickedPeriodId(value);
                   setActiveGroup("all");
                 }}
               >

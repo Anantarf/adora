@@ -23,6 +23,7 @@ export function EventEditDialog({ event, onClose }: EventEditDialogProps) {
           </DialogDescription>
 
           <EventFormCard
+            key={event.id}
             editEvent={event}
             onSuccess={onClose}
             title="Ubah Agenda"

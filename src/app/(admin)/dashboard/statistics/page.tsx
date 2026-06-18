@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   LayoutList as SelectIcon,
   CalendarRange,
@@ -13,7 +13,6 @@ import { EvaluationConfigDialog } from "@/components/features/EvaluationConfigDi
 import {
   StatisticsList,
   periodDisplayLabel,
-  type SharedPeriod,
   type SharedPlayer,
   type SharedStat,
 } from "@/components/features/statistics/StatisticsList";
@@ -28,30 +27,23 @@ import { useClubSettings } from "@/hooks/use-settings";
 import { useStatsByPeriod } from "@/hooks/use-statistics";
 
 export default function StatisticsPage() {
-  const [selectedPeriodId, setSelectedPeriodId] = useState<string>("");
   const [activeGroup, setActiveGroup] = useState<string>("all");
+  // Pilihan user untuk periode; null artinya belum pilih (auto-pakai periode aktif dari server).
+  const [pickedPeriodId, setPickedPeriodId] = useState<string | null>(null);
 
   const { data: periods } = usePeriods();
+
+  // Default periode aktif ketika user belum memilih; setelah user memilih, pickedPeriodId menang.
+  const defaultPeriodId = periods?.find((period) => period.isActive)?.id ?? periods?.[0]?.id;
+  const selectedPeriodId = pickedPeriodId ?? defaultPeriodId ?? "";
+  const selectedPeriod = periods?.find((period) => period.id === selectedPeriodId) ?? null;
+
   const { data: groups } = useGroups();
   const { data: players, isLoading: playersLoading } = usePlayers(activeGroup);
   const { data: stats, isLoading: statsLoading } = useStatsByPeriod(selectedPeriodId || null);
   const { mutateAsync: setActive } = useSetActivePeriod();
   const { mutateAsync: deletePeriod } = useDeletePeriod();
   const { data: settings } = useClubSettings();
-
-  const initialized = useRef(false);
-
-  useEffect(() => {
-    if (initialized.current || !periods) {
-      return;
-    }
-
-    const firstPeriod = periods.find((period) => period.isActive) ?? periods[0];
-    if (firstPeriod) {
-      setSelectedPeriodId(firstPeriod.id);
-      initialized.current = true;
-    }
-  }, [periods]);
 
   const statsMap = useMemo<Record<string, SharedStat | undefined>>(
     () => Object.fromEntries((stats ?? []).map((stat) => [stat.player.id, stat as SharedStat])),
@@ -87,7 +79,6 @@ export default function StatisticsPage() {
     [stats],
   );
 
-  const selectedPeriod = (periods?.find((period) => period.id === selectedPeriodId) ?? null) as SharedPeriod | null;
   const canDeletePeriod = statsSummary.published === 0 && statsSummary.draft === 0;
   const totalPlayers = players?.length ?? 0;
 
@@ -108,7 +99,7 @@ export default function StatisticsPage() {
     try {
       await deletePeriod(selectedPeriodId);
       toast.success("Periode evaluasi berhasil dihapus.");
-      setSelectedPeriodId("");
+      setPickedPeriodId(null);
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Gagal menghapus periode evaluasi.",
@@ -138,7 +129,7 @@ export default function StatisticsPage() {
               <Select
                 value={selectedPeriodId}
                 onValueChange={(value) => {
-                  setSelectedPeriodId(value ?? "");
+                  setPickedPeriodId(value);
                   setActiveGroup("all");
                 }}
               >
