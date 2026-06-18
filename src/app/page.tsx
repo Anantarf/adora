@@ -16,13 +16,13 @@ import { LandingFooter } from "@/components/features/landing/landing-footer";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "Klub Basket Depok | ADORA Basketball Club",
+  title: "Adora Basketball Club",
   description: "ADORA Basketball Club adalah klub basket Depok untuk usia 7-18 tahun. Program latihan modern, pembinaan karakter, dan jalur kompetisi resmi untuk pemain muda.",
   alternates: {
     canonical: "https://adorabbc.com",
   },
   openGraph: {
-    title: "Klub Basket Depok | ADORA Basketball Club",
+    title: "Adora Basketball Club",
     description: "ADORA Basketball Club membina pemain muda Depok usia 7-18 tahun melalui latihan modern, karakter kuat, dan kompetisi resmi.",
     url: "https://adorabbc.com",
     siteName: "ADORA Basketball",
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Klub Basket Depok | ADORA Basketball Club",
+    title: "Adora Basketball Club",
     description: "ADORA Basketball Club membina pemain muda Depok usia 7-18 tahun melalui latihan modern, karakter kuat, dan kompetisi resmi.",
   },
 };
