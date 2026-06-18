@@ -7,14 +7,7 @@ export function LandingCtaSection() {
     <section id="daftar" className="py-14 md:py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
       <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none"></div>
 
-      <div className="absolute top-0 right-0 w-96 h-96 bg-brand-orange/20 blur-[120px] -mr-48 -mt-48 pointer-events-none animate-pulse"></div>
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-brand-yellow/10 blur-[100px] -ml-40 -mb-40 pointer-events-none"></div>
 
-      <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none overflow-hidden">
-        <div className="absolute top-[-10%] left-[10%] w-0.5 h-[120%] bg-brand-orange rotate-45"></div>
-        <div className="absolute top-[-10%] left-[15%] w-px h-[120%] bg-white rotate-45"></div>
-        <div className="absolute top-[-10%] right-[10%] w-px h-[120%] bg-brand-yellow rotate-45"></div>
-      </div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
         <FadeIn direction="up">

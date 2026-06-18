@@ -129,8 +129,6 @@ function RegisterContent() {
 
       {/* Background Textures */}
       <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute top-0 right-0 w-200 h-200 bg-brand-purple rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
-        <div className="absolute bottom-0 left-0 w-150 h-150 bg-brand-orange rounded-full mix-blend-screen filter blur-[150px] opacity-20"></div>
         <div className="absolute inset-0 pattern-halftone opacity-30"></div>
       </div>
 
@@ -284,7 +282,7 @@ function RegisterContent() {
             )}
 
             {!selectedHomebase?.name && (
-              <div className="text-center pt-8 animate-pulse">
+              <div className="text-center pt-8">
                 <p className="text-brand-yellow font-black text-xs tracking-widest uppercase italic">↑ PILIH LOKASI DI ATAS UNTUK LANJUT ↑</p>
               </div>
             )}

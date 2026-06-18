@@ -57,7 +57,6 @@ export function LandingTurnamenSection() {
             </div>
 
             <div className="w-full relative">
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-brand-orange/20 blur-xl animate-pulse z-0"></div>
               <div className="relative z-10 border-4 border-black shadow-[6px_6px_0px_#CCFF00] sm:shadow-[12px_12px_0px_#CCFF00] rounded-card overflow-hidden bg-black">
                 <AutoFadeCarousel images={["/images/tournaments/asbcnew1.JPG", "/images/tournaments/asbcnew2.JPG", "/images/tournaments/asbcnew3.jpg", "/images/tournaments/asbc4.jpg", "/images/tournaments/asbc5.jpg"]} />
               </div>

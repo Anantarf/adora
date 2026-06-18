@@ -117,7 +117,6 @@ export function LoginForm() {
       <div className="bg-login-card/95 border border-white/10 rounded-3xl px-6 py-5 shadow-login-card sm:px-8">
         <div className="text-center mb-1">
           <div className="relative w-full flex items-center justify-center">
-            <div className="absolute inset-0 bg-primary/10 blur-3xl rounded-full pointer-events-none" />
             <Image src="/logo-adora-full.png" alt="Adora Basketball Club" width={380} height={160} className="object-contain relative z-10 mx-auto w-full h-auto max-w-95" style={{ width: "auto", height: "auto" }} preload />
           </div>
         </div>

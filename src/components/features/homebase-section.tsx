@@ -25,7 +25,6 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
   return (
     <section id="homebase" className="pt-12 pb-16 md:pb-24 relative overflow-hidden bg-page-dark scroll-mt-20 z-20">
       {/* Background Ornament */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-brand-orange/5 blur-[120px] pointer-events-none"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn direction="up">

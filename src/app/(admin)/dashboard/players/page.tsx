@@ -604,7 +604,7 @@ export default function PlayersPage() {
                                       "Ada riwayat penyakit bawaan"
                                     }
                                   >
-                                    <HeartCrack className="size-4 animate-pulse-subtle" />
+                                    <HeartCrack className="size-4" />
                                   </div>
                                 ) : (
                                   <span className="rounded-sm bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-500">
