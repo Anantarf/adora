@@ -1,11 +1,5 @@
 import "dotenv/config";
 
-function checkSecret(name: string | undefined, minLength: number) {
-  if (!name || !name.trim()) return `${name} missing`;
-  if (name.length < minLength) return `${name} too short`;
-  return null;
-}
-
 function main() {
   const nextAuth = process.env.NEXTAUTH_SECRET ?? "";
   const supabase = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";

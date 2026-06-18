@@ -1,6 +1,6 @@
 import "dotenv/config";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
@@ -103,7 +103,7 @@ async function main() {
     { username: "parent.fitri", email: "fitri.handayani@gmail.com", name: "Fitri Handayani" },
   ];
 
-  const parentUsers: Record<string, any> = {};
+  const parentUsers: Record<string, Awaited<ReturnType<typeof prisma.user.create>>> = {};
   for (const parent of parentsData) {
     const createdParent = await prisma.user.create({
       data: {
@@ -485,7 +485,7 @@ async function main() {
     },
   ];
 
-  const players: Record<string, any> = {};
+  const players: Record<string, Awaited<ReturnType<typeof prisma.player.create>>> = {};
   for (const p of playersToCreate) {
     const name = `${p.firstName} ${p.lastName}`.trim();
     const createdPlayer = await prisma.player.create({
@@ -605,7 +605,7 @@ async function main() {
   // Helper to get dates between start & end
   const generateDates = (start: Date, end: Date, stepDays: number = 7) => {
     const list: Date[] = [];
-    let curr = new Date(start.getTime());
+    const curr = new Date(start.getTime());
     while (curr <= end) {
       list.push(new Date(curr));
       curr.setDate(curr.getDate() + stepDays);
@@ -616,7 +616,7 @@ async function main() {
   const pastDates = generateDates(periodPast.startDate, periodPast.endDate, 7); // ~8 events
   const activeDates = generateDates(periodActive.startDate, periodActive.endDate, 7); // ~8 events
 
-  const allEventsToCreate: any[] = [];
+  const allEventsToCreate: Parameters<typeof prisma.event.create>[0]["data"][] = [];
   const eventGroupMappings: { eventIndex: number; groupId: string }[] = [];
 
   // Create event definitions first
@@ -699,7 +699,7 @@ async function main() {
   // 10. SEED ATTENDANCES
   console.log("Seeding attendances per player...");
   // Group players by group
-  const playersByGroup: Record<string, any[]> = {
+  const playersByGroup: Record<string, Awaited<ReturnType<typeof prisma.player.create>>[]> = {
     [ku10.id]: [],
     [ku12.id]: [],
     [ku14.id]: [],
@@ -760,14 +760,14 @@ async function main() {
   // 11. SEED STATISTICS (Maret-April (legacy) and Mei-Juni (V2))
   console.log("Seeding statistics & statistics histories...");
 
-  const groupInfo: Record<string, { group: any; homebase: any; coach: any }> = {
+  const groupInfo: Record<string, { group: Awaited<ReturnType<typeof prisma.group.create>>; homebase: Awaited<ReturnType<typeof prisma.homebase.create>>; coach: Awaited<ReturnType<typeof prisma.coachProfile.create>> }> = {
     [ku10.id]: { group: ku10, homebase: gandul, coach: coachDanuriProfile },
     [ku12.id]: { group: ku12, homebase: gandul, coach: coachRezaProfile },
     [ku14.id]: { group: ku14, homebase: cibubur, coach: coachFauziProfile },
     [ku16.id]: { group: ku16, homebase: cibubur, coach: coachDanuriProfile },
   };
 
-  const getDribbleAndPassingScore = (p: any, type: string) => {
+  const getDribbleAndPassingScore = (p: Awaited<ReturnType<typeof prisma.player.create>>, type: "legacy" | "v2"): Prisma.InputJsonValue => {
     // Generate scores based on player name/age
     const base = p.firstName.length % 3 === 0 ? 8 : p.firstName.length % 3 === 1 ? 9 : 7;
     if (type === "legacy") {
@@ -792,12 +792,12 @@ async function main() {
   };
 
   for (const p of Object.values(players)) {
-    const info = groupInfo[p.groupId];
+    const info = p.groupId ? groupInfo[p.groupId] : undefined;
     if (!info) continue;
 
     // A. Past Statistics (Legacy format, ALL PUBLISHED)
-    const legacyScores = getDribbleAndPassingScore(p, "legacy") as any;
-    const legacyMetrics: any = {
+    const legacyScores = getDribbleAndPassingScore(p, "legacy") as { inAndOut: number; crossover: number; vLeft: number; vRight: number; betweenLegsLeft: number; betweenLegsRight: number };
+    const legacyMetrics: Prisma.InputJsonObject = {
       dribble: legacyScores,
       passing: {
         chestPass: legacyScores.crossover,
@@ -848,10 +848,10 @@ async function main() {
       pCounts.ALPA * 0;
     const attScoreVal = totalSessions > 0 ? Math.round(weightedAttScore / totalSessions) : 0;
 
-    const v2DribbleScores = getDribbleAndPassingScore(p, "v2") as any[];
+    const v2DribbleScores = getDribbleAndPassingScore(p, "v2") as Array<{ id: string; label: string; maxScore: number; score: number }>;
     const isDraft = p.firstName.length % 4 === 0; // Some are draft, some are published
 
-    const v2Metrics: any = {
+    const v2Metrics: Prisma.InputJsonObject = {
       version: "v2",
       categories: [
         {
@@ -942,7 +942,7 @@ async function main() {
   // We seed RELEASED PDF reports for all players for the past period (since it's closed)
   // And DRAFT reports for the published statistics of the active period
   for (const p of Object.values(players)) {
-    const info = groupInfo[p.groupId];
+    const info = p.groupId ? groupInfo[p.groupId] : undefined;
     if (!info) continue;
 
     // A. Past Period Report (Always RELEASED)
