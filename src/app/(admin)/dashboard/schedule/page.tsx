@@ -96,7 +96,7 @@ export default function SchedulePage() {
         <section className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
           <div className="border-b border-border/50 px-5 py-4">
             <div className="space-y-1">
-              <h3 className="text-base font-semibold text-foreground">Kalender Agenda</h3>
+              <h2 className="text-base font-semibold text-foreground">Kalender Agenda</h2>
               <p className="text-sm text-muted-foreground">
                 Cek penyebaran jadwal dan potensi bentrok sebelum menambah atau mengubah agenda.
               </p>
@@ -112,7 +112,7 @@ export default function SchedulePage() {
 
             <aside className="flex flex-col gap-3 px-5 py-4">
               <div className="space-y-1">
-                <h3 className="text-base font-semibold text-foreground">Agenda Mendatang</h3>
+                <h2 className="text-base font-semibold text-foreground">Agenda Mendatang</h2>
                 <p className="text-sm text-muted-foreground">
                   Pantau agenda terdekat yang masih perlu ditinjau atau diubah.
                 </p>

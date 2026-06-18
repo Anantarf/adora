@@ -394,3 +394,8 @@ input:-webkit-autofill:active {
   }
 }
 
+/* ── FullCalendar Overrides ────────────────────────────────────────────── */
+.fc-theme-standard .fc-daygrid-day-number,
+.fc-theme-standard .fc-col-header-cell-cushion {
+  color: var(--foreground) !important;
+}

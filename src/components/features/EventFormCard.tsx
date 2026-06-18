@@ -372,7 +372,7 @@ export function EventFormCard({
             ) : null}
 
             <div className="flex items-end">
-              <Button type="submit" disabled={isPending} className="h-10 w-full text-sm font-semibold">
+              <Button type="submit" disabled={isPending} className="h-10 w-full text-sm font-semibold text-zinc-950">
                 {isPending ? <Loader2 className="mr-1.5 size-3.5 animate-spin" /> : null}
                 {isEditMode ? "Simpan Perubahan" : "Simpan Agenda"}
               </Button>
