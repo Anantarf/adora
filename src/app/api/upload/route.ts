@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
@@ -135,7 +136,7 @@ export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || (session.user.role !== "ADMIN" && session.user.role !== "COACH")) {
-    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+    return apiError("UNAUTHORIZED", "Tidak diizinkan.", 401);
   }
 
   const ip = getClientIp(req);
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
       statusCode: 429,
       metadata: { ip, count: rateLimitResult.count },
     });
-    return NextResponse.json({ error: "Too many requests, please try again later." }, { status: 429 });
+    return apiError("RATE_LIMITED", "Too many requests, please try again later.", 429);
   }
 
   try {
@@ -156,27 +157,27 @@ export async function POST(req: NextRequest) {
     const file = formData.get("file") as File | null;
 
     if (!file) {
-      return NextResponse.json({ error: "Tidak ada file yang diunggah." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Tidak ada file yang diunggah.", 400);
     }
 
     if (file.size === 0) {
-      return NextResponse.json({ error: "File tidak boleh kosong." }, { status: 400 });
+      return apiError("BAD_REQUEST", "File tidak boleh kosong.", 400);
     }
 
     const ext = file.name.substring(file.name.lastIndexOf(".")).toLowerCase();
     const expectedMime = ALLOWED_TYPES.get(ext);
     if (!expectedMime) {
-      return NextResponse.json({ error: "Format file tidak didukung. Gunakan PNG, JPG, atau PDF." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Format file tidak didukung. Gunakan PNG, JPG, atau PDF.", 400);
     }
 
     if (file.type && file.type !== expectedMime) {
-      return NextResponse.json({ error: "Tipe file tidak sesuai dengan ekstensinya. Pastikan file tidak dimodifikasi." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Tipe file tidak sesuai dengan ekstensinya. Pastikan file tidak dimodifikasi.", 400);
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const detected = await fileTypeFromBuffer(buffer);
     if (!detected || detected.mime !== expectedMime) {
-      return NextResponse.json({ error: "Tipe file tidak cocok dengan konten aktual." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Tipe file tidak cocok dengan konten aktual.", 400);
     }
 
     const uploadTarget = resolveUploadTarget(
@@ -186,7 +187,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: "Ukuran file melebihi batas maksimal 2MB." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Ukuran file melebihi batas maksimal 2MB.", 400);
     }
 
     if (file.size > uploadTarget.maxSizeBytes) {
@@ -217,19 +218,19 @@ export async function POST(req: NextRequest) {
   } catch (error) {
     if (error instanceof Error) {
       if (error.message === "UPLOAD_ASSET_KEY_REQUIRED") {
-        return NextResponse.json({ error: "Jenis unggahan tidak dikenali." }, { status: 400 });
+        return apiError("BAD_REQUEST", "Jenis unggahan tidak dikenali.", 400);
       }
 
       if (error.message === "UPLOAD_ASSET_KEY_INVALID") {
-        return NextResponse.json({ error: "Jenis unggahan tidak diizinkan." }, { status: 400 });
+        return apiError("BAD_REQUEST", "Jenis unggahan tidak diizinkan.", 400);
       }
 
       if (error.message === "UPLOAD_ASSET_EXTENSION_INVALID") {
-        return NextResponse.json({ error: "Format file tidak sesuai untuk jenis unggahan ini." }, { status: 400 });
+        return apiError("BAD_REQUEST", "Format file tidak sesuai untuk jenis unggahan ini.", 400);
       }
 
       if (error.message === "UPLOAD_ASSET_ROLE_FORBIDDEN") {
-        return NextResponse.json({ error: "Akun ini tidak diizinkan mengunggah jenis file tersebut." }, { status: 403 });
+        return apiError("FORBIDDEN", "Akun ini tidak diizinkan mengunggah jenis file tersebut.", 403);
       }
 
       if (error.message === "UPLOAD_STORAGE_NOT_CONFIGURED") {
@@ -239,7 +240,7 @@ export async function POST(req: NextRequest) {
           error,
           statusCode: 503,
         });
-        return NextResponse.json({ error: "Storage upload belum dikonfigurasi di server." }, { status: 503 });
+        return apiError("SERVICE_UNAVAILABLE", "Storage upload belum dikonfigurasi di server.", 503);
       }
 
       if (error.message === "UPLOAD_STORAGE_TIMEOUT") {
@@ -250,7 +251,7 @@ export async function POST(req: NextRequest) {
           statusCode: 503,
           durationMs: STORAGE_TIMEOUT_MS,
         });
-        return NextResponse.json({ error: "Storage upload sedang lambat atau tidak merespons. Coba lagi sebentar lagi." }, { status: 503 });
+        return apiError("SERVICE_UNAVAILABLE", "Storage upload sedang lambat atau tidak merespons. Coba lagi sebentar lagi.", 503);
       }
     }
 
@@ -261,6 +262,6 @@ export async function POST(req: NextRequest) {
       statusCode: 500,
     });
 
-    return NextResponse.json({ error: "Unggahan gagal. Coba lagi atau hubungi administrator." }, { status: 500 });
+    return apiError("INTERNAL_ERROR", "Unggahan gagal. Coba lagi atau hubungi administrator.", 500);
   }
 }

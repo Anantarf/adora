@@ -27,6 +27,12 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
+  // User may be null when the session callback returned a deleted user; redirect
+  // to /login instead of crashing on `session.user.role`.
+  if (!session.user) {
+    redirect("/login");
+  }
+
   if (session.user.role === "COACH") {
     redirect("/coach");
   }

@@ -1,10 +1,22 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { createClient } from "@supabase/supabase-js";
 import { prisma } from "@/lib/prisma";
 import { getPrivateUploadBucket } from "@/lib/supabase-storage";
 import { authorizePrivateStorageAccess } from "@/lib/storage-acl";
+import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
+import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
+
+function getClientIpFromHeaders(headers: Headers) {
+  const forwarded = headers.get("x-forwarded-for");
+  if (forwarded) {
+    const first = forwarded.split(",")[0]?.trim();
+    if (first) return first;
+  }
+  return headers.get("x-real-ip") ?? "unknown";
+}
 
 const SIGNED_URL_TTL_SECONDS = 60;
 const SIGNED_URL_CACHE_TTL_MS = 30_000;
@@ -78,21 +90,34 @@ function buildSignedUrlRedirect(url: string, cacheStatus: "HIT" | "MISS") {
   });
 }
 
-export async function GET(_req: Request, context: { params: Promise<{ bucket: string; objectPath: string[] }> }) {
+export async function GET(req: Request, context: { params: Promise<{ bucket: string; objectPath: string[] }> }) {
+  const headers = req.headers;
+  const ip = getClientIpFromHeaders(headers);
+  const proxyPolicy = RATE_LIMIT_POLICIES.storageProxy;
+  const proxyLimit = await consumeFixedWindowLimit(
+    proxyPolicy.namespace,
+    ip,
+    proxyPolicy.limit,
+    proxyPolicy.windowMs,
+  );
+  if (!proxyLimit.allowed) {
+    return apiError("RATE_LIMITED", "Terlalu banyak permintaan. Coba lagi nanti.", 429);
+  }
+
   const session = await getServerSession(authOptions);
   if (!session?.user) {
-    return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+    return apiError("UNAUTHORIZED", "Tidak diizinkan.", 401);
   }
 
   try {
     const params = await context.params;
     if (decodePathSegment(params.bucket) !== getPrivateUploadBucket()) {
-      return NextResponse.json({ error: "Bucket tidak didukung." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Bucket tidak didukung.", 400);
     }
 
     const objectKey = params.objectPath.map(decodePathSegment).join("/");
     if (!objectKey) {
-      return NextResponse.json({ error: "File tidak ditemukan." }, { status: 404 });
+      return apiError("NOT_FOUND", "File tidak ditemukan.", 404);
     }
 
     const fileUrl = buildInternalFileUrl(params.bucket, params.objectPath);
@@ -185,17 +210,17 @@ export async function GET(_req: Request, context: { params: Promise<{ bucket: st
     const { data, error } = await supabase.storage.from(getPrivateUploadBucket()).createSignedUrl(objectKey, SIGNED_URL_TTL_SECONDS);
 
     if (error || !data?.signedUrl) {
-      return NextResponse.json({ error: "File tidak tersedia." }, { status: 404 });
+      return apiError("NOT_FOUND", "File tidak tersedia.", 404);
     }
 
     setCachedSignedUrl(getPrivateUploadBucket(), objectKey, data.signedUrl);
     return buildSignedUrlRedirect(data.signedUrl, "MISS");
   } catch (error) {
     if (error instanceof Error && error.message === "STORAGE_PROXY_NOT_CONFIGURED") {
-      return NextResponse.json({ error: "Storage proxy belum dikonfigurasi." }, { status: 503 });
+      return apiError("SERVICE_UNAVAILABLE", "Storage proxy belum dikonfigurasi.", 503);
     }
 
-    return NextResponse.json({ error: "Gagal membuka file." }, { status: 500 });
+    return apiError("INTERNAL_ERROR", "Gagal membuka file.", 500);
   }
 }
 

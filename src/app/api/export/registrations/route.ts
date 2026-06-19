@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -29,14 +30,14 @@ const EXPORT_BUFFER_TIMEOUT_MS = 20_000;
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "ADMIN") {
-      return NextResponse.json({ error: "Tidak diizinkan." }, { status: 401 });
+    if (!session || !session.user || session.user.role !== "ADMIN") {
+      return apiError("UNAUTHORIZED", "Tidak diizinkan.", 401);
     }
 
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get("filter") || "all";
     if (!ALLOWED_EXPORT_FILTERS.has(filter)) {
-      return NextResponse.json({ error: "Filter export tidak valid." }, { status: 400 });
+      return apiError("BAD_REQUEST", "Filter export tidak valid.", 400);
     }
 
     const whereClause = buildRegistrationWhereClause(filter);
@@ -211,7 +212,7 @@ export async function GET(request: Request) {
         statusCode: 503,
         durationMs: EXPORT_BUFFER_TIMEOUT_MS,
       });
-      return NextResponse.json({ error: "Export sedang terlalu berat. Coba lagi sebentar lagi." }, { status: 503 });
+      return apiError("SERVICE_UNAVAILABLE", "Export sedang terlalu berat. Coba lagi sebentar lagi.", 503);
     }
 
     await recordOperationalError({
@@ -220,6 +221,6 @@ export async function GET(request: Request) {
       error,
       statusCode: 500,
     });
-    return NextResponse.json({ error: "Export data pendaftar gagal. Coba lagi sebentar lagi." }, { status: 500 });
+    return apiError("INTERNAL_ERROR", "Export data pendaftar gagal. Coba lagi sebentar lagi.", 500);
   }
 }

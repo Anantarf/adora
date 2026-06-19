@@ -7,7 +7,13 @@ import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";    const limitResult = await consumeFixedWindowLimit(RATE_LIMIT_POLICIES.webVitals.namespace, ip, RATE_LIMIT_POLICIES.webVitals.limit, RATE_LIMIT_POLICIES.webVitals.windowMs);
+    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const limitResult = await consumeFixedWindowLimit(
+      RATE_LIMIT_POLICIES.webVitals.namespace,
+      ip,
+      RATE_LIMIT_POLICIES.webVitals.limit,
+      RATE_LIMIT_POLICIES.webVitals.windowMs,
+    );
     if (!limitResult.allowed) {
       await recordOperationalWarning({
         source: "web-vitals",

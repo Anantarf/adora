@@ -8,7 +8,7 @@ import { formatZodErrors, submitRegistrationSchema } from "@/lib/validation/regi
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 import { getRequestIp } from "@/lib/async-utils";
-import { recordOperationalWarning } from "@/lib/observability";
+import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import { createAuditLog } from "@/actions/audit";
 
 type RegistrationStatus = "PENDING" | "REVIEWED" | "COMPLETED";
@@ -85,7 +85,7 @@ export async function submitRegistration(data: {
     revalidateRegistrations();
     return { success: true, id: registration.id };
   } catch (error) {
-    console.error("Failed to submit registration:", error);
+    await recordOperationalError({ source: "submit-registration", message: "Failed to submit registration", error });
     return {
       success: false,
       error: "Gagal mengirim pendaftaran. Silakan coba lagi.",
@@ -112,7 +112,7 @@ export async function getPendingRegistrations() {
       orderBy: { createdAt: "desc" },
     });
   } catch (error) {
-    console.error("Failed to get registrations:", error);
+    await recordOperationalError({ source: "get-pending-registrations", message: "Failed to get pending registrations", error });
     return [];
   }
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { recordOperationalError } from "@/lib/observability";
 import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/server-auth";
 import { createAuditLog } from "./audit";
@@ -31,7 +32,7 @@ export async function getGroupsAction() {
       };
     });
   } catch (error) {
-    console.error("Error fetching groups:", error);
+    await recordOperationalError({ source: "get-groups", message: "Failed to fetch groups", error });
     throw new Error("Gagal mengambil daftar grup");
   }
 }
@@ -73,7 +74,7 @@ export async function addGroupAction(data: {
     revalidatePath("/dashboard/players");
     return group;
   } catch (error: unknown) {
-    console.error("Error adding group:", error);
+    await recordOperationalError({ source: "add-group", message: "Failed to add group", error });
     throw new Error((error instanceof Error ? error.message : null) || "Gagal menambahkan grup baru");
   }
 }
@@ -118,7 +119,7 @@ export async function updateGroupAction(id: string, data: {
     revalidatePath("/dashboard/players");
     return updated;
   } catch (error: unknown) {
-    console.error("Error updating group:", error);
+    await recordOperationalError({ source: "update-group", message: "Failed to update group", error });
     throw new Error((error instanceof Error ? error.message : null) || "Gagal mengubah grup");
   }
 }
@@ -144,7 +145,7 @@ export async function deleteGroupAction(id: string) {
     revalidatePath("/dashboard/players");
     return { success: true as const };
   } catch (error: unknown) {
-    console.error("Error deleting group:", error);
+    await recordOperationalError({ source: "delete-group", message: "Failed to delete group", error });
     throw new Error((error instanceof Error ? error.message : null) || "Gagal menghapus grup");
   }
 }

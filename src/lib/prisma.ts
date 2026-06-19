@@ -16,8 +16,19 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL is required. Copy .env.example to .env and set DATABASE_URL (Prisma will not silently fall back to localhost).");
   }
 
+  // Cap individual query duration so a runaway query cannot pin a worker
+  // indefinitely. We append Postgres `statement_timeout` (server-side, in ms)
+  // to the connection string instead of constructing a `pg.Pool` because the
+  // pg package pulls in Node-only modules (tls, net, stream) that Next cannot
+  // bundle into client components that transitively import prisma.ts.
+  // Operators should configure this on the database server for production; the
+  // 10s default here is a safety net for local/dev where it is not pre-set.
+  const urlWithTimeout = url.includes("statement_timeout=")
+    ? url
+    : url + (url.includes("?") ? "&" : "?") + "statement_timeout=10000";
+
   const adapter = new PrismaPg({
-    connectionString: url,
+    connectionString: urlWithTimeout,
   });
 
   return new PrismaClient({

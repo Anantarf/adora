@@ -63,18 +63,25 @@ function summarizeViolation(ip: string, body: unknown) {
     }
   }
 
-  const fingerprint = ["csp-report", directives.sort().join(",") || "unknown", sample ?? "no-sample"]
+  // Sanitize sample to avoid log injection / oversized payloads. CSP reports
+  // may echo attacker-controlled HTML fragments; cap length and strip control chars
+  // that could break log readers.
+  const sanitizedSample = sample
+    ? sample.slice(0, 200).replace(/[\u0000-\u001f<>"]/g, "")
+    : undefined;
+
+  const fingerprint = ["csp-report", directives.sort().join(",") || "unknown", sanitizedSample ?? "no-sample"]
     .join(":")
     .slice(0, 160);
 
-  return { ip, directives, sample, fingerprint };
+  return { ip, directives, sample: sanitizedSample, fingerprint };
 }
 
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
-  const policy = RATE_LIMIT_POLICIES.webVitals;
+  const policy = RATE_LIMIT_POLICIES.cspReport;
   const rateLimit = await consumeFixedWindowLimit(
-    `${policy.namespace}:csp`,
+    `${policy.namespace}:csp-ip`,
     ip,
     policy.limit,
     policy.windowMs,
@@ -116,3 +123,5 @@ export async function POST(req: NextRequest) {
 
   return new NextResponse(null, { status: 204 });
 }
+
+

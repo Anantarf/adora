@@ -29,7 +29,7 @@ describe("Server auth helpers", () => {
 
     const session = await requireSessionRole("ADMIN");
 
-    expect(session.user.id).toBe("admin-1");
+    expect(session.user!.id).toBe("admin-1");
     expect(prisma.user.findFirst).not.toHaveBeenCalled();
   });
 
@@ -47,6 +47,6 @@ describe("Server auth helpers", () => {
     const session = await requireActiveUser("PARENT");
 
     expect(prisma.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(session.user.username).toBe("parent1");
+    expect(session.user!.username).toBe("parent1");
   });
 });

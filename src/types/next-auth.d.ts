@@ -10,7 +10,11 @@ declare module "next-auth" {
   }
 
   interface Session {
-    user: {
+    // `user` is nullable so the session callback can return `null` when the
+    // authenticated user is deleted/revoked mid-session, letting the layout
+    // redirect to /login instead of crashing on `session.user.role`. Callers
+    // must handle `session.user == null` explicitly.
+    user?: {
       id: string;
       name?: string | null;
       email?: string | null;
@@ -18,7 +22,7 @@ declare module "next-auth" {
       role: "ADMIN" | "PARENT" | "COACH";
       username: string | null;
       mustChangePassword?: boolean;
-    };
+    } | null;
   }
 }
 

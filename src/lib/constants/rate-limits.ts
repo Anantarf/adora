@@ -12,6 +12,8 @@ export const RATE_LIMIT_NAMESPACES = {
   LOGIN_FAILURES: "login-failures",
   OPERATIONAL_ALERTS: "operational-alerts",
   SUBMIT_REGISTRATION: "submit-registration",
+  CSP_REPORT: "csp-report",
+  STORAGE_PROXY: "storage-proxy",
 } as const;
 
 export type RateLimitNamespace =
@@ -50,4 +52,15 @@ export const RATE_LIMIT_POLICIES = {
     limit: 5,
     windowMs: RATE_LIMIT_WINDOWS.ONE_MINUTE_MS,
   },
+  cspReport: {
+    namespace: RATE_LIMIT_NAMESPACES.CSP_REPORT,
+    limit: 60,
+    windowMs: RATE_LIMIT_WINDOWS.ONE_MINUTE_MS,
+  },
+  storageProxy: {
+    namespace: RATE_LIMIT_NAMESPACES.STORAGE_PROXY,
+    limit: 60,
+    windowMs: RATE_LIMIT_WINDOWS.ONE_MINUTE_MS,
+  },
 } as const;
+

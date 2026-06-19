@@ -4,38 +4,39 @@ import { formatDateForInput, isSupportedDateInput, parseFlexibleDateInput } from
 
 const phoneRegex = /^(?:\+62|62|0)[1-9]\d{7,14}$/;
 
-const optionalText = z.string().trim().optional();
-const optionalEmail = z.string().email("Format email tidak valid").optional().or(z.literal(""));
-const optionalPhone = z.string().trim().optional().refine(val => !val || phoneRegex.test(val), {
+const optionalText = z.string().trim().max(200).optional();
+const optionalEmail = z.string().email("Format email tidak valid").max(200).optional().or(z.literal(""));
+const optionalPhone = z.string().trim().max(30).optional().refine(val => !val || phoneRegex.test(val), {
   message: "Format nomor telepon tidak valid (contoh: 0812xxxxxx atau +62812xxxxxx)"
 });
 
 export const playerSchema = z
   .object({
-    firstName: z.string().trim().min(1, "Nama depan wajib diisi"),
-    lastName: z.string().trim().optional(),
+    firstName: z.string().trim().min(1, "Nama depan wajib diisi").max(80, "Nama terlalu panjang"),
+    lastName: z.string().trim().max(80, "Nama terlalu panjang").optional(),
     dateOfBirth: z
       .string()
       .trim()
       .nonempty("Tanggal lahir wajib diisi")
       .refine((value) => isSupportedDateInput(value), "Gunakan format tanggal dd/mm/yyyy"),
     placeOfBirth: optionalText,
-    gender: z.string().trim().min(1, "Jenis kelamin wajib dipilih"),
+    gender: z.string().trim().min(1, "Jenis kelamin wajib dipilih").max(40),
     religion: optionalText,
     weight: optionalText,
     height: optionalText,
-    schoolOrigin: z.string().trim().min(1, "Asal sekolah wajib diisi"),
-    addressLine1: z.string().trim().min(1, "Alamat rumah wajib diisi"),
+    schoolOrigin: z.string().trim().min(1, "Asal sekolah wajib diisi").max(200),
+    addressLine1: z.string().trim().min(1, "Alamat rumah wajib diisi").max(300),
     addressLine2: optionalText,
-    city: z.string().trim().min(1, "Kota wajib diisi"),
-    province: z.string().trim().min(1, "Provinsi wajib diisi"),
-    postalCode: z.string().trim().min(1, "Kode pos wajib diisi"),
+    city: z.string().trim().min(1, "Kota wajib diisi").max(100),
+    province: z.string().trim().min(1, "Provinsi wajib diisi").max(100),
+    postalCode: z.string().trim().min(1, "Kode pos wajib diisi").max(15),
     ktpAddress: optionalText,
     email: optionalEmail,
     phoneNumber: z
       .string()
       .trim()
       .min(1, "Nomor telepon wajib diisi")
+      .max(30)
       .regex(phoneRegex, "Format nomor telepon tidak valid (contoh: 0812xxxxxx atau +62812xxxxxx)"),
     instagram: optionalText,
     hasMedicalCondition: z.boolean().default(false),
@@ -100,7 +101,7 @@ export function playerToFormValues(player: Player): PlayerFormValues {
 
   const form = { ...defaults } as Record<string, unknown>;
   for (const key of Object.keys(defaults)) {
-    const val = (player as unknown as Record<string, unknown>)[key];
+    const val = (player as Record<string, unknown>)[key];
     if (val !== undefined && val !== null) {
       form[key] = val;
     }
@@ -117,7 +118,7 @@ export function playerToFormValues(player: Player): PlayerFormValues {
 }
 
 export const batchPlayerSchema = z.object({
-  name: z.string().trim().min(2),
+  name: z.string().trim().min(2).max(120, "Nama terlalu panjang"),
   dateOfBirth: z.string().trim().refine((value) => isSupportedDateInput(value), "Gunakan format tanggal dd/mm/yyyy"),
   placeOfBirth: z.string().trim().optional(),
   gender: z.string().trim().optional(),
@@ -146,4 +147,5 @@ export const playerListArgsSchema = z.object({
   page: z.number().int().min(1).optional(),
   pageSize: z.number().int().min(1).max(MAX_PLAYER_PAGE_SIZE).optional(),
 });
+
 

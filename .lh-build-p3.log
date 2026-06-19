@@ -1,0 +1,61 @@
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 43s
+  Running TypeScript ...
+  Finished TypeScript in 29.9s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/35) ...
+  Generating static pages using 7 workers (8/35) 
+  Generating static pages using 7 workers (17/35) 
+  Generating static pages using 7 workers (26/35) 
+✓ Generating static pages using 7 workers (35/35) in 1828ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ○ /.well-known/security.txt
+├ ƒ /api/analytics/web-vitals
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/csp-report
+├ ƒ /api/export/registrations
+├ ƒ /api/health/db
+├ ƒ /api/health/observability
+├ ƒ /api/report/pdf
+├ ƒ /api/storage/[bucket]/[...objectPath]
+├ ƒ /api/upload
+├ ƒ /coach
+├ ƒ /coach/attendances
+├ ƒ /coach/dashboard
+├ ƒ /coach/players
+├ ƒ /coach/profile
+├ ƒ /coach/statistics
+├ ƒ /dashboard
+├ ƒ /dashboard/attendances
+├ ƒ /dashboard/audit
+├ ƒ /dashboard/certificates
+├ ƒ /dashboard/players
+├ ƒ /dashboard/registrations
+├ ƒ /dashboard/schedule
+├ ƒ /dashboard/settings
+├ ƒ /dashboard/statistics
+├ ƒ /dashboard/users
+├ ○ /icon.svg
+├ ƒ /login
+├ ○ /opengraph-image
+├ ƒ /parent
+├ ƒ /register
+├ ○ /robots.txt
+├ ○ /sitemap.xml
+└ ○ /twitter-image
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

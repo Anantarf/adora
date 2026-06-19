@@ -1,6 +1,7 @@
 "use server";
 
 import { Prisma } from "@prisma/client";
+import { recordOperationalError } from "@/lib/observability";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { DEFAULT_AUDIT_PAGE_SIZE } from "@/lib/constants";
@@ -65,7 +66,7 @@ export async function createAuditLog(
       },
     });
   } catch (error) {
-    console.error("[AUDIT_LOG_ERROR]:", error);
+    await recordOperationalError({ source: "create-audit-log", message: "Failed to create audit log", error });
     throw new Error("Gagal mencatat audit log.");
   }
 }

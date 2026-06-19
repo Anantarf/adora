@@ -1,15 +1,16 @@
 "use server";
 
 import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
-import { getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase.service";
+import { recordOperationalError } from "@/lib/observability";
+import { getHomebaseById, updateGroupHomebase, createHomebaseEvent } from "@/lib/homebase";
 import { prisma } from "@/lib/prisma";
 import { HOMEBASE_CACHE_TTL } from "@/lib/constants";
 import { requireAdmin } from "@/lib/server-auth";
 import type { event_type } from "@prisma/client";
 
 export const getPublicHomebases = unstable_cache(
-  () => prisma.homebase.findMany({ orderBy: { name: "asc" } }).catch((err) => {
-    console.error("Failed to fetch homebases:", err);
+  () => prisma.homebase.findMany({ orderBy: { name: "asc" } }).catch(async (err) => {
+    await recordOperationalError({ source: "get-public-homebases", message: "Failed to fetch homebases", error: err });
     return [];
   }),
   ["public-homebases"],
@@ -20,7 +21,7 @@ export async function getPublicHomebaseById(id: string) {
   try {
     return await getHomebaseById(id);
   } catch (error) {
-    console.error("Failed to fetch homebase:", error);
+    await recordOperationalError({ source: "get-public-homebase-by-id", message: "Failed to fetch homebase", error });
     return null;
   }
 }
@@ -33,7 +34,7 @@ export async function updateGroupToHomebase(groupId: string, homebaseId: string)
     revalidateTag("public-homebases", "max");
     return result;
   } catch (error) {
-    console.error("Failed to update group homebase:", error);
+    await recordOperationalError({ source: "update-group-homebase", message: "Failed to update group homebase", error });
     throw new Error("Gagal memperbarui homebase kelompok.");
   }
 }
@@ -53,7 +54,7 @@ export async function createEventWithHomebase(title: string, date: Date, homebas
     revalidateTag("public-homebases", "max");
     return result;
   } catch (error) {
-    console.error("Failed to create event:", error);
+    await recordOperationalError({ source: "create-event-with-homebase", message: "Failed to create homebase event", error });
     throw new Error("Gagal membuat agenda dari homebase.");
   }
 }

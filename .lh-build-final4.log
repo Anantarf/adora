@@ -1,0 +1,189 @@
+▲ Next.js 16.2.9 (Turbopack)
+- Environments: .env
+- Experiments (use with caution):
+  · optimizePackageImports
+
+  Creating an optimized production build ...
+
+> Build error occurred
+Error: Turbopack build failed with 6 errors:
+./node_modules/pg/lib/connection-parameters.js:3:13
+Module not found: Can't resolve 'dns'
+  [90m1 |[0m [32m'use strict'[0m
+  [90m2 |[0m
+[31m[1m>[0m [90m3 |[0m [36mconst[0m dns = require([32m'dns'[0m)
+  [90m  |[0m             [31m[1m^^^^^^^^^^^^^^[0m
+  [90m4 |[0m
+  [90m5 |[0m [36mconst[0m defaults = require([32m'./defaults'[0m)
+  [90m6 |[0m
+
+
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/pg/lib/connection-parameters.js [Client Component Browser]
+    ./node_modules/pg/lib/client.js [Client Component Browser]
+    ./node_modules/pg/lib/index.js [Client Component Browser]
+    ./node_modules/pg/esm/index.mjs [Client Component Browser]
+    ./node_modules/@prisma/adapter-pg/dist/index.mjs [Client Component Browser]
+    ./src/lib/prisma.ts [Client Component Browser]
+    ./src/lib/observability.ts [Client Component Browser]
+    ./src/lib/pdf/pdf-render.ts [Client Component Browser]
+    ./src/lib/generate-rapor-pdf.ts [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./node_modules/pg-connection-string/index.js:82:70
+Module not found: Can't resolve 'fs'
+  [90m80 |[0m
+  [90m81 |[0m   [90m// Only try to load fs if we expect to read from the disk[0m
+[31m[1m>[0m [90m82 |[0m   [36mconst[0m fs = config.sslcert || config.sslkey || config.sslrootcert ? require([32m'fs'[0m) : [36mnull[0m
+  [90m   |[0m                                                                      [31m[1m^^^^^^^^^^^^^[0m
+  [90m83 |[0m
+  [90m84 |[0m   [36mif[0m (config.sslcert) {
+  [90m85 |[0m     config.ssl.cert = fs.readFileSync(config.sslcert).toString()
+
+
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/pg-connection-string/index.js [Client Component Browser]
+    ./node_modules/pg/lib/connection-parameters.js [Client Component Browser]
+    ./node_modules/pg/lib/client.js [Client Component Browser]
+    ./node_modules/pg/lib/index.js [Client Component Browser]
+    ./node_modules/pg/esm/index.mjs [Client Component Browser]
+    ./node_modules/@prisma/adapter-pg/dist/index.mjs [Client Component Browser]
+    ./src/lib/prisma.ts [Client Component Browser]
+    ./src/lib/observability.ts [Client Component Browser]
+    ./src/lib/pdf/pdf-render.ts [Client Component Browser]
+    ./src/lib/generate-rapor-pdf.ts [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./node_modules/pgpass/lib/index.js:4:10
+Module not found: Can't resolve 'fs'
+  [90m2 |[0m
+  [90m3 |[0m [36mvar[0m path = require([32m'path'[0m)
+[31m[1m>[0m [90m4 |[0m   , fs = require([32m'fs'[0m)
+  [90m  |[0m          [31m[1m^^^^^^^^^^^^^[0m
+  [90m5 |[0m   , helper = require([32m'./helper.js'[0m)
+  [90m6 |[0m ;
+  [90m7 |[0m
+
+
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/pgpass/lib/index.js [Client Component Browser]
+    ./node_modules/pg/lib/client.js [Client Component Browser]
+    ./node_modules/pg/lib/index.js [Client Component Browser]
+    ./node_modules/pg/esm/index.mjs [Client Component Browser]
+    ./node_modules/@prisma/adapter-pg/dist/index.mjs [Client Component Browser]
+    ./src/lib/prisma.ts [Client Component Browser]
+    ./src/lib/observability.ts [Client Component Browser]
+    ./src/lib/pdf/pdf-render.ts [Client Component Browser]
+    ./src/lib/generate-rapor-pdf.ts [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./node_modules/pg/lib/connection.js:93:19
+Module not found: Can't resolve 'net'
+  [90m91 |[0m       }
+  [90m92 |[0m
+[31m[1m>[0m [90m93 |[0m       [36mconst[0m net = require([32m'net'[0m)
+  [90m   |[0m                   [31m[1m^^^^^^^^^^^^^^[0m
+  [90m94 |[0m       [36mif[0m (net.isIP && net.isIP(host) === [35m0[0m) {
+  [90m95 |[0m         options.servername = host
+  [90m96 |[0m       }
+
+
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/pg/lib/connection.js [Client Component Browser]
+    ./node_modules/pg/lib/index.js [Client Component Browser]
+    ./node_modules/pg/esm/index.mjs [Client Component Browser]
+    ./node_modules/@prisma/adapter-pg/dist/index.mjs [Client Component Browser]
+    ./src/lib/prisma.ts [Client Component Browser]
+    ./src/lib/observability.ts [Client Component Browser]
+    ./src/lib/pdf/pdf-render.ts [Client Component Browser]
+    ./src/lib/generate-rapor-pdf.ts [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./node_modules/pg/lib/stream.js:22:17
+Module not found: Can't resolve 'net'
+  [90m20 |[0m [36mfunction[0m getNodejsStreamFuncs() {
+  [90m21 |[0m   [36mfunction[0m getStream(ssl) {
+[31m[1m>[0m [90m22 |[0m     [36mconst[0m net = require([32m'net'[0m)
+  [90m   |[0m                 [31m[1m^^^^^^^^^^^^^^[0m
+  [90m23 |[0m     [36mreturn[0m [36mnew[0m net.[33mSocket[0m()
+  [90m24 |[0m   }
+  [90m25 |[0m
+
+
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/pg/lib/stream.js [Client Component Browser]
+    ./node_modules/pg/lib/connection.js [Client Component Browser]
+    ./node_modules/pg/lib/index.js [Client Component Browser]
+    ./node_modules/pg/esm/index.mjs [Client Component Browser]
+    ./node_modules/@prisma/adapter-pg/dist/index.mjs [Client Component Browser]
+    ./src/lib/prisma.ts [Client Component Browser]
+    ./src/lib/observability.ts [Client Component Browser]
+    ./src/lib/pdf/pdf-render.ts [Client Component Browser]
+    ./src/lib/generate-rapor-pdf.ts [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+./node_modules/pg/lib/stream.js:27:17
+Module not found: Can't resolve 'tls'
+  [90m25 |[0m
+  [90m26 |[0m   [36mfunction[0m getSecureStream(options) {
+[31m[1m>[0m [90m27 |[0m     [36mconst[0m tls = require([32m'tls'[0m)
+  [90m   |[0m                 [31m[1m^^^^^^^^^^^^^^[0m
+  [90m28 |[0m     [36mreturn[0m tls.connect(options)
+  [90m29 |[0m   }
+  [90m30 |[0m   [36mreturn[0m {
+
+
+
+Import trace:
+  Client Component Browser:
+    ./node_modules/pg/lib/stream.js [Client Component Browser]
+    ./node_modules/pg/lib/connection.js [Client Component Browser]
+    ./node_modules/pg/lib/index.js [Client Component Browser]
+    ./node_modules/pg/esm/index.mjs [Client Component Browser]
+    ./node_modules/@prisma/adapter-pg/dist/index.mjs [Client Component Browser]
+    ./src/lib/prisma.ts [Client Component Browser]
+    ./src/lib/observability.ts [Client Component Browser]
+    ./src/lib/pdf/pdf-render.ts [Client Component Browser]
+    ./src/lib/generate-rapor-pdf.ts [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Client Component Browser]
+    ./src/app/(admin)/dashboard/settings/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)

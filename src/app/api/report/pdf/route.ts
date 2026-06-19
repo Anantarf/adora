@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import {
   ALLOWED_REPORT_ROLES,
@@ -15,25 +16,25 @@ export async function GET(req: NextRequest) {
   try {
     const actor = await getSessionActor();
     if (!actor) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return apiError("UNAUTHORIZED", "Unauthorized", 401);
     }
 
     if (!actor.role || !ALLOWED_REPORT_ROLES.has(actor.role)) {
-      return NextResponse.json({ error: "Tidak diizinkan mengakses laporan ini." }, { status: 403 });
+      return apiError("FORBIDDEN", "Tidak diizinkan mengakses laporan ini.", 403);
     }
 
     const playerId = getRequestedPlayerId(req);
     if (!playerId) {
-      return NextResponse.json({ error: "playerId is required" }, { status: 400 });
+      return apiError("BAD_REQUEST", "playerId is required", 400);
     }
 
     const player = await getPlayerReportRecord(playerId);
     if (!player) {
-      return NextResponse.json({ error: "Player not found" }, { status: 404 });
+      return apiError("NOT_FOUND", "Player not found", 404);
     }
 
     if (!canActorAccessPlayer(actor, player)) {
-      return NextResponse.json({ error: "Akses Terlarang: Anda tidak memiliki izin untuk data ini." }, { status: 403 });
+      return apiError("FORBIDDEN", "Akses Terlarang: Anda tidak memiliki izin untuk data ini.", 403);
     }
 
     const html = renderReportHtml(buildReportViewModel(player));
@@ -50,6 +51,10 @@ export async function GET(req: NextRequest) {
     return new NextResponse(html, {
       headers: {
         "Content-Type": "text/html; charset=utf-8",
+        "Content-Security-Policy": "default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'",
+        "X-Content-Type-Options": "nosniff",
+        "Referrer-Policy": "no-referrer",
+        "Cache-Control": "private, no-store, max-age=0",
       },
     });
   } catch (error) {
@@ -59,6 +64,6 @@ export async function GET(req: NextRequest) {
       message: "Gagal generate laporan HTML",
       error,
     });
-    return NextResponse.json({ error: "Gagal generate laporan." }, { status: 500 });
+    return apiError("INTERNAL_ERROR", "Gagal generate laporan.", 500);
   }
 }

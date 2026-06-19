@@ -223,7 +223,7 @@ export const authOptions: NextAuthOptions = {
             token.lastChecked = Date.now();
           }
         } catch (error) {
-          console.error("JIT Session Validation Error:", error);
+          await recordOperationalError({ source: "jit-session-validation", message: "JIT session validation failed", error });
         }
       }
 
@@ -231,7 +231,10 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token?.error === "UserDeleted") {
-        return { ...session, user: undefined as unknown as typeof session.user };
+        // Returning `user: null` is now type-safe because Session.user is
+        // declared as nullable in src/types/next-auth.d.ts. Layouts must handle
+        // the null case and redirect to /login.
+        return { ...session, user: null };
       }
 
       if (token && session.user) {

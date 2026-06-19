@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { recordOperationalError } from "@/lib/observability";
 import type { Prisma, event_type } from "@prisma/client";
 import { createAuditLog } from "./audit";
 import { getJakartaToday, toJakartaDate } from "@/lib/date-utils";
@@ -46,7 +47,7 @@ export async function getEventsAction() {
       groups: event.eventGroups.map((eventGroup) => eventGroup.group),
     })) as ScheduleEvent[];
   } catch (error) {
-    console.error("Error fetching events:", error);
+    await recordOperationalError({ source: "get-events", message: "Failed to fetch events", error });
     throw new Error("Gagal mengambil jadwal kegiatan");
   }
 }
@@ -73,7 +74,7 @@ export async function getPublicEventsAction(): Promise<Partial<ScheduleEvent>[]>
 
     return events as Partial<ScheduleEvent>[];
   } catch (error) {
-    console.error("Error fetching public events:", error);
+    await recordOperationalError({ source: "get-public-events", message: "Failed to fetch public events", error });
     return [];
   }
 }
@@ -113,7 +114,7 @@ export async function createEventAction(data: { title: string; description?: str
     revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
-    console.error("Error creating event:", error);
+    await recordOperationalError({ source: "create-event", message: "Failed to create event", error });
     throw new Error("Gagal membuat agenda baru");
   }
 }
@@ -157,7 +158,7 @@ export async function updateEventAction(id: string, data: { title: string; descr
     revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
-    console.error("Error updating event:", error);
+    await recordOperationalError({ source: "update-event", message: "Failed to update event", error });
     throw new Error("Gagal mengubah jadwal");
   }
 }
@@ -175,7 +176,7 @@ export async function deleteEventAction(id: string) {
     revalidatePath("/dashboard", "layout");
     return { success: true };
   } catch (error) {
-    console.error("Error deleting event:", error);
+    await recordOperationalError({ source: "delete-event", message: "Failed to delete event", error });
     throw new Error("Gagal menghapus jadwal");
   }
 }
@@ -246,7 +247,7 @@ export async function getEventsWithAttendanceAction() {
       };
     });
   } catch (error) {
-    console.error("Error fetching events with attendance:", error);
+    await recordOperationalError({ source: "get-events-with-attendance", message: "Failed to fetch events with attendance", error });
     throw new Error("Gagal mengambil data agenda dengan presensi");
   }
 }
@@ -339,7 +340,7 @@ export async function getEventAttendanceDetailAction(eventId: string) {
       isDraftAttendance: event.attendances.length === 0,
     };
   } catch (error) {
-    console.error("Error fetching event attendance detail:", error);
+    await recordOperationalError({ source: "get-event-attendance-detail", message: "Failed to fetch event attendance detail", error });
     throw new Error("Gagal mengambil detail presensi agenda");
   }
 }

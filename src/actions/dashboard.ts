@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { recordOperationalError } from "@/lib/observability";
 import { requireAdmin } from "@/lib/server-auth";
 import { toJakartaDate, getJakartaToday } from "@/lib/date-utils";
 import { AttendanceStatus } from "@/types/dashboard";
@@ -125,7 +126,7 @@ export async function getDashboardMetricsAction(): Promise<DashboardMetrics> {
       atRiskPlayers,
     };
   } catch (error) {
-    console.error("[DASHBOARD_METRICS_ERROR]:", error);
+    await recordOperationalError({ source: "get-dashboard-metrics", message: "Failed to compute dashboard metrics", error });
     throw new Error("Gagal mengambil metrik dashboard. Silakan coba lagi.");
   }
 }
@@ -148,7 +149,7 @@ export async function getAttendancesAction(date: string, groupId?: string) {
       select: { playerId: true, status: true, note: true },
     }) as { playerId: string; status: AttendanceStatus; note: string | null }[];
   } catch (error) {
-    console.error("[GET_ATTENDANCES_ERROR]:", error);
+    await recordOperationalError({ source: "get-attendances", message: "Failed to fetch attendances", error });
     return [];
   }
 }
