@@ -113,13 +113,14 @@ export default function CertificatesPage() {
           description="Coba muat ulang halaman atau ulangi beberapa saat lagi."
           tone="danger"
           action={
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => refetch()}
-              className="rounded-lg border border-destructive/40 px-4 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+              className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
             >
               Muat Ulang
-            </button>
+            </Button>
           }
         />
       ) : null}

@@ -6,6 +6,7 @@ import { id as idLocale } from "date-fns/locale";
 import { Download, MessageCircle, Users } from "lucide-react";
 import { toast } from "sonner";
 
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { RegistrationActions } from "@/components/features/dashboard/RegistrationActions";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Pagination } from "@/components/ui/pagination";
@@ -113,13 +114,12 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
 
       <div className="px-4 pb-4 pt-0 sm:px-5">
         {registrations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center gap-3 py-16 text-center text-muted-foreground/75">
-            <Users className="size-10 text-muted-foreground/30" />
-            <p className="text-sm font-medium text-muted-foreground">Belum ada pendaftar baru</p>
-            <p className="text-xs text-muted-foreground/75">
-              Pendaftar dari formulir web akan muncul di sini.
-            </p>
-          </div>
+          <AdminStatePanel
+            icon={Users}
+            title="Belum ada pendaftar baru"
+            description="Pendaftar dari formulir web akan muncul di sini."
+            className="py-8"
+          />
         ) : (
           <>
             <div className="flex flex-col gap-2.5 pt-4 md:hidden">

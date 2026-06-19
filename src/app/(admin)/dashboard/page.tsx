@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { UserPlus } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
+
 import { AtRiskPlayers } from "@/components/features/dashboard/AtRiskPlayers";
 import { MetricCards } from "@/components/features/dashboard/MetricCards";
 import { RecentRegistrations } from "@/components/features/dashboard/RecentRegistrations";
@@ -106,13 +108,14 @@ export default function AdminDashboardPage() {
       {isError ? (
         <div className="flex items-center justify-between gap-3 rounded-xl border border-dashed border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">
           <span>Gagal memuat ringkasan dashboard. Coba muat ulang.</span>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => refetch()}
-            className="rounded-lg border border-destructive/40 px-3 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
+            className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
           >
             Muat Ulang
-          </button>
+          </Button>
         </div>
       ) : null}
 

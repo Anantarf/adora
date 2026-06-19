@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -184,9 +185,9 @@ export function EventFormCard({
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5 sm:col-span-2">
-              <label htmlFor="event-title" className="text-xs font-medium text-muted-foreground">
+              <Label htmlFor="event-title" className="text-xs font-medium text-muted-foreground">
                 Nama Agenda <span className="text-destructive">*</span>
-              </label>
+              </Label>
               <Input
                 id="event-title"
                 {...register("title")}
@@ -199,9 +200,9 @@ export function EventFormCard({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="event-type" className="text-xs font-medium text-muted-foreground">
+              <Label htmlFor="event-type" className="text-xs font-medium text-muted-foreground">
                 Jenis <span className="text-destructive">*</span>
-              </label>
+              </Label>
               <Select
                 value={selectedType}
                 onValueChange={(value: string | null) => {
@@ -275,9 +276,9 @@ export function EventFormCard({
           ) : null}
 
           <div className="space-y-1.5">
-            <label htmlFor="event-description" className="text-xs font-medium text-muted-foreground">
+            <Label htmlFor="event-description" className="text-xs font-medium text-muted-foreground">
               Keterangan
-            </label>
+            </Label>
             <Textarea
               id="event-description"
               {...register("description")}
@@ -288,9 +289,9 @@ export function EventFormCard({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <label htmlFor="event-date" className="text-xs font-medium text-muted-foreground">
+              <Label htmlFor="event-date" className="text-xs font-medium text-muted-foreground">
                 Tanggal <span className="text-destructive">*</span>
-              </label>
+              </Label>
               <Input
                 id="event-date"
                 type="date"
@@ -305,9 +306,9 @@ export function EventFormCard({
             </div>
 
             <div className="space-y-1.5">
-              <label htmlFor="event-time" className="text-xs font-medium text-muted-foreground">
+              <Label htmlFor="event-time" className="text-xs font-medium text-muted-foreground">
                 Waktu <span className="text-destructive">*</span>
-              </label>
+              </Label>
               <Input
                 id="event-time"
                 {...register("time", {
@@ -335,9 +336,9 @@ export function EventFormCard({
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <label htmlFor="event-location" className="text-xs font-medium text-muted-foreground">
+              <Label htmlFor="event-location" className="text-xs font-medium text-muted-foreground">
                 Lokasi
-              </label>
+              </Label>
               <Input
                 id="event-location"
                 {...register("location")}
@@ -348,9 +349,9 @@ export function EventFormCard({
 
             {homebases.length > 0 ? (
               <div className="space-y-1.5">
-                <label htmlFor="event-homebaseId" className="text-xs font-medium text-muted-foreground">
+                <Label htmlFor="event-homebaseId" className="text-xs font-medium text-muted-foreground">
                   Lokasi Latihan
-                </label>
+                </Label>
                 <Select
                   value={homebaseId ?? ""}
                   onValueChange={(value: string | null) => setValue("homebaseId", value || undefined)}

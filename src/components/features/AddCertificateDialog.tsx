@@ -16,6 +16,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function AddCertificateDialog() {
   const [open, setOpen] = useState(false);
@@ -94,7 +95,7 @@ export function AddCertificateDialog() {
 
         <div className="mt-2 flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Judul Sertifikat</label>
+            <Label className="text-xs font-medium text-muted-foreground">Judul Sertifikat</Label>
             <Input
               placeholder="Contoh: Juara 1 Turnamen Kemerdekaan 2026"
               value={title}
@@ -104,7 +105,7 @@ export function AddCertificateDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">URL File Sertifikat</label>
+            <Label className="text-xs font-medium text-muted-foreground">URL File Sertifikat</Label>
             <Input
               placeholder="/api/storage/uploads/sertifikat-001.pdf"
               value={fileUrl}
@@ -118,7 +119,7 @@ export function AddCertificateDialog() {
           </div>
 
           <div className="flex flex-col gap-1.5">
-            <label className="text-xs font-medium text-muted-foreground">Pilih Pemain</label>
+            <Label className="text-xs font-medium text-muted-foreground">Pilih Pemain</Label>
             <div className="space-y-2 rounded-xl border border-border/50 bg-background/40 p-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />

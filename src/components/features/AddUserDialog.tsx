@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Loader2, Plus, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
 
@@ -81,7 +82,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: ManagedUserRole }) {
     <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger
           render={
-          <Button size="lg" className="h-11 bg-primary text-primary-foreground hover:bg-primary/90 transition-all">
+          <Button size="lg" className="h-11">
             <Plus className="mr-2 size-4" /> Tambah {titleLabel}
           </Button>
         }
@@ -98,25 +99,25 @@ export function AddUserDialog({ role = "PARENT" }: { role?: ManagedUserRole }) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
           <div className="space-y-1.5">
-            <label htmlFor="user-name" className="ml-1 text-xs font-medium text-muted-foreground">Nama Lengkap</label>
+            <Label htmlFor="user-name" className="ml-1 text-xs font-medium text-muted-foreground">Nama Lengkap</Label>
             <Input id="user-name" {...register("name")} placeholder="Contoh: Budi Santoso" aria-required="true" aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? "user-name-error" : undefined} className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.name && <p id="user-name-error" role="alert" className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.name.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="user-username" className="ml-1 text-xs font-medium text-muted-foreground">Username Login</label>
+            <Label htmlFor="user-username" className="ml-1 text-xs font-medium text-muted-foreground">Username Login</Label>
             <Input id="user-username" {...register("username")} placeholder="Contoh: budi_santoso" aria-required="true" aria-invalid={Boolean(errors.username)} aria-describedby={errors.username ? "user-username-error" : undefined} className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.username && <p id="user-username-error" role="alert" className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.username.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="user-email" className="ml-1 text-xs font-medium text-muted-foreground">Email</label>
+            <Label htmlFor="user-email" className="ml-1 text-xs font-medium text-muted-foreground">Email</Label>
             <Input id="user-email" {...register("email")} type="email" placeholder="opsional@contoh.com" aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? "user-email-error" : undefined} className="h-11 bg-background/50 rounded-xl border-border/50 focus-visible:ring-primary/50" />
             {errors.email && <p id="user-email-error" role="alert" className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.email.message}</p>}
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="user-password" className="ml-1 text-xs font-medium text-muted-foreground">{passwordLabel}</label>
+            <Label htmlFor="user-password" className="ml-1 text-xs font-medium text-muted-foreground">{passwordLabel}</Label>
             {isParent ? (
               <div onClick={() => toast.info("Kata sandi awal orang tua mengikuti pengaturan default sistem.")} className="cursor-not-allowed">
                 <Input id="user-password" value="Mengikuti Default Sistem" readOnly tabIndex={-1} className="h-11 bg-background/50 font-mono opacity-80 pointer-events-none text-muted-foreground rounded-xl border-border/50 text-xs" />
@@ -134,7 +135,7 @@ export function AddUserDialog({ role = "PARENT" }: { role?: ManagedUserRole }) {
             {errors.password && !isParent && <p id="user-password-error" role="alert" className="ml-1 mt-1 text-xs font-medium text-destructive">{errors.password.message}</p>}
           </div>
 
-          <Button type="submit" disabled={isPending} className="mt-4 h-11 w-full rounded-xl bg-primary text-primary-foreground shadow-sm hover:bg-primary/90">
+          <Button type="submit" disabled={isPending} className="mt-4 h-11 w-full rounded-xl shadow-sm">
             {isPending ? <><Loader2 className="animate-spin size-4 mr-2" /> Menyimpan...</> : "Simpan"}
           </Button>
         </form>

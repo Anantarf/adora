@@ -188,7 +188,7 @@ export default function PlayersPage() {
         <div
           className={`flex flex-col gap-4 lg:col-span-4 ${isMobileDetailOpen ? "hidden lg:flex" : "flex"}`}
         >
-          <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 shadow-xs">
+          <div className="flex flex-col gap-4 rounded-xl border border-border/50 bg-card p-4 shadow-sm">
             <div className="flex items-center justify-between gap-3 border-b border-border/50 pb-3">
               <div className="space-y-1">
                 <h2 className="text-sm font-semibold text-foreground">
@@ -236,7 +236,7 @@ export default function PlayersPage() {
                     }}
                     className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-all ${
                       active
-                        ? "border border-border/30 bg-card text-foreground shadow-xs"
+                        ? "border border-border/30 bg-card text-foreground shadow-sm"
                         : "text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -281,7 +281,7 @@ export default function PlayersPage() {
                       }}
                       className={`flex w-full cursor-pointer flex-col gap-1.5 rounded-xl border p-3 text-left transition-all ${
                         isActive
-                          ? "border-primary bg-primary/5 shadow-xs"
+                          ? "border-primary bg-primary/5 shadow-sm"
                           : "border-border/40 bg-background/20 hover:border-primary/30 hover:bg-background/40"
                       }`}
                     >
@@ -337,7 +337,7 @@ export default function PlayersPage() {
                 </div>
               </div>
             ) : (
-<div className="flex min-h-[520px] animate-in fade-in slide-in-from-top-1 duration-150 flex-col gap-5 rounded-xl border border-border/50 bg-card p-4 shadow-xs sm:p-6"
+<div className="flex min-h-[520px] animate-in fade-in slide-in-from-top-1 duration-150 flex-col gap-5 rounded-xl border border-border/50 bg-card p-4 shadow-sm sm:p-6"
 
 
 
@@ -464,7 +464,7 @@ export default function PlayersPage() {
                       onClick={() => setViewMode("database")}
                       className={`rounded-md p-1.5 transition-all ${
                         viewMode === "database"
-                          ? "border border-border/30 bg-card text-foreground shadow-xs"
+                          ? "border border-border/30 bg-card text-foreground shadow-sm"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                       title="Tampilan Database (Tabel)"
@@ -477,7 +477,7 @@ export default function PlayersPage() {
                       onClick={() => setViewMode("grid")}
                       className={`rounded-md p-1.5 transition-all ${
                         viewMode === "grid"
-                          ? "border border-border/30 bg-card text-foreground shadow-xs"
+                          ? "border border-border/30 bg-card text-foreground shadow-sm"
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                       title="Tampilan Visual (Grid)"
@@ -502,7 +502,7 @@ export default function PlayersPage() {
                     className="min-h-[300px]"
                   />
                 ) : viewMode === "database" ? (
-                  <div className="-mx-1 overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
+                  <div className="-mx-1 overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-sm custom-scrollbar">
                     <table className="min-w-[64rem] w-full text-left text-xs">
                       <thead className="border-b border-border/50 bg-muted/40 text-label text-muted-foreground">
                         <tr>

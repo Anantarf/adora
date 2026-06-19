@@ -12,6 +12,7 @@ import { AccountDetailDialog } from "@/components/features/users/AccountDetailDi
 import { CoachProfileDialog } from "@/components/features/users/CoachProfileDialog";
 import { EditUserDialog } from "@/components/features/users/EditUserDialog";
 import { Pagination } from "@/components/ui/pagination";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // Header memakai UsersManagementHeader (sub-header kustom dengan role switcher + search) bukan AdminPageHeader generik, karena halaman ini punya kontrol filter yang lebih kaya.
@@ -97,9 +98,9 @@ export default function UsersManagementPage() {
             title="Gagal memuat data akun."
             tone="danger"
             action={
-              <button type="button" onClick={() => refetch()} className="rounded-lg border border-destructive/40 px-4 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10">
+              <Button variant="outline" size="sm" onClick={() => refetch()} className="border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive">
                 Muat Ulang
-              </button>
+              </Button>
             }
           />
         ) : totalAccounts === 0 ? (
