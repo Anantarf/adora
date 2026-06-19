@@ -64,9 +64,9 @@ export default function CertificatesPage() {
       <AlertDialogTrigger
         render={
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
-            className="h-9 rounded-lg px-3 text-xs font-medium text-destructive hover:bg-destructive/10 hover:text-destructive"
+            className="h-9 rounded-lg border-destructive/30 px-3 text-xs font-medium text-destructive transition-colors hover:border-destructive/60 hover:bg-destructive/10 hover:text-destructive"
           >
             <Trash2 className="mr-1.5 size-3.5" />
             Hapus
@@ -193,7 +193,7 @@ export default function CertificatesPage() {
                       </span>
                     </div>
                   </div>
-                  <span className="shrink-0 text-[10px] font-medium text-muted-foreground/60">
+                  <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
                     #{(clampedPage - 1) * ITEMS_PER_PAGE + index + 1}
                   </span>
                 </div>
@@ -219,19 +219,19 @@ export default function CertificatesPage() {
             <Table className="min-w-[48rem]">
               <TableHeader className="bg-muted/20">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">
-                  <TableHead className="w-10 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  <TableHead className="w-10 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     No
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Judul Sertifikat
                   </TableHead>
-                  <TableHead className="w-52 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  <TableHead className="w-52 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Pemain
                   </TableHead>
-                  <TableHead className="w-36 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  <TableHead className="w-36 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Tanggal Unggah
                   </TableHead>
-                  <TableHead className="w-32 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                  <TableHead className="w-32 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                     Aksi
                   </TableHead>
                 </TableRow>

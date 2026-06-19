@@ -149,7 +149,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                           </p>
                         ) : null}
                       </div>
-                      <span className="shrink-0 text-[10px] font-medium text-muted-foreground/50">
+                      <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
                         #{(clampedPage - 1) * ITEMS_PER_PAGE + index + 1}
                       </span>
                     </div>
@@ -161,7 +161,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                       <span className="rounded border border-border/50 bg-background px-2 py-0.5 text-muted-foreground">
                         {registration.homebase.name}
                       </span>
-                      <span className="px-1 py-0.5 text-muted-foreground/60">
+                      <span className="px-1 py-0.5 text-muted-foreground">
                         {format(new Date(registration.createdAt), "dd MMM yyyy", { locale: idLocale })}
                       </span>
                     </div>
@@ -197,25 +197,25 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border/40">
-                    <th scope="col" className="w-8 py-3 pl-1 pr-3 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="w-8 py-3 pl-1 pr-3 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       No
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Tanggal
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Nama Pemain
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       WhatsApp
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Status
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Lokasi
                     </th>
-                    <th scope="col" className="py-3 pl-3 pr-1 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                    <th scope="col" className="py-3 pl-3 pr-1 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                       Aksi
                     </th>
                   </tr>
@@ -228,15 +228,15 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
 
                     return (
                       <tr key={registration.id} className="group transition-colors hover:bg-muted/10">
-                        <td className="py-3 pl-1 pr-3 text-center text-xs font-medium text-muted-foreground/50">
+                        <td className="py-3 pl-1 pr-3 text-center text-xs font-medium text-muted-foreground">
                           {(clampedPage - 1) * ITEMS_PER_PAGE + index + 1}
                         </td>
                         <td className="whitespace-nowrap px-3 py-3">
                           <div className="flex flex-col">
-                            <span className="text-xs text-foreground/80">
+                            <span className="text-xs text-foreground">
                               {format(new Date(registration.createdAt), "dd MMM yyyy", { locale: idLocale })}
                             </span>
-                            <span className="text-[10px] text-muted-foreground/50">
+                            <span className="text-[10px] text-muted-foreground">
                               {format(new Date(registration.createdAt), "HH:mm", { locale: idLocale })}
                             </span>
                           </div>
@@ -252,7 +252,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                               </span>
                             </div>
                             {registration.email ? (
-                              <span className="text-[11px] text-muted-foreground/60">
+                              <span className="text-[11px] text-muted-foreground">
                                 {registration.email}
                               </span>
                             ) : null}

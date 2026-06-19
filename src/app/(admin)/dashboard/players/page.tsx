@@ -541,7 +541,7 @@ export default function PlayersPage() {
                               key={player.id}
                               className="group transition-colors hover:bg-primary/[0.02]"
                             >
-                              <td className="px-4 py-2.5 text-center font-mono font-medium tabular-nums text-muted-foreground/60">
+                              <td className="px-4 py-2.5 text-center font-mono font-medium tabular-nums text-muted-foreground">
                                 {globalIndex}
                               </td>
                               <td className="px-4 py-2.5 font-bold text-foreground">
