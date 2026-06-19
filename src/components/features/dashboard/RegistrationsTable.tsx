@@ -197,25 +197,25 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
               <table className="w-full text-left">
                 <thead>
                   <tr className="border-b border-border/40">
-                    <th scope="col" className="w-8 py-3 pl-1 pr-3 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="w-8 py-3 pl-1 pr-3 text-center text-label text-muted-foreground">
                       No
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="px-3 py-3 text-label text-muted-foreground">
                       Tanggal
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="px-3 py-3 text-label text-muted-foreground">
                       Nama Pemain
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="px-3 py-3 text-label text-muted-foreground">
                       WhatsApp
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="px-3 py-3 text-label text-muted-foreground">
                       Status
                     </th>
-                    <th scope="col" className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="px-3 py-3 text-label text-muted-foreground">
                       Lokasi
                     </th>
-                    <th scope="col" className="py-3 pl-3 pr-1 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                    <th scope="col" className="py-3 pl-3 pr-1 text-right text-label text-muted-foreground">
                       Aksi
                     </th>
                   </tr>
@@ -252,7 +252,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                               </span>
                             </div>
                             {registration.email ? (
-                              <span className="text-[11px] text-muted-foreground">
+                              <span className="text-xs text-muted-foreground">
                                 {registration.email}
                               </span>
                             ) : null}
@@ -270,7 +270,7 @@ export function RegistrationsTable({ registrations }: RegistrationsTableProps) {
                         </td>
                         <td className="px-3 py-3">
                           <span
-                            className={`inline-flex items-center rounded-md border px-2 py-0.5 text-[11px] font-semibold ${statusMeta.badgeClassName}`}
+                            className={`inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-semibold ${statusMeta.badgeClassName}`}
                           >
                             {statusMeta.label}
                           </span>

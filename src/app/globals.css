@@ -291,6 +291,10 @@ input:-webkit-autofill:active {
     @apply text-[10px] font-medium tracking-wide;
   }
 
+  .text-label {
+    @apply text-[11px] font-semibold uppercase tracking-wide;
+  }
+
   .wrap-break-word {
     overflow-wrap: break-word;
     word-wrap: break-word;

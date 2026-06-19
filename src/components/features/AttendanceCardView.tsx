@@ -160,7 +160,7 @@ function AttendanceCardViewInner() {
                           </div>
 
                           {event.groups.length > 0 ? (
-                            <div className="truncate text-[11px] text-muted-foreground">
+                            <div className="truncate text-xs text-muted-foreground">
                               {event.groups.map((group) => group.name).join(", ")}
                             </div>
                           ) : null}

@@ -182,7 +182,7 @@ export function ViewPlayerDialog({ playerId, open, onOpenChange, onDelete }: Vie
                     />
                   </a>
                 ) : (
-                  <div className="flex h-28 w-21 items-center justify-center rounded-lg border border-dashed border-border/50 bg-background/40 px-2 text-center text-[11px] font-medium text-muted-foreground">
+                  <div className="flex h-28 w-21 items-center justify-center rounded-lg border border-dashed border-border/50 bg-background/40 px-2 text-center text-xs font-medium text-muted-foreground">
                     Tidak ada foto
                   </div>
                 )}

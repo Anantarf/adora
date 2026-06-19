@@ -79,7 +79,7 @@ export function GroupFormFields({
                   }`}
                 >
                   <span className="block text-sm font-semibold">{option.label}</span>
-                  <span className="mt-1 block text-[11px] leading-relaxed">{option.desc}</span>
+                  <span className="mt-1 block text-xs leading-relaxed">{option.desc}</span>
                 </button>
               );
             })}

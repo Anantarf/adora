@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
           <button
             type="button"
             onClick={() => refetch()}
-            className="rounded-lg border border-destructive/40 px-3 py-1 text-[11px] font-medium text-destructive hover:bg-destructive/10"
+            className="rounded-lg border border-destructive/40 px-3 py-1 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
           >
             Muat Ulang
           </button>
@@ -127,6 +127,7 @@ export default function AdminDashboardPage() {
           <RecentRegistrations
             registrations={metrics?.recentRegistrations ?? []}
             isLoading={isLoading}
+            isError={isError}
           />
         </div>
         <div className="xl:col-span-1">

@@ -11,15 +11,36 @@ import { QUERY_KEYS } from "@/lib/constants";
 import { getEventConfig } from "@/lib/config/events";
 import { getCountdownLabel } from "@/lib/date-utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 
 export function UpcomingAgenda() {
-  const { data: events, isLoading } = useQuery({
+  const { data: events, isLoading, isError } = useQuery({
     queryKey: QUERY_KEYS.PUBLIC_EVENTS,
     queryFn: getPublicEventsAction,
     staleTime: 1000 * 60 * 5,
   });
 
   const upcoming = (events ?? []).slice(0, 5);
+
+  if (isError) {
+    return (
+      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">
+        <div className="flex items-center gap-2 border-b border-border/50 px-5 py-4">
+          <CalendarDays className="size-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-foreground">Agenda Mendatang</h2>
+        </div>
+        <div className="flex flex-1 items-center justify-center p-4">
+          <AdminStatePanel
+            icon={CalendarDays}
+            title="Gagal memuat agenda"
+            description="Tidak dapat mengambil jadwal. Silakan muat ulang halaman."
+            tone="danger"
+            className="min-h-44 w-full border-dashed"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm">

@@ -10,6 +10,7 @@ import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { useCertificates, useDeleteCertificate } from "@/hooks/use-certificates";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Pagination } from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -115,7 +116,7 @@ export default function CertificatesPage() {
             <button
               type="button"
               onClick={() => refetch()}
-              className="rounded-lg border border-destructive/40 px-4 py-2 text-[11px] font-medium text-destructive hover:bg-destructive/10"
+              className="rounded-lg border border-destructive/40 px-4 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
             >
               Muat Ulang
             </button>
@@ -125,7 +126,7 @@ export default function CertificatesPage() {
 
       <div className="relative">
         <Search className="absolute left-3.5 top-1/2 z-10 size-4 -translate-y-1/2 text-muted-foreground" />
-        <input
+        <Input
           type="text"
           placeholder="Cari judul sertifikat atau nama pemain..."
           value={searchQuery}
@@ -133,7 +134,7 @@ export default function CertificatesPage() {
             setSearchQuery(event.target.value);
             setCurrentPage(1);
           }}
-          className="h-11 w-full rounded-xl border border-border/50 bg-background/50 pl-10 pr-4 text-sm font-medium outline-none transition-all focus:ring-1 focus:ring-primary/30"
+          className="h-11 rounded-xl border-border/50 bg-background/50 pl-10 pr-4 font-medium focus:ring-primary/30"
         />
       </div>
 
@@ -219,19 +220,19 @@ export default function CertificatesPage() {
             <Table className="min-w-[48rem]">
               <TableHeader className="bg-muted/20">
                 <TableRow className="border-b border-border/50 hover:bg-transparent">
-                  <TableHead className="w-10 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TableHead className="w-10 text-center text-label text-muted-foreground">
                     No
                   </TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TableHead className="text-label text-muted-foreground">
                     Judul Sertifikat
                   </TableHead>
-                  <TableHead className="w-52 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TableHead className="w-52 text-label text-muted-foreground">
                     Pemain
                   </TableHead>
-                  <TableHead className="w-36 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TableHead className="w-36 text-label text-muted-foreground">
                     Tanggal Unggah
                   </TableHead>
-                  <TableHead className="w-32 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  <TableHead className="w-32 text-right text-label text-muted-foreground">
                     Aksi
                   </TableHead>
                 </TableRow>

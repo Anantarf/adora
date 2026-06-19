@@ -274,13 +274,13 @@ export default function StatisticsPage() {
           {selectedPeriodId && !statsLoading ? (
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Selesai</span>
+                <span className="text-xs font-medium text-muted-foreground">Selesai</span>
                 <span className="text-sm font-semibold tabular-nums text-primary">
                   {statsSummary.published}
                 </span>
               </div>
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Draft</span>
+                <span className="text-xs font-medium text-muted-foreground">Draft</span>
                 <span className="text-sm font-semibold tabular-nums text-foreground">
                   {statsSummary.draft}
                 </span>

@@ -44,7 +44,7 @@ export function BatchUploadFilePicker({ selectedFile, fileInputRef, acceptedFile
           <p className="text-xs text-muted-foreground">{(selectedFile.size / 1024).toFixed(1)} KB - siap diperiksa</p>
         </div>
       </div>
-      <Button variant="ghost" size="icon" onClick={onClear} disabled={isProcessing} className="hover:text-destructive">
+      <Button variant="ghost" size="icon" onClick={onClear} disabled={isProcessing} className="hover:text-destructive" aria-label="Hapus berkas">
         <X className="size-4" />
       </Button>
     </div>

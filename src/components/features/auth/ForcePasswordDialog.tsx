@@ -65,12 +65,12 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
           <div className="space-y-3">
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input type="password" placeholder="Kata sandi baru (minimal 8 karakter)" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-4" disabled={isLoading} required autoComplete="new-password" />
+              <Input id="force-new-password" type="password" placeholder="Kata sandi baru (minimal 8 karakter)" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-4" disabled={isLoading} required aria-required="true" aria-label="Kata sandi baru" autoComplete="new-password" />
             </div>
 
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input type="password" placeholder="Konfirmasi kata sandi" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-9 pr-4" disabled={isLoading} required autoComplete="new-password" />
+              <Input id="force-confirm-password" type="password" placeholder="Konfirmasi kata sandi" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="pl-9 pr-4" disabled={isLoading} required aria-required="true" aria-label="Konfirmasi kata sandi baru" autoComplete="new-password" />
             </div>
           </div>
 

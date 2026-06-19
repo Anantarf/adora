@@ -173,7 +173,7 @@ export function CoachProfileDialog({
                         />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-foreground">{group.name}</p>
-                          <p className="text-[11px] text-muted-foreground">
+                          <p className="text-xs text-muted-foreground">
                             {group._count?.player ?? 0} pemain aktif
                           </p>
                         </div>

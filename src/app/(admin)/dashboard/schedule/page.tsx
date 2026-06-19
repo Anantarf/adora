@@ -183,7 +183,7 @@ export default function SchedulePage() {
                             </div>
 
                             {event.location ? (
-                              <div className="flex min-w-0 items-center gap-1 text-[11px] text-muted-foreground">
+                              <div className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
                                 <MapPin className="size-3 shrink-0" />
                                 <span className="truncate">{event.location}</span>
                               </div>

@@ -156,6 +156,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
                         size="icon"
                         onClick={() => handleUnlink(p.id)}
                         disabled={isUnlinking}
+                        aria-label={`Putus tautan ${p.name}`}
                         className="size-8 rounded-lg text-destructive/50 hover:text-destructive hover:bg-destructive/10 sm:opacity-0 sm:group-hover:opacity-100 transition-all shrink-0"
                       >
                         <X className="size-4" />

@@ -91,7 +91,7 @@ export function ContactAddressFields({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
         {/* Alamat Rumah */}
         <div className="space-y-2 md:col-span-2">
           <label htmlFor="field-player-addressLine1" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
@@ -102,9 +102,12 @@ export function ContactAddressFields({
             {...register("addressLine1")}
             placeholder="Jalan, nomor rumah, RT/RW"
             className={inputClassName}
+            aria-required="true"
+            aria-invalid={Boolean(errors.addressLine1)}
+            aria-describedby={errors.addressLine1 ? "field-player-addressLine1-error" : undefined}
           />
           {errors.addressLine1 && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.addressLine1.message}</p>
+            <p id="field-player-addressLine1-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.addressLine1.message}</p>
           )}
         </div>
 
@@ -119,7 +122,7 @@ export function ContactAddressFields({
             placeholder="Patokan, blok, atau catatan tambahan (opsional)"
             className={inputClassName}
           />
-          <p className="text-[11px] text-muted-foreground">Opsional. Boleh dikosongkan jika tidak ada.</p>
+          <p className="text-xs text-muted-foreground">Opsional. Boleh dikosongkan jika tidak ada.</p>
         </div>
 
         {/* Kota */}
@@ -132,9 +135,12 @@ export function ContactAddressFields({
             {...register("city")}
             placeholder="Contoh: Depok"
             className={inputClassName}
+            aria-required="true"
+            aria-invalid={Boolean(errors.city)}
+            aria-describedby={errors.city ? "field-player-city-error" : undefined}
           />
           {errors.city && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.city.message}</p>
+            <p id="field-player-city-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.city.message}</p>
           )}
         </div>
 
@@ -148,9 +154,12 @@ export function ContactAddressFields({
             {...register("province")}
             placeholder="Contoh: Jawa Barat"
             className={inputClassName}
+            aria-required="true"
+            aria-invalid={Boolean(errors.province)}
+            aria-describedby={errors.province ? "field-player-province-error" : undefined}
           />
           {errors.province && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.province.message}</p>
+            <p id="field-player-province-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.province.message}</p>
           )}
         </div>
 
@@ -164,9 +173,12 @@ export function ContactAddressFields({
             {...register("postalCode")}
             placeholder="Contoh: 16514"
             className={inputClassName}
+            aria-required="true"
+            aria-invalid={Boolean(errors.postalCode)}
+            aria-describedby={errors.postalCode ? "field-player-postalCode-error" : undefined}
           />
           {errors.postalCode && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.postalCode.message}</p>
+            <p id="field-player-postalCode-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.postalCode.message}</p>
           )}
         </div>
 
@@ -181,11 +193,14 @@ export function ContactAddressFields({
             {...register("phoneNumber")}
             placeholder="Contoh: 081234567890"
             className={inputClassName}
+            aria-required="true"
+            aria-invalid={Boolean(errors.phoneNumber)}
+            aria-describedby={errors.phoneNumber ? "field-player-phoneNumber-error" : "field-player-phoneNumber-hint"}
           />
           {errors.phoneNumber && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.phoneNumber.message}</p>
+            <p id="field-player-phoneNumber-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.phoneNumber.message}</p>
           )}
-          <p className="text-[11px] text-muted-foreground">
+          <p id="field-player-phoneNumber-hint" className="text-xs text-muted-foreground">
             Jika pemain belum punya nomor sendiri, isi dengan nomor orang tua.
           </p>
         </div>

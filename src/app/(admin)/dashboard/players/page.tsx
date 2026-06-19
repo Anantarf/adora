@@ -194,7 +194,7 @@ export default function PlayersPage() {
                 <h2 className="text-sm font-semibold text-foreground">
                   Daftar Kelompok
                 </h2>
-                <p className="text-[11px] leading-relaxed text-muted-foreground">
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   Pilih kelompok di kiri, lalu kelola pemainnya di panel kanan.
                 </p>
               </div>
@@ -234,7 +234,7 @@ export default function PlayersPage() {
                       setSelectedGroupId(null);
                       setGroupSearchQuery("");
                     }}
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-[11px] font-medium transition-all ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 text-xs font-medium transition-all ${
                       active
                         ? "border border-border/30 bg-card text-foreground shadow-xs"
                         : "text-muted-foreground hover:text-foreground"
@@ -354,6 +354,7 @@ export default function PlayersPage() {
                             size="icon"
                             onClick={() => setIsMobileDetailOpen(false)}
                             className="size-8 shrink-0 rounded-lg lg:hidden"
+                            aria-label="Kembali ke daftar kelompok"
                           >
                             <ChevronLeft className="size-4" />
                           </Button>
@@ -431,13 +432,13 @@ export default function PlayersPage() {
                 <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
                   <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <div className="flex items-center justify-between gap-3">
-                      <p className="text-[11px] font-semibold text-muted-foreground">
+                      <p className="text-xs font-semibold text-muted-foreground">
                         {filteredPlayerCount === 0
                           ? "Belum ada pemain yang tampil."
                           : `${filteredPlayerCount} pemain tampil di daftar.`}
                       </p>
                       {totalPages > 1 ? (
-                        <p className="text-[11px] font-medium text-muted-foreground">
+                        <p className="text-xs font-medium text-muted-foreground">
                           Halaman {currentServerPage} dari {totalPages}
                         </p>
                       ) : null}
@@ -467,6 +468,7 @@ export default function PlayersPage() {
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                       title="Tampilan Database (Tabel)"
+                      aria-label="Tampilan Database (Tabel)"
                     >
                       <TableIcon className="size-3.5" />
                     </button>
@@ -479,6 +481,7 @@ export default function PlayersPage() {
                           : "text-muted-foreground hover:text-foreground"
                       }`}
                       title="Tampilan Visual (Grid)"
+                      aria-label="Tampilan Visual (Grid)"
                     >
                       <LayoutGrid className="size-3.5" />
                     </button>
@@ -501,7 +504,7 @@ export default function PlayersPage() {
                 ) : viewMode === "database" ? (
                   <div className="-mx-1 overflow-x-auto rounded-xl border border-border/50 bg-background/20 shadow-xs custom-scrollbar">
                     <table className="min-w-[64rem] w-full text-left text-xs">
-                      <thead className="border-b border-border/50 bg-muted/40 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                      <thead className="border-b border-border/50 bg-muted/40 text-label text-muted-foreground">
                         <tr>
                           <th scope="col" className="w-10 px-4 py-3 text-center">
                             No
@@ -702,7 +705,7 @@ export default function PlayersPage() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex flex-wrap items-center gap-1.5 text-[11px] text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground">
                           <span className="rounded-md border border-border/50 bg-background/50 px-2 py-0.5 font-medium text-foreground">
                             {(() => {
                               const age = player.dateOfBirth ? calculateAgeFromDate(new Date(player.dateOfBirth)) : null;

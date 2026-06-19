@@ -97,7 +97,7 @@ export default function UsersManagementPage() {
             title="Gagal memuat data akun."
             tone="danger"
             action={
-              <button type="button" onClick={() => refetch()} className="rounded-lg border border-destructive/40 px-4 py-2 text-[11px] font-medium text-destructive hover:bg-destructive/10">
+              <button type="button" onClick={() => refetch()} className="rounded-lg border border-destructive/40 px-4 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10">
                 Muat Ulang
               </button>
             }

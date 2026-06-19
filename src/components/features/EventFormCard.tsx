@@ -194,7 +194,7 @@ export function EventFormCard({
                 className="h-10 border-border/50 bg-background/50"
               />
               {errors.title ? (
-                <p className="text-[11px] text-destructive">{errors.title.message}</p>
+                <p className="text-xs text-destructive">{errors.title.message}</p>
               ) : null}
             </div>
 
@@ -326,9 +326,9 @@ export function EventFormCard({
                 className="h-10 border-border/50 bg-background/50"
               />
               {errors.time ? (
-                <p className="text-[11px] text-destructive">{errors.time.message}</p>
+                <p className="text-xs text-destructive">{errors.time.message}</p>
               ) : (
-                <p className="text-[11px] text-muted-foreground">Format 24 jam, misalnya 08:00.</p>
+                <p className="text-xs text-muted-foreground">Format 24 jam, misalnya 08:00.</p>
               )}
             </div>
           </div>

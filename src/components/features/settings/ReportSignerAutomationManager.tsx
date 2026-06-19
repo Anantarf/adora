@@ -163,7 +163,7 @@ export function ReportSignerAutomationManager() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="mt-2 text-[11px] text-muted-foreground">
+                      <p className="mt-2 text-xs text-muted-foreground">
                         Simpan setelah memilih coach.
                       </p>
                     </div>
@@ -218,7 +218,7 @@ export function ReportSignerAutomationManager() {
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="text-xs font-medium text-foreground">File tanda tangan</p>
-                            <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
+                            <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-xs text-muted-foreground">
                               PNG, maks. 300KB
                             </span>
                           </div>
@@ -276,12 +276,12 @@ export function ReportSignerAutomationManager() {
                               </div>
                               <div className="min-w-0 flex-1 space-y-0.5">
                                 <p className="truncate text-xs font-medium text-foreground">Tanda Tangan</p>
-                                <p className="text-[11px] text-muted-foreground">Dipakai untuk rapor lokasi ini</p>
+                                <p className="text-xs text-muted-foreground">Dipakai untuk rapor lokasi ini</p>
                                 <a
                                   href={selectedCoach.signatureUrl}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="text-[11px] font-medium text-primary hover:underline"
+                                  className="text-xs font-medium text-primary hover:underline"
                                 >
                                   Lihat File
                                 </a>

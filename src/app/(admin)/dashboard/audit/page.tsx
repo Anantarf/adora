@@ -86,7 +86,7 @@ function AuditDetailBody({
               key={key}
               className="flex flex-col gap-0.5 border-b border-border/20 py-1.5 last:border-0"
             >
-              <span className="text-[11px] text-muted-foreground">{getFieldLabel(key)}</span>
+              <span className="text-xs text-muted-foreground">{getFieldLabel(key)}</span>
               <span className="text-sm font-medium text-muted-foreground">
                 {formatValue(key, before[key], lookups)}
               </span>
@@ -104,7 +104,7 @@ function AuditDetailBody({
                 key={key}
                 className="flex flex-col gap-0.5 border-b border-border/20 py-1.5 last:border-0"
               >
-                <span className="text-[11px] text-muted-foreground">{getFieldLabel(key)}</span>
+                <span className="text-xs text-muted-foreground">{getFieldLabel(key)}</span>
                 <span className={`text-sm font-medium ${changed ? "text-primary" : "text-foreground"}`}>
                   {formatValue(key, after[key], lookups)}
                 </span>
@@ -140,7 +140,7 @@ function AuditLogEntry({
         <div className="min-w-0 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="rounded-md border px-2 py-1 text-[11px] font-medium"
+              className="rounded-md border px-2 py-1 text-xs font-medium"
               style={{
                 backgroundColor: `${config.color}12`,
                 color: config.color,
@@ -149,7 +149,7 @@ function AuditLogEntry({
             >
               {config.label}
             </span>
-            <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
+            <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-xs text-muted-foreground">
               {getHumanReadableTable(log.targetTable)}
             </span>
           </div>
@@ -257,7 +257,7 @@ export default function AuditPage() {
               <config.icon className="size-3" />
             </span>
             <div className="leading-none">
-              <p className="text-[11px] font-medium text-foreground">{config.label}</p>
+              <p className="text-xs font-medium text-foreground">{config.label}</p>
               <p className="mt-0.5 text-[10px] text-muted-foreground">{config.description}</p>
             </div>
           </div>

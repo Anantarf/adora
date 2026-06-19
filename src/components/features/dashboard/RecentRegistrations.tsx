@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Clock, UserPlus } from "lucide-react";
 import { formatFullDate } from "@/lib/date-utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AdminStatePanel } from "@/components/features/admin-state-panel";
 
 type RegistrationProps = {
   registrations: {
@@ -12,9 +13,30 @@ type RegistrationProps = {
     status: string;
   }[];
   isLoading?: boolean;
+  isError?: boolean;
 };
 
-export function RecentRegistrations({ registrations, isLoading }: RegistrationProps) {
+export function RecentRegistrations({ registrations, isLoading, isError }: RegistrationProps) {
+  if (isError) {
+    return (
+      <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm min-h-[350px]">
+        <div className="flex items-center gap-2 border-b border-border/50 px-5 py-4">
+          <UserPlus className="size-4 text-muted-foreground" />
+          <h2 className="text-sm font-semibold text-foreground">Pendaftar Baru</h2>
+        </div>
+        <div className="flex flex-1 items-center justify-center p-4">
+          <AdminStatePanel
+            icon={UserPlus}
+            title="Gagal memuat pendaftar"
+            description="Tidak dapat mengambil data. Silakan muat ulang halaman."
+            tone="danger"
+            className="min-h-44 w-full border-dashed"
+          />
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm min-h-[350px]">

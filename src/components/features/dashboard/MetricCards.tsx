@@ -113,12 +113,12 @@ export function MetricCards({ metrics, isLoading }: MetricCardsProps) {
         return (
           <Card
             key={card.key}
-            className={`group overflow-hidden border-border/50 bg-card bg-gradient-to-br ${card.tone} shadow-sm transition-colors hover:border-primary/30`}
+            className={`group overflow-hidden border-border/50 bg-card bg-gradient-to-br ${card.tone} shadow-sm transition-all duration-200 hover:border-primary/30 hover:shadow-md`}
           >
             <CardContent className="p-4 sm:p-5">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  <p className="text-label text-muted-foreground">
                     {card.label}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{card.subtitle}</p>

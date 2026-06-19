@@ -34,16 +34,19 @@ export function LoginUsernameField({ label, placeholder, registration, errorMess
           autoCorrect="off"
           spellCheck={false}
           enterKeyHint="next"
+          aria-required="true"
+          aria-invalid={Boolean(errorMessage)}
+          aria-describedby={errorMessage ? "field-username-error" : undefined}
           onKeyDown={(e) => e.key === " " && e.preventDefault()}
           onChange={(e) => {
             e.target.value = e.target.value.replace(/\s/g, "");
             onChange(e);
           }}
-          className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+          className="w-full bg-login-input border border-white/12 rounded-xl py-4 pl-14 pr-5 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
           placeholder={placeholder}
         />
       </div>
-      {errorMessage && <p className="text-xs text-red-400 mt-1 ml-1">{errorMessage}</p>}
+      {errorMessage && <p id="field-username-error" role="alert" className="text-xs text-red-400 mt-1 ml-1">{errorMessage}</p>}
     </div>
   );
 }
@@ -64,12 +67,15 @@ export function LoginPasswordField({ label, placeholder, registration, errorMess
           disabled={disabled}
           autoComplete="current-password"
           enterKeyHint="go"
+          aria-required="true"
+          aria-invalid={Boolean(errorMessage)}
+          aria-describedby={errorMessage ? "field-password-error" : undefined}
           onKeyDown={(e) => e.key === " " && e.preventDefault()}
           onChange={(e) => {
             e.target.value = e.target.value.replace(/\s/g, "");
             onChange(e);
           }}
-          className="w-full bg-login-input border border-white/12 rounded-2xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
+          className="w-full bg-login-input border border-white/12 rounded-xl py-4 pl-14 pr-14 text-white placeholder:text-white/22 focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary/50 transition-all disabled:opacity-50 [&:-webkit-autofill]:[transition:background-color_9999999s] [&:-webkit-autofill]:[-webkit-text-fill-color:white]"
           placeholder={placeholder}
         />
         <button
@@ -81,7 +87,7 @@ export function LoginPasswordField({ label, placeholder, registration, errorMess
           {showPassword ? <EyeOff className="size-5" /> : <Eye className="size-5" />}
         </button>
       </div>
-      {errorMessage && <p className="text-xs text-red-400 mt-1 ml-1">{errorMessage}</p>}
+      {errorMessage && <p id="field-password-error" role="alert" className="text-xs text-red-400 mt-1 ml-1">{errorMessage}</p>}
     </div>
   );
 }

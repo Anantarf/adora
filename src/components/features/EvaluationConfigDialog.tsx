@@ -171,6 +171,7 @@ export function EvaluationConfigDialog() {
                       type="button"
                       size="icon"
                       variant="outline"
+                      aria-label="Hapus kategori"
                       onClick={() =>
                         updateDraft((previous) => ({
                           ...previous,

@@ -258,7 +258,7 @@ export default function SettingsPage() {
                     >
                       {asset.label}
                     </label>
-                    <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
+                    <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-xs text-muted-foreground">
                       {asset.maxSizeLabel}
                     </span>
                   </div>
@@ -335,14 +335,14 @@ export default function SettingsPage() {
                         <p className="truncate text-xs font-medium text-foreground">
                           {previewMeta.badge}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {previewMeta.helperText}
                         </p>
                         <a
                           href={assetUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[11px] font-medium text-primary hover:underline"
+                          className="text-xs font-medium text-primary hover:underline"
                         >
                           Lihat File
                         </a>
@@ -417,7 +417,7 @@ export default function SettingsPage() {
                     >
                       {asset.label}
                     </label>
-                    <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-[11px] text-muted-foreground">
+                    <span className="rounded-md border border-border/50 bg-background px-2 py-1 text-xs text-muted-foreground">
                       {asset.maxSizeLabel}
                     </span>
                   </div>
@@ -490,14 +490,14 @@ export default function SettingsPage() {
                         <p className="truncate text-xs font-medium text-foreground">
                           {previewMeta.badge}
                         </p>
-                        <p className="text-[11px] text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {previewMeta.helperText}
                         </p>
                         <a
                           href={assetUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-[11px] font-medium text-primary hover:underline"
+                          className="text-xs font-medium text-primary hover:underline"
                         >
                           Lihat File
                         </a>

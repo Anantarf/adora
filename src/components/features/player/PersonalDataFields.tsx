@@ -55,7 +55,7 @@ export function PersonalDataFields({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-5">
         {/* Nama Depan */}
         <div className="space-y-2">
           <label htmlFor="field-player-firstName" className="text-xs font-semibold text-muted-foreground/90 tracking-wide">
@@ -66,9 +66,12 @@ export function PersonalDataFields({
             {...register("firstName")}
             placeholder="Contoh: Dimas"
             className={inputClassName}
+            aria-required="true"
+            aria-invalid={Boolean(errors.firstName)}
+            aria-describedby={errors.firstName ? "field-player-firstName-error" : undefined}
           />
           {errors.firstName && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.firstName.message}</p>
+            <p id="field-player-firstName-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.firstName.message}</p>
           )}
         </div>
 
@@ -109,10 +112,13 @@ export function PersonalDataFields({
             inputMode="numeric"
             placeholder="dd/mm/yyyy"
             className={`${inputClassName} w-full tracking-wide`}
+            aria-required="true"
+            aria-invalid={Boolean(errors.dateOfBirth)}
+            aria-describedby={errors.dateOfBirth ? "field-player-dateOfBirth-error" : "field-player-dateOfBirth-hint"}
           />
-          <p className="text-[11px] text-muted-foreground/80">Gunakan format hari/bulan/tahun, misalnya 17/08/2012.</p>
+          <p id="field-player-dateOfBirth-hint" className="text-xs text-muted-foreground/80">Gunakan format hari/bulan/tahun, misalnya 17/08/2012.</p>
           {errors.dateOfBirth && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.dateOfBirth.message}</p>
+            <p id="field-player-dateOfBirth-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.dateOfBirth.message}</p>
           )}
         </div>
 
@@ -134,7 +140,7 @@ export function PersonalDataFields({
             name="groupId"
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value || ""} disabled={isGroupsLoading}>
-                <SelectTrigger id="field-player-groupId" className={`w-full ${inputClassName}`}>
+                <SelectTrigger id="field-player-groupId" className={`w-full ${inputClassName}`} aria-required="true" aria-invalid={Boolean(errors.groupId)} aria-describedby={errors.groupId ? "field-player-groupId-error" : undefined}>
                   <SelectValue>
                     {groups?.find((g: Group) => g.id === field.value)?.name ||
                       (isGroupsLoading
@@ -155,10 +161,10 @@ export function PersonalDataFields({
             )}
           />
           {errors.groupId && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.groupId.message}</p>
+            <p id="field-player-groupId-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.groupId.message}</p>
           )}
           {groupFieldHint ? (
-            <div className="flex items-start gap-1.5 rounded-xl border border-primary/20 bg-primary/5 p-2.5 text-[11px] text-muted-foreground mt-1 leading-normal transition-all duration-300">
+            <div className="flex items-start gap-1.5 rounded-xl border border-primary/20 bg-primary/5 p-2.5 text-xs text-muted-foreground mt-1 leading-normal transition-all duration-300">
               <svg className="size-3.5 text-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
@@ -177,7 +183,7 @@ export function PersonalDataFields({
             name="gender"
             render={({ field }) => (
               <Select onValueChange={field.onChange} value={field.value || ""}>
-                <SelectTrigger id="field-player-gender" className={`w-full ${inputClassName}`}>
+                <SelectTrigger id="field-player-gender" className={`w-full ${inputClassName}`} aria-required="true" aria-invalid={Boolean(errors.gender)} aria-describedby={errors.gender ? "field-player-gender-error" : undefined}>
                   <SelectValue placeholder="Pilih Jenis Kelamin" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl">
@@ -191,7 +197,7 @@ export function PersonalDataFields({
             )}
           />
           {errors.gender && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.gender.message}</p>
+            <p id="field-player-gender-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.gender.message}</p>
           )}
         </div>
 
@@ -266,9 +272,12 @@ export function PersonalDataFields({
             {...register("schoolOrigin")}
             placeholder="Contoh: SDN Gandul 2"
             className={`w-full ${inputClassName}`}
+            aria-required="true"
+            aria-invalid={Boolean(errors.schoolOrigin)}
+            aria-describedby={errors.schoolOrigin ? "field-player-schoolOrigin-error" : undefined}
           />
           {errors.schoolOrigin && (
-            <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.schoolOrigin.message}</p>
+            <p id="field-player-schoolOrigin-error" role="alert" className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.schoolOrigin.message}</p>
           )}
         </div>
       </div>

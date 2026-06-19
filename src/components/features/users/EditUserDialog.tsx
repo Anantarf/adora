@@ -96,9 +96,12 @@ export function EditUserDialog({
             <Input
               id="edit-user-name"
               {...register("name")}
+              aria-required="true"
+              aria-invalid={Boolean(errors.name)}
+              aria-describedby={errors.name ? "edit-user-name-error" : undefined}
               className="h-11 rounded-xl border-border/50 bg-background/50"
             />
-            {errors.name ? <p className="ml-1 text-xs font-medium text-destructive">{errors.name.message}</p> : null}
+            {errors.name ? <p id="edit-user-name-error" role="alert" className="ml-1 text-xs font-medium text-destructive">{errors.name.message}</p> : null}
           </div>
 
           <div className="space-y-1.5">
@@ -108,9 +111,12 @@ export function EditUserDialog({
             <Input
               id="edit-user-username"
               {...register("username")}
+              aria-required="true"
+              aria-invalid={Boolean(errors.username)}
+              aria-describedby={errors.username ? "edit-user-username-error" : undefined}
               className="h-11 rounded-xl border-border/50 bg-background/50"
             />
-            {errors.username ? <p className="ml-1 text-xs font-medium text-destructive">{errors.username.message}</p> : null}
+            {errors.username ? <p id="edit-user-username-error" role="alert" className="ml-1 text-xs font-medium text-destructive">{errors.username.message}</p> : null}
           </div>
 
           <div className="space-y-1.5">
@@ -120,10 +126,12 @@ export function EditUserDialog({
             <Input
               id="edit-user-email"
               {...register("email")}
+              aria-invalid={Boolean(errors.email)}
+              aria-describedby={errors.email ? "edit-user-email-error" : undefined}
               className="h-11 rounded-xl border-border/50 bg-background/50"
               placeholder="opsional@contoh.com"
             />
-            {errors.email ? <p className="ml-1 text-xs font-medium text-destructive">{errors.email.message}</p> : null}
+            {errors.email ? <p id="edit-user-email-error" role="alert" className="ml-1 text-xs font-medium text-destructive">{errors.email.message}</p> : null}
           </div>
 
           <Button type="submit" disabled={isPending} className="h-11 w-full rounded-xl">

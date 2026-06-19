@@ -205,7 +205,7 @@ function CategorySummaryChips({
             <span className="h-3.5 w-px bg-border/60" />
             <p className={`${compact ? "text-sm" : "text-base"} font-bold tabular-nums text-primary`}>
               {value != null ? value : "-"}
-              <span className="ml-1 text-[11px] font-medium text-muted-foreground">/100</span>
+              <span className="ml-1 text-xs font-medium text-muted-foreground">/100</span>
             </p>
           </div>
         );
@@ -314,7 +314,7 @@ const PlayerStatRow = React.memo(function PlayerStatRow({
         <div className="space-y-1">
           <div className="space-y-0.5">
             <p className="text-[15px] font-semibold text-foreground">{player.name}</p>
-            <p className="text-[11px] text-muted-foreground">{group.name}</p>
+            <p className="text-xs text-muted-foreground">{group.name}</p>
           </div>
         </div>
       </TableCell>
@@ -446,7 +446,7 @@ export function StatisticsList(props: StatisticsListProps) {
             >
               <div className="flex items-center justify-between border-b border-border/50 bg-muted/20 px-4 py-2.5">
                 <span className="text-xs font-semibold text-primary">{group.name}</span>
-                <span className="text-[11px] font-medium text-muted-foreground">
+                <span className="text-xs font-medium text-muted-foreground">
                   {players.length} pemain
                 </span>
               </div>
@@ -481,22 +481,22 @@ export function StatisticsList(props: StatisticsListProps) {
           <Table className="min-w-[920px]">
             <TableHeader className="bg-muted/[0.16]">
               <TableRow className="border-b border-border/50 hover:bg-transparent">
-                <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                <TableHead className="sticky left-0 z-20 w-12 min-w-12 max-w-12 bg-muted/20 px-2 text-center text-label text-muted-foreground/70">
                   No
                 </TableHead>
-                <TableHead className="sticky left-12 z-20 min-w-40 max-w-52 bg-muted/20 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                <TableHead className="sticky left-12 z-20 min-w-40 max-w-52 bg-muted/20 text-label text-muted-foreground/70">
                   Nama Pemain
                 </TableHead>
-                <TableHead className="min-w-[320px] px-3 text-left text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                <TableHead className="min-w-[320px] px-3 text-left text-label text-muted-foreground/70">
                   Ringkasan Kategori
                 </TableHead>
-                <TableHead className="w-20 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                <TableHead className="w-20 text-center text-label text-muted-foreground/70">
                   Nilai
                 </TableHead>
-                <TableHead className="w-20 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                <TableHead className="w-20 text-center text-label text-muted-foreground/70">
                   Status
                 </TableHead>
-                <TableHead className="w-24 text-right text-[11px] font-semibold uppercase tracking-wide text-muted-foreground/70">
+                <TableHead className="w-24 text-right text-label text-muted-foreground/70">
                   Aksi
                 </TableHead>
               </TableRow>
@@ -523,7 +523,7 @@ export function StatisticsList(props: StatisticsListProps) {
                     >
                       <div className="flex items-center justify-between gap-3">
                         <span>{group.name}</span>
-                        <span className="text-[11px] font-medium text-muted-foreground">
+                        <span className="text-xs font-medium text-muted-foreground">
                           {players.length} pemain
                         </span>
                       </div>
