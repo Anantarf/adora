@@ -1,0 +1,69 @@
+▲ Next.js 16.2.9
+- Local:         http://localhost:4173
+- Network:       http://192.168.1.9:4173
+✓ Ready in 382ms
+[PRISMA_SLOW_QUERY] {
+  durationMs: 506.0438000000013,
+  target: 'ClientEngine',
+  query: 'SELECT "public"."RateLimitBucket"."id", "public"."RateLimitBucket"."namespace", "public"."RateLimitBucket"."key", "public"."RateLimitBucket"."count", "public"."RateLimitBucket"."resetAt", "public"."RateLimitBucket"."createdAt", "public"."RateLimitBucket"."updatedAt" FROM "public"."RateLimitBucket" WHERE (("public"."RateLimitBucket"."namespace" = $1 AND "public"."RateLimitBucket"."key" = $2) AND 1=1) LIMIT $3 OFFSET $4'
+}
+[PRISMA_SLOW_QUERY] {
+  durationMs: 527.7345999999961,
+  target: 'ClientEngine',
+  query: '\n' +
+    '    INSERT INTO "RateLimitBucket" ("id", "namespace", "key", "count", "resetAt", "createdAt", "updatedAt")\n' +
+    '    VALUES ($1, $2, $3, 1, $4, NOW(), NOW())\n' +
+    '    ON CONFLICT ("namespace", "key")\n' +
+    '    DO UPDATE SET\n' +
+    '      "count" = CASE\n' +
+    '        WHEN "RateLimitBucket"."resetAt" <= $5 THEN 1\n' +
+    '        ELSE "RateLimitBucket"."count" + 1\n' +
+    '      END,\n' +
+    '      "resetAt" = CASE\n' +
+    '        WHEN "RateLimitBucket"."resetAt" <= $6 THEN $7\n' +
+    '        ELSE "RateLimitBucket"."resetAt"\n' +
+    '      END,\n' +
+    '      "updatedAt" = NOW()\n' +
+    '    RETURNING "count", "resetAt"\n' +
+    '  '
+}
+[PRISMA_SLOW_QUERY] {
+  durationMs: 531.4232000000047,
+  target: 'ClientEngine',
+  query: '\n' +
+    '    INSERT INTO "RateLimitBucket" ("id", "namespace", "key", "count", "resetAt", "createdAt", "updatedAt")\n' +
+    '    VALUES ($1, $2, $3, 1, $4, NOW(), NOW())\n' +
+    '    ON CONFLICT ("namespace", "key")\n' +
+    '    DO UPDATE SET\n' +
+    '      "count" = CASE\n' +
+    '        WHEN "RateLimitBucket"."resetAt" <= $5 THEN 1\n' +
+    '        ELSE "RateLimitBucket"."count" + 1\n' +
+    '      END,\n' +
+    '      "resetAt" = CASE\n' +
+    '        WHEN "RateLimitBucket"."resetAt" <= $6 THEN $7\n' +
+    '        ELSE "RateLimitBucket"."resetAt"\n' +
+    '      END,\n' +
+    '      "updatedAt" = NOW()\n' +
+    '    RETURNING "count", "resetAt"\n' +
+    '  '
+}
+[PRISMA_SLOW_QUERY] {
+  durationMs: 504.17029999999795,
+  target: 'ClientEngine',
+  query: '\n' +
+    '    INSERT INTO "RateLimitBucket" ("id", "namespace", "key", "count", "resetAt", "createdAt", "updatedAt")\n' +
+    '    VALUES ($1, $2, $3, 1, $4, NOW(), NOW())\n' +
+    '    ON CONFLICT ("namespace", "key")\n' +
+    '    DO UPDATE SET\n' +
+    '      "count" = CASE\n' +
+    '        WHEN "RateLimitBucket"."resetAt" <= $5 THEN 1\n' +
+    '        ELSE "RateLimitBucket"."count" + 1\n' +
+    '      END,\n' +
+    '      "resetAt" = CASE\n' +
+    '        WHEN "RateLimitBucket"."resetAt" <= $6 THEN $7\n' +
+    '        ELSE "RateLimitBucket"."resetAt"\n' +
+    '      END,\n' +
+    '      "updatedAt" = NOW()\n' +
+    '    RETURNING "count", "resetAt"\n' +
+    '  '
+}

@@ -4,28 +4,24 @@ import { useQuery } from "@tanstack/react-query";
 
 import { getPlayerStatsAction } from "@/actions/stats";
 import { QUERY_KEYS } from "@/lib/constants";
-import type { MetricsJson, StatisticHistory } from "@/types/dashboard";
-import type { MetricsJsonV2 } from "@/lib/evaluation-rules";
+import type { MetricsJson } from "@/types/dashboard";
 
 export type { MetricsJson };
 
-export type PlayerStatRecord = {
-  id: string;
-  date: Date;
-  status: string;
-  metricsJson: MetricsJson | MetricsJsonV2;
-  playerId: string;
-  periodId: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-  period?: { id: string; name: string; startDate: Date | string; endDate: Date | string } | null;
-  history?: StatisticHistory[];
-};
+// Tipe data pemain stats mengikuti return server action (lebih lengkap dari versi
+// sebelumnya). Disimpan sebagai alias agar sisi client tidak perlu duplikasi.
+export type PlayerStatRecord = Awaited<ReturnType<typeof getPlayerStatsAction>>[number];
 
-export const usePlayerStats = (playerId: string | null) =>
-  useQuery({
+export function usePlayerStats(
+  playerId: string | null,
+  options?: { initialData?: PlayerStatRecord[]; initialDataUpdatedAt?: number },
+) {
+  return useQuery({
     queryKey: QUERY_KEYS.PLAYER_STATS(playerId!),
     queryFn: () => getPlayerStatsAction(playerId!),
     enabled: !!playerId,
     staleTime: 1000 * 60 * 10,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   });
+}

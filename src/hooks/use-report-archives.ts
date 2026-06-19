@@ -10,27 +10,37 @@ import {
   upsertReportArchiveDraftAction,
 } from "@/actions/report-archives";
 
-export const useReportArchiveRows = (
+export function useReportArchiveRows(
   groupId: string | null,
   periodId: string | null,
   enabled = true,
-) =>
-  useQuery({
+) {
+  return useQuery({
     queryKey: ["report-archives", "rows", groupId, periodId],
     queryFn: () => getReportArchiveRowsAction(groupId!, periodId!),
     enabled: enabled && !!groupId && !!periodId,
     staleTime: 1000 * 60 * 2,
   });
+}
 
-export const useReleasedReportArchives = (playerId: string | null) =>
-  useQuery({
+export function useReleasedReportArchives(
+  playerId: string | null,
+  options?: {
+    initialData?: Awaited<ReturnType<typeof getReleasedReportArchivesForPlayerAction>>;
+    initialDataUpdatedAt?: number;
+  },
+) {
+  return useQuery({
     queryKey: ["report-archives", "released", playerId],
     queryFn: () => getReleasedReportArchivesForPlayerAction(playerId!),
     enabled: !!playerId,
     staleTime: 1000 * 60 * 5,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   });
+}
 
-export const useUpsertReportArchiveDraft = () => {
+export function useUpsertReportArchiveDraft() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -46,9 +56,9 @@ export const useUpsertReportArchiveDraft = () => {
       toast.error(error instanceof Error ? error.message : "Gagal menyimpan arsip rapor.");
     },
   });
-};
+}
 
-export const useReleaseReportArchive = () => {
+export function useReleaseReportArchive() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -61,4 +71,4 @@ export const useReleaseReportArchive = () => {
       toast.error(error instanceof Error ? error.message : "Gagal merilis arsip rapor.");
     },
   });
-};
+}

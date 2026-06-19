@@ -1,0 +1,32 @@
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://localhost:4173
+- Network:       http://192.168.1.9:4173
+- Environments: .env
+✓ Ready in 784ms
+Creating turbopack project { dir: 'C:\\Users\\Ananta Raihan\\Kuliah\\adora-bc', testMode: true }
+- Experiments (use with caution):
+  · optimizePackageImports
+
+✓ Compiled in 1395ms
+ GET /api/auth/csrf 200 in 1606ms (next.js: 1540ms, application-code: 66ms)
+[PRISMA_SLOW_QUERY] {
+  durationMs: 510.14990000001853,
+  target: 'ClientEngine',
+  query: 'SELECT "public"."RateLimitBucket"."id", "public"."RateLimitBucket"."namespace", "public"."RateLimitBucket"."key", "public"."RateLimitBucket"."count", "public"."RateLimitBucket"."resetAt", "public"."RateLimitBucket"."createdAt", "public"."RateLimitBucket"."updatedAt" FROM "public"."RateLimitBucket" WHERE (("public"."RateLimitBucket"."namespace" = $1 AND "public"."RateLimitBucket"."key" = $2) AND 1=1) LIMIT $3 OFFSET $4'
+}
+ POST /api/auth/callback/credentials?json=true 200 in 1003ms (next.js: 17ms, application-code: 987ms)
+○ Compiling /parent ...
+ GET /parent 200 in 7.0s (next.js: 6.0s, proxy.ts: 81ms, application-code: 926ms)
+⚠ Blocked cross-origin request to Next.js dev resource /_next/webpack-hmr from "127.0.0.1".
+Cross-origin access to Next.js dev resources is blocked by default for safety.
+
+To allow this host in development, add it to "allowedDevOrigins" in next.config.js and restart the dev server:
+
+// next.config.js
+module.exports = {
+  allowedDevOrigins: ['127.0.0.1'],
+}
+
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+ GET /robots.txt 200 in 625ms (next.js: 600ms, application-code: 25ms)
+ GET /parent 200 in 249ms (next.js: 9ms, proxy.ts: 25ms, application-code: 216ms)

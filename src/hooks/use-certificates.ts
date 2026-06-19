@@ -4,16 +4,16 @@ import { getCertificatesAction, addCertificateAction, deleteCertificateAction, g
 import { QUERY_KEYS } from "@/lib/constants";
 
 // Hook (GET): Tarik semua sertifikat (Admin)
-export const useCertificates = () => {
+export function useCertificates() {
   return useQuery<CertificateRecord[]>({
     queryKey: QUERY_KEYS.CERTIFICATES,
     queryFn: getCertificatesAction,
     staleTime: 1000 * 60 * 5,
   });
-};
+}
 
 // Hook (POST): Tambah sertifikat baru
-export const useAddCertificate = () => {
+export function useAddCertificate() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -22,10 +22,10 @@ export const useAddCertificate = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CERTIFICATES });
     },
   });
-};
+}
 
 // Hook (DELETE): Hapus sertifikat
-export const useDeleteCertificate = () => {
+export function useDeleteCertificate() {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -34,13 +34,21 @@ export const useDeleteCertificate = () => {
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.CERTIFICATES });
     },
   });
-};
+}
 
-export const usePlayerCertificates = (playerId: string | null) => {
+export function usePlayerCertificates(
+  playerId: string | null,
+  options?: {
+    initialData?: Awaited<ReturnType<typeof getPlayerCertificatesAction>>;
+    initialDataUpdatedAt?: number;
+  },
+) {
   return useQuery({
     queryKey: ["player-certificates", playerId],
     queryFn: () => getPlayerCertificatesAction(playerId!),
     enabled: Boolean(playerId),
     staleTime: 1000 * 60 * 5,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   });
-};
+}

@@ -44,24 +44,37 @@ export type ParentUser = {
   username: string | null;
 };
 
-export const useFamily = () =>
-  useQuery({
+export function useFamily(options?: { initialData?: FamilyPlayer[]; initialDataUpdatedAt?: number }) {
+  return useQuery({
     queryKey: QUERY_KEYS.FAMILY_PLAYERS,
     queryFn: () => getFamilyPlayersAction(),
     staleTime: 1000 * 60 * 5,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   });
+}
 
-export const usePlayerAttendance = (playerId: string | null) =>
-  useQuery({
+export function usePlayerAttendance(
+  playerId: string | null,
+  options?: {
+    initialData?: Awaited<ReturnType<typeof getPlayerAttendanceAction>>;
+    initialDataUpdatedAt?: number;
+  },
+) {
+  return useQuery({
     queryKey: ["player-attendance", playerId],
     queryFn: () => getPlayerAttendanceAction(playerId!),
     enabled: !!playerId,
     staleTime: 1000 * 60 * 5,
+    initialData: options?.initialData,
+    initialDataUpdatedAt: options?.initialDataUpdatedAt,
   });
+}
 
-export const useParents = () =>
-  useQuery<ParentUser[]>({
+export function useParents() {
+  return useQuery<ParentUser[]>({
     queryKey: QUERY_KEYS.PARENTS,
     queryFn: () => getParentsAction(),
     staleTime: 1000 * 60 * 5,
   });
+}

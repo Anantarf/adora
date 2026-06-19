@@ -1,0 +1,168 @@
+{
+  "url": "http://127.0.0.1:4173/parent",
+  "fetchTime": "2026-06-19T07:02:39.907Z",
+  "performance": 72,
+  "accessibility": 90,
+  "bestPractices": 93,
+  "seo": 69,
+  "metrics": {
+    "fcp": 1231.472,
+    "lcp": 5140.207999999999,
+    "tbt": 365.9999999999991,
+    "cls": 0,
+    "si": 1561.9502680003495
+  },
+  "longTasks": 11,
+  "bootup": 1326.4239999999938,
+  "mainThreadWork": 2492.0719999999883,
+  "topRequests": [
+    {
+      "url": "/_next/static/chunks/08p-k818megjb.js",
+      "transferSize": 72244,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/1wjq2vtp9my90.js",
+      "transferSize": 69268,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/media/e8f2fbee2754df70.p.1dqa_6e_ad4sj.woff2",
+      "transferSize": 36468,
+      "resourceType": "Font",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/38a6_3youb9xg.js",
+      "transferSize": 30520,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/401wdlo995wir.css",
+      "transferSize": 28973,
+      "resourceType": "Stylesheet",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/0nq-ceg8gy1u_.js",
+      "transferSize": 22082,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/parent",
+      "transferSize": 21566,
+      "resourceType": "Document",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/277n4l4s8_30r.js",
+      "transferSize": 19030,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/2nqmenp9t36i5.js",
+      "transferSize": 18042,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/1j4h6106jrv5c.js",
+      "transferSize": 17866,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/3lptl9r9wwnxk.js",
+      "transferSize": 17473,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/3hu80y6xscfjb.js",
+      "transferSize": 16302,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/28gsqj5-q6y53.js",
+      "transferSize": 14179,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/1jpk2lrb6mcpa.js",
+      "transferSize": 13643,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/3f_6m3kt18p_w.js",
+      "transferSize": 12478,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/00ao7z55p6ueg.js",
+      "transferSize": 11261,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/1lm22dl6aykr3.js",
+      "transferSize": 10291,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/0p2nyhy6k688y.js",
+      "transferSize": 10277,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/3zswb3kfy6gh0.js",
+      "transferSize": 10052,
+      "resourceType": "Script",
+      "statusCode": 200
+    },
+    {
+      "url": "/_next/static/chunks/0qm9ocwzq07pn.js",
+      "transferSize": 10024,
+      "resourceType": "Script",
+      "statusCode": 200
+    }
+  ],
+  "unusedJs": [
+    {
+      "url": "/_next/static/chunks/1wjq2vtp9my90.js",
+      "wastedBytes": 57140
+    },
+    {
+      "url": "/_next/static/chunks/08p-k818megjb.js",
+      "wastedBytes": 20643
+    }
+  ],
+  "unusedCss": [],
+  "renderBlocking": [
+    {
+      "url": "/_next/static/chunks/401wdlo995wir.css",
+      "wastedMs": 466
+    },
+    {
+      "url": "/_next/static/chunks/3ct2_4ded4igi.css",
+      "wastedMs": 166
+    }
+  ],
+  "thirdParty": [
+    {
+      "entity": "supabase.co",
+      "mainThreadTime": 0,
+      "transferSize": 9673
+    }
+  ]
+}
