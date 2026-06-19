@@ -135,7 +135,7 @@ function RegisterContent() {
       {/* ── Hero ── */}
       <section className="relative pt-9 pb-5 md:pt-12 md:pb-8 text-center px-4 z-10">
         <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-6 border-2 border-black shadow-[4px_4px_0px_#000]">
-          <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">{"// JOIN THE SQUAD //"}</span>
+          <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">{"// BERGABUNG BERSAMA KAMI //"}</span>
         </div>
         <h1 className="font-heading font-black text-3xl md:text-5xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
           FORM <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>

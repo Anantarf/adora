@@ -24,11 +24,11 @@ import { UserProfileMenu } from "@/components/features/UserProfileMenu";
 import { cn } from "@/lib/utils";
 
 export const coachNavItems = [
-  { title: "Dashboard Coach", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Dashboard Pelatih", url: "/dashboard", icon: LayoutDashboard },
   { title: "Data Pemain", url: "/players", icon: Users },
   { title: "Data Presensi", url: "/attendances", icon: CalendarCheck2 },
   { title: "Penilaian & Rapor", url: "/statistics", icon: LineChart },
-  { title: "Profil Coach", url: "/profile", icon: UserRoundCog },
+  { title: "Profil Pelatih", url: "/profile", icon: UserRoundCog },
 ];
 
 export function CoachSidebar() {
@@ -60,7 +60,7 @@ export function CoachSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-muted-foreground group-data-[collapsible=icon]:pointer-events-none group-data-[collapsible=icon]:mb-0">
-            Portal Coach
+            Portal Pelatih
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="mt-2 gap-2">

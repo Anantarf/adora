@@ -19,7 +19,7 @@ export const adminNavItems = [
   { title: "Manajemen Akun", url: "/users", icon: Users },
   { title: "Pendaftar Baru", url: "/registrations", icon: UserPlus },
   { title: "Pengaturan", url: "/settings", icon: Settings },
-  { title: "Audit Log", url: "/audit", icon: ShieldAlert },
+  { title: "Log Audit", url: "/audit", icon: ShieldAlert },
 ];
 
 export function AdminSidebar() {

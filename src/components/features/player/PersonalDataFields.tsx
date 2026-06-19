@@ -51,7 +51,7 @@ export function PersonalDataFields({
       <div className="space-y-1">
         <p className="text-sm font-semibold text-foreground">Data Pribadi</p>
         <p className="text-xs text-muted-foreground">
-          Isi profil utama calon anggota sebelum lanjut ke kontak dan dokumen.
+          Isi profil utama pemain sebelum lanjut ke kontak dan dokumen.
         </p>
       </div>
 

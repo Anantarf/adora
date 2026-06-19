@@ -63,8 +63,8 @@ const metricCards: MetricCard[] = [
   },
   {
     key: "publishedStatsCount",
-    label: "Progress Penilaian",
-    subtitle: "Selesai / draft",
+    label: "Status Penilaian",
+    subtitle: "Terbit / Draf",
     icon: FileCheck,
     tone: "from-amber-500/12 to-transparent",
     iconClassName: "bg-amber-500/10 text-amber-300",
@@ -72,7 +72,7 @@ const metricCards: MetricCard[] = [
       `${metrics.publishedStatsCount} / ${metrics.draftStatsCount}`,
     getColorClass: (metrics) =>
       metrics.draftStatsCount > 0 ? "text-amber-500" : "text-foreground",
-    getHelper: (metrics) => metrics.draftStatsCount > 0 ? "Ada rapor belum terbit" : "Tidak ada draft tertahan",
+    getHelper: (metrics) => metrics.draftStatsCount > 0 ? "Ada rapor belum terbit" : "Tidak ada draf tertahan",
   },
 ];
 

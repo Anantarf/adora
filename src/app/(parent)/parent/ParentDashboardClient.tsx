@@ -326,7 +326,7 @@ export function ParentDashboardClient({ initialData }: Props) {
       <AdminStatePanel
         icon={User}
         title="Profil anak belum terhubung"
-        description="Akun ini belum terhubung ke profil anak. Hubungi tim ADORA agar akun ini dapat dihubungkan ke profil putra atau putri Anda."
+        description="Akun Anda belum terhubung ke profil anak. Hubungi tim ADORA untuk menghubungkannya ke profil putra atau putri Anda."
         className="min-h-[60vh]"
       />
     );
@@ -383,7 +383,7 @@ export function ParentDashboardClient({ initialData }: Props) {
             </span>
             <Select value={effectiveChildId ?? ""} onValueChange={setSelectedChildId}>
               <SelectTrigger className="h-10 w-full rounded-lg border-border/70 bg-card px-4 font-semibold text-foreground md:w-72">
-                <SelectValue placeholder="Pilih profil">
+                <SelectValue placeholder="Pilih anak">
                   {effectiveChildId
                     ? children.find((child) => child.id === effectiveChildId)?.name
                     : undefined}

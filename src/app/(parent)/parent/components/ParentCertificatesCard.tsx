@@ -32,7 +32,7 @@ export function ParentCertificatesCard({
               Sertifikat Prestasi
             </CardTitle>
             <CardDescription className="text-xs">
-              Penghargaan yang pernah diterima {playerName}.
+              Penghargaan yang telah diterima {playerName}.
             </CardDescription>
           </div>
         </div>

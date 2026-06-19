@@ -92,7 +92,7 @@ function CoachStatisticsPageInner() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <AdminPageHeader
-        eyebrow="Penilaian Coach"
+        eyebrow="Penilaian Pelatih"
         title="Penilaian & Rapor"
         description="Pilih periode dan kelompok, lalu isi penilaian pemain. Pelatih menyimpan draf; admin yang menerbitkan rapor."
       />
@@ -184,13 +184,13 @@ function CoachStatisticsPageInner() {
           {selectedPeriodId && !statsLoading ? (
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Nilai Terbit</span>
+                <span className="text-[11px] font-medium text-muted-foreground">Nilai Terpublikasi</span>
                 <span className="text-sm font-semibold tabular-nums text-primary">
                   {statsSummary.published}
                 </span>
               </div>
               <div className="inline-flex items-center gap-1.5 rounded-full border border-border/50 bg-background/50 px-3 py-1.5">
-                <span className="text-[11px] font-medium text-muted-foreground">Draft Saya</span>
+                <span className="text-[11px] font-medium text-muted-foreground">Draf Saya</span>
                 <span className="text-sm font-semibold tabular-nums text-foreground">
                   {statsSummary.draft}
                 </span>
@@ -210,7 +210,7 @@ function CoachStatisticsPageInner() {
         isLoading={isLoading}
         emptyMessage={{
           noPlayersTitle: "Belum ada pemain di kelompok Anda",
-          noPlayersDescription: "Pemain akan tampil setelah admin menugaskan kelompok kepada coach.",
+          noPlayersDescription: "Pemain akan tampil setelah admin menugaskan kelompok kepada pelatih.",
           noPeriodTitle: "Belum ada periode evaluasi",
           noPeriodDescription: "Periode evaluasi akan tampil setelah dibuat oleh admin.",
         }}

@@ -132,7 +132,7 @@ export function CoachProfilePageClient() {
     field: "photoUrl" | "licenseUrl" | "signatureUrl",
   ) => {
     if (!coachUser?.id) {
-      toast.error("Profil coach belum siap. Muat ulang halaman lalu coba lagi.");
+      toast.error("Profil pelatih belum siap. Muat ulang halaman lalu coba lagi.");
       return;
     }
 
@@ -155,7 +155,7 @@ export function CoachProfilePageClient() {
 
   const handleSubmit = async () => {
     if (!coachUser?.id) {
-      toast.error("Data akun coach belum tersedia. Coba muat ulang halaman.");
+      toast.error("Data akun pelatih belum tersedia. Coba muat ulang halaman.");
       return;
     }
 
@@ -183,7 +183,7 @@ export function CoachProfilePageClient() {
     savedProfile.signatureUrl.trim(),
   ].filter(Boolean).length;
   const profileCompletionLabel =
-    profileCompletionCount >= 6 ? "Siap ditampilkan" : profileCompletionCount >= 4 ? "Perlu dilengkapi" : "Masih minim";
+    profileCompletionCount >= 6 ? "Lengkap" : profileCompletionCount >= 4 ? "Sebagian" : "Belum Lengkap";
   const assignedGroups = coachUser?.coachProfile?.assignments ?? [];
   const showSavedPhoto = Boolean(savedProfile.photoUrl && failedPhotoUrl !== savedProfile.photoUrl);
 
@@ -207,8 +207,8 @@ export function CoachProfilePageClient() {
     return (
       <AdminStatePanel
         icon={AlertCircle}
-        title="Profil coach gagal dimuat"
-        description={error instanceof Error ? error.message : "Terjadi kendala saat mengambil data profil coach. Coba muat ulang halaman."}
+        title="Profil pelatih gagal dimuat"
+        description={error instanceof Error ? error.message : "Terjadi kendala saat mengambil data profil pelatih. Coba muat ulang halaman."}
         tone="danger"
         action={
           <Button type="button" onClick={() => refetch()}>
@@ -223,7 +223,7 @@ export function CoachProfilePageClient() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <AdminPageHeader
-        eyebrow="Profil Coach"
+        eyebrow="Profil Pelatih"
         title="Data Diri Pelatih"
         description="Lihat data diri pelatih yang tampil ke sistem, lalu perbarui biodata, foto, lisensi, dan tanda tangan bila diperlukan."
         actions={
@@ -254,7 +254,7 @@ export function CoachProfilePageClient() {
                     <UserRound className="size-14 text-muted-foreground/35" />
                   )}
                 </div>
-                <p className="mt-4 text-lg font-semibold text-foreground">{savedProfile.fullName || coachUser?.name || "Nama coach belum diisi"}</p>
+                <p className="mt-4 text-lg font-semibold text-foreground">{savedProfile.fullName || coachUser?.name || "Nama pelatih belum diisi"}</p>
                 <p className="mt-1 text-xs text-muted-foreground">{savedProfile.gender || "Jenis kelamin belum diisi"}</p>
                 <div className="mt-4 inline-flex rounded-full border border-primary/20 bg-primary/5 px-3 py-1 text-xs font-medium text-primary">
                   {profileCompletionLabel}
@@ -267,7 +267,7 @@ export function CoachProfilePageClient() {
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">Data Diri Pelatih</h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Data ini menjadi identitas utama coach di portal, tampilan orang tua, dan rapor.
+                    Data ini menjadi identitas utama pelatih di portal, tampilan orang tua, dan rapor.
                   </p>
                 </div>
                 <Button type="button" variant={isEditing ? "outline" : "default"} onClick={handleEditToggle}>
@@ -325,7 +325,7 @@ export function CoachProfilePageClient() {
                 >
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
                     <FileBadge className="size-4 text-primary" />
-                    Lisensi Coach
+                    Lisensi Pelatih
                   </div>
                   <p className="mt-2 text-sm font-semibold text-foreground">{savedProfile.licenseUrl ? "File lisensi tersedia" : "Belum diunggah"}</p>
                 </a>
@@ -374,7 +374,7 @@ export function CoachProfilePageClient() {
               Akses Profil
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              Data diri bisa diperbarui coach. Penugasan kelompok dikelola admin agar struktur latihan tetap terkunci.
+              Data diri bisa diperbarui pelatih. Penugasan kelompok dikelola admin agar struktur latihan tetap terkunci.
             </p>
           </div>
         </div>
@@ -386,7 +386,7 @@ export function CoachProfilePageClient() {
             <div className="flex items-center gap-2 border-b border-border/50 pb-4 text-foreground">
               <UserRoundCog className="size-5 text-primary" />
               <div>
-                <h2 className="text-lg font-semibold">Setting Profile / Edit</h2>
+                <h2 className="text-lg font-semibold">Sunting Data Profil</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Perbarui biodata, foto profil, lisensi, dan tanda tangan rapor Anda.
                 </p>
@@ -434,7 +434,7 @@ export function CoachProfilePageClient() {
                     </span>
                   ))
                 ) : (
-                  <span className="text-sm text-muted-foreground">Belum ada kelompok yang ditugaskan admin.</span>
+                  <span className="text-sm text-muted-foreground">Anda belum ditugaskan ke kelompok mana pun.</span>
                 )}
               </div>
             </div>
@@ -447,7 +447,7 @@ export function CoachProfilePageClient() {
                     Menyimpan...
                   </>
                 ) : (
-                  "Simpan Profil Coach"
+                  "Simpan Profil Pelatih"
                 )}
               </Button>
             </div>

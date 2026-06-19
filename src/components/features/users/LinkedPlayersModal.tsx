@@ -141,7 +141,7 @@ export function LinkedPlayersModal({ parentId, parentName, onOpenChange }: Linke
                 <div className="flex flex-col items-center justify-center gap-2 py-8 rounded-xl border border-dashed border-border/50">
                   <Users className="size-8 text-muted-foreground/30" />
                   <p className="text-sm font-medium text-muted-foreground">Belum Ada Pemain</p>
-                  <p className="text-xs text-muted-foreground/75 text-center px-4">Akun ini belum terhubung dengan data anak mana pun.</p>
+                  <p className="text-xs text-muted-foreground/75 text-center px-4">Akun ini belum terhubung dengan pemain mana pun.</p>
                 </div>
               ) : (
                 <ul className="space-y-2">

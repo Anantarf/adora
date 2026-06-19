@@ -19,7 +19,7 @@ export function ParentCoachCard({ player }: { player: FamilyPlayer }) {
       return { coach: groupCoach, label: "Pelatih Utama" };
     }
     if (resolutionSource === "HOMEBASE" && player.fallbackCoachProfile) {
-      return { coach: player.fallbackCoachProfile, label: "Pelatih Region" };
+      return { coach: player.fallbackCoachProfile, label: "Pelatih Wilayah" };
     }
     if (resolutionSource === "GLOBAL") {
       return {

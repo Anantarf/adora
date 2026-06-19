@@ -522,8 +522,7 @@ export function AddStatDialog({
                   {notes.length}/{notesMaxLength} karakter
                 </p>
                 <div className="rounded-lg border border-border/50 bg-background/30 px-3 py-2 text-[11px] text-muted-foreground">
-                  Acuan catatan: tampilkan 1 kekuatan utama, 1 fokus perbaikan, dan presensi bila memang perlu
-                  disorot.
+                  Tuliskan: 1 kekuatan utama, 1 area perbaikan, dan presensi jika relevan.
                 </div>
                 <div className="grid gap-2 md:grid-cols-3">
                   {categoryStatusRows.map((category) => (

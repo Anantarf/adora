@@ -78,7 +78,7 @@ export function CoachPlayersPageClient() {
   return (
     <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 pb-10">
       <AdminPageHeader
-        eyebrow="Portal Coach"
+        eyebrow="Portal Pelatih"
         title="Pemain Saya"
         description="Area ini menampilkan pemain yang saat ini terhubung ke kelompok tanggung jawab Anda. Perubahan data pemain tetap dikelola admin."
         actions={
@@ -139,7 +139,7 @@ export function CoachPlayersPageClient() {
                     <div className="mt-2 flex flex-wrap gap-2 text-xs text-muted-foreground lg:hidden">
                       <span>{player.schoolOrigin || "Sekolah belum diisi"}</span>
                       <span>•</span>
-                      <span>{player.parentName || "Orang tua belum ditautkan"}</span>
+                      <span>{player.parentName || "Orang tua belum terhubung"}</span>
                     </div>
                   </div>
                   <div className="hidden min-w-0 lg:block">
@@ -149,7 +149,7 @@ export function CoachPlayersPageClient() {
                     </div>
                     <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
                       <HeartPulse className="size-3.5 text-primary/70" />
-                      <span>{player.gender || "Gender belum diisi"}</span>
+                      <span>{player.gender || "Jenis kelamin belum diisi"}</span>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 lg:justify-end">
@@ -174,10 +174,10 @@ export function CoachPlayersPageClient() {
           ) : (
             <AdminStatePanel
               icon={Users}
-              title="Tidak ada pemain ditemukan"
+              title="Pemain tidak ditemukan"
               description={searchQuery || selectedGroupId !== "all"
                 ? "Coba ubah filter pencarian atau kelompok untuk melihat hasil."
-                : "Belum ada pemain aktif yang terhubung ke penugasan coach ini."}
+                : "Belum ada pemain aktif yang terhubung ke penugasan pelatih ini."}
               action={
                 searchQuery || selectedGroupId !== "all" ? (
                   <Button
@@ -189,7 +189,7 @@ export function CoachPlayersPageClient() {
                       setSelectedGroupId("all");
                     }}
                   >
-                    Reset Filter
+                    Bersihkan Filter
                   </Button>
                 ) : null
               }

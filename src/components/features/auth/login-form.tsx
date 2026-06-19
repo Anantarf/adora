@@ -45,7 +45,7 @@ function getLoginErrorMessage(error?: string | null) {
     error.toLowerCase().includes("sandi") ||
     error.toLowerCase().includes("password")
   ) {
-    return "Username atau password salah.";
+    return "Username atau kata sandi salah.";
   }
 
   return error;
@@ -99,7 +99,7 @@ export function LoginForm() {
 
         await signOut({ redirect: false });
         toast.error("Login gagal", {
-          description: "Username atau password salah.",
+          description: "Username atau kata sandi salah.",
           icon: <AlertCircle className="size-4" />,
         });
       }
@@ -139,7 +139,7 @@ export function LoginForm() {
           <LoginSubmitButton loading={loading} />
 
           <div className="text-center pt-1">
-            <p className="text-white/80 text-sm font-medium">Kendala akses? Hubungi admin ADORA Basketball.</p>
+            <p className="text-white/80 text-sm font-medium">Butuh bantuan? Hubungi tim kami via WhatsApp.</p>
           </div>
         </form>
       </div>

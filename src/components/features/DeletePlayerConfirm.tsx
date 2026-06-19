@@ -55,7 +55,7 @@ export function DeletePlayerConfirm({ player, open, onOpenChange }: DeletePlayer
             </p>
             <div className="flex items-center gap-3">
               <div className="size-2 rounded-full bg-destructive" />
-              <span className="text-xs font-medium text-destructive">Bukan penghapusan permanen</span>
+              <span className="text-xs font-medium text-destructive">Data tetap aman dan dapat dipulihkan</span>
             </div>
           </div>
 

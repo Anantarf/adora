@@ -37,7 +37,7 @@ export function CoachDashboardPageClient() {
     return (
       <AdminStatePanel
         icon={AlertCircle}
-        title="Portal coach gagal dimuat"
+        title="Portal pelatih gagal dimuat"
         description={error instanceof Error ? error.message : "Terjadi kendala saat memuat data pelatih."}
         tone="danger"
         action={
@@ -85,13 +85,13 @@ export function CoachDashboardPageClient() {
       icon: ClipboardCheck,
     },
     {
-      title: "Input Nilai",
+      title: "Beri Nilai",
       description: "Simpan penilaian pemain sebagai draf.",
       href: "/coach/statistics",
       icon: FileCheck2,
     },
     {
-      title: "Cek Pemain",
+      title: "Lihat Pemain",
       description: "Lihat daftar pemain di kelompok Anda.",
       href: "/coach/players",
       icon: Users,
@@ -120,10 +120,10 @@ export function CoachDashboardPageClient() {
 
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="rounded-xl border border-primary/25 bg-primary/10 p-4 text-primary sm:col-span-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">Portal Coach</p>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] opacity-80">Portal Pelatih</p>
               <p className="mt-2 text-sm font-bold text-foreground">Akses pelatih aktif</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Anda masuk sebagai Coach <span className="font-semibold text-foreground">{data.coach.name}</span>
+                Anda masuk sebagai Pelatih <span className="font-semibold text-foreground">{data.coach.name}</span>
               </p>
             </div>
             <div className="rounded-xl border border-border/50 bg-background/45 p-4">
@@ -177,7 +177,7 @@ export function CoachDashboardPageClient() {
       <Card className="border border-border/50 bg-card/90 shadow-sm">
         <CardHeader className="border-b border-border/40 pb-3">
           <CardTitle>Mulai dari sini</CardTitle>
-          <CardDescription>Aksi utama yang paling sering dipakai pelatih.</CardDescription>
+          <CardDescription>Aksi penting untuk pelatih.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-3">
           {quickActions.map((action) => (
@@ -200,7 +200,7 @@ export function CoachDashboardPageClient() {
         <Card className="border border-border/50 shadow-sm">
           <CardHeader className="border-b border-border/40">
             <CardTitle>Kelompok Tanggung Jawab</CardTitle>
-            <CardDescription>Daftar kelompok yang terhubung ke akun coach Anda.</CardDescription>
+            <CardDescription>Daftar kelompok yang terhubung ke akun pelatih Anda.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {data.groups.length > 0 ? (
@@ -224,7 +224,7 @@ export function CoachDashboardPageClient() {
               <AdminStatePanel
                 icon={UsersRound}
                 title="Belum ada kelompok"
-                description="Kelompok akan tampil setelah admin menugaskan coach ke kelompok latihan."
+                description="Kelompok akan tampil setelah admin menugaskan pelatih ke kelompok latihan."
                 className="min-h-40 border-0 bg-transparent"
               />
             )}
@@ -260,7 +260,7 @@ export function CoachDashboardPageClient() {
               <AdminStatePanel
                 icon={CalendarDays}
                 title="Belum ada agenda mendatang"
-                description="Agenda akan muncul setelah jadwal dibuat untuk kelompok yang ditugaskan."
+                description="Agenda akan muncul setelah dibuat untuk kelompok Anda."
                 className="min-h-40 border-0 bg-transparent"
               />
             )}

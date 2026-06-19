@@ -26,7 +26,7 @@ export function LandingHeroSection({ registrationYearText }: LandingHeroSectionP
       <div className="relative z-20 container mx-auto px-4 flex flex-col items-center text-center">
         <FadeIn delay={0.1} direction="up">
           <div className="inline-block skew-box bg-brand-yellow px-3 py-1.5 sm:px-4 md:px-8 md:py-3 mb-6 md:mb-8 border-b-4 border-r-4 border-black shadow-lg mx-2 max-w-full">
-            <span className="unskew-content block font-heading font-black uppercase text-black text-[9px] sm:text-xs md:text-sm tracking-[0.05em] sm:tracking-widest md:tracking-[0.2em] pr-1 md:pr-2 leading-tight sm:whitespace-nowrap">NOW OPEN REGISTRATION {registrationYearText}</span>
+            <span className="unskew-content block font-heading font-black uppercase text-black text-[9px] sm:text-xs md:text-sm tracking-[0.05em] sm:tracking-widest md:tracking-[0.2em] pr-1 md:pr-2 leading-tight sm:whitespace-nowrap">PENDAFTARAN DIBUKA {registrationYearText}</span>
           </div>
         </FadeIn>
 

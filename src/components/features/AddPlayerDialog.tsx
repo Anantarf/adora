@@ -309,7 +309,7 @@ export function AddPlayerDialog({ defaultGroupId, defaultGroupName }: AddPlayerD
                   setValue={setValue}
                   groups={groups}
                   isGroupsLoading={isGroupsLoading}
-                  groupFieldHint={defaultGroupName ? `Kelompok dari folder aktif sudah dipilih otomatis. Tetap bisa diganti jika perlu.` : undefined}
+                  groupFieldHint={defaultGroupName ? `Kelompok dari folder ini sudah dipilih otomatis, namun bisa diubah.` : undefined}
                   step={step}
                 />
               </div>

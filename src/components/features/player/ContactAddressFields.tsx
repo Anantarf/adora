@@ -186,7 +186,7 @@ export function ContactAddressFields({
             <p className="text-destructive text-xs animate-in fade-in-50 slide-in-from-top-1 duration-200">{errors.phoneNumber.message}</p>
           )}
           <p className="text-[11px] text-muted-foreground">
-            Jika anak belum punya nomor sendiri, isi dengan nomor orang tua.
+            Jika pemain belum punya nomor sendiri, isi dengan nomor orang tua.
           </p>
         </div>
 

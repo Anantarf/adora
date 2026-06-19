@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import type { UserItem } from "./UserAccountCard";
 
 const schema = z.object({
-  name: z.string().min(1, "Nama tidak boleh kosong."),
+  name: z.string().min(1, "Nama tidak boleh kosong"),
   username: z
     .string()
     .min(4, "Username minimal 4 karakter")
@@ -84,7 +84,7 @@ export function EditUserDialog({
             Edit Akun
           </DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground">
-            Perbarui informasi dasar akun tanpa mengubah role atau data domain lain.
+            Perbarui informasi dasar akun tanpa mengubah peran atau data lainnya.
           </DialogDescription>
         </DialogHeader>
 
@@ -121,7 +121,7 @@ export function EditUserDialog({
               id="edit-user-email"
               {...register("email")}
               className="h-11 rounded-xl border-border/50 bg-background/50"
-              placeholder="opsional@example.com"
+              placeholder="opsional@contoh.com"
             />
             {errors.email ? <p className="ml-1 text-xs font-medium text-destructive">{errors.email.message}</p> : null}
           </div>

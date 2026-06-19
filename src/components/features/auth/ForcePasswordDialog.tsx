@@ -21,14 +21,14 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
 
     if (password.length < 8) {
       toast.error("Kata Sandi Terlalu Singkat", {
-        description: "Password baru minimal terdiri dari 8 karakter.",
+        description: "Kata sandi baru minimal 8 karakter.",
       });
       return;
     }
 
     if (password !== confirmPassword) {
       toast.error("Kata Sandi Tidak Cocok", {
-        description: "Konfirmasi password harus sama persis dengan password baru.",
+        description: "Konfirmasi kata sandi harus sama dengan kata sandi baru.",
       });
       return;
     }
@@ -37,13 +37,13 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
     try {
       await changeForcedPasswordAction(password);
       toast.success("Kata Sandi Diperbarui", {
-        description: "Password Anda berhasil diubah. Mengamankan sesi...",
+        description: "Kata sandi berhasil diperbarui. Mengamankan sesi...",
       });
       // Force NextAuth to refresh the JWT and session so mustChangePassword becomes false
       await update({ mustChangePassword: false });
     } catch (error) {
       toast.error("Gagal", {
-        description: toUserErrorMessage(error, "Gagal mengubah password."),
+        description: toUserErrorMessage(error, "Gagal memperbarui kata sandi."),
       });
     } finally {
       setIsLoading(false);
@@ -58,14 +58,14 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
             <AlertTriangle className="size-6 text-destructive" />
           </div>
           <DialogTitle className="text-lg font-semibold text-primary">Keamanan Akun</DialogTitle>
-          <DialogDescription className="text-sm">Akun Anda menggunakan kata sandi bawaan atau baru saja di-reset. Untuk melindungi keamanan data Anda, silakan buat kata sandi baru.</DialogDescription>
+          <DialogDescription className="text-sm">Akun Anda menggunakan kata sandi bawaan atau baru saja direset. Untuk melindungi keamanan data Anda, silakan buat kata sandi baru.</DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-3">
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input type="password" placeholder="Kata sandi baru (min. 8 karakter)" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-4" disabled={isLoading} required autoComplete="new-password" />
+              <Input type="password" placeholder="Kata sandi baru (minimal 8 karakter)" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-9 pr-4" disabled={isLoading} required autoComplete="new-password" />
             </div>
 
             <div className="relative">
@@ -80,7 +80,7 @@ export function ForcePasswordDialog({ isOpen }: { isOpen: boolean }) {
                 <Loader2 className="mr-2 size-4 animate-spin" /> Menyimpan...
               </>
             ) : (
-              "Simpan Password & Lanjutkan"
+              "Simpan Kata Sandi & Lanjutkan"
             )}
           </Button>
         </form>

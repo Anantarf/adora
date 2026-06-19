@@ -9,10 +9,10 @@ export function BatchUploadGuide() {
       </div>
       <ol className="space-y-1.5 text-sm text-muted-foreground list-decimal pl-5">
         <li>Unduh contoh file dan lengkapi data pemain sesuai format.</li>
-        <li>Isi kolom Kelas agar sistem dapat membantu menentukan kategori kelompok secara otomatis.</li>
-        <li>Gunakan kolom Kelompok jika Anda ingin menentukan sendiri grup pilihan untuk pemain tersebut.</li>
+        <li>Isi kolom Kelas agar sistem dapat membantu menentukan kelompok latihan secara otomatis.</li>
+        <li>Gunakan kolom Kelompok jika Anda ingin menentukan sendiri kelompok pilihan untuk pemain tersebut.</li>
         <li>Pastikan seluruh informasi sudah akurat sebelum mengunggah berkas Excel.</li>
-        <li>Klik tombol simpan untuk mendaftarkan seluruh pemain ke dalam sistem.</li>
+        <li>Klik tombol Unggah Data Pemain untuk mendaftarkan seluruh pemain ke dalam sistem.</li>
       </ol>
     </div>
   );
