@@ -72,7 +72,7 @@ export function AccountDetailDialog({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h3 className="text-lg font-semibold text-foreground">{displayName}</h3>
-                  <span className="rounded border border-primary/20 bg-primary/10 px-2 py-1 text-[11px] font-medium text-primary">
+                  <span className="rounded border border-primary/40 bg-primary px-2 py-1 text-[11px] font-medium text-primary-foreground">
                     {ROLE_LABELS[user.role] ?? user.role}
                   </span>
                   {isProtected && (
@@ -120,7 +120,7 @@ export function AccountDetailDialog({
                         Kelola daftar anak yang memakai akun orang tua ini untuk akses portal.
                       </p>
                     </div>
-                    <span className="shrink-0 rounded-md border border-primary/20 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
+                    <span className="shrink-0 rounded-md border border-primary/40 bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground">
                       {playerCount} pemain
                     </span>
                   </div>

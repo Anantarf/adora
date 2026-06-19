@@ -35,7 +35,7 @@ export function UserAccountCard({ user, onViewDetail }: UserAccountCardProps) {
         <div className="min-w-0 flex-1">
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span className="truncate font-heading text-sm font-bold text-foreground">{displayName}</span>
-            <span className="shrink-0 rounded border border-primary/20 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary">
+            <span className="shrink-0 rounded border border-primary/40 bg-primary px-1.5 py-0.5 text-[10px] font-medium leading-none text-primary-foreground">
               {ROLE_LABELS[user.role] ?? user.role}
             </span>
           </div>
