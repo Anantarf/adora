@@ -63,12 +63,7 @@ export default function RootLayout({
     <html lang="id" className={`${poppins.variable} ${montserrat.variable} dark scroll-smooth`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <body className={`antialiased min-h-screen bg-background text-foreground font-sans selection:bg-primary selection:text-primary-foreground`}>
         <WebVitals />
-        <a
-          href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:bg-brand-yellow focus:text-black focus:font-black focus:uppercase focus:tracking-widest focus:text-xs focus:rounded-full focus:shadow-[4px_4px_0px_#000] focus:outline-none"
-        >
-          Lewati ke konten utama
-        </a>
+
         {children}
       </body>
     </html>
