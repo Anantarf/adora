@@ -9,14 +9,14 @@ export function LandingFooter() {
   return (
     <footer className="border-t-8 border-brand-purple bg-page-dark pt-20 pb-10">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-12 gap-10 md:gap-12 mb-16">
-          <div className="md:col-span-5">
+        <div className="grid gap-10 md:grid-cols-3 lg:grid-cols-12 md:gap-8 lg:gap-12 mb-16">
+          <div className="md:col-span-1 lg:col-span-5">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-24 h-24 flex items-center justify-center">
                 <Image src="/logo-new.svg" alt="Adora BBC Logo" width={96} height={96} className="w-auto h-auto object-contain" style={{ width: "auto", height: "auto" }} />
               </div>
             </div>
-            <p className="text-white/60 text-sm leading-relaxed mb-6 font-medium">
+            <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium text-pretty">
               Berdiri sejak 2020, Adora Basketball Club (ADORA BBC) berdedikasi menjadi pusat pembinaan basket terdepan di Depok. Misi kami tidak hanya mencetak atlet berprestasi, tetapi juga membangun karakter anak bangsa yang sportif,
               disiplin, dan tangguh melalui olahraga.
             </p>
@@ -51,27 +51,27 @@ export function LandingFooter() {
             </div>
           </div>
 
-          <div className="md:col-span-3 md:col-start-7">
-            <h4 className="font-heading text-lg font-black uppercase tracking-widest text-brand-yellow mb-6">Navigasi</h4>
+          <div className="md:col-span-1 lg:col-span-3 lg:col-start-7">
+            <h4 className="font-heading text-lg font-black uppercase tracking-wide md:tracking-widest text-brand-yellow mb-6">Navigasi</h4>
             <ul className="space-y-4">
               {NAV_LINKS.map(({ label, href }) => (
                 <li key={href}>
-                  <a href={href} className="inline-flex min-h-10 items-center text-sm text-white/70 hover:text-brand-orange transition-colors font-bold uppercase tracking-wider">
+                  <a href={href} className="inline-flex min-h-10 items-center text-sm text-white/75 hover:text-brand-orange transition-colors font-bold uppercase tracking-wide">
                     {label}
                   </a>
                 </li>
               ))}
               <li>
-                <Link href="/login" className="inline-flex min-h-10 items-center gap-2 text-sm text-brand-orange hover:text-white transition-colors font-bold uppercase tracking-wider">
+                <Link href="/login" className="inline-flex min-h-10 items-center gap-2 text-sm text-brand-orange hover:text-white transition-colors font-bold uppercase tracking-wide">
                   Login Portal →
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div className="md:col-span-3">
-            <h4 className="font-heading text-lg font-black uppercase tracking-widest text-brand-yellow mb-6">Kontak Kami</h4>
-            <ul className="space-y-4 text-sm text-white/70 font-medium">
+          <div className="md:col-span-1 lg:col-span-3">
+            <h4 className="font-heading text-lg font-black uppercase tracking-wide md:tracking-widest text-brand-yellow mb-6">Kontak Kami</h4>
+            <ul className="space-y-4 text-sm text-white/75 font-medium">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 w-5 h-5 shrink-0 text-brand-orange" />
                 <span>{CONTACT.address}</span>
@@ -93,8 +93,8 @@ export function LandingFooter() {
         </div>
 
         <div className="border-t border-white/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
-          <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">&copy; {new Date().getFullYear()} ADORA Basketball Club. All rights reserved.</p>
-          <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">Licensed by PERBASI</p>
+          <p className="text-white/60 text-[11px] font-bold tracking-wide md:tracking-widest uppercase">&copy; {new Date().getFullYear()} ADORA Basketball Club. All rights reserved.</p>
+          <p className="text-white/60 text-[11px] font-bold tracking-wide md:tracking-widest uppercase">Licensed by PERBASI</p>
         </div>
       </div>
     </footer>

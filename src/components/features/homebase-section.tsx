@@ -31,15 +31,15 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <Zap className="w-8 h-8 text-brand-orange fill-brand-orange" />
-              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">HOMEBASE</h2>
+              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-wide md:tracking-widest italic text-balance">HOMEBASE</h2>
             </div>
-            <p className="text-white/60 text-base md:text-lg max-w-2xl mx-auto font-medium">Pilih lokasi latihan terdekat dan jadilah bagian dari kami.</p>
+            <p className="text-white/70 text-sm sm:text-base md:text-lg max-w-2xl mx-auto font-medium text-pretty">Pilih lokasi latihan terdekat dan jadilah bagian dari kami.</p>
           </div>
         </FadeIn>
 
         {sorted.length === 0 ? (
           <FadeIn direction="up" className="text-center py-16">
-            <p className="text-brand-orange text-lg font-bold uppercase tracking-widest italic">Belum ada homebase yang terdaftar.</p>
+            <p className="text-brand-orange text-lg font-bold uppercase tracking-wide md:tracking-widest italic">Belum ada homebase yang terdaftar.</p>
             <p className="text-white/60 text-sm mt-2 font-medium">Hubungi Admin untuk informasi lebih lanjut.</p>
           </FadeIn>
         ) : (
@@ -69,7 +69,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                         <>
                           <div className="absolute inset-0 pattern-halftone opacity-30 z-0" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-white/20 font-heading font-black text-lg lg:text-xl uppercase tracking-widest text-center italic px-4">FOTO {name}</span>
+                            <span className="text-white/20 font-heading font-black text-lg lg:text-xl uppercase tracking-wide md:tracking-widest text-center italic px-4">FOTO {name}</span>
                           </div>
                         </>
                       )}
@@ -80,12 +80,12 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
 
                     {/* Overlay Text Content */}
                     <div className="absolute inset-0 p-5 lg:p-6 flex flex-col justify-end z-20">
-                      <h3 className="font-heading font-black text-xl md:text-2xl text-white group-hover:text-brand-yellow transition-colors uppercase tracking-widest leading-tight italic drop-shadow-lg mb-1 md:mb-2">
+                      <h3 className="font-heading font-black text-xl md:text-2xl text-white group-hover:text-brand-yellow transition-colors uppercase tracking-wide md:tracking-widest leading-tight italic drop-shadow-lg mb-1 md:mb-2 text-balance">
                         {displayName(homebase.name)}
                       </h3>
 
                       <div className="space-y-1">
-                        <div className="flex items-start gap-2 text-white/80 text-[10px] md:text-xs font-medium drop-shadow-md mb-2">
+                        <div className="flex items-start gap-2 text-white/85 text-xs md:text-sm font-medium drop-shadow-md mb-2">
                           <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 text-brand-orange mt-0.5" />
                           <span className="leading-relaxed line-clamp-2">{homebase.address}</span>
                         </div>
@@ -94,7 +94,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`Buka rute ke ${name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi"} di Google Maps`}
-                          className="inline-flex items-center gap-1.5 text-[9px] min-h-10 md:text-[10px] font-black uppercase tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
+                          className="inline-flex items-center gap-1.5 text-[10px] min-h-10 md:text-[11px] font-black uppercase tracking-wide md:tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
                         >
                           Buka di Google Maps
                           <ExternalLink className="w-3 h-3 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />

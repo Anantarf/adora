@@ -11,9 +11,9 @@ export function LandingProgramsSection() {
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center gap-2 mb-3">
               <Zap className="w-5 h-5 text-brand-yellow fill-brand-yellow" />
-              <h2 className="font-heading font-black text-2xl md:text-4xl text-white uppercase tracking-widest italic">PROGRAM KELAS</h2>
+              <h2 className="font-heading font-black text-2xl md:text-4xl text-white uppercase tracking-wide md:tracking-widest italic text-balance">PROGRAM KELAS</h2>
             </div>
-            <p className="text-white/60 max-w-2xl mx-auto font-medium text-xs md:text-base px-4">Pelatihan berbasis usia untuk memaksimalkan potensi, fisik, dan mental pemain.</p>
+            <p className="text-white/70 max-w-2xl mx-auto font-medium text-sm md:text-base px-4 text-pretty">Pelatihan berbasis usia untuk memaksimalkan potensi, fisik, dan mental pemain.</p>
           </div>
         </FadeIn>
 
@@ -37,7 +37,7 @@ export function LandingProgramsSection() {
                     <>
                       <div className="absolute inset-0 pattern-halftone opacity-30 z-0"></div>
                       <div className="absolute inset-0 flex items-center justify-center z-10">
-                        <span className="text-white/20 font-heading font-black text-lg uppercase tracking-widest text-center italic">FOTO {label}</span>
+                        <span className="text-white/20 font-heading font-black text-lg uppercase tracking-wide md:tracking-widest text-center italic">FOTO {label}</span>
                       </div>
                     </>
                   )}
@@ -46,12 +46,12 @@ export function LandingProgramsSection() {
                 <div className="absolute inset-0 bg-linear-to-t from-black/88 via-black/26 to-transparent z-10"></div>
 
                 <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 skew-box bg-brand-yellow text-black px-2 py-0.5 sm:px-3 sm:py-1 shadow-[2px_2px_0px_#000] sm:shadow-[3px_3px_0px_#000] border border-black">
-                  <span className="unskew-content block font-heading font-black text-[10px] sm:text-xs tracking-widest italic">{ages}</span>
+                  <span className="unskew-content block font-heading font-black text-[11px] sm:text-xs tracking-wide md:tracking-widest italic">{ages}</span>
                 </div>
 
                 <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-end z-20">
-                  <h3 className="font-heading font-black text-lg sm:text-2xl text-white tracking-widest mb-0.5 sm:mb-1 uppercase italic group-hover:text-brand-yellow transition-colors drop-shadow-lg leading-tight">{label}</h3>
-                  <p className="text-white/70 text-[10px] sm:text-sm leading-tight font-medium drop-shadow-md">{desc}</p>
+                  <h3 className="font-heading font-black text-lg sm:text-2xl text-white tracking-wide md:tracking-widest mb-0.5 sm:mb-1 uppercase italic group-hover:text-brand-yellow transition-colors drop-shadow-lg leading-tight">{label}</h3>
+                  <p className="text-white/75 text-xs sm:text-sm leading-snug font-medium drop-shadow-md text-pretty">{desc}</p>
                 </div>
               </div>
             </StaggerItem>

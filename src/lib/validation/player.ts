@@ -101,7 +101,7 @@ export function playerToFormValues(player: Player): PlayerFormValues {
 
   const form = { ...defaults } as Record<string, unknown>;
   for (const key of Object.keys(defaults)) {
-    const val = (player as Record<string, unknown>)[key];
+    const val = (player as unknown as Record<string, unknown>)[key];
     if (val !== undefined && val !== null) {
       form[key] = val;
     }

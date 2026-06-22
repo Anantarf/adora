@@ -11,18 +11,18 @@ export function LandingCtaSection() {
 
       <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
         <FadeIn direction="up">
-          <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic mb-2.5 md:mb-4 drop-shadow-lg">
+          <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-wide md:tracking-widest italic mb-2.5 md:mb-4 drop-shadow-lg text-balance">
             SIAP MENJADI <span className="text-brand-yellow">JUARA?</span>
           </h2>
-          <p className="text-white/90 max-w-xl mx-auto mb-7 md:mb-10 font-medium text-sm md:text-base leading-relaxed">Pendaftaran mudah, cepat, dan 100% online.</p>
+          <p className="text-white/90 max-w-xl mx-auto mb-7 md:mb-10 font-medium text-sm md:text-base leading-relaxed text-pretty">Pendaftaran mudah, cepat, dan 100% online.</p>
 
           <StaggerContainer className="flex flex-col md:flex-row items-center justify-center gap-2.5 md:gap-12 max-w-4xl mx-auto mb-8 md:mb-12" delay={0.2}>
             {REGISTRATION_STEPS.map(({ step, title, desc }) => (
               <StaggerItem key={step} className="flex items-center gap-3 md:gap-4 relative group">
                 <div className="text-brand-orange font-heading font-black text-2xl md:text-3xl italic drop-shadow-sm shrink-0 transition-transform group-hover:scale-110">0{step}</div>
                 <div className="text-left">
-                  <h3 className="font-heading font-black text-xs md:text-sm text-white uppercase tracking-widest leading-none mb-1 italic group-hover:text-brand-yellow transition-colors">{title}</h3>
-                  <p className="text-white/60 text-xs font-medium max-w-[150px] md:max-w-[180px] leading-tight">{desc}</p>
+                  <h3 className="font-heading font-black text-xs md:text-sm text-white uppercase tracking-wide md:tracking-widest leading-none mb-1 italic group-hover:text-brand-yellow transition-colors">{title}</h3>
+                  <p className="text-white/70 text-xs font-medium max-w-[170px] md:max-w-[180px] leading-snug text-pretty">{desc}</p>
                 </div>
                 {step !== "3" && <div className="hidden md:block w-px h-8 bg-brand-orange/30 ml-8"></div>}
               </StaggerItem>
@@ -32,14 +32,14 @@ export function LandingCtaSection() {
           <div className="flex flex-col items-center">
             <Link
               href="/register"
-              className="inline-flex skew-box bg-brand-yellow hover:bg-white text-black font-black px-10 py-3.5 transition-all uppercase tracking-[0.2em] text-sm md:text-base hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
+              className="inline-flex skew-box bg-brand-yellow hover:bg-white text-black font-black px-7 sm:px-10 py-3.5 transition-all uppercase tracking-wide md:tracking-[0.16em] text-sm md:text-base hover:scale-110 shadow-[6px_6px_0px_#000] border-2 border-black group"
             >
               <span className="unskew-content italic flex items-center gap-3">
                 DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">{"->"}</span>
               </span>
             </Link>
             <div className="mt-5 md:mt-6 flex flex-col items-center gap-1">
-              <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Kuota terbatas untuk setiap kelompok usia</p>
+              <p className="text-white/55 text-[11px] font-bold uppercase tracking-wide md:tracking-widest text-center text-balance">Kuota terbatas untuk setiap kelompok usia</p>
               <div className="w-12 h-1 bg-brand-orange/40 rounded-full"></div>
             </div>
           </div>

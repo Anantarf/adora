@@ -18,8 +18,8 @@ function PhotoSlot({ label, desc, image, color = "orange", className = "" }: { l
           <div className="absolute inset-0 bg-linear-to-t from-black/74 via-black/14 to-transparent" />
           {/* Caption — always visible, enhanced on hover */}
           <div className="absolute bottom-0 left-0 right-0 p-4 transition-all duration-300 group-hover:pb-5">
-            <p className="font-heading font-black text-xs text-brand-yellow uppercase italic tracking-widest mb-1">{label}</p>
-            <p className="text-white/70 text-[10px] leading-tight line-clamp-2 group-hover:text-white/90 transition-colors duration-300">{desc}</p>
+            <p className="font-heading font-black text-xs text-brand-yellow uppercase italic tracking-wide md:tracking-widest mb-1">{label}</p>
+            <p className="text-white/75 text-xs leading-snug line-clamp-2 group-hover:text-white/90 transition-colors duration-300 text-pretty">{desc}</p>
           </div>
         </>
       ) : (
@@ -29,8 +29,8 @@ function PhotoSlot({ label, desc, image, color = "orange", className = "" }: { l
             <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${isYellow ? "bg-brand-yellow/10 border border-brand-yellow/30" : "bg-brand-orange/10 border border-brand-orange/30"}`}>
               <Camera className={`w-4 h-4 opacity-70 ${isYellow ? "text-brand-yellow" : "text-brand-orange"}`} />
             </div>
-            <p className={`font-heading font-black text-[10px] md:text-xs uppercase tracking-widest italic leading-tight ${isYellow ? "text-brand-yellow" : "text-brand-orange"}`}>{label}</p>
-            <p className="text-white/35 text-[9px] md:text-[10px] font-medium leading-relaxed line-clamp-3 hidden sm:block max-w-45">{desc}</p>
+            <p className={`font-heading font-black text-[11px] md:text-xs uppercase tracking-wide md:tracking-widest italic leading-tight ${isYellow ? "text-brand-yellow" : "text-brand-orange"}`}>{label}</p>
+            <p className="text-white/50 text-[10px] md:text-xs font-medium leading-relaxed line-clamp-3 hidden sm:block max-w-45 text-pretty">{desc}</p>
           </div>
         </>
       )}
@@ -46,9 +46,9 @@ export function GallerySection() {
           <div className="text-center mb-8 md:mb-12">
             <div className="inline-flex items-center justify-center gap-2.5 md:gap-3 mb-2 md:mb-3">
               <Camera className="w-6 h-6 md:w-7 md:h-7 text-brand-orange" />
-              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-widest italic">ADORA IN ACTION</h2>
+              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-wide md:tracking-widest italic text-balance">ADORA IN ACTION</h2>
             </div>
-            <p className="text-white/60 text-sm md:text-base max-w-xl mx-auto font-medium">Kilas balik momen latihan, keseruan turnamen, dan semangat juang keluarga besar Adora BBC.</p>
+            <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto font-medium text-pretty">Kilas balik momen latihan, keseruan turnamen, dan semangat juang keluarga besar Adora BBC.</p>
           </div>
         </FadeIn>
 

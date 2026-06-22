@@ -149,12 +149,12 @@ function RegisterContent() {
           <div className="space-y-6 md:space-y-10">
             {/* Step 1: Pilih Homebase */}
             <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative">
-              <div className="absolute -top-5 -left-3 md:-left-5">
+              <div className="absolute -top-5 left-4 md:-left-5">
                 <div className="skew-box w-12 h-12 bg-brand-purple text-white border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
                   <span className="unskew-content font-heading font-black text-2xl italic">1</span>
                 </div>
               </div>
-              <div className="mb-8 pl-10 md:pl-12">
+              <div className="mb-8 pl-16 md:pl-12">
                 <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">PILIH LOKASI LATIHAN</h2>
                 <p className="text-white/60 font-medium text-xs md:text-sm">Pilih homebase yang paling dekat dengan Anda</p>
               </div>
@@ -164,12 +164,12 @@ function RegisterContent() {
             {/* Step 2: Form (muncul setelah homebase ter-resolve namanya) */}
             {selectedHomebase?.name && (
               <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative mt-12 animate-in slide-in-from-bottom-10 fade-in duration-500">
-                <div className="absolute -top-5 -left-3 md:-left-5">
+                <div className="absolute -top-5 left-4 md:-left-5">
                   <div className="skew-box w-12 h-12 bg-brand-orange text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
                     <span className="unskew-content font-heading font-black text-2xl italic">2</span>
                   </div>
                 </div>
-                <div className="mb-8 pl-10 md:pl-12">
+                <div className="mb-8 pl-16 md:pl-12">
                   <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">DATA CALON PEMAIN</h2>
                   <p className="text-white/60 font-medium text-xs md:text-sm">Pastikan nomor WhatsApp aktif untuk konfirmasi admin.</p>
                 </div>
