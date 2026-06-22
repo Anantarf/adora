@@ -154,7 +154,7 @@ function RegisterContent() {
                   <span className="unskew-content font-heading font-black text-2xl italic">1</span>
                 </div>
               </div>
-              <div className="mb-8 pl-16 md:pl-12">
+              <div className="mb-8 pl-16">
                 <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">PILIH LOKASI LATIHAN</h2>
                 <p className="text-white/60 font-medium text-xs md:text-sm">Pilih homebase yang paling dekat dengan Anda</p>
               </div>
@@ -169,7 +169,7 @@ function RegisterContent() {
                     <span className="unskew-content font-heading font-black text-2xl italic">2</span>
                   </div>
                 </div>
-                <div className="mb-8 pl-16 md:pl-12">
+                <div className="mb-8 pl-16">
                   <h2 className="font-heading font-black text-2xl md:text-3xl uppercase tracking-widest text-white italic">DATA CALON PEMAIN</h2>
                   <p className="text-white/60 font-medium text-xs md:text-sm">Pastikan nomor WhatsApp aktif untuk konfirmasi admin.</p>
                 </div>

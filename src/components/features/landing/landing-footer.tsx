@@ -9,8 +9,8 @@ export function LandingFooter() {
   return (
     <footer className="border-t-8 border-brand-purple bg-page-dark pt-20 pb-10">
       <div className="container mx-auto px-4">
-        <div className="grid gap-10 md:grid-cols-3 lg:grid-cols-12 md:gap-8 lg:gap-12 mb-16">
-          <div className="md:col-span-1 lg:col-span-5">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-12 md:gap-8 lg:gap-12 mb-16">
+          <div className="md:col-span-2 lg:col-span-5">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-24 h-24 flex items-center justify-center">
                 <Image src="/logo-new.svg" alt="Adora BBC Logo" width={96} height={96} className="w-auto h-auto object-contain" style={{ width: "auto", height: "auto" }} />
