@@ -7,10 +7,16 @@ interface HomebaseSectionProps {
   homebases: Homebase[];
 }
 
-/** Mapping homebase display name to image path */
-const HOMEBASE_IMAGES: Record<string, string> = {
-  "ADORA Gandul": "/images/homebases/homecourt.JPG",
-  "ADORA Cibubur": "/images/homebases/cibubur.jpg",
+/** Mapping homebase display name to image path and map query */
+const HOMEBASE_LOOKUP: Record<string, { image: string; mapsQuery: string }> = {
+  "ADORA Gandul": {
+    image: "/images/homebases/homecourt.JPG",
+    mapsQuery: "Homecourt Cinere, Depok"
+  },
+  "ADORA Cibubur": {
+    image: "/images/homebases/cibubur.jpg",
+    mapsQuery: "GOR Cileungsi"
+  },
 };
 
 /** Strip parenthetical suffix: "ADORA Gandul (Pusat)" → "ADORA Gandul" */
@@ -46,7 +52,8 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
           <StaggerContainer className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-7xl mx-auto" delay={0.2}>
             {sorted.map((homebase) => {
               const name = displayName(homebase.name);
-              const imageUrl = HOMEBASE_IMAGES[name];
+              const lookup = HOMEBASE_LOOKUP[name] || { image: "", mapsQuery: homebase.address || name };
+              const imageUrl = lookup.image;
 
               return (
                 <StaggerItem key={homebase.id} className="relative group h-full">
@@ -90,10 +97,10 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                           <span className="leading-relaxed line-clamp-2">{homebase.address}</span>
                         </div>
                         <a
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi")}`}
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(lookup.mapsQuery)}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          aria-label={`Buka rute ke ${name.includes("Gandul") ? "Homecourt Cinere" : "GOR Cileungsi"} di Google Maps`}
+                          aria-label={`Buka rute ke ${lookup.mapsQuery} di Google Maps`}
                           className="inline-flex items-center gap-1.5 text-[10px] min-h-10 md:text-[11px] font-black uppercase tracking-wide md:tracking-widest text-brand-yellow hover:text-white transition-colors group/link"
                         >
                           Buka di Google Maps

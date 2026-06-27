@@ -62,7 +62,7 @@ export function GallerySection() {
           │                     │  Lapangan    │ Turnamen │
           └─────────────────────┴──────────────┴──────────┘
         */}
-        <div className="grid grid-cols-12 md:grid-rows-2 gap-4 md:gap-4 h-auto md:h-140">
+        <div className="grid grid-cols-12 md:grid-rows-2 gap-4 md:gap-4 h-auto md:h-[35rem]">
           {/* Slot 1 — Hero Carousel (Besar, 2 baris) */}
           <div className="col-span-12 md:col-span-5 md:row-span-2 h-64 sm:h-80 md:h-full group relative rounded-2xl overflow-hidden border-2 border-brand-yellow/40 hover:border-brand-yellow transition-all duration-300 bg-surface-dark shadow-xl">
             <GalleryHeroCarousel />
