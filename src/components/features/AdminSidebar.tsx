@@ -43,7 +43,7 @@ export function AdminSidebar() {
               </div>
               <div className={cn("flex flex-col justify-center overflow-hidden transition-all duration-300", isCollapsed ? "w-0 opacity-0 pointer-events-none ml-0" : "w-auto opacity-100 ml-1")}>
                 <span className="font-heading mt-0.5 whitespace-nowrap text-lg leading-none tracking-wide text-foreground">
-                  ADORA <span className="text-primary">BBC</span>
+                  ADORA <span className="text-brand-orange">BBC</span>
                 </span>
               </div>
             </SidebarMenuButton>

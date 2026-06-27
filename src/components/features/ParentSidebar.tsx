@@ -48,7 +48,7 @@ export function ParentSidebar() {
               </div>
               <div className={cn("flex flex-col justify-center overflow-hidden transition-all duration-300", isCollapsed ? "ml-0 w-0 pointer-events-none opacity-0" : "ml-1 w-auto opacity-100")}>
                 <span className="font-heading mt-0.5 whitespace-nowrap text-lg leading-none tracking-wide text-foreground">
-                  ADORA <span className="text-primary">BBC</span>
+                  ADORA <span className="text-brand-orange">BBC</span>
                 </span>
               </div>
             </SidebarMenuButton>
