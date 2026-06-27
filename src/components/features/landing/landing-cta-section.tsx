@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 
 export function LandingCtaSection() {
   return (
-    <section id="daftar" className="py-14 md:py-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
+    <section id="daftar" className="pt-10 pb-16 md:pt-16 md:pb-24 bg-brand-purple relative overflow-hidden z-20 scroll-mt-20">
       <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none"></div>
 
       <div className="container mx-auto px-4 md:px-6 relative z-10 text-center">
@@ -31,7 +31,7 @@ export function LandingCtaSection() {
           </StaggerContainer>
 
           <div className="flex flex-col items-center">
-            <Link href="/register" className={buttonVariants({ variant: "cta-yellow", size: "xl", className: "uppercase group h-auto px-7 sm:px-10 py-3.5 text-sm md:text-base" })}>
+            <Link href="/register" className={buttonVariants({ variant: "cta", size: "xl", className: "uppercase group h-auto px-7 sm:px-10 py-3.5 text-sm md:text-base" })}>
               DAFTAR SEKARANG <span className="group-hover:translate-x-2 transition-transform">{"->"}</span>
             </Link>
             <div className="mt-5 md:mt-6 flex flex-col items-center gap-1">

@@ -47,7 +47,7 @@ export function LandingHeader() {
             </div>
             <div className="hidden sm:flex flex-col justify-center">
               <span className="font-heading font-black text-xl tracking-wide uppercase text-white group-hover:text-brand-yellow transition-colors leading-none mt-1">
-                ADORA <span className="text-brand-orange">BBC</span>
+                ADORA <span className="text-brand-yellow">BBC</span>
               </span>
             </div>
           </Link>

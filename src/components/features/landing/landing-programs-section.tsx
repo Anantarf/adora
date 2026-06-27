@@ -8,12 +8,12 @@ export function LandingProgramsSection() {
     <section id="program" className="pt-10 pb-16 md:pt-16 md:pb-24 bg-page-dark scroll-mt-20 relative -mt-10 z-10">
       <div className="container mx-auto px-4">
         <FadeIn direction="up">
-          <div className="text-center mb-16">
+          <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center justify-center gap-2 mb-3">
               <Zap className="w-5 h-5 text-brand-yellow fill-brand-yellow" />
               <h2 className="text-h2 text-white uppercase text-balance">PROGRAM KELAS</h2>
             </div>
-            <p className="text-white/70 max-w-2xl mx-auto text-body px-4 text-pretty">Pelatihan berbasis usia untuk memaksimalkan potensi, fisik, dan mental pemain.</p>
+            <p className="text-white/70 text-body-lg max-w-2xl mx-auto text-pretty">Pelatihan berbasis usia untuk memaksimalkan potensi, fisik, dan mental pemain.</p>
           </div>
         </FadeIn>
 
@@ -43,10 +43,10 @@ export function LandingProgramsSection() {
                   )}
                 </div>
 
-                <div className="absolute inset-0 bg-linear-to-t from-black/88 via-black/26 to-transparent z-10"></div>
+                <div className="absolute inset-0 bg-linear-to-t from-black/84 via-black/20 to-transparent z-10"></div>
 
                 <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 skew-box bg-brand-yellow text-black px-2 py-0.5 sm:px-3 sm:py-1 shadow-[2px_2px_0px_#000] sm:shadow-[3px_3px_0px_#000] border border-black">
-                  <span className="unskew-content block font-heading font-black text-[11px] sm:text-xs tracking-wide">{ages}</span>
+                  <span className="unskew-content block font-heading font-black text-[10px] sm:text-xs md:text-sm tracking-wide">{ages}</span>
                 </div>
 
                 <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-end z-20">

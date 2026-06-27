@@ -1,6 +1,6 @@
 import { type homebase as Homebase } from "@prisma/client";
 import Image from "next/image";
-import { ExternalLink, MapPin, Zap } from "lucide-react";
+import { ExternalLink, MapPin } from "lucide-react";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 
 interface HomebaseSectionProps {
@@ -29,17 +29,17 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
   const sorted = [...homebases].sort((a, b) => rank(a.name) - rank(b.name));
 
   return (
-    <section id="homebase" className="pt-12 pb-16 md:pb-24 relative overflow-hidden bg-page-dark scroll-mt-20 z-20">
+    <section id="homebase" className="pt-10 pb-16 md:pt-16 md:pb-24 relative overflow-hidden bg-page-dark scroll-mt-20 z-20">
       {/* Background Ornament */}
 
       <div className="container mx-auto px-4 relative z-10">
         <FadeIn direction="up">
           <div className="text-center mb-10 md:mb-16">
-            <div className="inline-flex items-center justify-center gap-3 mb-4">
-              <Zap className="w-8 h-8 text-brand-orange fill-brand-orange" />
-              <h2 className="text-h2 text-white uppercase text-balance">HOMEBASE</h2>
+            <div className="inline-flex items-center justify-center gap-2 mb-3">
+              <MapPin className="w-5 h-5 text-brand-yellow" />
+              <h2 className="text-h2 text-white uppercase text-balance">LOKASI LATIHAN</h2>
             </div>
-            <p className="text-white/70 text-body-lg max-w-2xl mx-auto text-pretty">Pilih lokasi latihan terdekat dan jadilah bagian dari kami.</p>
+            <p className="text-white/70 text-body-lg max-w-2xl mx-auto text-pretty">Pilih lokasi terdekat dan jadilah bagian dari keluarga besar Adora BBC.</p>
           </div>
         </FadeIn>
 

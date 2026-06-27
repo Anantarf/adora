@@ -5,7 +5,7 @@ import { CONTACT } from "@/lib/constants/contact";
 
 export function LandingTurnamenSection() {
   return (
-    <section id="turnamen" className="relative pt-10 pb-14 md:pt-16 md:pb-24 bg-brand-purple scroll-mt-20 clip-diagonal z-30 -mt-10">
+    <section id="turnamen" className="relative pt-10 pb-16 md:pt-16 md:pb-24 bg-brand-purple scroll-mt-20 clip-diagonal z-30 -mt-10">
       <div className="absolute inset-0 pattern-halftone opacity-20 pointer-events-none overflow-hidden"></div>
 
       <div className="container mx-auto px-4 relative z-10">
@@ -14,16 +14,16 @@ export function LandingTurnamenSection() {
             <div className="flex flex-col items-center lg:items-start text-center lg:text-left gap-4 md:gap-8">
               <div className="w-full">
                 <div className="inline-block skew-box bg-brand-yellow px-4 py-1 mb-3 md:mb-4 border-b-4 border-r-4 border-black">
-                  <span className="unskew-content block font-heading font-black uppercase text-black text-xs tracking-wide">EVENT & TURNAMEN</span>
+                  <span className="unskew-content block font-heading font-black uppercase text-black text-[10px] sm:text-xs md:text-sm tracking-wide">EVENT & TURNAMEN</span>
                 </div>
                 <h3 className="text-h2 text-white uppercase mb-2 md:mb-3 drop-shadow-lg wrap-break-word text-balance">
                   Adora Sports <br />
-                  <span className="text-brand-orange pr-2">Entertainment</span>
+                  <span className="text-brand-yellow pr-2">Entertainment</span>
                 </h3>
                 <p className="text-white/85 text-body-lg mb-4 md:mb-6 text-pretty">Dua turnamen resmi yang kami selenggarakan setiap tahun sebagai wadah kompetisi usia dini terbaik di Depok.</p>
                 <ul className="text-left space-y-2 md:space-y-3 text-white">
-                  <li className="flex items-start gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
-                    <div className="bg-brand-orange p-3 rounded-xl shrink-0 text-black">
+                  <li className="flex items-start gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-2xl border border-white/10 hover:border-brand-yellow transition-colors">
+                    <div className="bg-brand-yellow p-3 rounded-xl shrink-0 text-black">
                       <Trophy className="w-6 h-6" />
                     </div>
                     <div>
@@ -31,8 +31,8 @@ export function LandingTurnamenSection() {
                       <span className="text-white/80 text-body leading-snug">Adora Student Basketball Championship (ASBC), turnamen antar pelajar sekolah.</span>
                     </div>
                   </li>
-                  <li className="flex items-start gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-2xl border border-white/10 hover:border-brand-orange transition-colors">
-                    <div className="bg-brand-orange p-3 rounded-xl shrink-0 text-black">
+                  <li className="flex items-start gap-3 md:gap-4 bg-white/5 p-3 md:p-4 rounded-2xl border border-white/10 hover:border-brand-yellow transition-colors">
+                    <div className="bg-brand-yellow p-3 rounded-xl shrink-0 text-black">
                       <Trophy className="w-6 h-6" />
                     </div>
                     <div>
