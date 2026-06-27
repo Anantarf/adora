@@ -31,16 +31,16 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
           <div className="text-center mb-10 md:mb-16">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <Zap className="w-8 h-8 text-brand-orange fill-brand-orange" />
-              <h2 className="font-heading font-black text-2xl md:text-5xl text-white uppercase tracking-wide md:tracking-widest italic text-balance">HOMEBASE</h2>
+              <h2 className="text-h2 text-white uppercase text-balance">HOMEBASE</h2>
             </div>
-            <p className="text-white/70 text-sm sm:text-base md:text-lg max-w-2xl mx-auto font-medium text-pretty">Pilih lokasi latihan terdekat dan jadilah bagian dari kami.</p>
+            <p className="text-white/70 text-body-lg max-w-2xl mx-auto text-pretty">Pilih lokasi latihan terdekat dan jadilah bagian dari kami.</p>
           </div>
         </FadeIn>
 
         {sorted.length === 0 ? (
           <FadeIn direction="up" className="text-center py-16">
-            <p className="text-brand-orange text-lg font-bold uppercase tracking-wide md:tracking-widest italic">Belum ada homebase yang terdaftar.</p>
-            <p className="text-white/60 text-sm mt-2 font-medium">Hubungi Admin untuk informasi lebih lanjut.</p>
+            <p className="text-brand-orange text-h3 uppercase">Belum ada homebase yang terdaftar.</p>
+            <p className="text-white/60 text-body mt-2">Hubungi Admin untuk informasi lebih lanjut.</p>
           </FadeIn>
         ) : (
           <StaggerContainer className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-7xl mx-auto" delay={0.2}>
@@ -69,7 +69,7 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
                         <>
                           <div className="absolute inset-0 pattern-halftone opacity-30 z-0" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-white/20 font-heading font-black text-lg lg:text-xl uppercase tracking-wide md:tracking-widest text-center italic px-4">FOTO {name}</span>
+                            <span className="text-white/20 text-h3 uppercase text-center px-4">FOTO {name}</span>
                           </div>
                         </>
                       )}
@@ -80,13 +80,13 @@ export function HomebaseSection({ homebases }: HomebaseSectionProps) {
 
                     {/* Overlay Text Content */}
                     <div className="absolute inset-0 p-5 lg:p-6 flex flex-col justify-end z-20">
-                      <h3 className="font-heading font-black text-xl md:text-2xl text-white group-hover:text-brand-yellow transition-colors uppercase tracking-wide md:tracking-widest leading-tight italic drop-shadow-lg mb-1 md:mb-2 text-balance">
+                      <h3 className="text-h3 text-white group-hover:text-brand-yellow transition-colors uppercase leading-tight drop-shadow-lg mb-1 md:mb-2 text-balance">
                         {displayName(homebase.name)}
                       </h3>
 
                       <div className="space-y-1">
-                        <div className="flex items-start gap-2 text-white/85 text-xs md:text-sm font-medium drop-shadow-md mb-2">
-                          <MapPin className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0 text-brand-orange mt-0.5" />
+                        <div className="flex items-start gap-2 text-white/85 text-body drop-shadow-md mb-2">
+                          <MapPin className="w-4 h-4 shrink-0 text-brand-orange mt-0.5" />
                           <span className="leading-relaxed line-clamp-2">{homebase.address}</span>
                         </div>
                         <a

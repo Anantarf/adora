@@ -16,7 +16,7 @@ export function LandingFooter() {
                 <Image src="/logo-new.svg" alt="Adora BBC Logo" width={96} height={96} className="w-auto h-auto object-contain" style={{ width: "auto", height: "auto" }} />
               </div>
             </div>
-            <p className="text-white/70 text-sm leading-relaxed mb-6 font-medium text-pretty">
+            <p className="text-white/70 text-body leading-relaxed mb-6 text-pretty">
               Berdiri sejak 2020, Adora Basketball Club (ADORA BBC) berdedikasi menjadi pusat pembinaan basket terdepan di Depok. Misi kami tidak hanya mencetak atlet berprestasi, tetapi juga membangun karakter anak bangsa yang sportif,
               disiplin, dan tangguh melalui olahraga.
             </p>
@@ -52,17 +52,17 @@ export function LandingFooter() {
           </div>
 
           <div className="md:col-span-1 lg:col-span-3 lg:col-start-7">
-            <h4 className="font-heading text-lg font-black uppercase tracking-wide md:tracking-widest text-brand-yellow mb-6">Navigasi</h4>
+            <h4 className="text-h3 uppercase text-brand-yellow mb-6">Navigasi</h4>
             <ul className="space-y-4">
               {NAV_LINKS.map(({ label, href }) => (
                 <li key={href}>
-                  <a href={href} className="inline-flex min-h-10 items-center text-sm text-white/75 hover:text-brand-orange transition-colors font-bold uppercase tracking-wide">
+                  <a href={href} className="inline-flex min-h-10 items-center text-body text-white/75 hover:text-brand-orange transition-colors">
                     {label}
                   </a>
                 </li>
               ))}
               <li>
-                <Link href="/login" className="inline-flex min-h-10 items-center gap-2 text-sm text-brand-orange hover:text-white transition-colors font-bold uppercase tracking-wide">
+                <Link href="/login" className="inline-flex min-h-10 items-center gap-2 text-body text-brand-orange hover:text-white transition-colors">
                   Login Portal →
                 </Link>
               </li>
@@ -70,8 +70,8 @@ export function LandingFooter() {
           </div>
 
           <div className="md:col-span-1 lg:col-span-3">
-            <h4 className="font-heading text-lg font-black uppercase tracking-wide md:tracking-widest text-brand-yellow mb-6">Kontak Kami</h4>
-            <ul className="space-y-4 text-sm text-white/75 font-medium">
+            <h4 className="text-h3 uppercase text-brand-yellow mb-6">Kontak Kami</h4>
+            <ul className="space-y-4 text-body text-white/75">
               <li className="flex items-start gap-3">
                 <MapPin className="mt-0.5 w-5 h-5 shrink-0 text-brand-orange" />
                 <span>{CONTACT.address}</span>

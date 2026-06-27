@@ -46,7 +46,7 @@ export function LandingHeader() {
               <Image src="/logo-new.svg" alt="Adora BBC Logo" width={48} height={48} className="w-auto h-auto object-contain" />
             </div>
             <div className="hidden sm:flex flex-col justify-center">
-              <span className="font-heading font-black text-xl tracking-wide md:tracking-widest uppercase text-white group-hover:text-brand-yellow transition-colors leading-none mt-1 italic">
+              <span className="font-heading font-black text-xl tracking-wide uppercase text-white group-hover:text-brand-yellow transition-colors leading-none mt-1">
                 ADORA <span className="text-brand-orange">BBC</span>
               </span>
             </div>
@@ -54,7 +54,7 @@ export function LandingHeader() {
 
           <nav aria-label="Navigasi utama" className="hidden md:flex absolute left-1/2 -translate-x-1/2 items-center gap-8">
             {NAV_LINKS.map(({ label, href }) => (
-              <a key={href} href={href} className="inline-flex min-h-10 items-center font-heading font-black italic uppercase tracking-wide lg:tracking-widest text-xs text-white/70 hover:text-brand-yellow transition-colors">
+              <a key={href} href={href} className="inline-flex min-h-10 items-center font-heading font-black uppercase tracking-wide text-xs text-white/70 hover:text-brand-yellow transition-colors">
                 {label}
               </a>
             ))}
@@ -65,7 +65,7 @@ export function LandingHeader() {
               href="/login"
               className="skew-box inline-flex min-h-11 items-center bg-white/15 border-2 border-white/30 text-white px-4 py-1.5 md:px-5 md:py-2 hover:bg-brand-yellow hover:text-black hover:border-black transition-all shadow-none hover:shadow-[4px_4px_0px_#000] group"
             >
-              <span className="unskew-content block font-heading font-black italic text-[10px] md:text-xs tracking-wide md:tracking-widest uppercase">PORTAL LOGIN</span>
+              <span className="unskew-content block font-heading font-black text-[10px] md:text-xs tracking-wide uppercase">PORTAL LOGIN</span>
             </Link>
             <button
               className="md:hidden min-w-11 min-h-11 flex items-center justify-center text-white/70 hover:text-white transition-colors"
@@ -98,7 +98,7 @@ export function LandingHeader() {
         className={`fixed top-0 right-0 h-full w-72 sm:w-80 bg-black border-l-4 border-brand-orange z-[70] md:hidden flex flex-col shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between h-14 px-4 border-b border-white/10">
-          <span className="font-heading font-black italic text-xs tracking-wide uppercase text-brand-yellow">MENU</span>
+          <span className="font-heading font-black text-xs tracking-wide uppercase text-brand-yellow">MENU</span>
           <button
             onClick={closeDrawer}
             aria-label="Tutup menu"
@@ -114,7 +114,7 @@ export function LandingHeader() {
               key={href}
               href={href}
               onClick={closeDrawer}
-              className="font-heading font-black italic uppercase tracking-wide text-xs text-white hover:text-brand-yellow py-2.5 transition-all flex items-center justify-between group min-h-11"
+              className="font-heading font-black uppercase tracking-wide text-xs text-white hover:text-brand-yellow py-2.5 transition-all flex items-center justify-between group min-h-11"
             >
               {label}
               <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all text-brand-orange text-[10px]">→</span>
