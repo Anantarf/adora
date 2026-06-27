@@ -38,7 +38,19 @@ export const metadata: Metadata = {
 
 export default async function LandingPage() {
   const nonce = (await headers()).get("x-nonce") ?? undefined;
-  const homebases = await getPublicHomebases();
+
+  let homebases: Awaited<ReturnType<typeof getPublicHomebases>> = [];
+  try {
+    homebases = await Promise.race([
+      getPublicHomebases(),
+      new Promise((_, reject) => setTimeout(() => reject(new Error("Database timeout")), 5000))
+    ]) as Awaited<ReturnType<typeof getPublicHomebases>>;
+  } catch (err) {
+    console.error("[LANDING_PAGE] Failed to fetch homebases:", err);
+    // Continue render with empty homebases rather than crashing
+    homebases = [];
+  }
+
   const registrationYearText = getAcademicYear();
 
   const jsonLd = {

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/animations/fade-in";
 import { REGISTRATION_STEPS } from "@/lib/constants/landing";

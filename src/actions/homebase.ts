@@ -10,7 +10,9 @@ import type { event_type } from "@prisma/client";
 
 export const getPublicHomebases = unstable_cache(
   () => prisma.homebase.findMany({ orderBy: { name: "asc" } }).catch(async (err) => {
-    await recordOperationalError({ source: "get-public-homebases", message: "Failed to fetch homebases", error: err });
+    recordOperationalError({ source: "get-public-homebases", message: "Failed to fetch homebases", error: err }).catch(() => {
+      console.error("[getPublicHomebases] Failed to record operational error");
+    });
     return [];
   }),
   ["public-homebases"],
