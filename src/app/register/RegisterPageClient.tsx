@@ -133,14 +133,14 @@ function RegisterContent() {
       </div>
 
       {/* ── Hero ── */}
-      <section className="relative pt-9 pb-5 md:pt-12 md:pb-8 text-center px-4 z-10">
+      <section className="relative pt-10 pb-16 md:pt-16 md:pb-24 text-center px-4 z-10">
         <div className="inline-flex skew-box bg-brand-yellow text-black px-4 py-1.5 mb-6 border-2 border-black shadow-[4px_4px_0px_#000]">
-          <span className="unskew-content block font-heading font-black uppercase text-xs tracking-widest italic">{"// BERGABUNG BERSAMA KAMI //"}</span>
+          <span className="unskew-content block font-heading font-black uppercase text-[10px] sm:text-xs md:text-sm tracking-widest italic">FORMULIR PENDAFTARAN</span>
         </div>
         <h1 className="font-heading font-black text-3xl md:text-5xl tracking-tighter uppercase text-white mb-3 leading-tight italic drop-shadow-lg py-2">
-          FORM <span className="inline-block text-transparent bg-clip-text bg-linear-to-br from-brand-orange to-red-500 pr-6">PENDAFTARAN</span>
+          DAFTAR SEKARANG <span className="inline-block text-brand-yellow pr-2">→</span>
         </h1>
-        <p className="text-white/70 text-sm md:text-base max-w-xl mx-auto font-medium">Isi data dengan lengkap. Langkah awal menuju Kejurkot dimulai dari sini.</p>
+        <p className="text-white/70 text-body-lg max-w-2xl mx-auto text-pretty">Isi data dengan lengkap. Langkah awal menuju prestasi dimulai dari sini.</p>
       </section>
 
       {/* ── Main Form ── */}
@@ -150,7 +150,7 @@ function RegisterContent() {
             {/* Step 1: Pilih Homebase */}
             <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative">
               <div className="absolute -top-5 left-4 md:-left-5">
-                <div className="skew-box w-12 h-12 bg-brand-purple text-white border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
+                <div className="skew-box w-12 h-12 bg-brand-yellow text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
                   <span className="unskew-content font-heading font-black text-2xl italic">1</span>
                 </div>
               </div>
@@ -165,7 +165,7 @@ function RegisterContent() {
             {selectedHomebase?.name && (
               <div className="bg-surface-dark border-2 border-white/10 p-6 md:p-8 rounded-[1.5rem] shadow-2xl relative mt-12 animate-in slide-in-from-bottom-10 fade-in duration-500">
                 <div className="absolute -top-5 left-4 md:-left-5">
-                  <div className="skew-box w-12 h-12 bg-brand-orange text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
+                  <div className="skew-box w-12 h-12 bg-brand-yellow text-black border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_#000]">
                     <span className="unskew-content font-heading font-black text-2xl italic">2</span>
                   </div>
                 </div>
@@ -180,7 +180,7 @@ function RegisterContent() {
                     {FORM_FIELDS.map(({ key, type, label, required, placeholder, autoComplete, inputMode, sanitize }) => (
                       <div key={key}>
                         <label htmlFor={`field-${key}`} className="block font-bold text-white/80 uppercase tracking-widest text-xs mb-2">
-                          {label} {required && <span className="text-brand-orange">*</span>}
+                          {label} {required && <span className="text-brand-yellow">*</span>}
                         </label>
                         <input
                           id={`field-${key}`}
@@ -202,8 +202,8 @@ function RegisterContent() {
 
                     {/* Program (Cards) */}
                     <fieldset className="pt-3">
-                      <legend className="block font-bold text-white/80 uppercase tracking-widest text-[10px] mb-3">
-                        PILIH KELOMPOK USIA <span className="text-brand-orange">*</span>
+                      <legend className="block font-bold text-white/80 uppercase tracking-widest text-xs mb-3">
+                        PILIH KELOMPOK USIA <span className="text-brand-yellow">*</span>
                       </legend>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {PROGRAMS.map(({ label, ages, desc }) => {
@@ -267,7 +267,7 @@ function RegisterContent() {
                           type="submit"
                           loading={isPending}
                           loadingText="MEMPROSES..."
-                          className="w-full skew-box bg-linear-to-r from-brand-orange to-red-600 hover:from-brand-yellow hover:to-brand-orange text-white hover:text-black font-black px-6 py-3 md:px-8 md:py-4 transition-all text-sm md:text-base uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
+                          className="w-full skew-box bg-brand-yellow hover:bg-brand-orange text-black font-black px-6 py-3 md:px-8 md:py-4 transition-all text-sm md:text-base uppercase tracking-widest hover:scale-[1.02] shadow-[6px_6px_0px_#000] border-2 border-black group h-auto"
                         >
                           <span className="unskew-content flex items-center justify-center gap-2 italic">
                             KIRIM PENDAFTARAN
@@ -291,10 +291,10 @@ function RegisterContent() {
       </div>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t-4 border-brand-purple py-6 md:py-8 bg-black/60 backdrop-blur-md">
+      <footer className="relative z-10 border-t-4 border-brand-yellow py-6 md:py-8 bg-black/60 backdrop-blur-md">
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
-          <Link href="/" className="inline-flex min-h-10 items-center text-white/50 text-xs font-bold uppercase tracking-widest hover:text-brand-orange transition-colors">
-            ← KEMBALI
+          <Link href="/" className="inline-flex min-h-10 items-center text-white/50 text-xs font-bold uppercase tracking-widest hover:text-brand-yellow transition-colors">
+            ← KEMBALI KE HALAMAN UTAMA
           </Link>
           <p className="text-white/50 text-[10px] font-bold tracking-widest uppercase">&copy; {new Date().getFullYear()} ADORA Basketball Club</p>
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">

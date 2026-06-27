@@ -42,7 +42,7 @@ export function LandingHeroSection({ registrationYearText }: LandingHeroSectionP
         </FadeIn>
 
         <FadeIn delay={0.3} direction="up">
-          <p className="text-body-lg max-w-2xl text-white mb-8 md:mb-10 leading-relaxed drop-shadow-md bg-black/30 p-4 md:p-5 rounded-2xl backdrop-blur-sm border border-white/10 text-pretty">
+          <p className="text-sm md:text-base max-w-xl text-white mb-6 md:mb-8 leading-snug drop-shadow-md bg-black/40 px-4 py-3 md:px-5 md:py-4 rounded-xl backdrop-blur-md border border-white/10 text-balance mx-auto">
             Klub basket terdepan di Depok. Membina talenta muda usia 7–16 tahun dengan pendekatan menyenangkan, membangun karakter, dan menyiapkan mereka menuju KEJURKOT hingga kompetisi nasional.
           </p>
         </FadeIn>

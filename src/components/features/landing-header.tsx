@@ -95,7 +95,7 @@ export function LandingHeader() {
         role="dialog"
         aria-modal="true"
         aria-label="Menu navigasi"
-        className={`fixed top-0 right-0 h-full w-72 sm:w-80 bg-black border-l-4 border-brand-orange z-[70] md:hidden flex flex-col shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed top-0 right-0 h-full w-72 sm:w-80 bg-black border-l-4 border-brand-yellow z-[70] md:hidden flex flex-col shadow-2xl transition-transform duration-300 ease-out ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between h-14 px-4 border-b border-white/10">
           <span className="font-heading font-black text-xs tracking-wide uppercase text-brand-yellow">MENU</span>
