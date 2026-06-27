@@ -45,9 +45,7 @@ export function LandingProgramsSection() {
 
                 <div className="absolute inset-0 bg-linear-to-t from-black/84 via-black/20 to-transparent z-10"></div>
 
-                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 skew-box bg-brand-yellow text-black px-2 py-0.5 sm:px-3 sm:py-1 shadow-[2px_2px_0px_#000] sm:shadow-[3px_3px_0px_#000] border border-black">
-                  <span className="unskew-content block font-heading font-black text-[10px] sm:text-xs md:text-sm tracking-wide">{ages}</span>
-                </div>
+
 
                 <div className="absolute inset-0 p-3 sm:p-5 flex flex-col justify-end z-20">
                   <h3 className="text-h3 text-white mb-0.5 sm:mb-1 uppercase group-hover:text-brand-yellow transition-colors drop-shadow-lg leading-tight">{label}</h3>
