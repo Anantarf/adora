@@ -2,6 +2,7 @@
 
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 import { createAuditLog } from "./audit";
 import { prisma } from "@/lib/prisma";
 import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
@@ -122,16 +123,24 @@ export async function createUserAction(data: { username: string; name: string; e
   const hashedPassword = await bcrypt.hash(data.password || defaultPassword!, 10);
 
   const user = await prisma.$transaction(async (tx) => {
-    const newUser = await tx.user.create({
-      data: {
-        username: data.username,
-        name: data.name,
-        email: data.email || null,
-        password: hashedPassword,
-        role: data.role || "PARENT",
-        mustChangePassword: true,
-      },
-    });
+    let newUser;
+    try {
+      newUser = await tx.user.create({
+        data: {
+          username: data.username,
+          name: data.name,
+          email: data.email || null,
+          password: hashedPassword,
+          role: data.role || "PARENT",
+          mustChangePassword: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new Error("Username atau email sudah digunakan oleh akun lain.");
+      }
+      throw error;
+    }
 
     await createAuditLog(tx, "CREATE", "user", newUser.id, userId, {
       username: newUser.username,
@@ -170,7 +179,16 @@ export async function updateUserAction(
     }
 
     const before = { username: targetUser.username, name: targetUser.name, email: targetUser.email };
-    const res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
+    
+    let res;
+    try {
+      res = await tx.user.update({ where: { id }, data: buildUpdateData(data) });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+        throw new Error("Username atau email sudah digunakan oleh akun lain.");
+      }
+      throw error;
+    }
 
     await createAuditLog(tx, "UPDATE", "user", id, userId, {
       before,

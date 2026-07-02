@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 import { createAuditLog } from "@/actions/audit";
 import { normalizeExpectedPrivateUploadUrl } from "@/lib/private-upload";
@@ -218,16 +219,23 @@ export async function upsertCoachProfileAction(input: CoachProfileInput) {
     });
 
     for (const groupId of uniqueGroupIds) {
-      await tx.coachAssignment.upsert({
-        where: { groupId },
-        create: {
-          coachProfileId: coachProfile.id,
-          groupId,
-        },
-        update: {
-          coachProfileId: coachProfile.id,
-        },
-      });
+      try {
+        await tx.coachAssignment.upsert({
+          where: { groupId },
+          create: {
+            coachProfileId: coachProfile.id,
+            groupId,
+          },
+          update: {
+            coachProfileId: coachProfile.id,
+          },
+        });
+      } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+          throw new Error("Grup ini baru saja di-assign ke coach lain secara bersamaan. Silakan muat ulang halaman.");
+        }
+        throw error;
+      }
     }
 
     await createAuditLog(tx, "UPSERT", "coachProfile", coachProfile.id, userId, {

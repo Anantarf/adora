@@ -89,7 +89,7 @@ export default async function LandingPage() {
   };
   return (
     <main id="main" className="min-h-screen bg-page-dark text-white relative overflow-x-hidden pt-18">
-      <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" nonce={nonce} dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <LandingHeader />
       <LandingHeroSection registrationYearText={registrationYearText} />
       <LandingProgramsSection />

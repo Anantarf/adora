@@ -15,6 +15,7 @@ const eslintConfig = defineConfig([
     "test-pdf.js",
     "test2.js",
     "test3.js",
+    ".lh-tmp/**",
   ]),
 ]);
 

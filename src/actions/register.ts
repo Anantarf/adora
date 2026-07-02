@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { Prisma } from "@prisma/client";
 
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/server-auth";
@@ -93,12 +94,15 @@ export async function submitRegistration(data: {
   }
 }
 
+const MAX_REGISTRATIONS_LISTED = 500;
+
 export async function getPendingRegistrations() {
   await requireAdmin();
 
   try {
     return await prisma.registration.findMany({
-      where: { status: { in: ["PENDING", "REVIEWED"] } },
+      where: { status: { in: ["PENDING", "REVIEWED", "COMPLETED"] } },
+      take: MAX_REGISTRATIONS_LISTED,
       select: {
         id: true,
         createdAt: true,
@@ -135,6 +139,10 @@ export async function markRegistrationUnpaid(id: string): Promise<void> {
   await updateRegistrationStatus(id, "PENDING");
 }
 
+export async function markRegistrationCompleted(id: string): Promise<void> {
+  await updateRegistrationStatus(id, "COMPLETED");
+}
+
 export async function deleteRegistration(id: string): Promise<void> {
   const session = await requireAdmin();
   const userId = session.user.id;
@@ -143,8 +151,19 @@ export async function deleteRegistration(id: string): Promise<void> {
       where: { id },
       select: { playerName: true, ageGroup: true, homebaseId: true },
     });
-    await tx.registration.delete({ where: { id } });
-    await createAuditLog(tx, "DELETE_REGISTRATION", "registration", id, userId, existing ?? undefined);
+    if (!existing) {
+      throw new Error("Pendaftaran tidak ditemukan atau sudah dihapus sebelumnya.");
+    }
+    
+    try {
+      await tx.registration.delete({ where: { id } });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2025") {
+        throw new Error("Pendaftaran sudah dihapus sebelumnya.");
+      }
+      throw error;
+    }
+    await createAuditLog(tx, "DELETE_REGISTRATION", "registration", id, userId, existing);
   });
   revalidateRegistrations();
 }

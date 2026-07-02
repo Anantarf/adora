@@ -171,6 +171,7 @@ export function ParentDashboardClient({ initialData }: Props) {
 
   // Timestamp stabil: menandai initialData dari SSR sebagai fresh sehingga tidak langsung stale
   // dan tidak memicu refetch segera setelah mount (tanpa ini RQ menganggap data lahir di epoch 0).
+  // eslint-disable-next-line react-hooks/purity -- one-time capture, not rendered, safe for SSR/hydration
   const serverDataTimestamp = useMemo(() => Date.now(), []);
 
   // Hanya kirim initialData untuk anak yang sudah di-prefetch di server (anak pertama).

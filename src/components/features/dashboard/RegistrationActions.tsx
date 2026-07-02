@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { markRegistrationPaid, markRegistrationUnpaid, deleteRegistration } from "@/actions/register";
+import { markRegistrationCompleted, markRegistrationPaid, markRegistrationUnpaid, deleteRegistration } from "@/actions/register";
 import {
   REGISTRATION_STATUS_META,
   type RegistrationStatus,
@@ -41,6 +41,8 @@ export function RegistrationActions({ regId, status }: Props) {
         await markRegistrationPaid(regId);
       } else if (newStatus === "PENDING") {
         await markRegistrationUnpaid(regId);
+      } else if (newStatus === "COMPLETED") {
+        await markRegistrationCompleted(regId);
       }
     });
   };
