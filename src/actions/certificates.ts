@@ -6,6 +6,7 @@ import { createAuditLog } from "./audit";
 import { ensureActivePlayer, ensureOwnedPlayer } from "@/lib/domain-guards";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin, requireAuth } from "@/lib/server-auth";
+import { normalizeDocumentUrl } from "@/lib/private-upload";
 
 export type CertificateRecord = {
   id: string;
@@ -38,13 +39,15 @@ export async function addCertificateAction(data: {
     throw new Error("Sertifikat wajib ditujukan ke pemain tertentu.");
   }
 
+  const normalizedFileUrl = normalizeDocumentUrl(data.fileUrl, "URL file sertifikat");
+
   const certificate = await prisma.$transaction(async (tx) => {
     await ensureActivePlayer(tx, data.playerId);
 
     const newCertificate = await tx.certificate.create({
       data: {
-        title: data.title,
-        fileUrl: data.fileUrl,
+        title: data.title.trim(),
+        fileUrl: normalizedFileUrl,
         playerId: data.playerId.trim(),
       },
     });

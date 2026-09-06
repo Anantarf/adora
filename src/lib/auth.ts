@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { clearBucket, getActiveBucket, incrementBucket } from "@/lib/shared-rate-limit";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
+import { getClientIpFromHeaderMap } from "@/lib/client-ip";
 
 const LOGIN_FAILURE_NAMESPACE = RATE_LIMIT_POLICIES.loginFailures.namespace;
 const MAX_FAILURES = RATE_LIMIT_POLICIES.loginFailures.maxFailures;
@@ -147,10 +148,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials, req) {
-        const ip =
-          (req.headers?.["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
-          (req.headers?.["x-real-ip"] as string | undefined) ??
-          "unknown";
+        const ip = getClientIpFromHeaderMap(req.headers);
 
         if (!credentials?.username || !credentials?.password) {
           throw new Error("Izin akses gagal: Identitas login belum lengkap.");

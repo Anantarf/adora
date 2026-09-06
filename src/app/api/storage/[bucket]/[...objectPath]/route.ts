@@ -8,15 +8,7 @@ import { getPrivateUploadBucket } from "@/lib/supabase-storage";
 import { authorizePrivateStorageAccess } from "@/lib/storage-acl";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
-
-function getClientIpFromHeaders(headers: Headers) {
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
-    const first = forwarded.split(",")[0]?.trim();
-    if (first) return first;
-  }
-  return headers.get("x-real-ip") ?? "unknown";
-}
+import { getClientIp } from "@/lib/client-ip";
 
 const SIGNED_URL_TTL_SECONDS = 60;
 const SIGNED_URL_CACHE_TTL_MS = 30_000;
@@ -91,8 +83,7 @@ function buildSignedUrlRedirect(url: string, cacheStatus: "HIT" | "MISS") {
 }
 
 export async function GET(req: Request, context: { params: Promise<{ bucket: string; objectPath: string[] }> }) {
-  const headers = req.headers;
-  const ip = getClientIpFromHeaders(headers);
+  const ip = getClientIp(req);
   const proxyPolicy = RATE_LIMIT_POLICIES.storageProxy;
   const proxyLimit = await consumeFixedWindowLimit(
     proxyPolicy.namespace,

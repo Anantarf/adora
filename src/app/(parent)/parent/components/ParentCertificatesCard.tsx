@@ -5,6 +5,7 @@ import { Award, ChevronRight } from "lucide-react";
 import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatFullDate } from "@/lib/date-utils";
+import { isValidDocumentUrl } from "@/lib/private-upload";
 
 type CertificateItem = {
   id: string;
@@ -46,14 +47,26 @@ export function ParentCertificatesCard({
             className="min-h-44 border-dashed bg-background/30"
           />
         ) : (
-          certificates.map((certificate) => (
-            <a
-              key={certificate.id}
-              href={certificate.fileUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-start gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-3.5 transition-colors hover:border-primary/30 hover:bg-primary/5"
-            >
+          certificates.map((certificate) => {
+            const isSafeUrl = isValidDocumentUrl(certificate.fileUrl);
+
+            return (
+              <a
+                key={certificate.id}
+                href={isSafeUrl ? certificate.fileUrl : "#"}
+                target={isSafeUrl ? "_blank" : "_self"}
+                rel="noreferrer"
+                onClick={(e) => {
+                  if (!isSafeUrl) {
+                    e.preventDefault();
+                  }
+                }}
+                className={`flex items-start gap-3 rounded-xl border border-border/50 bg-background/30 px-4 py-3.5 transition-colors ${
+                  isSafeUrl
+                    ? "hover:border-primary/30 hover:bg-primary/5"
+                    : "cursor-not-allowed opacity-60"
+                }`}
+              >
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-primary/20 bg-primary/10">
                 <Award className="size-4 text-primary" />
               </div>
@@ -65,8 +78,9 @@ export function ParentCertificatesCard({
                 </p>
               </div>
               <ChevronRight className="mt-3 size-4 shrink-0 text-muted-foreground" />
-            </a>
-          ))
+              </a>
+            );
+          })
         )}
       </CardContent>
     </Card>

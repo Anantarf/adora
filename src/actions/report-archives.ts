@@ -11,6 +11,7 @@ import {
   resolveReportSignerSnapshotForGroup,
 } from "@/lib/report-signer-resolver";
 import { requireActiveUser, requireAdmin } from "@/lib/server-auth";
+import { normalizeDocumentUrl } from "@/lib/private-upload";
 
 export async function getReportArchiveRowsAction(groupId: string, periodId: string) {
   await requireAdmin();
@@ -95,6 +96,7 @@ export async function upsertReportArchiveDraftAction(input: {
 }) {
   const session = await requireAdmin();
   const userId = session.user.id ?? null;
+  const normalizedFileUrl = normalizeDocumentUrl(input.fileUrl, "URL file rapor");
 
   const archive = await prisma.$transaction(async (tx) => {
     const player = await tx.player.findFirst({
@@ -196,14 +198,14 @@ export async function upsertReportArchiveDraftAction(input: {
         playerId: input.playerId,
         periodId: input.periodId,
         ...frozenArchiveSnapshot,
-        fileUrl: input.fileUrl.trim(),
+        fileUrl: normalizedFileUrl,
         status: "DRAFT",
         releasedAt: null,
         uploadedById: userId,
       },
       update: {
         ...frozenArchiveSnapshot,
-        fileUrl: input.fileUrl.trim(),
+        fileUrl: normalizedFileUrl,
         status: "DRAFT",
         releasedAt: null,
         uploadedById: userId,

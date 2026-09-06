@@ -4,6 +4,7 @@ import { normalizeWebVitalPayload, shouldPersistWebVital, type WebVitalPayload }
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import { consumeFixedWindowLimit } from "@/lib/shared-rate-limit";
 import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
+import { getClientIp } from "@/lib/client-ip";
 
 function isRequestAbortError(error: unknown) {
   return error instanceof Error && (error.name === "AbortError" || error.message === "aborted");
@@ -11,7 +12,7 @@ function isRequestAbortError(error: unknown) {
 
 export async function POST(request: Request) {
   try {
-    const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
+    const ip = getClientIp(request);
     const limitResult = await consumeFixedWindowLimit(
       RATE_LIMIT_POLICIES.webVitals.namespace,
       ip,

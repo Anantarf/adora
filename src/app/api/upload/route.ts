@@ -9,6 +9,7 @@ import { withTimeout } from "@/lib/async-utils";
 import { RATE_LIMIT_POLICIES } from "@/lib/constants/rate-limits";
 import { recordOperationalError, recordOperationalWarning } from "@/lib/observability";
 import { buildPrivateStorageUrl, getPrivateUploadBucket } from "@/lib/supabase-storage";
+import { getClientIp } from "@/lib/client-ip";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024;
 const STORAGE_TIMEOUT_MS = 15_000;
@@ -75,13 +76,8 @@ const UPLOAD_POLICIES: UploadPolicy[] = [
       assetKey === "rapor_coach_sign_url" ||
       assetKey === "rapor_stamp_url",
     allowedExtensions: [".png"] as const,
-    maxSizeBytes: 300 * 1024,
   },
 ];
-
-function getClientIp(req: NextRequest): string {
-  return req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "unknown";
-}
 
 function getSupabaseUrl() {
   const serverUrl = process.env.SUPABASE_URL?.trim();

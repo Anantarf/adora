@@ -38,11 +38,8 @@ export async function getRequestIp(): Promise<string> {
   try {
     const { headers } = await import("next/headers");
     const h = await headers();
-    return (
-      h.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      h.get("x-real-ip") ??
-      "unknown"
-    );
+    const { getClientIp } = await import("@/lib/client-ip");
+    return getClientIp(h);
   } catch {
     return "unknown";
   }

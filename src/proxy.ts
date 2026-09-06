@@ -109,14 +109,20 @@ export default async function proxy(request: NextRequest) {
   applySecurityHeaders(securedResponse, csp);
 
   const origin = request.headers.get("origin");
-  const host = request.headers.get("host");
   const isCrossOrigin = (() => {
-    if (!origin || !host) {
+    if (!origin) {
       return false;
     }
 
     try {
-      return new URL(origin).hostname !== host.split(":")[0];
+      const originUrl = new URL(origin);
+      const expectedUrl = new URL(request.nextUrl.origin);
+      const forwardedProto = request.headers.get("x-forwarded-proto");
+      const expectedScheme = forwardedProto ? `${forwardedProto}:` : expectedUrl.protocol;
+      const expectedHost = request.headers.get("host") || expectedUrl.host;
+
+      const normalizedExpectedOrigin = `${expectedScheme}//${expectedHost}`.toLowerCase();
+      return originUrl.origin.toLowerCase() !== normalizedExpectedOrigin;
     } catch {
       return true;
     }

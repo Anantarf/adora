@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { AdminStatePanel } from "@/components/features/admin-state-panel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatFullDate } from "@/lib/date-utils";
+import { isValidDocumentUrl } from "@/lib/private-upload";
 import type { FamilyPlayer } from "@/hooks/use-family";
 
 type ArchiveItem = {
@@ -36,6 +37,11 @@ export function ParentReportArchivesCard({
   const handleOpenRealReport = async (archive: ArchiveItem) => {
     if (!archive.fileUrl) {
       toast.error("File rapor belum tersedia.");
+      return;
+    }
+
+    if (!isValidDocumentUrl(archive.fileUrl)) {
+      toast.error("URL file rapor tidak valid atau tidak aman.");
       return;
     }
 

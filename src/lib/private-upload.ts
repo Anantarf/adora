@@ -19,9 +19,18 @@ export function getPrivateUploadObjectKey(url: string) {
     return null;
   }
 
-  const parsed = new URL(trimmed, "http://local.invalid");
   const bucketPrefix = `/api/storage/${encodeURIComponent(getPrivateUploadBucket())}/`;
-  if (!parsed.pathname.startsWith(bucketPrefix)) {
+  if (!trimmed.startsWith(bucketPrefix)) {
+    return null;
+  }
+
+  const parsed = new URL(trimmed, "http://local.invalid");
+  if (
+    parsed.origin !== "http://local.invalid" ||
+    parsed.search ||
+    parsed.hash ||
+    !parsed.pathname.startsWith(bucketPrefix)
+  ) {
     return null;
   }
 
@@ -70,6 +79,43 @@ export function normalizeExpectedPrivateUploadUrl(
   const trimmed = url.trim();
   if (!isExpectedPrivateUploadUrl(trimmed, expectation)) {
     throw new Error(`${fieldLabel} tidak valid atau tidak berasal dari unggahan privat yang diizinkan.`);
+  }
+
+  return trimmed;
+}
+
+export function isValidDocumentUrl(url: string | null | undefined): boolean {
+  if (!url?.trim()) {
+    return false;
+  }
+
+  const trimmed = url.trim();
+
+  // Allow internal private storage URLs
+  if (getPrivateUploadObjectKey(trimmed) !== null) {
+    return true;
+  }
+
+  // Allow explicit HTTPS URLs only
+  try {
+    const parsed = new URL(trimmed);
+    return parsed.protocol === "https:" && Boolean(parsed.hostname);
+  } catch {
+    return false;
+  }
+}
+
+export function normalizeDocumentUrl(
+  url: string | null | undefined,
+  fieldLabel: string,
+): string {
+  if (!url?.trim()) {
+    throw new Error(`${fieldLabel} tidak boleh kosong.`);
+  }
+
+  const trimmed = url.trim();
+  if (!isValidDocumentUrl(trimmed)) {
+    throw new Error(`${fieldLabel} tidak valid. Gunakan URL internal storage (/api/storage/uploads/...) atau URL HTTPS yang sah.`);
   }
 
   return trimmed;
